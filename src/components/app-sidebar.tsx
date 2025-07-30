@@ -10,7 +10,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { Home, Users, CreditCard, Settings } from "lucide-react"
+import { Home, Users, CreditCard, Settings, HelpCircle, AlertTriangle, FileText, CheckSquare, BarChart3, Package } from "lucide-react"
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
@@ -35,14 +35,45 @@ const data = {
       icon: CreditCard,
     },
     {
-      title: "Inventory",
-      url: "/dashboard/inventory",
-    },
-    {
-      title: "Settings",
-      url: "/dashboard/settings",
-      icon: Settings,
-    },
+    title: "Support Center",
+    url: "/dashboard/support",
+    icon: HelpCircle,
+  },
+  {
+    title: "Refunds & Disputes",
+    url: "/dashboard/refunds",
+    icon: AlertTriangle,
+  },
+  {
+    title: "Content Pipeline",
+    url: "/dashboard/content",
+    icon: FileText,
+  },
+  // {
+  //   title: "Knowledge Base",
+  //   url: "/knowledge",
+  //   icon: BookOpen,
+  // },
+  {
+    title: "Tasks & Workflow",
+    url: "/dashboard/tasks",
+    icon: CheckSquare,
+  },
+  {
+    title: "Audit & Performance",
+    url: "/dashboard/audit",
+    icon: BarChart3,
+  },
+  {
+    title: "Inventory & Assets",
+    url: "/dashboard/inventory",
+    icon: Package,
+  },
+  {
+    title: "Admin Panel",
+    url: "/dashboard/admin",
+    icon: Settings,
+  },
   ],
 };
 
