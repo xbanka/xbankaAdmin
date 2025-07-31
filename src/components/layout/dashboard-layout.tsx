@@ -25,7 +25,7 @@ export function DashboardLayout({ children, breadcrumbs = [], title }: Dashboard
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="/">Dashboard</BreadcrumbLink>
+              <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
             </BreadcrumbItem>
             {breadcrumbs.map((crumb, index) => (
               <div key={index} className="flex items-center">
