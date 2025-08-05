@@ -34,7 +34,7 @@ interface KanbanBoardProps {
 }
 
 export function KanbanBoard({ columns, onItemClick }: KanbanBoardProps) {
-  const [boardColumns, setBoardColumns] = useState(columns)
+  const [boardColumns] = useState(columns)
 
   const getPriorityColor = (priority?: string) => {
     switch (priority) {

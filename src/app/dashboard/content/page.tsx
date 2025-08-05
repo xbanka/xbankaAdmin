@@ -1,134 +1,136 @@
 "use client"
 
-import { useState } from "react"
+// import { useState } from "react"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
-import { KanbanBoard, KanbanItem } from "@/components/layout/kanban-board"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Search, Plus, Calendar, User, Target, FileText } from "lucide-react"
+// import { KanbanItem } from "@/components/layout/kanban-board"
+// import { KanbanBoard, KanbanItem } from "@/components/layout/kanban-board"
+// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+// import { Badge } from "@/components/ui/badge"
+// import { Button } from "@/components/ui/button"
+// import { Input } from "@/components/ui/input"
+// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+// import { Search, Plus, Calendar, User, Target, FileText } from "lucide-react"
 
-const contentColumns = [
-  {
-    id: "idea",
-    title: "Idea",
-    color: "bg-blue-500",
-    items: [
-      {
-        id: "C001",
-        title: "How to Buy Bitcoin Guide",
-        description: "Comprehensive guide for beginners",
-        assignee: { name: "Sarah Wilson" },
-        priority: "medium" as const,
-        tags: ["crypto", "guide"],
-        dueDate: "2024-01-20",
-      },
-      {
-        id: "C002",
-        title: "Gift Card Security Tips",
-        description: "Article about gift card fraud prevention",
-        assignee: { name: "Tom Brown" },
-        priority: "low" as const,
-        tags: ["security", "gift-cards"],
-        dueDate: "2024-01-25",
-      },
-    ],
-  },
-  {
-    id: "draft",
-    title: "Draft",
-    color: "bg-yellow-500",
-    items: [
-      {
-        id: "C003",
-        title: "Mobile App Tutorial",
-        description: "Step-by-step app usage guide",
-        assignee: { name: "Mike Johnson" },
-        priority: "high" as const,
-        tags: ["tutorial", "mobile"],
-        dueDate: "2024-01-18",
-      },
-    ],
-  },
-  {
-    id: "review",
-    title: "Review",
-    color: "bg-sub-cyan",
-    items: [
-      {
-        id: "C004",
-        title: "Crypto Market Analysis",
-        description: "Weekly market trends article",
-        assignee: { name: "Jane Smith" },
-        priority: "medium" as const,
-        tags: ["crypto", "analysis"],
-        dueDate: "2024-01-17",
-      },
-    ],
-  },
-  {
-    id: "scheduled",
-    title: "Scheduled",
-    color: "bg-purple-500",
-    items: [
-      {
-        id: "C005",
-        title: "New Year Promotions",
-        description: "Promotional content for January",
-        assignee: { name: "Sarah Wilson" },
-        priority: "high" as const,
-        tags: ["promotion", "social"],
-        dueDate: "2024-01-16",
-      },
-    ],
-  },
-  {
-    id: "posted",
-    title: "Posted",
-    color: "bg-main-green",
-    items: [
-      {
-        id: "C006",
-        title: "Bill Payment Benefits",
-        description: "Article about bill payment advantages",
-        assignee: { name: "Tom Brown" },
-        priority: "low" as const,
-        tags: ["bills", "benefits"],
-        dueDate: "2024-01-15",
-      },
-    ],
-  },
-]
+// const contentColumns = [
+//   {
+//     id: "idea",
+//     title: "Idea",
+//     color: "bg-blue-500",
+//     items: [
+//       {
+//         id: "C001",
+//         title: "How to Buy Bitcoin Guide",
+//         description: "Comprehensive guide for beginners",
+//         assignee: { name: "Sarah Wilson" },
+//         priority: "medium" as const,
+//         tags: ["crypto", "guide"],
+//         dueDate: "2024-01-20",
+//       },
+//       {
+//         id: "C002",
+//         title: "Gift Card Security Tips",
+//         description: "Article about gift card fraud prevention",
+//         assignee: { name: "Tom Brown" },
+//         priority: "low" as const,
+//         tags: ["security", "gift-cards"],
+//         dueDate: "2024-01-25",
+//       },
+//     ],
+//   },
+//   {
+//     id: "draft",
+//     title: "Draft",
+//     color: "bg-yellow-500",
+//     items: [
+//       {
+//         id: "C003",
+//         title: "Mobile App Tutorial",
+//         description: "Step-by-step app usage guide",
+//         assignee: { name: "Mike Johnson" },
+//         priority: "high" as const,
+//         tags: ["tutorial", "mobile"],
+//         dueDate: "2024-01-18",
+//       },
+//     ],
+//   },
+//   {
+//     id: "review",
+//     title: "Review",
+//     color: "bg-sub-cyan",
+//     items: [
+//       {
+//         id: "C004",
+//         title: "Crypto Market Analysis",
+//         description: "Weekly market trends article",
+//         assignee: { name: "Jane Smith" },
+//         priority: "medium" as const,
+//         tags: ["crypto", "analysis"],
+//         dueDate: "2024-01-17",
+//       },
+//     ],
+//   },
+//   {
+//     id: "scheduled",
+//     title: "Scheduled",
+//     color: "bg-purple-500",
+//     items: [
+//       {
+//         id: "C005",
+//         title: "New Year Promotions",
+//         description: "Promotional content for January",
+//         assignee: { name: "Sarah Wilson" },
+//         priority: "high" as const,
+//         tags: ["promotion", "social"],
+//         dueDate: "2024-01-16",
+//       },
+//     ],
+//   },
+//   {
+//     id: "posted",
+//     title: "Posted",
+//     color: "bg-main-green",
+//     items: [
+//       {
+//         id: "C006",
+//         title: "Bill Payment Benefits",
+//         description: "Article about bill payment advantages",
+//         assignee: { name: "Tom Brown" },
+//         priority: "low" as const,
+//         tags: ["bills", "benefits"],
+//         dueDate: "2024-01-15",
+//       },
+//     ],
+//   },
+// ]
 
-const contentDetails = {
-  C003: {
-    title: "Mobile App Tutorial",
-    writer: "Mike Johnson",
-    dueDate: "2024-01-18",
-    seoKeywords: ["mobile app", "tutorial", "how to use", "guide"],
-    targetPlatforms: ["Blog", "Social Media", "Email Newsletter"],
-    bodyLink: "https://docs.example.com/mobile-tutorial-draft",
-    notes: "Include screenshots from both iOS and Android versions",
-    attachments: ["app-screenshots.zip", "user-flow-diagram.pdf"],
-  },
-}
+// const contentDetails = {
+//   C003: {
+//     title: "Mobile App Tutorial",
+//     writer: "Mike Johnson",
+//     dueDate: "2024-01-18",
+//     seoKeywords: ["mobile app", "tutorial", "how to use", "guide"],
+//     targetPlatforms: ["Blog", "Social Media", "Email Newsletter"],
+//     bodyLink: "https://docs.example.com/mobile-tutorial-draft",
+//     notes: "Include screenshots from both iOS and Android versions",
+//     attachments: ["app-screenshots.zip", "user-flow-diagram.pdf"],
+//   },
+// }
 
 export default function ContentPipeline() {
-  const [selectedContent, setSelectedContent] = useState<KanbanItem>(null)
-  const [filterWriter, setFilterWriter] = useState("all")
+  // const [selectedContent, setSelectedContent] = useState<KanbanItem>(null)
+  // const [filterWriter, setFilterWriter] = useState("all")
 
-  const handleContentClick = (item: KanbanItem) => {
-    setSelectedContent({
-      ...item,
-      ...contentDetails[item.id as keyof typeof contentDetails],
-    })
-  }
+  // const handleContentClick = (item: KanbanItem) => {
+  //   setSelectedContent({
+  //     ...item,
+  //     ...contentDetails[item.id as keyof typeof contentDetails],
+  //   })
+  // }
 
   return (
     <DashboardLayout title="Content Pipeline" breadcrumbs={[{ label: "Content" }]}>
-      <div className="space-y-6">
+      <h1>content pipeline</h1>
+      {/* <div className="space-y-6">
         <div className="flex gap-4 items-center">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -269,7 +271,7 @@ export default function ContentPipeline() {
             </CardContent>
           </Card>
         )}
-      </div>
+      </div> */}
     </DashboardLayout>
   )
 }

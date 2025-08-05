@@ -1,14 +1,5 @@
-import { ZodTypeAny } from "zod/v3"
-import { ReactNode } from "react"
-import { useForm, UseFormProps, SubmitHandler, FieldValues } from "react-hook-form"
-import type { LucideIcon } from "lucide-react"
 
-export interface FormLayoutProps<T extends FieldValues> {
-  schema: ZodTypeAny
-  defaultValues: UseFormProps<T>["defaultValues"]
-  onSubmit: SubmitHandler<T>
-  children: (form: ReturnType<typeof useForm<T>>) => ReactNode
-}
+import type { LucideIcon } from "lucide-react"
 
 export interface SummaryCardProps {
   title: string
