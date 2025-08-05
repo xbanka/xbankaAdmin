@@ -1,108 +1,109 @@
 "use client"
 
-import { useState } from "react"
+// import { useState } from "react"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Search, Download, Eye, Activity, BarChart3, Clock, CheckCircle } from "lucide-react"
+// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+// import { Badge } from "@/components/ui/badge"
+// import { Button } from "@/components/ui/button"
+// import { Input } from "@/components/ui/input"
+// import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+// import { Search, Download, Eye, Activity, BarChart3, Clock, CheckCircle } from "lucide-react"
 
-const activityLogs = [
-  {
-    id: "LOG001",
-    user: "Sarah Wilson",
-    action: "Approved refund",
-    target: "DIS001",
-    timestamp: "2024-01-16 14:30:25",
-    ipAddress: "192.168.1.100",
-    status: "Success",
-  },
-  {
-    id: "LOG002",
-    user: "Mike Johnson",
-    action: "Updated customer status",
-    target: "CUST001",
-    timestamp: "2024-01-16 13:45:12",
-    ipAddress: "192.168.1.101",
-    status: "Success",
-  },
-  {
-    id: "LOG003",
-    user: "Tom Brown",
-    action: "Failed login attempt",
-    target: "Admin Panel",
-    timestamp: "2024-01-16 12:20:08",
-    ipAddress: "192.168.1.102",
-    status: "Failed",
-  },
-]
+// const activityLogs = [
+//   {
+//     id: "LOG001",
+//     user: "Sarah Wilson",
+//     action: "Approved refund",
+//     target: "DIS001",
+//     timestamp: "2024-01-16 14:30:25",
+//     ipAddress: "192.168.1.100",
+//     status: "Success",
+//   },
+//   {
+//     id: "LOG002",
+//     user: "Mike Johnson",
+//     action: "Updated customer status",
+//     target: "CUST001",
+//     timestamp: "2024-01-16 13:45:12",
+//     ipAddress: "192.168.1.101",
+//     status: "Success",
+//   },
+//   {
+//     id: "LOG003",
+//     user: "Tom Brown",
+//     action: "Failed login attempt",
+//     target: "Admin Panel",
+//     timestamp: "2024-01-16 12:20:08",
+//     ipAddress: "192.168.1.102",
+//     status: "Failed",
+//   },
+// ]
 
-const performanceMetrics = {
-  support: {
-    responseTime: "2.3 hrs",
-    resolutionRate: "94.2%",
-    ticketsResolved: 156,
-    avgRating: 4.7,
-  },
-  content: {
-    timeliness: "89%",
-    outputCount: 23,
-    avgWordsPerArticle: 1250,
-    seoScore: 85,
-  },
-  tasks: {
-    completionRate: "91%",
-    onTimeDelivery: "87%",
-    blockers: 3,
-    avgTaskTime: "2.1 days",
-  },
-}
+// const performanceMetrics = {
+//   support: {
+//     responseTime: "2.3 hrs",
+//     resolutionRate: "94.2%",
+//     ticketsResolved: 156,
+//     avgRating: 4.7,
+//   },
+//   content: {
+//     timeliness: "89%",
+//     outputCount: 23,
+//     avgWordsPerArticle: 1250,
+//     seoScore: 85,
+//   },
+//   tasks: {
+//     completionRate: "91%",
+//     onTimeDelivery: "87%",
+//     blockers: 3,
+//     avgTaskTime: "2.1 days",
+//   },
+// }
 
-const complianceChecks = [
-  {
-    id: "COMP001",
-    rule: "Transactions over ₦500,000",
-    flaggedCount: 12,
-    status: "Review Required",
-    lastCheck: "2024-01-16 09:00",
-  },
-  {
-    id: "COMP002",
-    rule: "Multiple failed login attempts",
-    flaggedCount: 3,
-    status: "Monitored",
-    lastCheck: "2024-01-16 08:30",
-  },
-  {
-    id: "COMP003",
-    rule: "Suspicious transaction patterns",
-    flaggedCount: 7,
-    status: "Under Investigation",
-    lastCheck: "2024-01-16 10:15",
-  },
-]
+// const complianceChecks = [
+//   {
+//     id: "COMP001",
+//     rule: "Transactions over ₦500,000",
+//     flaggedCount: 12,
+//     status: "Review Required",
+//     lastCheck: "2024-01-16 09:00",
+//   },
+//   {
+//     id: "COMP002",
+//     rule: "Multiple failed login attempts",
+//     flaggedCount: 3,
+//     status: "Monitored",
+//     lastCheck: "2024-01-16 08:30",
+//   },
+//   {
+//     id: "COMP003",
+//     rule: "Suspicious transaction patterns",
+//     flaggedCount: 7,
+//     status: "Under Investigation",
+//     lastCheck: "2024-01-16 10:15",
+//   },
+// ]
 
 export default function AuditPerformance() {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [filterUser, setFilterUser] = useState("all")
-  const [filterAction, setFilterAction] = useState("all")
+  // const [searchTerm, setSearchTerm] = useState("")
+  // const [filterUser, setFilterUser] = useState("all")
+  // const [filterAction, setFilterAction] = useState("all")
 
-  const filteredLogs = activityLogs.filter((log) => {
-    const matchesSearch =
-      log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.user.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesUser = filterUser === "all" || log.user.toLowerCase().includes(filterUser)
-    const matchesAction = filterAction === "all" || log.action.toLowerCase().includes(filterAction)
-    return matchesSearch && matchesUser && matchesAction
-  })
+  // const filteredLogs = activityLogs.filter((log) => {
+  //   const matchesSearch =
+  //     log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //     log.user.toLowerCase().includes(searchTerm.toLowerCase())
+  //   const matchesUser = filterUser === "all" || log.user.toLowerCase().includes(filterUser)
+  //   const matchesAction = filterAction === "all" || log.action.toLowerCase().includes(filterAction)
+  //   return matchesSearch && matchesUser && matchesAction
+  // })
 
   return (
     <DashboardLayout title="Audit & Performance" breadcrumbs={[{ label: "Audit & Performance" }]}>
-      <Tabs defaultValue="activity" className="w-full">
+      <h1>audit</h1>
+      {/* <Tabs defaultValue="activity" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="activity">Activity Logs</TabsTrigger>
           <TabsTrigger value="performance">Performance Dashboard</TabsTrigger>
@@ -333,7 +334,7 @@ export default function AuditPerformance() {
             </CardContent>
           </Card>
         </TabsContent>
-      </Tabs>
+      </Tabs> */}
     </DashboardLayout>
   )
 }

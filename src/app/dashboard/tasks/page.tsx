@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
-import { KanbanBoard } from "@/components/layout/kanban-board"
+// import { KanbanBoard } from "@/components/layout/kanban-board"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -12,82 +12,83 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Search, Plus, Calendar, User, MessageSquare, Paperclip } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { FilteredTasks } from "@/lib/types"
 
-const taskColumns = [
-  {
-    id: "todo",
-    title: "To Do",
-    color: "bg-blue-500",
-    items: [
-      {
-        id: "T001",
-        title: "Update API Documentation",
-        description: "Review and update payment gateway documentation",
-        assignee: { name: "Mike Johnson" },
-        priority: "high" as const,
-        tags: ["documentation", "api"],
-        dueDate: "2024-01-18",
-      },
-      {
-        id: "T002",
-        title: "Customer Feedback Analysis",
-        description: "Analyze Q4 customer feedback survey results",
-        assignee: { name: "Sarah Wilson" },
-        priority: "medium" as const,
-        tags: ["analysis", "customer"],
-        dueDate: "2024-01-20",
-      },
-    ],
-  },
-  {
-    id: "in-progress",
-    title: "In Progress",
-    color: "bg-yellow-500",
-    items: [
-      {
-        id: "T003",
-        title: "Security Audit Preparation",
-        description: "Prepare documents for quarterly security audit",
-        assignee: { name: "Tom Brown" },
-        priority: "high" as const,
-        tags: ["security", "audit"],
-        dueDate: "2024-01-17",
-      },
-    ],
-  },
-  {
-    id: "review",
-    title: "Review",
-    color: "bg-sub-cyan",
-    items: [
-      {
-        id: "T004",
-        title: "New Feature Testing",
-        description: "Test crypto wallet integration feature",
-        assignee: { name: "Jane Smith" },
-        priority: "medium" as const,
-        tags: ["testing", "feature"],
-        dueDate: "2024-01-19",
-      },
-    ],
-  },
-  {
-    id: "done",
-    title: "Done",
-    color: "bg-main-green",
-    items: [
-      {
-        id: "T005",
-        title: "Monthly Report Generation",
-        description: "Generate December performance reports",
-        assignee: { name: "Sarah Wilson" },
-        priority: "low" as const,
-        tags: ["report", "monthly"],
-        dueDate: "2024-01-15",
-      },
-    ],
-  },
-]
+// const taskColumns = [
+//   {
+//     id: "todo",
+//     title: "To Do",
+//     color: "bg-blue-500",
+//     items: [
+//       {
+//         id: "T001",
+//         title: "Update API Documentation",
+//         description: "Review and update payment gateway documentation",
+//         assignee: { name: "Mike Johnson" },
+//         priority: "high" as const,
+//         tags: ["documentation", "api"],
+//         dueDate: "2024-01-18",
+//       },
+//       {
+//         id: "T002",
+//         title: "Customer Feedback Analysis",
+//         description: "Analyze Q4 customer feedback survey results",
+//         assignee: { name: "Sarah Wilson" },
+//         priority: "medium" as const,
+//         tags: ["analysis", "customer"],
+//         dueDate: "2024-01-20",
+//       },
+//     ],
+//   },
+//   {
+//     id: "in-progress",
+//     title: "In Progress",
+//     color: "bg-yellow-500",
+//     items: [
+//       {
+//         id: "T003",
+//         title: "Security Audit Preparation",
+//         description: "Prepare documents for quarterly security audit",
+//         assignee: { name: "Tom Brown" },
+//         priority: "high" as const,
+//         tags: ["security", "audit"],
+//         dueDate: "2024-01-17",
+//       },
+//     ],
+//   },
+//   {
+//     id: "review",
+//     title: "Review",
+//     color: "bg-sub-cyan",
+//     items: [
+//       {
+//         id: "T004",
+//         title: "New Feature Testing",
+//         description: "Test crypto wallet integration feature",
+//         assignee: { name: "Jane Smith" },
+//         priority: "medium" as const,
+//         tags: ["testing", "feature"],
+//         dueDate: "2024-01-19",
+//       },
+//     ],
+//   },
+//   {
+//     id: "done",
+//     title: "Done",
+//     color: "bg-main-green",
+//     items: [
+//       {
+//         id: "T005",
+//         title: "Monthly Report Generation",
+//         description: "Generate December performance reports",
+//         assignee: { name: "Sarah Wilson" },
+//         priority: "low" as const,
+//         tags: ["report", "monthly"],
+//         dueDate: "2024-01-15",
+//       },
+//     ],
+//   },
+// ]
 
 const taskList = [
   {
@@ -129,7 +130,7 @@ const taskList = [
 ]
 
 export default function TasksWorkflow() {
-  const [selectedTask, setSelectedTask] = useState<any>(null)
+  const [selectedTask, setSelectedTask] = useState<FilteredTasks | null >(null)
   const [viewMode, setViewMode] = useState<"kanban" | "list">("kanban")
   const [filterAssignee, setFilterAssignee] = useState("all")
   const [filterPriority, setFilterPriority] = useState("all")
@@ -205,7 +206,8 @@ export default function TasksWorkflow() {
         </div>
 
         {viewMode === "kanban" ? (
-          <KanbanBoard columns={taskColumns} onItemClick={(item) => setSelectedTask(item)} />
+          <div>kabnana</div>
+          // <KanbanBoard columns={taskColumns} onItemClick={(item) => setSelectedTask(item)} />
         ) : (
           <Card className="bg-white">
             <CardHeader>
@@ -225,7 +227,7 @@ export default function TasksWorkflow() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredTasks.map((task) => (
+                  {filteredTasks.map((task: FilteredTasks) => (
                     <TableRow key={task.id}>
                       <TableCell>
                         <div>
