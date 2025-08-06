@@ -303,7 +303,7 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {topWriters.map((writer, index) => (
+              {topWriters.map((writer) => (
                 <div key={writer.name} className="flex items-center justify-between p-2 bg-off-white rounded">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 bg-abstract-cyan rounded-full flex items-center justify-center">
