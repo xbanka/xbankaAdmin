@@ -127,7 +127,6 @@ const featureToggles = [
 ]
 
 export default function AdminPanel() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   // const [selectedRole, setSelectedRole] = useState<any>(null)
   const [newRoleName, setNewRoleName] = useState("")
   const [newRoleDescription, setNewRoleDescription] = useState("")
