@@ -1,5 +1,5 @@
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
-import { SummaryCard } from "@/components/layout/summary-card"
+import { MetricCarousel } from "@/components/layout/metric-carousel"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -7,8 +7,6 @@ import { Badge } from "@/components/ui/badge"
 import {
   DollarSign,
   AlertTriangle,
-  Ticket,
-  FileText,
   CheckSquare,
   ArrowUpRight,
   ArrowDownLeft,
@@ -97,36 +95,8 @@ const topWriters = [
 export default function Dashboard() {
   return (
     <DashboardLayout title="Dashboard Overview">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <SummaryCard
-          title="Daily Transactions"
-          value="₦2,458,000"
-          icon={DollarSign}
-          trend={{ value: "+12.5% from yesterday", isPositive: true }}
-          className="bg-light-cyan border-abstract-cyan"
-        />
-        <SummaryCard
-          title="Pending Escalations"
-          value="8"
-          icon={AlertTriangle}
-          trend={{ value: "-2 from yesterday", isPositive: true }}
-          className="bg-red-50 border-red-200"
-        />
-        <SummaryCard
-          title="Open Tickets"
-          value="23"
-          icon={Ticket}
-          trend={{ value: "+3 new today", isPositive: false }}
-          className="bg-yellow-50 border-yellow-200"
-        />
-        <SummaryCard
-          title="Articles Due"
-          value="5"
-          icon={FileText}
-          trend={{ value: "This week", isPositive: true }}
-          className="bg-blue-50 border-blue-200"
-        />
-      </div>
+      {/* Scrollable Metric Cards */}
+      <MetricCarousel cardsPerView={4} />
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mt-6">
         {/* Recent Transactions */}
@@ -137,7 +107,7 @@ export default function Dashboard() {
                 <DollarSign className="h-5 w-5" />
                 Recent Transactions
               </CardTitle>
-              <Link href="dashboard/transactions">
+              <Link href="/transactions">
                 <Button variant="outline" size="sm" className="flex items-center gap-2 bg-transparent">
                   <Eye className="h-4 w-4" />
                   View All
@@ -156,9 +126,9 @@ export default function Dashboard() {
                       }`}
                     >
                       {transaction.type === "received" ? (
-                        <ArrowDownLeft className="h-4 w-4 stroke-white bg-green-700 hover:bg-green-800 p-2 rounded-full transition" />
+                        <ArrowDownLeft className="h-4 w-4 text-white" />
                       ) : (
-                        <ArrowUpRight className="h-4 w-4 stroke-white hover:bg-green-900 bg-red-700 p-2 rounded-full transition" />
+                        <ArrowUpRight className="h-4 w-4 text-white" />
                       )}
                     </div>
                     <div>
@@ -333,7 +303,7 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {topWriters.map((writer) => (
+              {topWriters.map((writer, index) => (
                 <div key={writer.name} className="flex items-center justify-between p-2 bg-off-white rounded">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 bg-abstract-cyan rounded-full flex items-center justify-center">

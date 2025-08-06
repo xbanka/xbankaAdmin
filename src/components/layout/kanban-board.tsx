@@ -21,7 +21,7 @@ export interface KanbanItem {
   dueDate?: string
 }
 
-interface KanbanColumn {
+export interface KanbanColumn {
   id: string
   title: string
   items: KanbanItem[]
@@ -35,6 +35,11 @@ interface KanbanBoardProps {
 
 export function KanbanBoard({ columns, onItemClick }: KanbanBoardProps) {
   const [boardColumns] = useState(columns)
+
+  const handleClick = (item: KanbanItem) => {
+    console.log("Kabnan item:", item)
+    onItemClick?.(item)
+  }
 
   const getPriorityColor = (priority?: string) => {
     switch (priority) {
@@ -50,7 +55,7 @@ export function KanbanBoard({ columns, onItemClick }: KanbanBoardProps) {
   }
 
   return (
-    <div className="flex gap-6 overflow-x-auto pb-4">
+    <div className="flex flex-wrap gap-6 overflow-x-auto pb-4">
       {boardColumns.map((column) => (
         <div key={column.id} className="flex-shrink-0 w-80">
           <Card className="bg-white h-full">
@@ -73,7 +78,8 @@ export function KanbanBoard({ columns, onItemClick }: KanbanBoardProps) {
                 <Card
                   key={item.id}
                   className="p-3 cursor-pointer hover:shadow-md transition-shadow bg-off-white"
-                  onClick={() => onItemClick?.(item)}
+                  onClick={() => handleClick(item)}
+                  // onClick={() => onItemClick?.(item)}
                 >
                   <div className="space-y-2">
                     <div className="flex items-start justify-between">

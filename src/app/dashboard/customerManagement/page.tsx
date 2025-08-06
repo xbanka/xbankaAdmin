@@ -8,8 +8,11 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Search, Filter, Eye, MoreHorizontal } from "lucide-react"
+import { Search, Filter, Eye, MoreHorizontal, Plus } from 'lucide-react'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
+// import { Textarea } from "@/components/ui/textarea"
 
 const customers = [
   {
@@ -50,6 +53,16 @@ const customers = [
 export default function CustomerManagement() {
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  const [newCustomer, setNewCustomer] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+    dateOfBirth: "",
+    occupation: "",
+    notes: ""
+  })
 
   const filteredCustomers = customers.filter((customer) => {
     const matchesSearch =
@@ -60,11 +73,156 @@ export default function CustomerManagement() {
     return matchesSearch && matchesStatus
   })
 
+  const handleInputChange = (field: string, value: string) => {
+    setNewCustomer(prev => ({
+      ...prev,
+      [field]: value
+    }))
+  }
+
+  const handleSaveCustomer = () => {
+    // Here you would typically send the data to your backend
+    console.log("Saving customer:", newCustomer)
+    
+    // Reset form and close modal
+    setNewCustomer({
+      name: "",
+      email: "",
+      phone: "",
+      address: "",
+      dateOfBirth: "",
+      occupation: "",
+      notes: ""
+    })
+    setIsAddModalOpen(false)
+    
+    // You could also show a success message here
+  }
+
+  const handleCancelAdd = () => {
+    // Reset form and close modal
+    setNewCustomer({
+      name: "",
+      email: "",
+      phone: "",
+      address: "",
+      dateOfBirth: "",
+      occupation: "",
+      notes: ""
+    })
+    setIsAddModalOpen(false)
+  }
+
   return (
     <DashboardLayout title="Customer Management" breadcrumbs={[{ label: "Customers" }]}>
       <Card className="bg-white">
         <CardHeader>
-          <CardTitle className="text-deep-blue">Customer List</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-deep-blue">Customer List</CardTitle>
+            <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+              <DialogTrigger asChild>
+                <Button className="flex items-center gap-2">
+                  <Plus className="h-4 w-4" />
+                  Add New Customer
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Add New Customer</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="customerName">Full Name *</Label>
+                      <Input
+                        id="customerName"
+                        value={newCustomer.name}
+                        onChange={(e) => handleInputChange("name", e.target.value)}
+                        placeholder="Enter customer's full name"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="customerEmail">Email Address *</Label>
+                      <Input
+                        id="customerEmail"
+                        type="email"
+                        value={newCustomer.email}
+                        onChange={(e) => handleInputChange("email", e.target.value)}
+                        placeholder="customer@example.com"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="customerPhone">Phone Number *</Label>
+                      <Input
+                        id="customerPhone"
+                        type="tel"
+                        value={newCustomer.phone}
+                        onChange={(e) => handleInputChange("phone", e.target.value)}
+                        placeholder="+234 xxx xxx xxxx"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="customerDob">Date of Birth</Label>
+                      <Input
+                        id="customerDob"
+                        type="date"
+                        value={newCustomer.dateOfBirth}
+                        onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="customerOccupation">Occupation</Label>
+                      <Input
+                        id="customerOccupation"
+                        value={newCustomer.occupation}
+                        onChange={(e) => handleInputChange("occupation", e.target.value)}
+                        placeholder="Enter occupation"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="customerAddress">Address</Label>
+                    <Input
+                      id="customerAddress"
+                      value={newCustomer.address}
+                      onChange={(e) => handleInputChange("address", e.target.value)}
+                      placeholder="Enter customer's address"
+                      className="min-h-20"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="customerNotes">Notes</Label>
+                    <Input
+                      id="customerNotes"
+                      value={newCustomer.notes}
+                      onChange={(e) => handleInputChange("notes", e.target.value)}
+                      placeholder="Any additional notes about the customer"
+                      className="min-h-20"
+                    />
+                  </div>
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <Button 
+                    onClick={handleSaveCustomer}
+                    className=""
+                    disabled={!newCustomer.name || !newCustomer.email || !newCustomer.phone}
+                  >
+                    Save Customer
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={handleCancelAdd}
+                    className="bg-transparent"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
           <div className="flex gap-4 mt-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
