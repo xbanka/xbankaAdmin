@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
-import { KanbanBoard, KanbanColumn, KanbanItem } from "@/components/layout/kanban-board"
+import { KanbanBoard, KanbanItem } from "@/components/layout/kanban-board"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -12,7 +12,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Search, Plus, Calendar, User, MessageSquare, Paperclip } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { FilteredTasks } from "@/lib/types"
 
 const taskColumns = [
   {
