@@ -33,3 +33,5 @@ export interface FilteredTasks {
     comments: number;
     attachments: number;
 }
+
+export const numNum = 4
