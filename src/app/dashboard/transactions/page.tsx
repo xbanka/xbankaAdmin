@@ -1,16 +1,12 @@
 "use client"
 
-import { useState } from "react"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
+import { DataTable } from "@/components/layout/data-table"
 import { Badge } from "@/components/ui/badge"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Search, Eye, MoreHorizontal, RefreshCw, AlertTriangle } from "lucide-react"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Eye, RefreshCw, AlertTriangle } from "lucide-react"
 
 const transactions = [
   {
@@ -73,31 +69,93 @@ const providerStats = [
 ]
 
 export default function Transactions() {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
-  const [typeFilter, setTypeFilter] = useState("all")
-
-  const filteredTransactions = transactions.filter((transaction) => {
-    const matchesSearch =
-      transaction.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      transaction.customer.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesStatus = statusFilter === "all" || transaction.status.toLowerCase() === statusFilter
-    const matchesType = typeFilter === "all" || transaction.type.toLowerCase().includes(typeFilter.toLowerCase())
-    return matchesSearch && matchesStatus && matchesType
-  })
-
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case "successful":
-        return "bg-main-green"
+        return "bg-abstractCyan"
       case "pending":
         return "bg-yellow-500"
       case "failed":
-        return "bg-main-red"
+        return "bg-mainRed"
       default:
         return "bg-gray-500"
     }
   }
+
+  const transactionColumns = [
+    { key: "id", label: "Transaction ID" },
+    {
+      key: "customer",
+      label: "Customer",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      render: (value: string, row: any) => (
+        <div>
+          <div className="font-medium">{value}</div>
+          <div className="text-sm text-muted-foreground">{row.customerId}</div>
+        </div>
+      ),
+    },
+    { key: "type", label: "Type" },
+    { key: "amount", label: "Amount", render: (value: string) => <span className="font-medium">{value}</span> },
+    { key: "status", label: "Status" },
+    { key: "gateway", label: "Gateway" },
+    { key: "timestamp", label: "Timestamp", render: (value: string) => <span className="text-sm">{value}</span> },
+    {
+      key: "tickets",
+      label: "Support Tickets",
+      render: (value: number) => <Badge variant={value > 0 ? "destructive" : "secondary"}>{value}</Badge>,
+    },
+  ]
+
+  const transactionFilters = [
+    {
+      key: "status",
+      placeholder: "Status",
+      options: [
+        { value: "all", label: "All Status" },
+        { value: "successful", label: "Successful" },
+        { value: "pending", label: "Pending" },
+        { value: "failed", label: "Failed" },
+      ],
+    },
+    {
+      key: "type",
+      placeholder: "Type",
+      options: [
+        { value: "all", label: "All Types" },
+        { value: "gift card", label: "Gift Card" },
+        { value: "crypto", label: "Crypto" },
+        { value: "bills", label: "Bills" },
+      ],
+    },
+  ]
+
+  const transactionActions = [
+    {
+      label: "View Details",
+      icon: <Eye className="h-4 w-4" />,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      onClick: (row: any) => console.log("View details", row),
+    },
+    {
+      label: "Retry Transaction",
+      icon: <RefreshCw className="h-4 w-4" />,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      onClick: (row: any) => console.log("Retry transaction", row),
+    },
+    {
+      label: "Escalate",
+      icon: <AlertTriangle className="h-4 w-4" />,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      onClick: (row: any) => console.log("Escalate", row),
+    },
+    {
+      label: "Refund",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      onClick: (row: any) => console.log("Refund", row),
+      className: "text-main-red",
+    },
+  ]
 
   return (
     <DashboardLayout title="Transaction Management" breadcrumbs={[{ label: "Transactions" }]}>
@@ -108,110 +166,15 @@ export default function Transactions() {
         </TabsList>
 
         <TabsContent value="transactions">
-          <Card className="bg-white">
-            <CardHeader>
-              <CardTitle className="text-deep-blue">Transaction Master Table</CardTitle>
-              <div className="flex gap-4 mt-4">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input
-                    placeholder="Search transactions..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-[150px]">
-                    <SelectValue placeholder="Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="successful">Successful</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="failed">Failed</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Select value={typeFilter} onValueChange={setTypeFilter}>
-                  <SelectTrigger className="w-[150px]">
-                    <SelectValue placeholder="Type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Types</SelectItem>
-                    <SelectItem value="gift">Gift Card</SelectItem>
-                    <SelectItem value="crypto">Crypto</SelectItem>
-                    <SelectItem value="bills">Bills</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Transaction ID</TableHead>
-                    <TableHead>Customer</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Gateway</TableHead>
-                    <TableHead>Timestamp</TableHead>
-                    <TableHead>Support Tickets</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredTransactions.map((transaction) => (
-                    <TableRow key={transaction.id}>
-                      <TableCell className="font-medium">{transaction.id}</TableCell>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">{transaction.customer}</div>
-                          <div className="text-sm text-muted-foreground">{transaction.customerId}</div>
-                        </div>
-                      </TableCell>
-                      <TableCell>{transaction.type}</TableCell>
-                      <TableCell className="font-medium">{transaction.amount}</TableCell>
-                      <TableCell>
-                        <Badge className={getStatusColor(transaction.status)}>{transaction.status}</Badge>
-                      </TableCell>
-                      <TableCell>{transaction.gateway}</TableCell>
-                      <TableCell className="text-sm">{transaction.timestamp}</TableCell>
-                      <TableCell>
-                        <Badge variant={transaction.tickets > 0 ? "destructive" : "secondary"}>
-                          {transaction.tickets}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
-                              <Eye className="mr-2 h-4 w-4" />
-                              View Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <RefreshCw className="mr-2 h-4 w-4" />
-                              Retry Transaction
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <AlertTriangle className="mr-2 h-4 w-4" />
-                              Escalate
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="text-main-red">Refund</DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+          <DataTable
+            title="Transaction Master Table"
+            data={transactions}
+            columns={transactionColumns}
+            searchKeys={["id", "customer"]}
+            filters={transactionFilters}
+            actions={transactionActions}
+            getBadgeColor={getStatusColor}
+          />
         </TabsContent>
 
         <TabsContent value="providers">

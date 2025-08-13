@@ -97,7 +97,7 @@ const allMetrics = [
 
   // Content Metrics
   {
-    title: "Articles Submitted This Week",
+    title: "Articles Submitted",
     value: "18",
     icon: Send,
     trend: { value: "3 ahead of schedule", isPositive: true },
@@ -163,7 +163,7 @@ export function MetricCarousel({ cardsPerView = 4 }: MetricCarouselProps) {
             size="sm"
             onClick={prevSlide}
             disabled={currentIndex === 0}
-            className="h-8 w-8 p-0 bg-transparent"
+            className="h-8 w-8 p-0 bg-abstractCyan hover:bg-customCyan"
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
@@ -172,7 +172,7 @@ export function MetricCarousel({ cardsPerView = 4 }: MetricCarouselProps) {
             size="sm"
             onClick={nextSlide}
             disabled={currentIndex === maxIndex}
-            className="h-8 w-8 p-0 bg-transparent"
+            className="h-8 w-8 p-0 bg-abstractCyan hover:bg-customCyan"
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
@@ -185,7 +185,7 @@ export function MetricCarousel({ cardsPerView = 4 }: MetricCarouselProps) {
               key={index}
               onClick={() => goToSlide(index)}
               className={`w-2 h-2 rounded-full transition-colors ${
-                index === currentIndex ? "bg-main-green" : "bg-gray-300"
+                index === currentIndex ? "bg-abstractCyan" : "bg-customCyan"
               }`}
               aria-label={`Go to slide ${index + 1}`}
             />
@@ -199,7 +199,7 @@ export function MetricCarousel({ cardsPerView = 4 }: MetricCarouselProps) {
       </div>
 
       {/* Metric Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 transition-all duration-300">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 transform transition-all duration-300 ease-in-out">
         {getCurrentMetrics().map((metric, index) => (
           <SummaryCard
             key={`${currentIndex}-${index}`}
@@ -213,7 +213,7 @@ export function MetricCarousel({ cardsPerView = 4 }: MetricCarouselProps) {
       </div>
 
       {/* Category Labels */}
-      <div className="flex justify-center">
+      {/* <div className="flex justify-center">
         <div className="flex items-center gap-6 text-xs text-muted-foreground">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 bg-light-cyan rounded-full"></div>
@@ -228,7 +228,7 @@ export function MetricCarousel({ cardsPerView = 4 }: MetricCarouselProps) {
             <span>Content (11-14)</span>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   )
 }
