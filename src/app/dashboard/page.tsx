@@ -122,13 +122,13 @@ export default function Dashboard() {
                   <div className="flex items-center gap-3">
                     <div
                       className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                        transaction.type === "received" ? "bg-main-green" : "bg-main-red"
+                        transaction.type === "received" ? "bg-abstractCyan" : "bg-mainRed"
                       }`}
                     >
                       {transaction.type === "received" ? (
-                        <ArrowDownLeft className="h-4 w-4 text-white" />
+                        <ArrowDownLeft className="h-4 w-4" />
                       ) : (
-                        <ArrowUpRight className="h-4 w-4 text-white" />
+                        <ArrowUpRight className="h-4 w-4" />
                       )}
                     </div>
                     <div>
@@ -317,9 +317,9 @@ export default function Dashboard() {
                   <Badge
                     className={`text-xs ${
                       writer.performance === "Excellent"
-                        ? "bg-main-green"
+                        ? "bg-abstractCyan"
                         : writer.performance === "Good"
-                          ? "bg-sub-cyan"
+                          ? "bg-subCyan"
                           : "bg-yellow-500"
                     }`}
                   >
@@ -399,7 +399,7 @@ export default function Dashboard() {
             </div>
             <div className="grid grid-cols-2 gap-4 mt-6">
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-main-green rounded-full"></div>
+                <div className="w-3 h-3 bg-mainGreen rounded-full"></div>
                 <span className="text-sm">Published (70)</span>
               </div>
               <div className="flex items-center gap-2">
@@ -407,11 +407,11 @@ export default function Dashboard() {
                 <span className="text-sm">Pending (39)</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-sub-cyan rounded-full"></div>
+                <div className="w-3 h-3 bg-subCyan rounded-full"></div>
                 <span className="text-sm">Under Review (31)</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-main-red rounded-full"></div>
+                <div className="w-3 h-3 bg-mainRed rounded-full"></div>
                 <span className="text-sm">Disapproved (16)</span>
               </div>
             </div>
