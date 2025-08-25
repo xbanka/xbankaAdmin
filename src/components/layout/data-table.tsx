@@ -15,7 +15,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 interface Column {
   key: string
   label: string
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   render?: (value: any, row: any) => React.ReactNode
 }
 
@@ -33,14 +32,18 @@ interface Filter {
 interface ActionItem {
   label: string
   icon?: React.ReactNode
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onClick: (row: any) => void
   className?: string
 }
 
+interface TabFilter {
+  key: string
+  label: string
+  value: string
+}
+
 interface DataTableProps {
   title: string
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any[]
   columns: Column[]
   searchKeys: string[]
@@ -48,6 +51,8 @@ interface DataTableProps {
   actions?: ActionItem[]
   headerActions?: React.ReactNode
   getBadgeColor?: (status: string) => string
+  tabFilters?: TabFilter[]
+  tabFilterKey?: string
 }
 
 export function DataTable({
@@ -59,9 +64,12 @@ export function DataTable({
   actions = [],
   headerActions,
   getBadgeColor,
+  tabFilters = [],
+  tabFilterKey = "",
 }: DataTableProps) {
   const [searchTerm, setSearchTerm] = useState("")
   const [filterValues, setFilterValues] = useState<Record<string, string>>({})
+  const [activeTab, setActiveTab] = useState(tabFilters.length > 0 ? tabFilters[0].value : "all")
 
   // Initialize filter values
   const initializedFilters = filters.reduce((acc, filter) => {
@@ -77,6 +85,10 @@ export function DataTable({
       item[key]?.toString().toLowerCase().includes(searchTerm.toLowerCase()),
     )
 
+    // Tab filter
+    const matchesTabFilter =
+      !tabFilterKey || activeTab === "all" || item[tabFilterKey]?.toLowerCase() === activeTab.toLowerCase()
+
     // Other filters
     const matchesFilters = filters.every((filter) => {
       const filterValue = initializedFilters[filter.key]
@@ -84,7 +96,7 @@ export function DataTable({
       return item[filter.key]?.toLowerCase() === filterValue
     })
 
-    return matchesSearch && matchesFilters
+    return matchesSearch && matchesTabFilter && matchesFilters
   })
 
   const handleFilterChange = (filterKey: string, value: string) => {
@@ -94,7 +106,6 @@ export function DataTable({
     }))
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const renderCellContent = (column: Column, row: any) => {
     const value = row[column.key]
 
@@ -117,6 +128,23 @@ export function DataTable({
           <CardTitle className="text-deep-blue">{title}</CardTitle>
           {headerActions}
         </div>
+
+        {tabFilters.length > 0 && (
+          <div className="flex gap-2 mt-4">
+            {tabFilters.map((tab) => (
+              <Button
+                key={tab.value}
+                variant={activeTab === tab.value ? "default" : "outline"}
+                size="sm"
+                onClick={() => setActiveTab(tab.value)}
+                className={activeTab === tab.value ? "" : "bg-transparent"}
+              >
+                {tab.label}
+              </Button>
+            ))}
+          </div>
+        )}
+
         <div className="flex gap-4 mt-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
