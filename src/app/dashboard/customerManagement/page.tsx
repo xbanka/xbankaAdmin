@@ -93,7 +93,7 @@ export default function CustomerManagement() {
   }
 
   const getStatusColor = (status: string) => {
-    return status === "Active" ? "bg-abstractCyan" : "bg-yellow-500"
+    return status === "Active" ? "bg-main-green" : "bg-yellow-500"
   }
 
   const customerColumns = [
@@ -132,24 +132,26 @@ export default function CustomerManagement() {
     {
       label: "View Profile",
       icon: <Eye className="h-4 w-4" />,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       onClick: (row: any) => console.log("View profile", row),
     },
     {
       label: "Edit Customer",
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       onClick: (row: any) => console.log("Edit customer", row),
     },
     {
       label: "View Transactions",
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       onClick: (row: any) => console.log("View transactions", row),
     },
     {
       label: "Support History",
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       onClick: (row: any) => console.log("Support history", row),
     },
+  ]
+
+  const customerTabFilters = [
+    { key: "status", label: "All Customers", value: "all" },
+    { key: "status", label: "Active Customers", value: "active" },
+    { key: "status", label: "Inactive Customers", value: "pending" },
   ]
 
   const headerActions = (
@@ -270,6 +272,8 @@ export default function CustomerManagement() {
         actions={customerActions}
         headerActions={headerActions}
         getBadgeColor={getStatusColor}
+        tabFilters={customerTabFilters}
+        tabFilterKey="status"
       />
     </DashboardLayout>
   )
