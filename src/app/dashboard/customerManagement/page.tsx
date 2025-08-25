@@ -132,18 +132,22 @@ export default function CustomerManagement() {
     {
       label: "View Profile",
       icon: <Eye className="h-4 w-4" />,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       onClick: (row: any) => console.log("View profile", row),
     },
     {
       label: "Edit Customer",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       onClick: (row: any) => console.log("Edit customer", row),
     },
     {
       label: "View Transactions",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       onClick: (row: any) => console.log("View transactions", row),
     },
     {
       label: "Support History",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       onClick: (row: any) => console.log("Support history", row),
     },
   ]

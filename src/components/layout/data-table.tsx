@@ -1,58 +1,79 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Search, MoreHorizontal } from "lucide-react"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Search, MoreHorizontal } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface Column {
-  key: string
-  label: string
-  render?: (value: any, row: any) => React.ReactNode
+  key: string;
+  label: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  render?: (value: any, row: any) => React.ReactNode;
 }
 
 interface FilterOption {
-  value: string
-  label: string
+  value: string;
+  label: string;
 }
 
 interface Filter {
-  key: string
-  placeholder: string
-  options: FilterOption[]
+  key: string;
+  placeholder: string;
+  options: FilterOption[];
 }
 
 interface ActionItem {
-  label: string
-  icon?: React.ReactNode
-  onClick: (row: any) => void
-  className?: string
+  label: string;
+  icon?: React.ReactNode;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onClick: (row: any) => void;
+  className?: string;
 }
 
 interface TabFilter {
-  key: string
-  label: string
-  value: string
+  key: string;
+  label: string;
+  value: string;
 }
 
 interface DataTableProps {
-  title: string
-  data: any[]
-  columns: Column[]
-  searchKeys: string[]
-  filters?: Filter[]
-  actions?: ActionItem[]
-  headerActions?: React.ReactNode
-  getBadgeColor?: (status: string) => string
-  tabFilters?: TabFilter[]
-  tabFilterKey?: string
+  title: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  data: any[];
+  columns: Column[];
+  searchKeys: string[];
+  filters?: Filter[];
+  actions?: ActionItem[];
+  headerActions?: React.ReactNode;
+  getBadgeColor?: (status: string) => string;
+  tabFilters?: TabFilter[];
+  tabFilterKey?: string;
 }
 
 export function DataTable({
@@ -67,83 +88,89 @@ export function DataTable({
   tabFilters = [],
   tabFilterKey = "",
 }: DataTableProps) {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [filterValues, setFilterValues] = useState<Record<string, string>>({})
-  const [activeTab, setActiveTab] = useState(tabFilters.length > 0 ? tabFilters[0].value : "all")
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterValues, setFilterValues] = useState<Record<string, string>>({});
+  const [activeTab, setActiveTab] = useState(
+    tabFilters.length > 0 ? tabFilters[0].value : "all"
+  );
 
   // Initialize filter values
   const initializedFilters = filters.reduce((acc, filter) => {
     if (!acc[filter.key]) {
-      acc[filter.key] = "all"
+      acc[filter.key] = "all";
     }
-    return acc
-  }, filterValues)
+    return acc;
+  }, filterValues);
 
   const filteredData = data.filter((item) => {
     // Search filter
     const matchesSearch = searchKeys.some((key) =>
-      item[key]?.toString().toLowerCase().includes(searchTerm.toLowerCase()),
-    )
+      item[key]?.toString().toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     // Tab filter
     const matchesTabFilter =
-      !tabFilterKey || activeTab === "all" || item[tabFilterKey]?.toLowerCase() === activeTab.toLowerCase()
+      !tabFilterKey ||
+      activeTab === "all" ||
+      item[tabFilterKey]?.toLowerCase() === activeTab.toLowerCase();
 
     // Other filters
     const matchesFilters = filters.every((filter) => {
-      const filterValue = initializedFilters[filter.key]
-      if (filterValue === "all") return true
-      return item[filter.key]?.toLowerCase() === filterValue
-    })
+      const filterValue = initializedFilters[filter.key];
+      if (filterValue === "all") return true;
+      return item[filter.key]?.toLowerCase() === filterValue;
+    });
 
-    return matchesSearch && matchesTabFilter && matchesFilters
-  })
+    return matchesSearch && matchesTabFilter && matchesFilters;
+  });
 
   const handleFilterChange = (filterKey: string, value: string) => {
     setFilterValues((prev) => ({
       ...prev,
       [filterKey]: value,
-    }))
-  }
+    }));
+  };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const renderCellContent = (column: Column, row: any) => {
-    const value = row[column.key]
+    const value = row[column.key];
 
     if (column.render) {
-      return column.render(value, row)
+      return column.render(value, row);
     }
 
     // Default badge rendering for status-like fields
     if (column.key.toLowerCase().includes("status") && getBadgeColor) {
-      return <Badge className={getBadgeColor(value)}>{value}</Badge>
+      return <Badge className={getBadgeColor(value)}>{value}</Badge>;
     }
 
-    return value
-  }
+    return value;
+  };
 
   return (
     <Card className="bg-white">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="text-deep-blue">{title}</CardTitle>
-          {headerActions}
-        </div>
-
-        {tabFilters.length > 0 && (
-          <div className="flex gap-2 mt-4">
-            {tabFilters.map((tab) => (
-              <Button
-                key={tab.value}
-                variant={activeTab === tab.value ? "default" : "outline"}
-                size="sm"
-                onClick={() => setActiveTab(tab.value)}
-                className={activeTab === tab.value ? "" : "bg-transparent"}
-              >
-                {tab.label}
-              </Button>
-            ))}
+          {tabFilters.length > 0 && (
+            <div className="flex items-center gap-2">
+              {tabFilters.map((tab) => (
+                <Button
+                  key={tab.value}
+                  variant={activeTab === tab.value ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setActiveTab(tab.value)}
+                  className={activeTab === tab.value ? "" : "bg-transparent"}
+                >
+                  {tab.label}
+                </Button>
+              ))}
+            </div>
+          )}
+          <div className="flex items-center justify-between">
+            {/* <CardTitle className="text-deep-blue">{title}</CardTitle> */}
+            {headerActions}
           </div>
-        )}
+        </div>
 
         <div className="flex gap-4 mt-4">
           <div className="relative flex-1">
@@ -189,7 +216,10 @@ export function DataTable({
             {filteredData.map((row, index) => (
               <TableRow key={row.id || index}>
                 {columns.map((column) => (
-                  <TableCell key={column.key} className={column.key === "id" ? "font-medium" : ""}>
+                  <TableCell
+                    key={column.key}
+                    className={column.key === "id" ? "font-medium" : ""}
+                  >
                     {renderCellContent(column, row)}
                   </TableCell>
                 ))}
@@ -208,7 +238,9 @@ export function DataTable({
                             onClick={() => action.onClick(row)}
                             className={action.className}
                           >
-                            {action.icon && <span className="mr-2">{action.icon}</span>}
+                            {action.icon && (
+                              <span className="mr-2">{action.icon}</span>
+                            )}
                             {action.label}
                           </DropdownMenuItem>
                         ))}
@@ -222,5 +254,5 @@ export function DataTable({
         </Table>
       </CardContent>
     </Card>
-  )
+  );
 }
