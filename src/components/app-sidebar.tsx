@@ -1,5 +1,5 @@
 "use client"
-import type * as React from "react"
+import React from "react"
 
 import {
   Sidebar,
@@ -25,6 +25,14 @@ import {
 import Image from "next/image"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
+import { Button } from "./ui/button"
+import { DialogLayout } from "./layout/modalLayout"
+import { useUserStore } from "@/store/userStore";
+import { useRouter } from "next/navigation";
+import { useMutation } from "@tanstack/react-query"
+import Cookies from "js-cookie";
+import { logoutAction } from "@/lib/actions/actions"
+import { toast } from "sonner"
 
 // This is sample data.
 const data = {
@@ -89,7 +97,32 @@ const data = {
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const [open, setOpen] = React.useState(false)
   const pathname = usePathname()
+  const clearUser = useUserStore((s) => s.clearUser);
+  const router = useRouter();
+
+  const { mutate } = useMutation({
+    mutationFn: () => logoutAction(),
+    onSuccess: (result) => {
+      if(!result.success){
+        console.log(result.message)
+        toast.error(result.message)
+      }else{
+        localStorage.removeItem("accessToken"); // clear LS
+        document.cookie =
+          "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+        Cookies.remove("accessToken", { path: "/" }); // clear cookie
+        clearUser(); // clear Zustand
+        router.push("/auth/signin");
+        setOpen(false)
+      }
+    },
+  });
+
+  const handleLogout = () => {
+    mutate()
+  }
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader className="">
@@ -126,7 +159,28 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </SidebarMenuItem>
             )
           })}
+        <SidebarMenuButton onClick={() => setOpen(true)}>Log out</SidebarMenuButton>
         </SidebarMenu>
+        <DialogLayout
+        open={open}
+        onOpenChange={setOpen}
+        title="Logout"
+        footer={
+          <>
+            {/* Cancel just closes the dialog */}
+            <DialogLayout.Close asChild>
+              <Button variant="outline">Cancel</Button>
+            </DialogLayout.Close>
+
+            {/* Logout button calls handler */}
+            <Button variant="destructive" onClick={handleLogout}>
+              Logout
+            </Button>
+          </>
+        }
+      >
+        <p>Are you sure you want to logout</p>
+      </DialogLayout>
       </SidebarContent>
       <SidebarRail />
     </Sidebar>
