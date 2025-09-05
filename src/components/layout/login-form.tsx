@@ -88,13 +88,13 @@ export default function LoginForm() {
   };
 
   return (
-    <Card className="w-full shadow-xl border-0 bg-white/95 backdrop-blur-sm">
+    <Card className="w-[40%] mx-auto mt-[100px] shadow-xl border-0 bg-white/95 backdrop-blur-sm">
       <CardHeader className="space-y-1 text-center">
         <CardTitle className="text-2xl font-bold text-gray-900">
           Welcome Back
         </CardTitle>
         <CardDescription className="text-gray-600">
-          Sign in to your affiliate marketer account
+          Sign in to your xbanka dashboard account
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
