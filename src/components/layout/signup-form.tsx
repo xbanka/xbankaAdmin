@@ -203,7 +203,7 @@ export default function SignupForm() {
           <p className="text-sm text-gray-600">
             Already have an account?{" "}
             <Link
-              href="/affiliate/auth/login"
+              href="/auth/signin"
               className="font-semibold text-[var(--abstractCyan)] hover:underline"
             >
               Sign in here
