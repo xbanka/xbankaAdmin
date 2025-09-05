@@ -29,9 +29,9 @@ import { Button } from "./ui/button"
 import { DialogLayout } from "./layout/modalLayout"
 import { useUserStore } from "@/store/userStore";
 import { useRouter } from "next/navigation";
-import { useMutation } from "@tanstack/react-query"
-import Cookies from "js-cookie";
-import { logoutAction } from "@/lib/actions/actions"
+// import { useMutation } from "@tanstack/react-query"
+// import Cookies from "js-cookie";
+// import { logoutAction } from "@/lib/actions/actions"
 import { toast } from "sonner"
 
 // This is sample data.
@@ -102,26 +102,31 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const clearUser = useUserStore((s) => s.clearUser);
   const router = useRouter();
 
-  const { mutate } = useMutation({
-    mutationFn: () => logoutAction(),
-    onSuccess: (result) => {
-      if(!result.success){
-        console.log(result.message)
-        toast.error(result.message)
-      }else{
-        localStorage.removeItem("accessToken"); // clear LS
-        document.cookie =
-          "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-        Cookies.remove("accessToken", { path: "/" }); // clear cookie
-        clearUser(); // clear Zustand
-        router.push("/auth/signin");
-        setOpen(false)
-      }
-    },
-  });
+  // const { mutate } = useMutation({
+  //   mutationFn: () => logoutAction(),
+  //   onSuccess: (result) => {
+  //     if(!result.success){
+  //       console.log(result.message)
+  //       toast.error(result.message)
+  //     }else{
+  //       localStorage.removeItem("accessToken"); // clear LS
+  //       document.cookie =
+  //         "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+  //       Cookies.remove("accessToken", { path: "/" }); // clear cookie
+  //       clearUser(); // clear Zustand
+  //       router.push("/auth/signin");
+  //       setOpen(false)
+  //     }
+  //   },
+  // });
 
   const handleLogout = () => {
-    mutate()
+    // mutate()
+    localStorage.removeItem("accessToken");
+    // Cookies.remove("accessToken", { path: "/" }); // clear cookie
+        clearUser();
+        router.push("/auth/signin");
+        toast.success("user logged out")
   }
   return (
     <Sidebar collapsible="icon" {...props}>
