@@ -112,13 +112,13 @@ export default function SignupForm() {
   // }
 
   return (
-    <Card className="w-full shadow-xl border-0 bg-white/95 backdrop-blur-sm">
+    <Card className="w-[60%] mx-auto mt-[100px] shadow-xl border-0 bg-white/95 backdrop-blur-sm">
       <CardHeader className="text-center">
         <CardTitle className="font-bold text-foreground">
           Join Our Team
         </CardTitle>
         <CardDescription className="text-foreground">
-          Create your affiliate marketer account
+          Create your xbanka dashboard account
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
