@@ -1,3 +1,4 @@
+"use client"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import { MetricCarousel } from "@/components/layout/metric-carousel"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -16,6 +17,7 @@ import {
   Eye,
 } from "lucide-react"
 import Link from "next/link"
+
 
 const recentTransactions = [
   {

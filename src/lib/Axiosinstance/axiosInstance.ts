@@ -1,4 +1,5 @@
 import axios from "axios";
+import Cookies from "js-cookie";
 
 const AxiosInstance = axios.create({
   baseURL: "https://xbankadashboardbackend-production.up.railway.app/",
@@ -15,7 +16,8 @@ AxiosInstance.interceptors.request.use(
     // if (token) {
     //   config.headers.Authorization = `Bearer ${token}`;
     // }
-    const token = localStorage.getItem("accessToken");
+    // const token = localStorage.getItem("accessToken");
+    const token = Cookies.get("accessToken");
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -44,17 +46,27 @@ AxiosInstance.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const refreshRes = await AxiosInstance.post("/auth/refresh"); // backend uses cookie
+        const refreshRes = await AxiosInstance.get("/xbankastaff/refresh"); // backend uses cookie
         const newAccessToken = refreshRes.data.accessToken;
 
-        localStorage.setItem("accessToken", newAccessToken);
+        // console.log("new accesstoken", newAccessToken)
+        // localStorage.setItem("accessToken", newAccessToken);
+        Cookies.set("accessToken", newAccessToken, {
+          path: "/",
+          sameSite: "strict", // use lax to allow refreshes
+          // secure: process.env.NODE_ENV === "production", // only secure in prod
+          secure: true, // only secure in prod
+        });
         AxiosInstance.defaults.headers.common.Authorization = `Bearer ${newAccessToken}`;
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
 
         return AxiosInstance(originalRequest); // retry
       } catch (refreshError) {
-        localStorage.removeItem("accessToken");
-        window.location.href = "/login";
+        // localStorage.removeItem("accessToken");
+        Cookies.remove("accessToken");
+        if (typeof window !== "undefined") {
+          window.location.href = "/auth/signin";
+        }
         return Promise.reject(refreshError);
       }
     }
@@ -68,7 +80,7 @@ export default AxiosInstance;
 // api.interceptors.response.use(
 //   (res) => res,
 //   async (err) => {
-    
+
 //     return Promise.reject(err);
 //   }
 // );
