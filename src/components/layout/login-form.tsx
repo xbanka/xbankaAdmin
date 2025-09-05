@@ -25,6 +25,7 @@ import FormField from "./FormField";
 import { toast } from "sonner";
 import { decodeAccessToken } from "@/lib/decodeToken";
 import { useUserStore } from "@/store/userStore";
+import Cookies from "js-cookie";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -54,16 +55,26 @@ export default function LoginForm() {
       if (!result.success) {
         // Show API error in alert
         console.log(result.message);
-        toast.error(result.message)
+        toast.error(result.message);
         //   setErrorMessage(result.message)
       } else {
         console.log("Signup success!", result.data);
-        decodeAccessToken(result.data.accessToken)
-        const data = { firstName: result.data.firstName, role: result.data.role}
-        console.log(data)
-        setUser(data)
+        decodeAccessToken(result.data.accessToken);
+        const data = {
+          firstName: result.data.firstName,
+          role: result.data.role,
+        };
+        console.log(data);
+        setUser(data);
+        document.cookie = `accessToken=${result.data.accessToken}; path=/; samesite=strict`;
+        Cookies.set("accessToken", result.data.accessToken, {
+          path: "/",
+          sameSite: "strict", // use lax to allow refreshes
+          // secure: process.env.NODE_ENV === "production", // only secure in prod
+          secure: true, // only secure in prod
+        });
         localStorage.setItem("accessToken", result.data.accessToken);
-        toast.success("User Loggedin")
+        toast.success("User Loggedin");
         router.push("/dashboard");
       }
     },
@@ -132,10 +143,10 @@ export default function LoginForm() {
           </div>
 
           {isSuccess && !data?.success && (
-          <Alert variant="destructive">
-            <AlertDescription>{data.message}</AlertDescription>
-          </Alert>
-        )}
+            <Alert variant="destructive">
+              <AlertDescription>{data.message}</AlertDescription>
+            </Alert>
+          )}
 
           <div className="flex items-center justify-between">
             <Link
