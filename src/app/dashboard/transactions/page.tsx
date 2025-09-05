@@ -5,8 +5,6 @@ import type React from "react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { DataTable } from "@/components/layout/data-table";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -64,29 +62,29 @@ const transactions = [
   },
 ];
 
-const providerStats = [
-  {
-    name: "Flutterwave",
-    successRate: "94.2%",
-    totalTransactions: 1247,
-    errors: 12,
-    status: "Active",
-  },
-  {
-    name: "Crypto API",
-    successRate: "89.7%",
-    totalTransactions: 856,
-    errors: 23,
-    status: "Active",
-  },
-  {
-    name: "Bills Gateway",
-    successRate: "96.1%",
-    totalTransactions: 634,
-    errors: 8,
-    status: "Active",
-  },
-];
+// const providerStats = [
+//   {
+//     name: "Flutterwave",
+//     successRate: "94.2%",
+//     totalTransactions: 1247,
+//     errors: 12,
+//     status: "Active",
+//   },
+//   {
+//     name: "Crypto API",
+//     successRate: "89.7%",
+//     totalTransactions: 856,
+//     errors: 23,
+//     status: "Active",
+//   },
+//   {
+//     name: "Bills Gateway",
+//     successRate: "96.1%",
+//     totalTransactions: 634,
+//     errors: 8,
+//     status: "Active",
+//   },
+// ];
 
 export default function Transactions() {
   const [isModalOpen, setIsModalOpen] = useState(false);
