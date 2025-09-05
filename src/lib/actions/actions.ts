@@ -2,6 +2,7 @@
 
 import axios, { AxiosError } from "axios";
 import { AffiliateSignUpTypes, loginTypes } from "./actionTypes";
+import AxiosInstance from "../Axiosinstance/axiosInstance";
 
 export const signupAction = async (data: AffiliateSignUpTypes) => {
   // Insert into DB, call API, etc.
@@ -119,3 +120,75 @@ export const loginAction = async (data: loginTypes) => {
   // If you want to refresh server components that depend on user state
   //   revalidatePath("/dashboard");
 };
+export const logoutAction = async () => {
+  // Insert into DB, call API, etc.
+  try {
+    const response = await AxiosInstance.post("https://xbankadashboardbackend-production.up.railway.app/xbankastaff/logout");
+    console.log(response)
+    return {
+      success: true,
+      data: response.data,   // ✅ only return actual payload
+      status: response.status,
+    };
+  } catch (err: unknown) {
+    const error = err as AxiosError<{ message?: string }>;
+    if (error.response) {
+      // Return structured error message from backend
+      console.log(error)
+      return {
+        success: false,
+        message: error.response.data?.message || "Something went wrong",
+        status: error.response.status,
+      };
+    } else if (error.request) {
+         console.log(error)
+      return {
+        success: false,
+        message: "No response from server. Please try again later.",
+      };
+    } else {
+        console.log(error)
+      return { success: false, message: error.message };
+    }
+  }
+  //   console.log("User signup:", response);
+
+  // If you want to refresh server components that depend on user state
+  //   revalidatePath("/dashboard");
+};
+// export const refresh = async () => {
+//   // Insert into DB, call API, etc.
+//   try {
+//     const response = await AxiosInstance.get("/xbankastaff/refresh")
+//     console.log(response)
+//     return {
+//       success: true,
+//       data: response.data,   // ✅ only return actual payload
+//       status: response.status,
+//     };
+//   } catch (err: unknown) {
+//     const error = err as AxiosError<{ message?: string }>;
+//     if (error.response) {
+//       // Return structured error message from backend
+//       console.log(error)
+//       return {
+//         success: false,
+//         message: error.response.data?.message || "Something went wrong",
+//         status: error.response.status,
+//       };
+//     } else if (error.request) {
+//          console.log(error)
+//       return {
+//         success: false,
+//         message: "No response from server. Please try again later.",
+//       };
+//     } else {
+//         console.log(error)
+//       return { success: false, message: error.message };
+//     }
+//   }
+//   //   console.log("User signup:", response);
+
+//   // If you want to refresh server components that depend on user state
+//   //   revalidatePath("/dashboard");
+// };
