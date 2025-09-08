@@ -66,14 +66,6 @@ export default function LoginForm() {
         };
         console.log(data);
         setUser(data);
-        document.cookie = `accessToken=${result.data.accessToken}; path=/; samesite=strict`;
-        Cookies.set("accessToken", result.data.accessToken, {
-          path: "/",
-          sameSite: "strict", // use lax to allow refreshes
-          // secure: process.env.NODE_ENV === "production", // only secure in prod
-          secure: true, // only secure in prod
-        });
-        localStorage.setItem("accessToken", result.data.accessToken);
         toast.success("User Loggedin");
         router.push("/dashboard");
       }

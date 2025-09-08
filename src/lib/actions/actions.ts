@@ -1,8 +1,9 @@
-"use server";
+"use client";
 // import Cookies from "js-cookie";
 
 import axios, { AxiosError } from "axios";
 import { AffiliateSignUpTypes, loginTypes } from "./actionTypes";
+import AxiosInstance from "../Axiosinstance/axiosInstance";
 
 export const signupAction = async (data: AffiliateSignUpTypes) => {
   // Insert into DB, call API, etc.
@@ -48,6 +49,7 @@ export const signupAction = async (data: AffiliateSignUpTypes) => {
     }
   }
 };
+
 export const verifyEmailAction = async (token: string) => {
   // Insert into DB, call API, etc.
   try {
@@ -89,11 +91,13 @@ export const loginAction = async (data: loginTypes) => {
   // Insert into DB, call API, etc.
   try {
     const response = await axios.post(
-      "https://xbankadashboardbackend-production.up.railway.app/xbankastaff/login",
+      // "https://xbankadashboardbackend-production.up.railway.app/xbankastaff/login",
+      "http://localhost:3001/xbankastaff/login",
       {
         email: data.email,
         password: data.password,
-      }
+      },
+      { withCredentials: true }
     );
     console.log(response);
     return {
@@ -130,19 +134,9 @@ export const loginAction = async (data: loginTypes) => {
 export const logoutAction = async () => {
   // Insert into DB, call API, etc.
   try {
-    // const token = Cookies.get("accessToken");
-    const token = localStorage.getItem("accessToken");
-    console.log("logout", token);
-    const response = await axios.post(
-      "https://xbankadashboardbackend-production.up.railway.app/xbankastaff/logout",
-      {},
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: token ? `Bearer ${token}` : "",
-        },
-        withCredentials: true,
-      }
+    const response = await AxiosInstance.post(
+      "/xbankastaff/logout",
+      {}, { withCredentials: true }
     );
     console.log(response);
     return {
