@@ -91,8 +91,8 @@ export const loginAction = async (data: loginTypes) => {
   // Insert into DB, call API, etc.
   try {
     const response = await axios.post(
-      // "https://xbankadashboardbackend-production.up.railway.app/xbankastaff/login",
-      "http://localhost:3001/xbankastaff/login",
+      "https://xbankadashboardbackend-production.up.railway.app/xbankastaff/login",
+      // "http://localhost:3001/xbankastaff/login",
       {
         email: data.email,
         password: data.password,
@@ -131,6 +131,7 @@ export const loginAction = async (data: loginTypes) => {
   // If you want to refresh server components that depend on user state
   //   revalidatePath("/dashboard");
 };
+
 export const logoutAction = async () => {
   // Insert into DB, call API, etc.
   try {
@@ -170,39 +171,38 @@ export const logoutAction = async () => {
   // If you want to refresh server components that depend on user state
   //   revalidatePath("/dashboard");
 };
-// export const refresh = async () => {
-//   // Insert into DB, call API, etc.
-//   try {
-//     const response = await AxiosInstance.get("/xbankastaff/refresh")
-//     console.log(response)
-//     return {
-//       success: true,
-//       data: response.data,   // ✅ only return actual payload
-//       status: response.status,
-//     };
-//   } catch (err: unknown) {
-//     const error = err as AxiosError<{ message?: string }>;
-//     if (error.response) {
-//       // Return structured error message from backend
-//       console.log(error)
-//       return {
-//         success: false,
-//         message: error.response.data?.message || "Something went wrong",
-//         status: error.response.status,
-//       };
-//     } else if (error.request) {
-//          console.log(error)
-//       return {
-//         success: false,
-//         message: "No response from server. Please try again later.",
-//       };
-//     } else {
-//         console.log(error)
-//       return { success: false, message: error.message };
-//     }
-//   }
-//   //   console.log("User signup:", response);
 
-//   // If you want to refresh server components that depend on user state
-//   //   revalidatePath("/dashboard");
-// };
+export const getTransactions = async () => {
+  try{
+    const response = await AxiosInstance.get(
+      "/transactions",
+      { withCredentials: true }
+    );
+    console.log(response)
+    return {
+      success: true,
+      data: response.data, // ✅ only return actual payload
+      status: response.status,
+    };
+  }catch(err){
+    const error = err as AxiosError<{ message?: string }>;
+    if (error.response) {
+      // Return structured error message from backend
+      console.log(error);
+      return {
+        success: false,
+        message: error.response.data?.message || "Something went wrong",
+        status: error.response.status,
+      };
+    } else if (error.request) {
+      console.log(error);
+      return {
+        success: false,
+        message: "No response from server. Please try again later.",
+      };
+    } else {
+      console.log(error);
+      return { success: false, message: error.message };
+    }
+  }
+}
