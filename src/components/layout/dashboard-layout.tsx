@@ -1,6 +1,6 @@
-import type React from "react"
-import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
-import { Separator } from "@/components/ui/separator"
+import type React from "react";
+import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
+import { Separator } from "@/components/ui/separator";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -8,15 +8,24 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+} from "@/components/ui/breadcrumb";
+// import Error from "next/error"
 
 interface DashboardLayoutProps {
-  children: React.ReactNode
-  breadcrumbs?: Array<{ label: string; href?: string }>
-  title: string
+  children: React.ReactNode;
+  breadcrumbs?: Array<{ label: string; href?: string }>;
+  title: string;
+  isPending?: boolean;
+  error?: string | null;
 }
 
-export function DashboardLayout({ children, breadcrumbs = [], title }: DashboardLayoutProps) {
+export function DashboardLayout({
+  children,
+  breadcrumbs = [],
+  title,
+  isPending,
+  error,
+}: DashboardLayoutProps) {
   return (
     <SidebarInset>
       <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 bg-white">
@@ -32,7 +41,9 @@ export function DashboardLayout({ children, breadcrumbs = [], title }: Dashboard
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
                   {crumb.href ? (
-                    <BreadcrumbLink href={crumb.href}>{crumb.label}</BreadcrumbLink>
+                    <BreadcrumbLink href={crumb.href}>
+                      {crumb.label}
+                    </BreadcrumbLink>
                   ) : (
                     <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
                   )}
@@ -46,8 +57,23 @@ export function DashboardLayout({ children, breadcrumbs = [], title }: Dashboard
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-deep-blue">{title}</h1>
         </div>
-        {children}
+        {/* Handle loading */}
+        {isPending && (
+          <div className="flex flex-1 items-center justify-center text-gray-500">
+            Loading...
+          </div>
+        )}
+
+        {/* Handle error */}
+        {error && !isPending && (
+          <div className="flex flex-1 items-center justify-center text-red-500">
+            {error || "Something went wrong"}
+          </div>
+        )}
+
+        {/* Render children only if no error and not loading */}
+        {!isPending && !error && children}
       </div>
     </SidebarInset>
-  )
+  );
 }

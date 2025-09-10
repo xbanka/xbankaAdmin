@@ -23,8 +23,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 // import { Textarea } from "@/components/ui/textarea"
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Eye, RefreshCw, AlertTriangle, Plus } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { getTransactions } from "@/lib/actions/actions";
+import { formatDate } from "@/lib/formatDate";
 
 const transactions = [
   {
@@ -97,6 +100,11 @@ export default function Transactions() {
     description: "",
   });
 
+  const { isPending, error, data } = useQuery({
+    queryKey: ["transactions"],
+    queryFn: () => getTransactions(),
+  });
+
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
@@ -129,16 +137,14 @@ export default function Transactions() {
   };
 
   const transactionColumns = [
-    { key: "id", label: "Transaction ID" },
+    { key: "transactionId", label: "Transaction ID" },
     {
       key: "customer",
       label: "Customer",
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       render: (value: string, row: any) => (
-        <div>
-          <div className="font-medium">{value}</div>
-          <div className="text-sm text-muted-foreground">{row.customerId}</div>
-        </div>
+        // <div className="font-medium">{value.firstName}</div>
+        <div className="font-medium">{row.customer.firstName}</div>
       ),
     },
     { key: "type", label: "Type" },
@@ -148,19 +154,20 @@ export default function Transactions() {
       render: (value: string) => <span className="font-medium">{value}</span>,
     },
     { key: "status", label: "Status" },
-    { key: "gateway", label: "Gateway" },
     {
-      key: "timestamp",
-      label: "Timestamp",
-      render: (value: string) => <span className="text-sm">{value}</span>,
-    },
-    {
-      key: "tickets",
-      label: "Support Tickets",
-      render: (value: number) => (
-        <Badge variant={value > 0 ? "destructive" : "secondary"}>{value}</Badge>
+      key: "createdAt",
+      label: "Date Created",
+      render: (value: string) => (
+        <span className="text-sm">{formatDate(value)}</span>
       ),
     },
+    // {
+    //   key: "tickets",
+    //   label: "Support Tickets",
+    //   render: (value: number) => (
+    //     <Badge variant={value > 0 ? "destructive" : "secondary"}>{value}</Badge>
+    //   ),
+    // },
   ];
 
   const transactionFilters = [
@@ -336,12 +343,14 @@ export default function Transactions() {
     <DashboardLayout
       title="Transaction Management"
       breadcrumbs={[{ label: "Transactions" }]}
+      isPending={isPending}
+      error={error?.message}
     >
       <DataTable
         title="Transaction Master Table"
-        data={transactions}
+        data={data?.data ?? []}
         columns={transactionColumns}
-        searchKeys={["id", "customer"]}
+        searchKeys={["transactionId", "customer.firstName", "customer.lastName"]}
         filters={transactionFilters}
         actions={transactionActions}
         getBadgeColor={getStatusColor}

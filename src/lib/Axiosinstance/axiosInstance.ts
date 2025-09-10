@@ -1,13 +1,12 @@
 import axios from "axios";
-import Cookies from "js-cookie";
 
 const AxiosInstance = axios.create({
-  // baseURL: "https://xbankadashboardbackend-production.up.railway.app/",
-  baseURL: "http://localhost:3001/",
+  baseURL: "https://xbankadashboardbackend-production.up.railway.app/",
+  // baseURL: "http://localhost:3001/",
   headers: {
     "Content-Type": "application/json",
   },
-  timeout: 10000,
+  // timeout: 10000,
   withCredentials: true,
 });
 
