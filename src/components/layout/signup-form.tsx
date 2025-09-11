@@ -78,39 +78,6 @@ export default function SignupForm() {
     mutate(data);
   };
 
-  // if (showSuccess && isSuccess && data?.success) {
-  //   return (
-  //     <Card className="w-full shadow-xl border-0 bg-white/95 backdrop-blur-sm">
-  //       <CardContent className="pt-2">
-  //         <div className="text-center space-y-3">
-  //           <div className="w-10 h-10 bg-[var(--customCyan)] rounded-full flex items-center justify-center mx-auto">
-  //             <Mail className="w-5 h-5 text-[var(--abstractCyan)]" />
-  //           </div>
-  //           <h2 className="text-[20px] font-bold text-gray-900">
-  //             Check Your Email
-  //           </h2>
-  //           <p className="text-gray-600 text-[16px]">
-  //             We&apos;ve sent a verification link to your email address. Please
-  //             check your inbox and click the link to verify your account.
-  //           </p>
-  //           <Link href="">
-  //             <Button
-  //               className="w-full h-12 text-gray-900 font-semibold"
-  //               style={{
-  //                 backgroundColor: "var(--abstractCyan)",
-  //                 borderColor: "var(--abstractCyan)",
-  //               }}
-  //               onClick={() => setShowSuccess(false)}
-  //             >
-  //               Ok
-  //             </Button>
-  //           </Link>
-  //         </div>
-  //       </CardContent>
-  //     </Card>
-  //   );
-  // }
-
   return (
     <Card className="w-[60%] mx-auto mt-[100px] shadow-xl border-0 bg-white/95 backdrop-blur-sm">
       <CardHeader className="text-center">

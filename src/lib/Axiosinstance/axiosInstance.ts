@@ -1,26 +1,17 @@
 import axios from "axios";
-import Cookies from "js-cookie";
 
 const AxiosInstance = axios.create({
   baseURL: "https://xbankadashboardbackend-production.up.railway.app/",
+  // baseURL: "http://localhost:3001/",
   headers: {
     "Content-Type": "application/json",
   },
-  timeout: 10000,
+  // timeout: 10000,
   withCredentials: true,
 });
 
 AxiosInstance.interceptors.request.use(
   (config) => {
-    // const token = localStorage.getItem("token"); // or sessionStorage/cookies
-    // if (token) {
-    //   config.headers.Authorization = `Bearer ${token}`;
-    // }
-    // const token = localStorage.getItem("accessToken");
-    const token = Cookies.get("accessToken");
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
     return config;
   },
   (error) => Promise.reject(error)
@@ -46,24 +37,12 @@ AxiosInstance.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const refreshRes = await AxiosInstance.get("/xbankastaff/refresh"); // backend uses cookie
-        const newAccessToken = refreshRes.data.accessToken;
+        await AxiosInstance.get("/xbankastaff/refresh", {
+          withCredentials: true,
+        }); // backend uses cookie
+        return AxiosInstance(originalRequest);
 
-        // console.log("new accesstoken", newAccessToken)
-        // localStorage.setItem("accessToken", newAccessToken);
-        Cookies.set("accessToken", newAccessToken, {
-          path: "/",
-          sameSite: "strict", // use lax to allow refreshes
-          // secure: process.env.NODE_ENV === "production", // only secure in prod
-          secure: true, // only secure in prod
-        });
-        AxiosInstance.defaults.headers.common.Authorization = `Bearer ${newAccessToken}`;
-        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-
-        return AxiosInstance(originalRequest); // retry
       } catch (refreshError) {
-        // localStorage.removeItem("accessToken");
-        Cookies.remove("accessToken");
         if (typeof window !== "undefined") {
           window.location.href = "/auth/signin";
         }
