@@ -25,7 +25,6 @@ import FormField from "./FormField";
 import { toast } from "sonner";
 import { decodeAccessToken } from "@/lib/decodeToken";
 import { useUserStore } from "@/store/userStore";
-import Cookies from "js-cookie";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -66,14 +65,6 @@ export default function LoginForm() {
         };
         console.log(data);
         setUser(data);
-        document.cookie = `accessToken=${result.data.accessToken}; path=/; samesite=strict`;
-        Cookies.set("accessToken", result.data.accessToken, {
-          path: "/",
-          sameSite: "strict", // use lax to allow refreshes
-          // secure: process.env.NODE_ENV === "production", // only secure in prod
-          secure: true, // only secure in prod
-        });
-        localStorage.setItem("accessToken", result.data.accessToken);
         toast.success("User Loggedin");
         router.push("/dashboard");
       }
