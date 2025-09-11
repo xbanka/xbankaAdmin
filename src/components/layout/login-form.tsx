@@ -25,7 +25,6 @@ import FormField from "./FormField";
 import { toast } from "sonner";
 import { decodeAccessToken } from "@/lib/decodeToken";
 import { useUserStore } from "@/store/userStore";
-import Cookies from "js-cookie";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
