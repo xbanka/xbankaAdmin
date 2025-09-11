@@ -5,6 +5,9 @@ import type React from "react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { DataTable } from "@/components/layout/data-table";
 import { Badge } from "@/components/ui/badge";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -28,76 +31,45 @@ import { Eye, RefreshCw, AlertTriangle, Plus } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { getTransactions } from "@/lib/actions/actions";
 import { formatDate } from "@/lib/formatDate";
+import { generateTransactionId } from "@/lib/getTransactionId";
+import { DialogLayout } from "@/components/layout/modalLayout";
+import { SelectFieldLayout } from "@/components/layout/SelectFieldLayout";
+import FormField from "@/components/layout/FormField";
 
-const transactions = [
-  {
-    id: "TXN001",
-    customer: "John Doe",
-    customerId: "CUST001",
-    type: "Gift Card",
-    amount: "$250.00",
-    status: "Successful",
-    gateway: "Flutterwave",
-    timestamp: "2024-01-16 14:30:25",
-    tickets: 0,
-  },
-  {
-    id: "TXN002",
-    customer: "Jane Smith",
-    customerId: "CUST002",
-    type: "Crypto",
-    amount: "$1,200.00",
-    status: "Pending",
-    gateway: "Crypto API",
-    timestamp: "2024-01-16 13:45:12",
-    tickets: 1,
-  },
-  {
-    id: "TXN003",
-    customer: "Mike Johnson",
-    customerId: "CUST003",
-    type: "Bills",
-    amount: "$89.50",
-    status: "Failed",
-    gateway: "Flutterwave",
-    timestamp: "2024-01-16 12:20:08",
-    tickets: 2,
-  },
-];
+const transactionSchema = z.object({
+  transactionId: z.string(),
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  email: z.string().email("Invalid email"),
+  phone: z.string().min(10, "Phone number is too short"),
+  type: z.enum(["GIFT_CARD", "CRYPTO", "BILLS"]),
+  amount: z.coerce.number().positive("Amount must be positive"),
+  status: z.enum(["PENDING", "SUCCESSFUL", "FAILED"]),
+});
 
-// const providerStats = [
-//   {
-//     name: "Flutterwave",
-//     successRate: "94.2%",
-//     totalTransactions: 1247,
-//     errors: 12,
-//     status: "Active",
-//   },
-//   {
-//     name: "Crypto API",
-//     successRate: "89.7%",
-//     totalTransactions: 856,
-//     errors: 23,
-//     status: "Active",
-//   },
-//   {
-//     name: "Bills Gateway",
-//     successRate: "96.1%",
-//     totalTransactions: 634,
-//     errors: 8,
-//     status: "Active",
-//   },
-// ];
+type TransactionFormValues = z.infer<typeof transactionSchema>;
 
 export default function Transactions() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    customer: "",
-    customerId: "",
-    type: "",
-    amount: "",
-    gateway: "",
-    description: "",
+  const [open, setOpen] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    reset,
+    formState: { errors },
+  } = useForm<TransactionFormValues>({
+    resolver: zodResolver(transactionSchema),
+    defaultValues: {
+      transactionId: "",
+      firstName: "",
+      lastName: "",
+      email: "",
+      phone: "",
+      type: "BILLS",
+      amount: undefined as unknown as number,
+      status: "PENDING",
+    },
   });
 
   const { isPending, error, data } = useQuery({
@@ -105,22 +77,16 @@ export default function Transactions() {
     queryFn: () => getTransactions(),
   });
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
+  useEffect(() => {
+    if (open) {
+      setValue("transactionId", generateTransactionId());
+    }
+  }, [open, setValue]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("New transaction data:", formData);
-    setFormData({
-      customer: "",
-      customerId: "",
-      type: "",
-      amount: "",
-      gateway: "",
-      description: "",
-    });
-    setIsModalOpen(false);
+  const onSubmit = (data: TransactionFormValues) => {
+    console.log("New Transaction:", data);
+    reset();
+    setOpen(false);
   };
 
   const getStatusColor = (status: string) => {
@@ -228,115 +194,112 @@ export default function Transactions() {
   ];
 
   const transactionHeaderActions = (
-    <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-      <DialogTrigger asChild>
+    <>
+      <Button onClick={() => setOpen(true)} className="flex items-center gap-2">
+        <Plus className="h-4 w-4" />
+        New Transaction
+      </Button>
+    <DialogLayout
+      open={open}
+      onOpenChange={setOpen}
+      title="Add New Transaction"
+      className="sm:max-w-[500px]"
+      footer={
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" onClick={() => setOpen(false)}>
+            Cancel
+          </Button>
+          <Button type="submit" form="transaction-form">
+            Create Transaction
+          </Button>
+        </div>
+      }
+    >
+      {/* <DialogLayout.Trigger asChild>
         <Button className="flex items-center gap-2">
           <Plus className="h-4 w-4" />
           New Transaction
         </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>Add New Transaction</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="customer">Customer Name</Label>
-              <Input
-                id="customer"
-                value={formData.customer}
-                onChange={(e) => handleInputChange("customer", e.target.value)}
-                placeholder="Enter customer name"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="customerId">Customer ID</Label>
-              <Input
-                id="customerId"
-                value={formData.customerId}
-                onChange={(e) =>
-                  handleInputChange("customerId", e.target.value)
-                }
-                placeholder="Enter customer ID"
-                required
-              />
-            </div>
-          </div>
+      </DialogLayout.Trigger> */}
+      <form
+        id="transaction-form"
+        onSubmit={handleSubmit(onSubmit)}
+        className="space-y-4"
+      >
+        {/* Hidden Transaction ID */}
+        <input type="hidden" {...register("transactionId")} />
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="type">Transaction Type</Label>
-              <Select
-                value={formData.type}
-                onValueChange={(value) => handleInputChange("type", value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="crypto">Crypto</SelectItem>
-                  <SelectItem value="gift card">Gift Card</SelectItem>
-                  <SelectItem value="bills">Bills</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="amount">Amount</Label>
-              <Input
-                id="amount"
-                value={formData.amount}
-                onChange={(e) => handleInputChange("amount", e.target.value)}
-                placeholder="$0.00"
-                type="number"
-                step="0.01"
-                required
-              />
-            </div>
-          </div>
+        {/* First & Last Name */}
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            id="firstName"
+            label="First Name"
+            placeholder="firstName"
+            register={register}
+            error={errors.firstName}
+          />
+          <FormField
+            id="lastName"
+            label="Last Name"
+            placeholder="lastName"
+            register={register}
+            error={errors.lastName}
+          />
+        </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="gateway">Payment Gateway</Label>
-            <Select
-              value={formData.gateway}
-              onValueChange={(value) => handleInputChange("gateway", value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select gateway" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="flutterwave">Flutterwave</SelectItem>
-                <SelectItem value="crypto api">Crypto API</SelectItem>
-                <SelectItem value="bills gateway">Bills Gateway</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+        {/* Email & Phone */}
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            id="email"
+            label="Email"
+            placeholder="email"
+            register={register}
+            error={errors.email}
+          />
+          <FormField
+            id="phone"
+            label="Phone"
+            placeholder="phone"
+            register={register}
+            error={errors.phone}
+          />
+        </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="description">Description (Optional)</Label>
-            {/* <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => handleInputChange("description", e.target.value)}
-              placeholder="Enter transaction description"
-              rows={3}
-            /> */}
-          </div>
+        {/* Type & Status */}
+        <div className="grid grid-cols-2 gap-4">
+          <SelectFieldLayout
+            id="type"
+            label="Transaction Type"
+            options={["GIFT_CARD", "CRYPTO", "BILLS"]}
+            placeholder="Select type"
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            onChange={(val) => setValue("type", val as any)}
+            className="w-full"
+            error={errors.type}
+          />
+          <SelectFieldLayout
+            id="status"
+            label="Status"
+            options={["PENDING", "SUCCESSFUL", "FAILED"]}
+            placeholder="Select status"
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            onChange={(val) => setValue("status", val as any)}
+            className="w-full"
+            error={errors.status}
+          />
+        </div>
 
-          <div className="flex justify-end gap-2 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setIsModalOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button type="submit">Create Transaction</Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+        {/* Amount */}
+          <FormField
+            id="amount"
+            label="Amount"
+            placeholder="amount"
+            register={register}
+            error={errors.amount}
+          />
+      </form>
+    </DialogLayout>
+    </>
   );
 
   return (
@@ -350,7 +313,11 @@ export default function Transactions() {
         title="Transaction Master Table"
         data={data?.data ?? []}
         columns={transactionColumns}
-        searchKeys={["transactionId", "customer.firstName", "customer.lastName"]}
+        searchKeys={[
+          "transactionId",
+          "customer.firstName",
+          "customer.lastName",
+        ]}
         filters={transactionFilters}
         actions={transactionActions}
         getBadgeColor={getStatusColor}
