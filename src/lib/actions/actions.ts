@@ -137,7 +137,8 @@ export const logoutAction = async () => {
   try {
     const response = await AxiosInstance.post(
       "/xbankastaff/logout",
-      {}, { withCredentials: true }
+      {},
+      { withCredentials: true }
     );
     console.log(response);
     return {
@@ -173,36 +174,66 @@ export const logoutAction = async () => {
 };
 
 export const getTransactions = async () => {
-  try{
-    const response = await AxiosInstance.get(
-      "/transactions",
-      { withCredentials: true }
-    );
-    console.log(response)
+  try {
+    const response = await AxiosInstance.get("/transactions", {
+      withCredentials: true,
+    });
+    console.log(response);
     return {
       success: true,
       data: response.data, // ✅ only return actual payload
       status: response.status,
     };
-  }catch(err){
+  } catch (err) {
     const error = err as AxiosError<{ message?: string }>;
     if (error.response) {
-      // Return structured error message from backend
-      console.log(error);
-      return {
-        success: false,
-        message: error.response.data?.message || "Something went wrong",
-        status: error.response.status,
-      };
+      throw new Error(error.response.data?.message || "Something went wrong");
     } else if (error.request) {
-      console.log(error);
-      return {
-        success: false,
-        message: "No response from server. Please try again later.",
-      };
+      throw new Error("No response from server. Please try again later.");
     } else {
-      console.log(error);
-      return { success: false, message: error.message };
+      throw new Error(error.message);
     }
   }
-}
+};
+
+export const createNewTransaction = async (
+  transactionId: string,
+  type: string,
+  amount: number,
+  phone: string,
+  status: string,
+  email: string,
+  firstName: string,
+  lastName: string
+) => {
+  try {
+    const response = await AxiosInstance.post(
+      "/transactions/create",
+      {
+        transactionId,
+        type,
+        amount,
+        phone,
+        status,
+        email,
+        firstName,
+        lastName,
+      },
+      { withCredentials: true }
+    );
+    return {
+      success: true,
+      data: response.data, // ✅ only return actual payload
+      status: response.status,
+    };
+  } catch (err) {
+    const error = err as AxiosError<{ message?: string }>;
+    if (error.response) {
+      throw new Error(error.response.data?.message || "Something went wrong");
+    } else if (error.request) {
+      throw new Error("No response from server. Please try again later.");
+    } else {
+      throw new Error(error.message);
+    }
+  }
+};

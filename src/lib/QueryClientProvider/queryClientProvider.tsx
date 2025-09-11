@@ -12,7 +12,7 @@ interface QueryClientProviderTypes {
 }
 
 const QueryProvider = ({children}: QueryClientProviderTypes) => {
-    const queryClient = new QueryClient(queryClientConfig)
+  const queryClient = new QueryClient(queryClientConfig)
   return (
     <QueryClientProvider client={queryClient}>
       { children }

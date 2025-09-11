@@ -4,37 +4,22 @@ import type React from "react";
 
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { DataTable } from "@/components/layout/data-table";
-import { Badge } from "@/components/ui/badge";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 // import { Textarea } from "@/components/ui/textarea"
 import { useEffect, useState } from "react";
 import { Eye, RefreshCw, AlertTriangle, Plus } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { getTransactions } from "@/lib/actions/actions";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createNewTransaction, getTransactions } from "@/lib/actions/actions";
 import { formatDate } from "@/lib/formatDate";
 import { generateTransactionId } from "@/lib/getTransactionId";
 import { DialogLayout } from "@/components/layout/modalLayout";
 import { SelectFieldLayout } from "@/components/layout/SelectFieldLayout";
 import FormField from "@/components/layout/FormField";
+import { createTransactionTypes } from "@/lib/actions/actionTypes";
+import { toast } from "sonner";
 
 const transactionSchema = z.object({
   transactionId: z.string(),
@@ -43,13 +28,14 @@ const transactionSchema = z.object({
   email: z.string().email("Invalid email"),
   phone: z.string().min(10, "Phone number is too short"),
   type: z.enum(["GIFT_CARD", "CRYPTO", "BILLS"]),
-  amount: z.coerce.number().positive("Amount must be positive"),
+  amount: z.number().positive("Amount must be positive"),
   status: z.enum(["PENDING", "SUCCESSFUL", "FAILED"]),
 });
 
 type TransactionFormValues = z.infer<typeof transactionSchema>;
 
 export default function Transactions() {
+  const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
 
   const {
@@ -67,7 +53,7 @@ export default function Transactions() {
       email: "",
       phone: "",
       type: "BILLS",
-      amount: undefined as unknown as number,
+      amount: 0,
       status: "PENDING",
     },
   });
@@ -77,6 +63,37 @@ export default function Transactions() {
     queryFn: () => getTransactions(),
   });
 
+  const { mutate, isPending: createTransactionPending } = useMutation({
+    mutationFn: (data: createTransactionTypes) =>
+      createNewTransaction(
+        data.transactionId,
+        data.type,
+        data.amount,
+        data.phone,
+        data.status,
+        data.email,
+        data.firstName,
+        data.lastName
+      ),
+    onSuccess: (result) => {
+      if (!result.success) {
+        // Show API error in alert
+        //   setErrorMessage(result.message)
+        toast.success("Failed trying to created Customer");
+      } else {
+        console.log("Signup success!", result.data);
+        setOpen(false);
+        toast.success("Customer created successfully");
+        reset();
+        queryClient.invalidateQueries({ queryKey: ["transactions"] });
+        queryClient.refetchQueries({ queryKey: ["transactions"] });
+      }
+    },
+    onError: (err) => {
+      console.log("Signup failed:", err);
+    },
+  });
+
   useEffect(() => {
     if (open) {
       setValue("transactionId", generateTransactionId());
@@ -84,9 +101,7 @@ export default function Transactions() {
   }, [open, setValue]);
 
   const onSubmit = (data: TransactionFormValues) => {
-    console.log("New Transaction:", data);
-    reset();
-    setOpen(false);
+    mutate(data);
   };
 
   const getStatusColor = (status: string) => {
@@ -199,97 +214,109 @@ export default function Transactions() {
         <Plus className="h-4 w-4" />
         New Transaction
       </Button>
-    <DialogLayout
-      open={open}
-      onOpenChange={setOpen}
-      title="Add New Transaction"
-      className="sm:max-w-[500px]"
-      footer={
-        <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={() => setOpen(false)}>
-            Cancel
-          </Button>
-          <Button type="submit" form="transaction-form">
-            Create Transaction
-          </Button>
-        </div>
-      }
-    >
-      {/* <DialogLayout.Trigger asChild>
+      <DialogLayout
+        open={open}
+        onOpenChange={setOpen}
+        title="Add New Transaction"
+        className="sm:max-w-[500px]"
+        footer={
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                reset();
+                setOpen(false);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              disabled={createTransactionPending}
+              type="submit"
+              form="transaction-form"
+            >
+              {createTransactionPending
+                ? "Creating Transaction"
+                : "Create Transaction"}
+            </Button>
+          </div>
+        }
+      >
+        {/* <DialogLayout.Trigger asChild>
         <Button className="flex items-center gap-2">
           <Plus className="h-4 w-4" />
           New Transaction
         </Button>
       </DialogLayout.Trigger> */}
-      <form
-        id="transaction-form"
-        onSubmit={handleSubmit(onSubmit)}
-        className="space-y-4"
-      >
-        {/* Hidden Transaction ID */}
-        <input type="hidden" {...register("transactionId")} />
+        <form
+          id="transaction-form"
+          onSubmit={handleSubmit(onSubmit)}
+          className="space-y-4"
+        >
+          {/* Hidden Transaction ID */}
+          <input type="hidden" {...register("transactionId")} />
 
-        {/* First & Last Name */}
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            id="firstName"
-            label="First Name"
-            placeholder="firstName"
-            register={register}
-            error={errors.firstName}
-          />
-          <FormField
-            id="lastName"
-            label="Last Name"
-            placeholder="lastName"
-            register={register}
-            error={errors.lastName}
-          />
-        </div>
+          {/* First & Last Name */}
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              id="firstName"
+              label="First Name"
+              placeholder="firstName"
+              register={register}
+              error={errors.firstName}
+            />
+            <FormField
+              id="lastName"
+              label="Last Name"
+              placeholder="lastName"
+              register={register}
+              error={errors.lastName}
+            />
+          </div>
 
-        {/* Email & Phone */}
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            id="email"
-            label="Email"
-            placeholder="email"
-            register={register}
-            error={errors.email}
-          />
-          <FormField
-            id="phone"
-            label="Phone"
-            placeholder="phone"
-            register={register}
-            error={errors.phone}
-          />
-        </div>
+          {/* Email & Phone */}
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              id="email"
+              label="Email"
+              placeholder="email"
+              register={register}
+              error={errors.email}
+            />
+            <FormField
+              id="phone"
+              label="Phone"
+              placeholder="phone"
+              register={register}
+              error={errors.phone}
+            />
+          </div>
 
-        {/* Type & Status */}
-        <div className="grid grid-cols-2 gap-4">
-          <SelectFieldLayout
-            id="type"
-            label="Transaction Type"
-            options={["GIFT_CARD", "CRYPTO", "BILLS"]}
-            placeholder="Select type"
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            onChange={(val) => setValue("type", val as any)}
-            className="w-full"
-            error={errors.type}
-          />
-          <SelectFieldLayout
-            id="status"
-            label="Status"
-            options={["PENDING", "SUCCESSFUL", "FAILED"]}
-            placeholder="Select status"
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            onChange={(val) => setValue("status", val as any)}
-            className="w-full"
-            error={errors.status}
-          />
-        </div>
+          {/* Type & Status */}
+          <div className="grid grid-cols-2 gap-4">
+            <SelectFieldLayout
+              id="type"
+              label="Transaction Type"
+              options={["GIFT_CARD", "CRYPTO", "BILLS"]}
+              placeholder="Select type"
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              onChange={(val) => setValue("type", val as any)}
+              className="w-full"
+              error={errors.type}
+            />
+            <SelectFieldLayout
+              id="status"
+              label="Status"
+              options={["PENDING", "SUCCESSFUL", "FAILED"]}
+              placeholder="Select status"
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              onChange={(val) => setValue("status", val as any)}
+              className="w-full"
+              error={errors.status}
+            />
+          </div>
 
-        {/* Amount */}
+          {/* Amount */}
           <FormField
             id="amount"
             label="Amount"
@@ -297,8 +324,8 @@ export default function Transactions() {
             register={register}
             error={errors.amount}
           />
-      </form>
-    </DialogLayout>
+        </form>
+      </DialogLayout>
     </>
   );
 
@@ -313,11 +340,7 @@ export default function Transactions() {
         title="Transaction Master Table"
         data={data?.data ?? []}
         columns={transactionColumns}
-        searchKeys={[
-          "transactionId",
-          "customer.firstName",
-          "customer.lastName",
-        ]}
+        searchKeys={["transactionId", "customer", "type"]}
         filters={transactionFilters}
         actions={transactionActions}
         getBadgeColor={getStatusColor}
