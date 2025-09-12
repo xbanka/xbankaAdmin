@@ -230,11 +230,6 @@ export default function CustomerManagement() {
     mutate(data);
   };
 
-  const handleDeleteCustomer = (id: string) => {
-    console.log("dekete id", id);
-    deleteMutate(id);
-  };
-
   const headerActions = (
     <>
       <Button onClick={() => setOpen(true)} className="flex items-center gap-2">
@@ -353,42 +348,6 @@ export default function CustomerManagement() {
           tabFilters={customerTabFilters}
           tabFilterKey="status"
         />
-        <DialogLayout
-          open={deleteDialogOpen}
-          onOpenChange={(open) => {
-            setDeleteDialogOpen(open);
-            if (!open) setSelectedCustomerId(null);
-          }}
-          title="Delete Customer"
-          footer={
-            <>
-              {/* Cancel just closes the dialog */}
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setDeleteDialogOpen(false); // ✅ close on Cancel
-                  setSelectedCustomerId(null); // ✅ clear selection
-                }}
-              >
-                Cancel
-              </Button>
-
-              {/* Logout button calls handler */}
-              <Button
-                variant="destructive"
-                // onClick={() => {
-                //   if (selectedCustomerId) {
-                //     handleDeleteCustomer(selectedCustomerId);
-                //   }
-                // }}
-              >
-                {deleteCustomerPending ? "Deleting..." : "Delete"}
-              </Button>
-            </>
-          }
-        >
-          <p>Are you sure you want to delete this customer</p>
-        </DialogLayout>
       </>
     </DashboardLayout>
   );
