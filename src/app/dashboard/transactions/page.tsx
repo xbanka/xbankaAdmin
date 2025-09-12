@@ -227,32 +227,46 @@ export default function Transactions() {
       icon: <Trash2Icon className="h-4 w-4" />,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       onClick: (row: any) => {
-        setSelectedTransactionId(row.id);
-        setDeleteDialogOpen(true);
+        deleteMutate(row.id, {
+          onSuccess: (result) => {
+            if (!result.success) {
+              toast.error("Failed to delete transaction");
+            } else {
+              toast.success("Transaction deleted successfully");
+              setDeleteDialogOpen(false); // ✅ close modal
+              setSelectedTransactionId(null); // ✅ reset selection
+              queryClient.invalidateQueries({ queryKey: ["transactions"] });
+            }
+          },
+          onError: (err) => {
+            console.error("Delete failed:", err);
+            toast.error("Failed to delete transaction");
+          },
+        });
       },
       className: "text-main-red",
     },
   ];
 
-  const handleDeleteTransaction = (id: string) => {
-    console.log("dekete id", id);
-    deleteMutate(id, {
-      onSuccess: (result) => {
-        if (!result.success) {
-          toast.error("Failed to delete transaction");
-        } else {
-          toast.success("Transaction deleted successfully");
-          setDeleteDialogOpen(false); // ✅ close modal
-          setSelectedTransactionId(null); // ✅ reset selection
-          queryClient.invalidateQueries({ queryKey: ["transactions"] });
-        }
-      },
-      onError: (err) => {
-        console.error("Delete failed:", err);
-        toast.error("Failed to delete transaction");
-      },
-    });
-  };
+  // const handleDeleteTransaction = (id: string) => {
+  //   console.log("dekete id", id);
+  //   deleteMutate(id, {
+  //     onSuccess: (result) => {
+  //       if (!result.success) {
+  //         toast.error("Failed to delete transaction");
+  //       } else {
+  //         toast.success("Transaction deleted successfully");
+  //         setDeleteDialogOpen(false); // ✅ close modal
+  //         setSelectedTransactionId(null); // ✅ reset selection
+  //         queryClient.invalidateQueries({ queryKey: ["transactions"] });
+  //       }
+  //     },
+  //     onError: (err) => {
+  //       console.error("Delete failed:", err);
+  //       toast.error("Failed to delete transaction");
+  //     },
+  //   });
+  // };
 
   const transactionTabFilters = [
     { key: "type", label: "All", value: "all" },
@@ -402,42 +416,6 @@ export default function Transactions() {
           tabFilterKey="type"
           headerActions={transactionHeaderActions}
         />
-        <DialogLayout
-          open={deleteDialogOpen}
-          onOpenChange={(open) => {
-            setDeleteDialogOpen(open);
-            if (!open) setSelectedTransactionId(null);
-          }}
-          title="Delete Customer"
-          footer={
-            <>
-              {/* Cancel just closes the dialog */}
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setDeleteDialogOpen(false); // ✅ close on Cancel
-                  setSelectedTransactionId(null); // ✅ clear selection
-                }}
-              >
-                Cancel
-              </Button>
-
-              {/* Logout button calls handler */}
-              <Button
-                variant="destructive"
-                onClick={() => {
-                  if (selectedTransactionId) {
-                    handleDeleteTransaction(selectedTransactionId);
-                  }
-                }}
-              >
-                {deleteTransactionPending ? "Deleting..." : "Delete"}
-              </Button>
-            </>
-          }
-        >
-          <p>Are you sure you want to delete this customer</p>
-        </DialogLayout>
       </>
     </DashboardLayout>
   );
