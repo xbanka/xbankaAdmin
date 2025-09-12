@@ -237,21 +237,21 @@ export default function Transactions() {
   const handleDeleteTransaction = (id: string) => {
     console.log("dekete id", id);
     deleteMutate(id, {
-    onSuccess: (result) => {
-      if (!result.success) {
+      onSuccess: (result) => {
+        if (!result.success) {
+          toast.error("Failed to delete transaction");
+        } else {
+          toast.success("Transaction deleted successfully");
+          setDeleteDialogOpen(false); // ✅ close modal
+          setSelectedTransactionId(null); // ✅ reset selection
+          queryClient.invalidateQueries({ queryKey: ["transactions"] });
+        }
+      },
+      onError: (err) => {
+        console.error("Delete failed:", err);
         toast.error("Failed to delete transaction");
-      } else {
-        toast.success("Transaction deleted successfully");
-        setDeleteDialogOpen(false);      // ✅ close modal
-        setSelectedTransactionId(null);  // ✅ reset selection
-        queryClient.invalidateQueries({ queryKey: ["transactions"] });
-      }
-    },
-    onError: (err) => {
-      console.error("Delete failed:", err);
-      toast.error("Failed to delete transaction");
-    },
-  });
+      },
+    });
   };
 
   const transactionTabFilters = [
@@ -412,9 +412,15 @@ export default function Transactions() {
           footer={
             <>
               {/* Cancel just closes the dialog */}
-              <DialogLayout.Close asChild>
-                <Button variant="outline">Cancel</Button>
-              </DialogLayout.Close>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setDeleteDialogOpen(false); // ✅ close on Cancel
+                  setSelectedTransactionId(null); // ✅ clear selection
+                }}
+              >
+                Cancel
+              </Button>
 
               {/* Logout button calls handler */}
               <Button
