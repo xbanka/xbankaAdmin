@@ -210,7 +210,7 @@ export default function CustomerManagement() {
     //   onClick: (row: any) => console.log("Support history", row),
     // },
     {
-      label: "Support History",
+      label: "Delete",
       icon: <Trash2Icon className="h-4 w-4" />,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       onClick: (row: any) => {
@@ -231,7 +231,7 @@ export default function CustomerManagement() {
   };
 
   const handleDeleteCustomer = (id: string) => {
-    console.log("dekete id", id)
+    console.log("dekete id", id);
     deleteMutate(id);
   };
 
@@ -355,7 +355,10 @@ export default function CustomerManagement() {
         />
         <DialogLayout
           open={deleteDialogOpen}
-          onOpenChange={setDeleteDialogOpen}
+          onOpenChange={(open) => {
+            setDeleteDialogOpen(open);
+            if (!open) setSelectedCustomerId(null);
+          }}
           title="Delete Customer"
           footer={
             <>

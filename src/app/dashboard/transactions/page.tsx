@@ -41,9 +41,9 @@ type TransactionFormValues = z.infer<typeof transactionSchema>;
 export default function Transactions() {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [selectedTransactionId, setSelectedTransactionId] = useState<string | null>(
-    null
-  );
+  const [selectedTransactionId, setSelectedTransactionId] = useState<
+    string | null
+  >(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const {
@@ -105,22 +105,22 @@ export default function Transactions() {
   const { mutate: deleteMutate, isPending: deleteTransactionPending } =
     useMutation({
       mutationFn: (id: string) => deleteTransaction(id),
-      onSuccess: (result) => {
-        if (!result.success) {
-          // Show API error in alert
-          //   setErrorMessage(result.message)
-          toast.success("Failed trying to created Customer");
-        } else {
-          console.log("Signup success!", result);
-          setDeleteDialogOpen(false);
-          toast.success("Transaction deleted successfully");
-          queryClient.invalidateQueries({ queryKey: ["transactions"] });
-          queryClient.refetchQueries({ queryKey: ["transactions"] });
-        }
-      },
-      onError: (err) => {
-        console.log("Signup failed:", err);
-      },
+      // onSuccess: (result) => {
+      //   if (!result.success) {
+      //     // Show API error in alert
+      //     //   setErrorMessage(result.message)
+      //     toast.success("Failed trying to created Customer");
+      //   } else {
+      //     console.log("Signup success!", result);
+      //     setDeleteDialogOpen(false);
+      //     toast.success("Transaction deleted successfully");
+      //     queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      //     queryClient.refetchQueries({ queryKey: ["transactions"] });
+      //   }
+      // },
+      // onError: (err) => {
+      //   console.log("Signup failed:", err);
+      // },
     });
 
   useEffect(() => {
@@ -236,7 +236,22 @@ export default function Transactions() {
 
   const handleDeleteTransaction = (id: string) => {
     console.log("dekete id", id);
-    deleteMutate(id);
+    deleteMutate(id, {
+    onSuccess: (result) => {
+      if (!result.success) {
+        toast.error("Failed to delete transaction");
+      } else {
+        toast.success("Transaction deleted successfully");
+        setDeleteDialogOpen(false);      // ✅ close modal
+        setSelectedTransactionId(null);  // ✅ reset selection
+        queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      }
+    },
+    onError: (err) => {
+      console.error("Delete failed:", err);
+      toast.error("Failed to delete transaction");
+    },
+  });
   };
 
   const transactionTabFilters = [
@@ -389,7 +404,10 @@ export default function Transactions() {
         />
         <DialogLayout
           open={deleteDialogOpen}
-          onOpenChange={setDeleteDialogOpen}
+          onOpenChange={(open) => {
+            setDeleteDialogOpen(open);
+            if (!open) setSelectedTransactionId(null);
+          }}
           title="Delete Customer"
           footer={
             <>
