@@ -8,8 +8,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 // import { Badge } from "@/components/ui/badge";
-import { Plus, Eye } from "lucide-react";
-import { createNewCustomer, getCustomers } from "@/lib/actions/customerAction";
+import { Plus, Eye, Trash2Icon } from "lucide-react";
+import {
+  createNewCustomer,
+  deleteCustomer,
+  getCustomers,
+} from "@/lib/actions/customerAction";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { DialogLayout } from "@/components/layout/modalLayout";
 import FormField from "@/components/layout/FormField";
@@ -66,6 +70,10 @@ type CustomerFormValues = z.infer<typeof customerSchema>;
 export default function CustomerManagement() {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(
+    null
+  );
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const { isPending, error, data } = useQuery({
     queryKey: ["customers"],
@@ -97,6 +105,28 @@ export default function CustomerManagement() {
       console.log("Signup failed:", err);
     },
   });
+
+  const { mutate: deleteMutate, isPending: deleteCustomerPending } =
+    useMutation({
+      mutationFn: (id: string) => deleteCustomer(id),
+      onSuccess: (result) => {
+        if (!result.success) {
+          // Show API error in alert
+          //   setErrorMessage(result.message)
+          toast.success("Failed trying to delete Customer");
+        } else {
+          console.log("Signup success!", result);
+          setDeleteDialogOpen(false);
+          toast.success("Transaction deleted successfully");
+          queryClient.invalidateQueries({ queryKey: ["transactions"] });
+          queryClient.refetchQueries({ queryKey: ["transactions"] });
+        }
+      },
+      onError: (err) => {
+        console.log("Signup failed:", err);
+        toast.success("Failed trying to delete Customer");
+      },
+    });
 
   useEffect(() => {
     console.log(error);
@@ -158,26 +188,35 @@ export default function CustomerManagement() {
   ];
 
   const customerActions = [
-    {
-      label: "View Profile",
-      icon: <Eye className="h-4 w-4" />,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      onClick: (row: any) => console.log("View profile", row),
-    },
-    {
-      label: "Edit Customer",
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      onClick: (row: any) => console.log("Edit customer", row),
-    },
-    {
-      label: "View Transactions",
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      onClick: (row: any) => console.log("View transactions", row),
-    },
+    // {
+    //   label: "View Profile",
+    //   icon: <Eye className="h-4 w-4" />,
+    //   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    //   onClick: (row: any) => console.log("View profile", row),
+    // },
+    // {
+    //   label: "Edit Customer",
+    //   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    //   onClick: (row: any) => console.log("Edit customer", row),
+    // },
+    // {
+    //   label: "View Transactions",
+    //   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    //   onClick: (row: any) => console.log("View transactions", row),
+    // },
+    // {
+    //   label: "Support History",
+    //   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    //   onClick: (row: any) => console.log("Support history", row),
+    // },
     {
       label: "Support History",
+      icon: <Trash2Icon className="h-4 w-4" />,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      onClick: (row: any) => console.log("Support history", row),
+      onClick: (row: any) => {
+        setSelectedCustomerId(row.id);
+        setDeleteDialogOpen(true);
+      },
     },
   ];
 
@@ -189,6 +228,11 @@ export default function CustomerManagement() {
 
   const onSubmit = (data: CustomerFormValues) => {
     mutate(data);
+  };
+
+  const handleDeleteCustomer = (id: string) => {
+    console.log("dekete id", id)
+    deleteMutate(id);
   };
 
   const headerActions = (
@@ -206,14 +250,18 @@ export default function CustomerManagement() {
           <div className="flex justify-end gap-2">
             <Button
               variant="outline"
-              onClick={() =>{
+              onClick={() => {
                 reset();
                 setOpen(false);
               }}
             >
               Cancel
             </Button>
-            <Button disabled={createCustomerPending} type="submit" form="transaction-form">
+            <Button
+              disabled={createCustomerPending}
+              type="submit"
+              form="transaction-form"
+            >
               {createCustomerPending ? "Creating Customer" : "Create Customer"}
             </Button>
           </div>
@@ -292,18 +340,47 @@ export default function CustomerManagement() {
       title="Customer Management"
       breadcrumbs={[{ label: "Customers" }]}
     >
-      <DataTable
-        title="Customer List"
-        data={data?.data ?? []}
-        columns={customerColumns}
-        searchKeys={["firstName", "email", "id"]}
-        filters={customerFilters}
-        actions={customerActions}
-        headerActions={headerActions}
-        getBadgeColor={getStatusColor}
-        tabFilters={customerTabFilters}
-        tabFilterKey="status"
-      />
+      <>
+        <DataTable
+          title="Customer List"
+          data={data?.data ?? []}
+          columns={customerColumns}
+          searchKeys={["firstName", "email", "id"]}
+          filters={customerFilters}
+          actions={customerActions}
+          headerActions={headerActions}
+          getBadgeColor={getStatusColor}
+          tabFilters={customerTabFilters}
+          tabFilterKey="status"
+        />
+        <DialogLayout
+          open={deleteDialogOpen}
+          onOpenChange={setDeleteDialogOpen}
+          title="Delete Customer"
+          footer={
+            <>
+              {/* Cancel just closes the dialog */}
+              <DialogLayout.Close asChild>
+                <Button variant="outline">Cancel</Button>
+              </DialogLayout.Close>
+
+              {/* Logout button calls handler */}
+              <Button
+                variant="destructive"
+                // onClick={() => {
+                //   if (selectedCustomerId) {
+                //     handleDeleteCustomer(selectedCustomerId);
+                //   }
+                // }}
+              >
+                {deleteCustomerPending ? "Deleting..." : "Delete"}
+              </Button>
+            </>
+          }
+        >
+          <p>Are you sure you want to delete this customer</p>
+        </DialogLayout>
+      </>
     </DashboardLayout>
   );
 }

@@ -60,3 +60,29 @@ export const createNewCustomer = async (
     }
   }
 };
+
+export const deleteCustomer = async (
+  id: string,
+) => {
+  try {
+    const response = await AxiosInstance.delete(
+      `/customers/${id}`,
+      { withCredentials: true }
+    );
+    console.log(response);
+    return {
+      success: true,
+      data: response.data, // ✅ only return actual payload
+      status: response.status,
+    };
+  } catch (err) {
+    const error = err as AxiosError<{ message?: string }>;
+    if (error.response) {
+      throw new Error(error.response.data?.message || "Something went wrong");
+    } else if (error.request) {
+      throw new Error("No response from server. Please try again later.");
+    } else {
+      throw new Error(error.message);
+    }
+  }
+};

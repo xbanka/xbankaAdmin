@@ -10,9 +10,13 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 // import { Textarea } from "@/components/ui/textarea"
 import { useEffect, useState } from "react";
-import { Eye, RefreshCw, AlertTriangle, Plus } from "lucide-react";
+import { Eye, RefreshCw, AlertTriangle, Plus, Trash2Icon } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createNewTransaction, getTransactions } from "@/lib/actions/actions";
+import {
+  createNewTransaction,
+  deleteTransaction,
+  getTransactions,
+} from "@/lib/actions/actions";
 import { formatDate } from "@/lib/formatDate";
 import { generateTransactionId } from "@/lib/getTransactionId";
 import { DialogLayout } from "@/components/layout/modalLayout";
@@ -37,6 +41,10 @@ type TransactionFormValues = z.infer<typeof transactionSchema>;
 export default function Transactions() {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
+  const [selectedTransactionId, setSelectedTransactionId] = useState<string | null>(
+    null
+  );
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const {
     register,
@@ -93,6 +101,27 @@ export default function Transactions() {
       console.log("Signup failed:", err);
     },
   });
+
+  const { mutate: deleteMutate, isPending: deleteTransactionPending } =
+    useMutation({
+      mutationFn: (id: string) => deleteTransaction(id),
+      onSuccess: (result) => {
+        if (!result.success) {
+          // Show API error in alert
+          //   setErrorMessage(result.message)
+          toast.success("Failed trying to created Customer");
+        } else {
+          console.log("Signup success!", result);
+          setDeleteDialogOpen(false);
+          toast.success("Transaction deleted successfully");
+          queryClient.invalidateQueries({ queryKey: ["transactions"] });
+          queryClient.refetchQueries({ queryKey: ["transactions"] });
+        }
+      },
+      onError: (err) => {
+        console.log("Signup failed:", err);
+      },
+    });
 
   useEffect(() => {
     if (open) {
@@ -175,31 +204,40 @@ export default function Transactions() {
   ];
 
   const transactionActions = [
+    // {
+    //   label: "View Details",
+    //   icon: <Eye className="h-4 w-4" />,
+    //   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    //   onClick: (row: any) => console.log("View details", row),
+    // },
+    // {
+    //   label: "Retry Transaction",
+    //   icon: <RefreshCw className="h-4 w-4" />,
+    //   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    //   onClick: (row: any) => console.log("Retry transaction", row),
+    // },
+    // {
+    //   label: "Escalate",
+    //   icon: <AlertTriangle className="h-4 w-4" />,
+    //   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    //   onClick: (row: any) => console.log("Escalate", row),
+    // },
     {
-      label: "View Details",
-      icon: <Eye className="h-4 w-4" />,
+      label: "Delete",
+      icon: <Trash2Icon className="h-4 w-4" />,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      onClick: (row: any) => console.log("View details", row),
-    },
-    {
-      label: "Retry Transaction",
-      icon: <RefreshCw className="h-4 w-4" />,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      onClick: (row: any) => console.log("Retry transaction", row),
-    },
-    {
-      label: "Escalate",
-      icon: <AlertTriangle className="h-4 w-4" />,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      onClick: (row: any) => console.log("Escalate", row),
-    },
-    {
-      label: "Refund",
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      onClick: (row: any) => console.log("Refund", row),
+      onClick: (row: any) => {
+        setSelectedTransactionId(row.id);
+        setDeleteDialogOpen(true);
+      },
       className: "text-main-red",
     },
   ];
+
+  const handleDeleteTransaction = (id: string) => {
+    console.log("dekete id", id);
+    deleteMutate(id);
+  };
 
   const transactionTabFilters = [
     { key: "type", label: "All", value: "all" },
@@ -336,18 +374,47 @@ export default function Transactions() {
       isPending={isPending}
       error={error?.message}
     >
-      <DataTable
-        title="Transaction Master Table"
-        data={data?.data ?? []}
-        columns={transactionColumns}
-        searchKeys={["transactionId", "customer", "type"]}
-        filters={transactionFilters}
-        actions={transactionActions}
-        getBadgeColor={getStatusColor}
-        tabFilters={transactionTabFilters}
-        tabFilterKey="type"
-        headerActions={transactionHeaderActions}
-      />
+      <>
+        <DataTable
+          title="Transaction Master Table"
+          data={data?.data ?? []}
+          columns={transactionColumns}
+          searchKeys={["transactionId", "customer", "type"]}
+          filters={transactionFilters}
+          actions={transactionActions}
+          getBadgeColor={getStatusColor}
+          tabFilters={transactionTabFilters}
+          tabFilterKey="type"
+          headerActions={transactionHeaderActions}
+        />
+        <DialogLayout
+          open={deleteDialogOpen}
+          onOpenChange={setDeleteDialogOpen}
+          title="Delete Customer"
+          footer={
+            <>
+              {/* Cancel just closes the dialog */}
+              <DialogLayout.Close asChild>
+                <Button variant="outline">Cancel</Button>
+              </DialogLayout.Close>
+
+              {/* Logout button calls handler */}
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  if (selectedTransactionId) {
+                    handleDeleteTransaction(selectedTransactionId);
+                  }
+                }}
+              >
+                {deleteTransactionPending ? "Deleting..." : "Delete"}
+              </Button>
+            </>
+          }
+        >
+          <p>Are you sure you want to delete this customer</p>
+        </DialogLayout>
+      </>
     </DashboardLayout>
   );
 }
