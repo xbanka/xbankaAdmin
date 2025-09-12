@@ -363,9 +363,15 @@ export default function CustomerManagement() {
           footer={
             <>
               {/* Cancel just closes the dialog */}
-              <DialogLayout.Close asChild>
-                <Button variant="outline">Cancel</Button>
-              </DialogLayout.Close>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setDeleteDialogOpen(false); // ✅ close on Cancel
+                  setSelectedCustomerId(null); // ✅ clear selection
+                }}
+              >
+                Cancel
+              </Button>
 
               {/* Logout button calls handler */}
               <Button
