@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -12,6 +12,8 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useQuery } from "@tanstack/react-query"
+import { getAllUsers } from "@/lib/actions/allUsersActions"
 
 const users = [
   {
@@ -79,6 +81,10 @@ export default function AdminPanel() {
     setEditUserRole("")
   }
 
+  const { isPending, error, data } = useQuery({
+    queryKey: ["allUsers"],
+    queryFn: () => getAllUsers(),
+  });
   const openEditModal = (user: any) => {
     setEditingUser(user)
     setEditUserRole(user.role)
@@ -99,6 +105,10 @@ export default function AdminPanel() {
         return "bg-gray-100 text-gray-800"
     }
   }
+
+  useEffect(() => {
+    console.log(data)
+  }, [data])
 
   const getStatusColor = (status: string) => {
     return status === "active" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
