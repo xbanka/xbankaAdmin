@@ -11,81 +11,80 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useQuery } from "@tanstack/react-query"
-import { getAllUsers } from "@/lib/actions/allUsersActions"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { getAllUsers, updateUsers } from "@/lib/actions/allUsersActions"
+import { toast } from "sonner"
+import { updateUsersTypes, UserTypes } from "@/lib/actions/actionTypes"
+import { useUserStore } from "@/store/userStore"
 
-const users = [
-  {
-    id: "USER001",
-    name: "John Smith",
-    email: "john.smith@company.com",
-    role: "Super Admin",
-    avatar: "/placeholder-user.jpg",
-    lastActive: "2024-01-15",
-    status: "active",
-  },
-  {
-    id: "USER002",
-    name: "Sarah Johnson",
-    email: "sarah.johnson@company.com",
-    role: "Support Manager",
-    avatar: "/placeholder-user.jpg",
-    lastActive: "2024-01-14",
-    status: "active",
-  },
-  {
-    id: "USER003",
-    name: "Mike Chen",
-    email: "mike.chen@company.com",
-    role: "Content Editor",
-    avatar: "/placeholder-user.jpg",
-    lastActive: "2024-01-13",
-    status: "active",
-  },
-  {
-    id: "USER004",
-    name: "Emily Davis",
-    email: "emily.davis@company.com",
-    role: "Finance Analyst",
-    avatar: "/placeholder-user.jpg",
-    lastActive: "2024-01-12",
-    status: "inactive",
-  },
-  {
-    id: "USER005",
-    name: "Alex Rodriguez",
-    email: "alex.rodriguez@company.com",
-    role: "Content Editor",
-    avatar: "/placeholder-user.jpg",
-    lastActive: "2024-01-11",
-    status: "active",
-  },
-]
 
-const availableRoles = ["Super Admin", "Support Manager", "Content Editor", "Finance Analyst", "Viewer"]
+const availableRoles = ['SUPER_ADMIN', 'SEO_WRITER','CUSTOMER_SUPPORT', 'ADMIN']
 
 export default function AdminPanel() {
-  const [selectedUser, setSelectedUser] = useState<any>(null)
+  const queryClient = useQueryClient();
+  const setUser = useUserStore((s) => s.setUser)
+  const currentUser = useUserStore((s) => s.user)
   const [newUserName, setNewUserName] = useState("")
   const [newUserEmail, setNewUserEmail] = useState("")
   const [newUserRole, setNewUserRole] = useState("")
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-  const [editingUser, setEditingUser] = useState<any>(null)
+  const [editingUser, setEditingUser] = useState<UserTypes | null>(null)
   const [editUserRole, setEditUserRole] = useState("")
 
+  const { mutate, isPending: updateUserPending } = useMutation({
+      mutationFn: (data: updateUsersTypes) =>
+        updateUsers(
+          data.role,
+          data.id,
+        ),
+      onSuccess: (result) => {
+        if (!result.success) {
+          // Show API error in alert
+          //   setErrorMessage(result.message)
+        } else {
+          console.log("Signup success!", result.data);
+          setIsEditModalOpen(false)
+          setEditingUser(null)
+          setEditUserRole("")
+          if (currentUser && currentUser.firstName === result.data.firstName) {
+          setUser({
+            ...currentUser,
+            role: result.data.updatedUser.role, // update role locally in Zustand
+          })
+        }
+          toast.success("User role updated successfully");
+          queryClient.invalidateQueries({ queryKey: ["allUsers"] });
+          queryClient.refetchQueries({ queryKey: ["allUsers"] });
+        }
+      },
+      onError: (err) => {
+        console.log("Signup failed:", err);
+        toast.error("Something went wrong while updating the role")
+      },
+    });
+
   const handleRoleUpdate = (userId: string, newRole: string) => {
-    console.log(`[v0] Updating user ${userId} to role ${newRole}`)
-    setIsEditModalOpen(false)
-    setEditingUser(null)
-    setEditUserRole("")
+    console.log(`Updating user ${userId} to role ${newRole}`)
+    // setIsEditModalOpen(false)
+    mutate({id: userId, role: newRole})
   }
 
   const { isPending, error, data } = useQuery({
     queryKey: ["allUsers"],
     queryFn: () => getAllUsers(),
   });
-  const openEditModal = (user: any) => {
+
+  // useEffect(() => {
+  //   console.log(data)
+  //   getAllUsers()
+  // }, [])
+  useEffect(() => {
+    console.log(data)
+  }, [data])
+  useEffect(() => {
+    console.log(editingUser)
+  }, [editingUser])
+  const openEditModal = (user: UserTypes) => {
     setEditingUser(user)
     setEditUserRole(user.role)
     setIsEditModalOpen(true)
@@ -106,12 +105,24 @@ export default function AdminPanel() {
     }
   }
 
-  useEffect(() => {
-    console.log(data)
-  }, [data])
+  // const getStatusColor = (status: string) => {
+  //   return status === "active" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
+  // }
 
-  const getStatusColor = (status: string) => {
-    return status === "active" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
+  if(isPending){
+    return(
+      <div className="flex flex-1 items-center justify-center text-gray-500">
+            Loading...
+          </div>
+    )
+  }
+
+  if(error){
+    return(
+      <div className="flex flex-1 items-center justify-center text-gray-500">
+            {error.message}
+          </div>
+    )
   }
 
   return (
@@ -185,17 +196,17 @@ export default function AdminPanel() {
                 <TableHead>User</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Role</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Last Active</TableHead>
+                {/* <TableHead>Status</TableHead> */}
+                {/* <TableHead>Last Active</TableHead> */}
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {users.map((user) => (
+              {data?.data?.users?.map((user: UserTypes) => (
                 <TableRow key={user.id}>
                   <TableCell>
                     <div className="flex items-center gap-3">
-                      <Avatar className="h-8 w-8">
+                      {/* <Avatar className="h-8 w-8">
                         <AvatarImage src={user.avatar || "/placeholder.svg"} alt={user.name} />
                         <AvatarFallback>
                           {user.name
@@ -203,8 +214,8 @@ export default function AdminPanel() {
                             .map((n) => n[0])
                             .join("")}
                         </AvatarFallback>
-                      </Avatar>
-                      <span className="font-medium">{user.name}</span>
+                      </Avatar> */}
+                      <span className="font-medium">{user.firstName}</span>
                     </div>
                   </TableCell>
                   <TableCell className="text-gray-600">{user.email}</TableCell>
@@ -213,12 +224,12 @@ export default function AdminPanel() {
                       {user.role}
                     </Badge>
                   </TableCell>
-                  <TableCell>
+                  {/* <TableCell>
                     <Badge variant="secondary" className={getStatusColor(user.status)}>
                       {user.status}
                     </Badge>
-                  </TableCell>
-                  <TableCell className="text-sm text-gray-600">{user.lastActive}</TableCell>
+                  </TableCell> */}
+                  {/* <TableCell className="text-sm text-gray-600">{user.lastActive}</TableCell> */}
                   <TableCell>
                     <div className="flex gap-2">
                       <Button variant="ghost" size="sm" onClick={() => openEditModal(user)}>
@@ -244,7 +255,7 @@ export default function AdminPanel() {
           {editingUser && (
             <div className="space-y-4">
               <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                <Avatar className="h-10 w-10">
+                {/* <Avatar className="h-10 w-10">
                   <AvatarImage src={editingUser.avatar || "/placeholder.svg"} alt={editingUser.name} />
                   <AvatarFallback>
                     {editingUser.name
@@ -252,9 +263,9 @@ export default function AdminPanel() {
                       .map((n: string) => n[0])
                       .join("")}
                   </AvatarFallback>
-                </Avatar>
+                </Avatar> */}
                 <div>
-                  <div className="font-medium">{editingUser.name}</div>
+                  <div className="font-medium">{editingUser.firstName}</div>
                   <div className="text-sm text-gray-600">{editingUser.email}</div>
                 </div>
               </div>
@@ -285,9 +296,9 @@ export default function AdminPanel() {
                 <Button
                   className="bg-blue-600 hover:bg-blue-700"
                   onClick={() => handleRoleUpdate(editingUser.id, editUserRole)}
-                  disabled={!editUserRole || editUserRole === editingUser.role}
+                  disabled={!editUserRole || editUserRole === editingUser.role || updateUserPending}
                 >
-                  Update Role
+                  {updateUserPending ? "Updating user..." : "Update Role"}
                 </Button>
                 <Button variant="outline" onClick={() => setIsEditModalOpen(false)}>
                   Cancel
