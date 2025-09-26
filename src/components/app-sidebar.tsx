@@ -1,5 +1,5 @@
-"use client"
-import React from "react"
+"use client";
+import React from "react";
 
 import {
   Sidebar,
@@ -9,7 +9,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 import {
   Home,
   Users,
@@ -21,18 +21,19 @@ import {
   CheckSquare,
   BarChart3,
   Package,
-} from "lucide-react"
-import Image from "next/image"
-import { usePathname } from "next/navigation"
-import Link from "next/link"
-import { Button } from "./ui/button"
-import { DialogLayout } from "./layout/modalLayout"
+} from "lucide-react";
+import Image from "next/image";
+import { usePathname } from "next/navigation";
+import Link from "next/link";
+import { Button } from "./ui/button";
+import { DialogLayout } from "./layout/modalLayout";
 import { useUserStore } from "@/store/userStore";
 import { useRouter } from "next/navigation";
-import { useMutation } from "@tanstack/react-query"
+import { useMutation } from "@tanstack/react-query";
 // import Cookies from "js-cookie";
-import { logoutAction } from "@/lib/actions/actions"
-import { toast } from "sonner"
+import { logoutAction } from "@/lib/actions/actions";
+import { toast } from "sonner";
+import { rolePermissions } from "@/lib/rolePermissions";
 
 // This is sample data.
 const data = {
@@ -94,32 +95,42 @@ const data = {
       icon: Settings,
     },
   ],
-}
+};
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const [open, setOpen] = React.useState(false)
-  const pathname = usePathname()
+  const [open, setOpen] = React.useState(false);
+  const pathname = usePathname();
   const clearUser = useUserStore((s) => s.clearUser);
   const router = useRouter();
+  const user = useUserStore((s) => s.user);
 
+  const allowedRoutes: string[] =
+  user?.role
+    ? [...rolePermissions[user.role as keyof typeof rolePermissions]]
+    : [];
+
+  // const allowedRoutes = user?.role
+  //   ? rolePermissions[user.role as keyof typeof rolePermissions]
+  //   : [];
+  
   const { mutate } = useMutation({
     mutationFn: () => logoutAction(),
     onSuccess: (result) => {
-      if(!result.success){
-        console.log(result.message)
-        toast.error(result.message)
-      }else{
+      if (!result.success) {
+        console.log(result.message);
+        toast.error(result.message);
+      } else {
         clearUser(); // clear Zustand
         router.push("/auth/signin");
         toast.success(result?.message ?? "User logged out");
-        setOpen(false)
+        setOpen(false);
       }
     },
   });
 
   const handleLogout = () => {
-    mutate()
-  }
+    mutate();
+  };
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader className="">
@@ -143,43 +154,52 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent className="">
         {/* We create a SidebarGroup for each parent. */}
         <SidebarMenu className="h-screen">
-          {data.navMain.map((item) => {
-            const isActive = pathname === item.url
-            return (
-              <SidebarMenuItem className="px-2" key={item.title}>
-                <SidebarMenuButton className="py-5 px-5" asChild isActive={isActive} tooltip={item.title}>
-                  <Link href={item.url}>
-                    {item.icon && <item.icon className="w-4 h-4" />}
-                    <span>{item.title}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            )
-          })}
-        <SidebarMenuButton onClick={() => setOpen(true)}>Log out</SidebarMenuButton>
+          {data.navMain
+            .filter((item) => allowedRoutes.includes(item.url)) // ✅ filter
+            .map((item) => {
+              const isActive = pathname === item.url;
+              return (
+                <SidebarMenuItem className="px-2" key={item.title}>
+                  <SidebarMenuButton
+                    className="py-5 px-5"
+                    asChild
+                    isActive={isActive}
+                    tooltip={item.title}
+                  >
+                    <Link href={item.url}>
+                      {item.icon && <item.icon className="w-4 h-4" />}
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              );
+            })}
+          <SidebarMenuButton onClick={() => setOpen(true)}>
+            Log out
+          </SidebarMenuButton>
         </SidebarMenu>
         <DialogLayout
-        open={open}
-        onOpenChange={setOpen}
-        title="Logout"
-        footer={
-          <>
-            {/* Cancel just closes the dialog */}
-            <DialogLayout.Close asChild>
-              <Button variant="outline">Cancel</Button>
-            </DialogLayout.Close>
+          open={open}
+          onOpenChange={setOpen}
+          title="Logout"
+          footer={
+            <>
+              {/* Cancel just closes the dialog */}
+              <DialogLayout.Close asChild>
+                <Button variant="outline">Cancel</Button>
+              </DialogLayout.Close>
 
-            {/* Logout button calls handler */}
-            <Button variant="destructive" onClick={handleLogout}>
-              Logout
-            </Button>
-          </>
-        }
-      >
-        <p>Are you sure you want to logout</p>
-      </DialogLayout>
+              {/* Logout button calls handler */}
+              <Button variant="destructive" onClick={handleLogout}>
+                Logout
+              </Button>
+            </>
+          }
+        >
+          <p>Are you sure you want to logout</p>
+        </DialogLayout>
       </SidebarContent>
       <SidebarRail />
     </Sidebar>
-  )
+  );
 }

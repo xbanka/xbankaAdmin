@@ -10,7 +10,7 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 // import { Textarea } from "@/components/ui/textarea"
 import { useEffect, useState } from "react";
-import { Eye, RefreshCw, AlertTriangle, Plus, Trash2Icon } from "lucide-react";
+import { Plus, Trash2Icon } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createNewTransaction,
@@ -41,9 +41,11 @@ type TransactionFormValues = z.infer<typeof transactionSchema>;
 export default function Transactions() {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedTransactionId, setSelectedTransactionId] = useState<
     string | null
   >(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const {
@@ -102,6 +104,7 @@ export default function Transactions() {
     },
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { mutate: deleteMutate, isPending: deleteTransactionPending } =
     useMutation({
       mutationFn: (id: string) => deleteTransaction(id),

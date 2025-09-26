@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 // import { Badge } from "@/components/ui/badge";
-import { Plus, Eye, Trash2Icon } from "lucide-react";
+import { Plus, Trash2Icon } from "lucide-react";
 import {
   createNewCustomer,
   deleteCustomer,
@@ -70,9 +70,11 @@ type CustomerFormValues = z.infer<typeof customerSchema>;
 export default function CustomerManagement() {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(
     null
   );
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const { isPending, error, data } = useQuery({
@@ -106,6 +108,7 @@ export default function CustomerManagement() {
     },
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { mutate: deleteMutate, isPending: deleteCustomerPending } =
     useMutation({
       mutationFn: (id: string) => deleteCustomer(id),
