@@ -3,7 +3,8 @@ import AxiosInstance from "../Axiosinstance/axiosInstance";
 
 export const getAllUsers = async () => {
   try {
-    const response = await AxiosInstance("/xbankastaff/allUsers", { withCredentials: true });
+    const response = await AxiosInstance.get("/xbankastaff/allUsers", { withCredentials: true });
+    console.log(response)
     return {
       success: true,
       data: response.data, // ✅ only return actual payload
@@ -21,9 +22,9 @@ export const getAllUsers = async () => {
   }
 };
 
-export const updateUsers = async () => {
+export const updateUsers = async (role: string, id: string) => {
   try {
-    const response = await AxiosInstance("/xbankastaff/allUsers");
+    const response = await AxiosInstance.patch(`/xbankastaff/${id}/role`, { role }, { withCredentials: true });
     return {
       success: true,
       data: response.data, // ✅ only return actual payload
