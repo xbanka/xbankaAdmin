@@ -21,6 +21,7 @@ import {
   CheckSquare,
   BarChart3,
   Package,
+  Banknote,
 } from "lucide-react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -33,7 +34,7 @@ import { useMutation } from "@tanstack/react-query";
 // import Cookies from "js-cookie";
 import { logoutAction } from "@/lib/actions/actions";
 import { toast } from "sonner";
-import { rolePermissions } from "@/lib/rolePermissions";
+// import { rolePermissions } from "@/lib/rolePermissions";
 
 // This is sample data.
 const data = {
@@ -41,59 +42,64 @@ const data = {
   navMain: [
     {
       title: "Dashboard",
-      url: "/dashboard",
+      url: "/",
       icon: Home,
     },
+    // {
+    //   title: "Customer Management",
+    //   url: "/customerManagement",
+    //   icon: Users,
+    // },
+    // {
+    //   title: "Transactions",
+    //   url: "/transactions",
+    //   icon: CreditCard,
+    // },
     {
-      title: "Customer Management",
-      url: "/dashboard/customerManagement",
-      icon: Users,
+      title: "Finance",
+      url: "/finance",
+      icon: Banknote,
     },
-    {
-      title: "Transactions",
-      url: "/dashboard/transactions",
-      icon: CreditCard,
-    },
-    {
-      title: "Support Center",
-      url: "/dashboard/support",
-      icon: HelpCircle,
-    },
-    {
-      title: "Refunds & Disputes",
-      url: "/dashboard/refunds",
-      icon: AlertTriangle,
-    },
-    {
-      title: "Content Pipeline",
-      url: "/dashboard/content",
-      icon: FileText,
-    },
+    // {
+    //   title: "Support Center",
+    //   url: "/support",
+    //   icon: HelpCircle,
+    // },
+    // {
+    //   title: "Refunds & Disputes",
+    //   url: "/refunds",
+    //   icon: AlertTriangle,
+    // },
+    // {
+    //   title: "Content Pipeline",
+    //   url: "/content",
+    //   icon: FileText,
+    // },
     // {
     //   title: "Knowledge Base",
     //   url: "/knowledge",
     //   icon: BookOpen,
     // },
-    {
-      title: "Tasks & Workflow",
-      url: "/dashboard/tasks",
-      icon: CheckSquare,
-    },
-    {
-      title: "Audit & Performance",
-      url: "/dashboard/audit",
-      icon: BarChart3,
-    },
-    {
-      title: "Inventory & Assets",
-      url: "/dashboard/inventory",
-      icon: Package,
-    },
-    {
-      title: "Admin Panel",
-      url: "/dashboard/admin",
-      icon: Settings,
-    },
+    // {
+    //   title: "Tasks & Workflow",
+    //   url: "/tasks",
+    //   icon: CheckSquare,
+    // },
+    // {
+    //   title: "Audit & Performance",
+    //   url: "/audit",
+    //   icon: BarChart3,
+    // },
+    // {
+    //   title: "Inventory & Assets",
+    //   url: "/inventory",
+    //   icon: Package,
+    // },
+    // {
+    //   title: "Admin Panel",
+    //   url: "/admin",
+    //   icon: Settings,
+    // },
   ],
 };
 
@@ -102,15 +108,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
   const clearUser = useUserStore((s) => s.clearUser);
   const router = useRouter();
-  const user = useUserStore((s) => s.user);
+  // const user = useUserStore((s) => s.user);
 
-  const allowedRoutes: string[] =
-  user?.role
-    ? [...rolePermissions[user.role as keyof typeof rolePermissions]]
-    : [];
-
-  // const allowedRoutes = user?.role
-  //   ? rolePermissions[user.role as keyof typeof rolePermissions]
+  // const allowedRoutes: string[] =
+  // user?.role
+  //   ? [...rolePermissions[user.role as keyof typeof rolePermissions]]
   //   : [];
   
   const { mutate } = useMutation({
@@ -120,7 +122,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         console.log(result.message);
         toast.error(result.message);
       } else {
-        clearUser(); // clear Zustand
+        clearUser(); 
         router.push("/auth/signin");
         toast.success(result?.message ?? "User logged out");
         setOpen(false);
@@ -131,6 +133,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const handleLogout = () => {
     mutate();
   };
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader className="">
@@ -155,7 +158,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {/* We create a SidebarGroup for each parent. */}
         <SidebarMenu className="h-screen">
           {data.navMain
-            .filter((item) => allowedRoutes.includes(item.url)) // ✅ filter
+            // .filter((item) => allowedRoutes.includes(item.url)) // ✅ filter
             .map((item) => {
               const isActive = pathname === item.url;
               return (

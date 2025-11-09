@@ -1,30 +1,30 @@
-// middleware.ts
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+// // middleware.ts
+// import { NextResponse } from "next/server";
+// import type { NextRequest } from "next/server";
 
-export function middleware(req: NextRequest) {
-  const token = req.cookies.get("access_token")?.value || null;
-  console.log("token", token)
+// export function middleware(req: NextRequest) {
+//   const token = req.cookies.get("access_token")?.value || null;
+//   console.log("token", token)
 
-  const { pathname } = req.nextUrl;
+//   const { pathname } = req.nextUrl;
 
-  // Public routes
-  const isPublicRoute = ["/auth/signin", "/auth/signup"].includes(pathname);
+//   // Public routes
+//   const isPublicRoute = ["/auth/signin", "/auth/signup"].includes(pathname);
 
-  if (!token && !isPublicRoute) {
-    const loginUrl = new URL("auth/signin", req.url);
-    return NextResponse.redirect(loginUrl);
-  }
+//   if (!token && !isPublicRoute) {
+//     const loginUrl = new URL("auth/signin", req.url);
+//     return NextResponse.redirect(loginUrl);
+//   }
 
-  if (token && isPublicRoute) {
-    const dashboardUrl = new URL("/dashboard", req.url);
-    return NextResponse.redirect(dashboardUrl);
-  }
+//   if (token && isPublicRoute) {
+//     const dashboardUrl = new URL("/", req.url);
+//     return NextResponse.redirect(dashboardUrl);
+//   }
 
-  return NextResponse.next();
-}
+//   return NextResponse.next();
+// }
 
-// Only match routes you want to protect
-export const config = {
-  matcher: ["/dashboard/:path*", "/auth/signin", "/auth/signup"],
-};
+// // Only match routes you want to protect
+// export const config = {
+//   matcher: ["/:path*", "/auth/signin", "/auth/signup"],
+// };
