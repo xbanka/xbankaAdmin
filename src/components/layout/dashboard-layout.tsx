@@ -12,7 +12,7 @@ import {
 // import Error from "next/error"
 
 interface DashboardLayoutProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   breadcrumbs?: Array<{ label: string; href?: string }>;
   title: string;
   isPending?: boolean;
