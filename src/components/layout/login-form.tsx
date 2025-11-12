@@ -151,7 +151,7 @@ export default function LoginForm() {
           <Button
             type="submit"
             disabled={isPending}
-            className="w-full h-12 text-gray-900 font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+            className="w-full"
             style={{
               backgroundColor: "var(--abstractCyan)",
               borderColor: "var(--abstractCyan)",
