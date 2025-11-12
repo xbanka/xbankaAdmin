@@ -22,6 +22,7 @@ import {
   BarChart3,
   Package,
   Banknote,
+  LogOutIcon,
 } from "lucide-react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -114,7 +115,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   // user?.role
   //   ? [...rolePermissions[user.role as keyof typeof rolePermissions]]
   //   : [];
-  
+
   const { mutate } = useMutation({
     mutationFn: () => logoutAction(),
     onSuccess: (result) => {
@@ -122,7 +123,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         console.log(result.message);
         toast.error(result.message);
       } else {
-        clearUser(); 
+        clearUser();
         router.push("/auth/signin");
         toast.success(result?.message ?? "User logged out");
         setOpen(false);
@@ -177,9 +178,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </SidebarMenuItem>
               );
             })}
-          <SidebarMenuButton onClick={() => setOpen(true)}>
-            Log out
-          </SidebarMenuButton>
+          <SidebarMenuItem className="px-2 mt-[240px]">
+            <SidebarMenuButton
+              className="py-5 px-5 cursor-pointer"
+              asChild
+              onClick={() => setOpen(true)}
+            >
+              <a className="flex items-center">
+                <LogOutIcon />
+                <span>Log out</span>
+              </a>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
         </SidebarMenu>
         <DialogLayout
           open={open}
