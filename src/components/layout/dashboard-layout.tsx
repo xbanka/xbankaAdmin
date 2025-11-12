@@ -9,12 +9,13 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { HeaderActions } from "../notifications-panel/header-actions";
 // import Error from "next/error"
 
 interface DashboardLayoutProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   breadcrumbs?: Array<{ label: string; href?: string }>;
-  title: string;
+  title?: string;
   isPending?: boolean;
   error?: string | null;
 }
@@ -22,7 +23,6 @@ interface DashboardLayoutProps {
 export function DashboardLayout({
   children,
   breadcrumbs = [],
-  title,
   isPending,
   error,
 }: DashboardLayoutProps) {
@@ -52,11 +52,9 @@ export function DashboardLayout({
             ))}
           </BreadcrumbList>
         </Breadcrumb>
+        <HeaderActions />
       </header>
       <div className="flex flex-1 flex-col gap-4 p-4 bg-off-white min-h-screen">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-deep-blue">{title}</h1>
-        </div>
         {/* Handle loading */}
         {isPending && (
           <div className="flex flex-1 items-center justify-center text-gray-500">

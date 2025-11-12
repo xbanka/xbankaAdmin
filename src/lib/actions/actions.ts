@@ -91,8 +91,8 @@ export const loginAction = async (data: loginTypes) => {
   // Insert into DB, call API, etc.
   try {
     const response = await axios.post(
-      "https://xbankadashboardbackend-production.up.railway.app/xbankastaff/login",
-      // "http://localhost:3001/xbankastaff/login",
+      // "https://xbankadashboardbackend-production.up.railway.app/xbankastaff/login",
+      "http://localhost:3001/xbankastaff/login",
       {
         email: data.email,
         password: data.password,
