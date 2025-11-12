@@ -32,7 +32,7 @@ const transactionSchema = z.object({
   email: z.string().email("Invalid email"),
   phone: z.string().min(10, "Phone number is too short"),
   type: z.enum(["GIFT_CARD", "CRYPTO", "BILLS"]),
-  amount: z.number().positive("Amount must be positive"),
+  amount: z.string().min(1, "Amount is required"),
   status: z.enum(["PENDING", "SUCCESSFUL", "FAILED"]),
 });
 
@@ -63,7 +63,7 @@ export default function Transactions() {
       email: "",
       phone: "",
       type: "BILLS",
-      amount: 0,
+      amount: '',
       status: "PENDING",
     },
   });
@@ -133,7 +133,10 @@ export default function Transactions() {
   }, [open, setValue]);
 
   const onSubmit = (data: TransactionFormValues) => {
-    mutate(data);
+    mutate({
+    ...data,
+    amount: Number(data.amount), // 👈 convert here
+  });
   };
 
   const getStatusColor = (status: string) => {
@@ -389,6 +392,7 @@ export default function Transactions() {
           {/* Amount */}
           <FormField
             id="amount"
+            type="number"
             label="Amount"
             placeholder="amount"
             register={register}

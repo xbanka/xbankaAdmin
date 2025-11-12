@@ -1,8 +1,8 @@
 import axios from "axios";
 
 const AxiosInstance = axios.create({
-  baseURL: "https://xbankadashboardbackend-production.up.railway.app/",
-  // baseURL: "http://localhost:3001/",
+  // baseURL: "https://xbankadashboardbackend-production.up.railway.app/",
+  baseURL: "http://localhost:3001/",
   headers: {
     "Content-Type": "application/json",
   },
