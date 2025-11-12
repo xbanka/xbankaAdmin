@@ -132,9 +132,8 @@ export function ConfirmPayoutSidebar({
             )}
           </div>
         </div>
-        <div className="py-[20px] px-[24px]">
-          {/* Form Fields */}
-          <div>
+        {/* Form Fields */}
+          <div className="px-[24px] py-[20px]">
             <div className="space-y-4">
               {/* Account Source */}
               <SelectFieldLayout
@@ -183,14 +182,13 @@ export function ConfirmPayoutSidebar({
               </div>
             </div>
           </div>
-        </div>
 
         {/* Attachments */}
-        <div>
-          <h3 className="text-sm font-semibold text-gray-700 mb-4">
+        <div className="px-[24px] py-[20px]">
+          <h3 className="text-sm font-[500] leading-[20px] text-[#1E1F20] mb-1">
             Attachments
           </h3>
-          <p className="text-xs text-gray-500 mb-3">
+          <p className="text-xs text-[#606368] mb-3">
             Upload screenshot, receipt or proof of transaction
           </p>
 
