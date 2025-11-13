@@ -180,12 +180,12 @@ export default function FinancePage() {
       header: "Status",
       render: (item: PayoutData) => (
         <span
-          className={`capitalize px-2 py-1 rounded text-xs font-medium ${
+          className={`capitalize px-3 py-2 rounded-[36px] text-xs font-medium ${
             item.status === "completed"
-              ? "bg-green-100 text-green-700"
+              ? "bg-[#D1FAE5] text-[#37703F]"
               : item.status === "declined"
-              ? "bg-red-100 text-red-700"
-              : "bg-yellow-100 text-yellow-700"
+              ? "bg-[#FCE6E6] text-[#EF4444]"
+              : "bg-[#FFF8D8] text-[#B29504]"
           }`}
         >
           {item.status}
@@ -198,13 +198,12 @@ export default function FinancePage() {
       key: "actions",
       header: "Actions",
       render: (item: PayoutData) => (
-        <Button
-          size="sm"
-          variant="outline"
+        <div
+          className="underline cursor-pointer"
           onClick={() => handleSelectPayout(item)}
         >
           View Details
-        </Button>
+        </div>
       ),
     },
   ];
@@ -219,14 +218,14 @@ export default function FinancePage() {
       <div>
         <div className="flex items-center justify-between mb-[24px]">
           <h1 className="text-[18px] font-[600] leading-[22px] text-[#111827]">
-            Finance
+            Finance Overview
           </h1>
           <Button size="sm" variant={"outline"}><Upload />Export</Button>
         </div>
 
         <div className="flex items-center justify-between mb-[24px]">
           <div className="flex gap-1">
-            {["All", "Active", "Approved", "Pending"].map((filter) => (
+            {["All", "Pending", "Completed", "Declined"].map((filter) => (
               <Button
                 key={filter}
                 variant={
@@ -236,8 +235,8 @@ export default function FinancePage() {
                 onClick={() => setActiveFilter(filter.toLowerCase())}
                 className={
                   activeFilter === filter.toLowerCase()
-                    ? "bg-[#E7F0F0] text-[#111827] font-[500] text-[14px] leading-[18px]"
-                    : "font-[500] text-[14px] leading-[18px]"
+                    ? "bg-[#68F4E3] border border-[#68F4E3] text-[#111827] p-2 font-[500] text-[14px] leading-[18px]"
+                    : "font-[500] text-[14px] leading-[18px] text-[#111827] p-2"
                 }
               >
                 {filter}
@@ -263,7 +262,7 @@ export default function FinancePage() {
               onChange={setTransactionTypeFilter}
             />
 
-            <Button variant="outline" size="sm">
+            <Button variant="outline">
               <Filter className="h-4 w-4 mr-2" />
               Advanced filter
             </Button>
