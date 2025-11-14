@@ -73,13 +73,13 @@ export function DataTableLayout<T>({
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full border border-[#E5E7EB] rounded-[8px] overflow-hidden">
       {/* TABLE */}
-      <Table>
+      <Table className="">
         <TableHeader>
-          <TableRow className="bg-gray-50">
+          <TableRow className="bg-[#FAFAFA] ">
             {columns.map((col) => (
-              <TableHead key={col.key as string} className={`font-medium text-gray-600 ${col.className ?? ""}`}>
+              <TableHead key={col.key as string} className={`font-medium  py-[8px] px-[20px] text-[12px] leading-[16px] text-[#606368] ${col.className ?? ""}`}>
                 {col.header}
               </TableHead>
             ))}
@@ -107,7 +107,7 @@ export function DataTableLayout<T>({
 
           {!isLoading && !isError && paginatedData?.length === 0 && (
             <TableRow>
-              <TableCell colSpan={columns.length} className="text-center text-gray-500 py-6">
+              <TableCell colSpan={columns.length} className="text-center text-[#111827] text-[14px] font-[500] leading-[18px] py-6">
                 {emptyMessage}
               </TableCell>
             </TableRow>
@@ -116,9 +116,9 @@ export function DataTableLayout<T>({
           { !isLoading &&
             !isError && (
             paginatedData?.map((item) => (
-              <TableRow key={rowKey(item)} className="hover:bg-gray-50">
+              <TableRow key={rowKey(item)} className="hover:bg-gray-50 text-left text-[#111827] text-[14px] font-[500] leading-[18px]">
                 {columns.map((col) => (
-                  <TableCell key={col.key as string}>
+                  <TableCell className="py-[19px] px-[20px] text-left" key={col.key as string}>
                     {col.render ? col.render(item) : (item as never)[col.key]}
                   </TableCell>
                 ))}
