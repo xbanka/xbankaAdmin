@@ -25,6 +25,7 @@ import FormField from "./FormField";
 import { toast } from "sonner";
 import { decodeAccessToken } from "@/lib/decodeToken";
 import { useUserStore } from "@/store/userStore";
+import PasswordField from "../ui/PasswordField";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -79,86 +80,60 @@ export default function LoginForm() {
   };
 
   return (
-    <Card className="w-[40%] mx-auto mt-[100px] shadow-xl border-0 bg-white/95 backdrop-blur-sm">
-      <CardHeader className="space-y-1 text-center">
-        <CardTitle className="text-2xl font-bold text-gray-900">
-          Welcome Back
-        </CardTitle>
-        <CardDescription className="text-gray-600">
-          Sign in to your xbanka dashboard account
+    <Card className="w-full max-w-sm mx-auto">
+      <CardHeader>
+        <CardTitle>Welcome Back, Login to your account</CardTitle>
+        <CardDescription>
+          Enter your email below to login to your account
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <FormField
-            id="email"
-            label="Email Address"
-            type="text" // <-- prevents native popup, uses Zod validation
-            placeholder="john@example.com"
-            icon={Mail}
-            register={register}
-            error={errors.email}
-          />
-
-          <div className="space-y-2">
-            <Label
-              htmlFor="password"
-              className="text-sm font-medium text-gray-700"
-            >
-              Password
-            </Label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-              <Input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                placeholder="Enter your password"
-                className="pl-10 pr-10 h-12 border-gray-200 focus:border-[var(--abstractCyan)] focus:ring-[var(--abstractCyan)]"
-                {...register("password")}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
-              >
-                {showPassword ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
-              </button>
-            </div>
-            {errors.password && (
-              <p className="text-sm text-red-600">{errors.password.message}</p>
+          <div className="flex flex-col gap-6">
+            <FormField
+              id="email"
+              label="Email Address"
+              type="text" // <-- prevents native popup, uses Zod validation
+              placeholder="john@example.com"
+              icon={Mail}
+              register={register}
+              error={errors.email}
+            />
+            <PasswordField
+              id="password"
+              label="Password"
+              placeholder="Enter your password"
+              icon={Lock}
+              register={register}
+              error={errors.password}
+            />
+            {isSuccess && !data?.success && (
+              <Alert variant="destructive">
+                <AlertDescription>{data.message}</AlertDescription>
+              </Alert>
             )}
-          </div>
 
-          {isSuccess && !data?.success && (
-            <Alert variant="destructive">
-              <AlertDescription>{data.message}</AlertDescription>
-            </Alert>
-          )}
+            <div className="flex items-center justify-between">
+              <Link
+                href="/forgot-password"
+                className="text-sm text-[var(--abstractCyan)] hover:underline"
+              >
+                Forgot password?
+              </Link>
+            </div>
 
-          <div className="flex items-center justify-between">
-            <Link
-              href="/forgot-password"
-              className="text-sm text-[var(--abstractCyan)] hover:underline"
+            <Button
+              type="submit"
+              disabled={isPending}
+              className="w-full"
+              style={{
+                backgroundColor: "var(--abstractCyan)",
+                borderColor: "var(--abstractCyan)",
+              }}
             >
-              Forgot password?
-            </Link>
+              {isPending ? "Signing in..." : "Sign In"}
+            </Button>
           </div>
-
-          <Button
-            type="submit"
-            disabled={isPending}
-            className="w-full"
-            style={{
-              backgroundColor: "var(--abstractCyan)",
-              borderColor: "var(--abstractCyan)",
-            }}
-          >
-            {isPending ? "Signing in..." : "Sign In"}
-          </Button>
         </form>
 
         <div className="text-center pt-4 border-t border-gray-200">
