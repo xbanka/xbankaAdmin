@@ -25,12 +25,13 @@ AxiosInstance.interceptors.response.use(
       error.response?.status === 401 &&
       !originalRequest._retry &&
       !originalRequest.url.includes("/api/auth/erp/login") &&
-      !originalRequest.url.includes("/api/auth/erp/register")
+      !originalRequest.url.includes("/api/auth/erp/register") &&
+      !originalRequest.url.includes("/api/auth/erp/verify")
     ) {
       originalRequest._retry = true;
 
       try {
-        const refreshResponse = await AxiosInstance.post("api/auth/refresh", {
+        const refreshResponse = await AxiosInstance.post("/api/auth/erp/refresh", {
           withCredentials: true,
         }); // backend uses cookie
         console.log(refreshResponse);

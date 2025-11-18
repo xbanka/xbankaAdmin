@@ -17,7 +17,7 @@ export function useAuthGuard() {
 
   useEffect(() => {
     if (isHydrated && !user) {
-      router.replace("/auth/signin"); // ✅ absolute path
+      router.replace("/signin"); // ✅ absolute path
     }
   }, [isHydrated, user, router]);
 

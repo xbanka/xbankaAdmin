@@ -39,7 +39,7 @@ const PasswordField = ({
           {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
         </button>
       </div>
-      {error && <p className="">{error.message}</p>}
+      {error && <p className="text-[10px] text-mainRed">{error.message}</p>}
     </div>
   );
 };
