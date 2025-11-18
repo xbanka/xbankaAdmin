@@ -1,8 +1,12 @@
 import ResetPasswordPage from '@/components/ResetPassword/ResetPassword'
 import React from 'react'
 
-const page = ({ searchParams }: { searchParams: { token?: string } }) => {
-    const token = searchParams.token;
+const page = async ({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | undefined>>;
+}) => {
+    const { token } = await searchParams;
   return (
     <div>
       <ResetPasswordPage token={token} />
