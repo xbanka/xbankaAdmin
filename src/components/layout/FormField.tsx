@@ -29,12 +29,12 @@ const FormField = ({
     <div className="space-y-2">
       <Label htmlFor={id}>{label}</Label>
       <div className="relative">
-        {Icon && <Icon className="absolute left-3 top-4 h-4 w-4 text-foreground" />}
+        {Icon && <Icon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground" />}
         <Input
           id={id}
           type={type}
           placeholder={placeholder}
-          className={`pl-10 h-12 border-gray-200 focus:border-[var(--abstractCyan)]`}
+          className={`${ Icon ? "pl-10" : "px-3"} border-gray-200 focus:border-[var(--abstractCyan)]`}
           {...register(id)}
         />
       </div>

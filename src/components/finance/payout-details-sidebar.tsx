@@ -140,7 +140,7 @@ export function PayoutDetailsSidebar({
           >
             Hold/Flag Payout
           </Button>
-          <Button className="flex-1 text-white" onClick={onProcess}>
+          <Button variant="default" onClick={onProcess}>
             Process Payout
           </Button>
         </div>
