@@ -235,7 +235,7 @@ export default function FinancePage() {
                 onClick={() => setActiveFilter(filter.toLowerCase())}
                 className={
                   activeFilter === filter.toLowerCase()
-                    ? "bg-[#68F4E3] border border-[#68F4E3] text-[#111827] p-2 font-[500] text-[14px] leading-[18px]"
+                    ? "bg-abstractCyan border border-abstractCyan text-[#111827] p-2 font-[500] text-[14px] leading-[18px]"
                     : "font-[500] text-[14px] leading-[18px] text-[#111827] p-2"
                 }
               >

@@ -119,15 +119,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { mutate } = useMutation({
     mutationFn: () => logoutAction(),
     onSuccess: (result) => {
-      if (!result.success) {
-        console.log(result.message);
-        toast.error(result.message);
-      } else {
-        clearUser();
-        router.push("/auth/signin");
-        toast.success(result?.message ?? "User logged out");
-        setOpen(false);
-      }
+      clearUser();
+      router.push("/signin");
+      toast.success(result.data.message);
+      setOpen(false);
+    },
+    onError: (err) => {
+      toast.error(err.message);
     },
   });
 

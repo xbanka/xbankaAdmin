@@ -12,10 +12,20 @@ export interface AffiliateSignUpTypes {
   lastName: string;
   email: string;
   password: string;
+  confirmPassword: string;
 }
 export interface loginTypes {
   email: string;
   password: string;
+}
+
+export interface passwordResetErpProps {
+  token: string,
+    password: string, 
+    confirm: string
+}
+export interface forgotPasswordTypes{
+  email: string
 }
 export interface createCustomerTypes {
   firstName: string;

@@ -6,41 +6,40 @@ import * as z from "zod";
 import Link from "next/link";
 import {
   Card,
-  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Eye, EyeOff, Mail, Lock, User } from "lucide-react";
-import { useMutation } from "@tanstack/react-query";
-import { signupAction } from "@/lib/actions/actions";
+import { Mail, Lock, User } from "lucide-react";
 import FormField from "./FormField";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
 import PasswordField from "../ui/PasswordField";
+import { useSignup } from "@/hooks/SignupService";
 
-const signupSchema = z.object({
-  firstName: z.string().min(2, "First name must be at least 2 characters"),
-  lastName: z.string().min(2, "Last name must be at least 2 characters"),
-  email: z.string().email("Please enter a valid email address"),
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    .regex(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-      "Password must contain at least one uppercase letter, one lowercase letter, and one number"
-    ),
-});
+const signupSchema = z
+  .object({
+    firstName: z.string().min(2, "First name must be at least 2 characters"),
+    lastName: z.string().min(2, "Last name must be at least 2 characters"),
+    email: z.string().email("Please enter a valid email address"),
+    password: z
+      .string()
+      .min(8, "Password must be at least 8 characters")
+      .regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+        "Password must contain at least one uppercase letter, one lowercase letter, and one number"
+      ),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
 
-type SignupFormData = z.infer<typeof signupSchema>;
+export type SignupFormData = z.infer<typeof signupSchema>;
 
 export default function SignupForm() {
-  const router = useRouter();
 
   const {
     register,
@@ -51,26 +50,12 @@ export default function SignupForm() {
     resolver: zodResolver(signupSchema),
   });
 
-  const { data, mutate, isSuccess, isPending } = useMutation({
-    mutationFn: (data: SignupFormData) => signupAction(data),
-    onSuccess: (result) => {
-      if (!result.success) {
-        // Show API error in alert
-        console.log(result.message);
-        //   setErrorMessage(result.message)
-      } else {
-        console.log("Signup success!", result.data);
-        router.push("/auth/verify");
-        reset();
-      }
-    },
-    onError: (err) => {
-      console.log("Signup failed:", err);
-    },
-  });
+  const { error, mutate, isPending } = useSignup()
 
   const onSubmit = async (data: SignupFormData) => {
-    mutate(data);
+    mutate(data, {
+    onSuccess: () => reset(),
+  });
   };
 
   return (
@@ -121,11 +106,20 @@ export default function SignupForm() {
               register={register}
               error={errors.password}
             />
-            {isSuccess && !data?.success && (
-              <Alert variant="destructive">
-                <AlertDescription>{data.message}</AlertDescription>
-              </Alert>
-            )}
+
+            <PasswordField
+              id="confirmPassword"
+              label="Confirm Password"
+              placeholder="Enter your password"
+              icon={Lock}
+              register={register}
+              error={errors.confirmPassword}
+            />
+            {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error.message}</AlertDescription>
+            </Alert>
+          )}
 
             <Button
               type="submit"

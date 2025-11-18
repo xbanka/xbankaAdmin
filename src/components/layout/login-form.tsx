@@ -36,10 +36,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginForm() {
   const setUser = useUserStore((state) => state.setUser);
-  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
-  //   const [isLoading, setIsLoading] = useState(false);
-  //   const [error, setError] = useState("");
 
   const {
     register,
@@ -49,26 +46,19 @@ export default function LoginForm() {
     resolver: zodResolver(loginSchema),
   });
 
-  const { data, mutate, isSuccess, isPending } = useMutation({
+  const { error, mutate, isPending } = useMutation({
     mutationFn: (data: loginTypes) => loginAction(data),
     onSuccess: (result) => {
-      if (!result.success) {
-        // Show API error in alert
-        console.log(result.message);
-        toast.error(result.message);
-        //   setErrorMessage(result.message)
-      } else {
-        console.log("Signup success!", result.data);
-        decodeAccessToken(result.data.accessToken);
-        const data = {
-          firstName: result.data.firstName,
-          role: result.data.role,
-        };
-        console.log(data);
-        setUser(data);
-        toast.success("User Loggedin");
-        router.push("/dashboard");
-      }
+      decodeAccessToken(result.data.accessToken);
+      console.log(result, result.data.access_token)
+      console.log(decodeAccessToken(result.data.access_token))
+      const data = {
+        access_token: result.data.access_token,
+      };
+      console.log(result.data)
+      setUser(data);
+      toast.success("User Loggedin");
+      router.push("/");
     },
     onError: (err) => {
       console.log("Signup failed:", err);
@@ -107,11 +97,11 @@ export default function LoginForm() {
               register={register}
               error={errors.password}
             />
-            {isSuccess && !data?.success && (
-              <Alert variant="destructive">
-                <AlertDescription>{data.message}</AlertDescription>
-              </Alert>
-            )}
+            {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error.message}</AlertDescription>
+            </Alert>
+          )}
 
             <div className="flex items-center justify-between">
               <Link
@@ -140,7 +130,7 @@ export default function LoginForm() {
           <p className="text-sm text-gray-600">
             Don&apos;t have an account?{" "}
             <Link
-              href="/auth/signup"
+              href="/signup"
               className="font-semibold text-[var(--abstractCyan)] hover:underline"
             >
               Sign up here
