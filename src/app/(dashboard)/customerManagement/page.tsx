@@ -68,290 +68,291 @@ const customerSchema = z.object({
 type CustomerFormValues = z.infer<typeof customerSchema>;
 
 export default function CustomerManagement() {
-  const queryClient = useQueryClient();
-  const [open, setOpen] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(
-    null
-  );
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  // const queryClient = useQueryClient();
+  // const [open, setOpen] = useState(false);
+  // // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(
+  //   null
+  // );
+  // // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-  const { isPending, error, data } = useQuery({
-    queryKey: ["customers"],
-    queryFn: () => getCustomers(),
-  });
+  // const { isPending, error, data } = useQuery({
+  //   queryKey: ["customers"],
+  //   queryFn: () => getCustomers(),
+  // });
 
-  const { mutate, isPending: createCustomerPending } = useMutation({
-    mutationFn: (data: createCustomerTypes) =>
-      createNewCustomer(
-        data.firstName,
-        data.lastName,
-        data.email,
-        data.phone,
-        data.status
-      ),
-    onSuccess: (result) => {
-      if (!result.success) {
-        // Show API error in alert
-        //   setErrorMessage(result.message)
-      } else {
-        console.log("Signup success!", result.data);
-        setOpen(false);
-        toast.success("Customer created successfully");
-        reset();
-        queryClient.invalidateQueries({ queryKey: ["customers"] });
-      }
-    },
-    onError: (err) => {
-      console.log("Signup failed:", err);
-    },
-  });
+  // const { mutate, isPending: createCustomerPending } = useMutation({
+  //   mutationFn: (data: createCustomerTypes) =>
+  //     createNewCustomer(
+  //       data.firstName,
+  //       data.lastName,
+  //       data.email,
+  //       data.phone,
+  //       data.status
+  //     ),
+  //   onSuccess: (result) => {
+  //     if (!result.success) {
+  //       // Show API error in alert
+  //       //   setErrorMessage(result.message)
+  //     } else {
+  //       console.log("Signup success!", result.data);
+  //       setOpen(false);
+  //       toast.success("Customer created successfully");
+  //       reset();
+  //       queryClient.invalidateQueries({ queryKey: ["customers"] });
+  //     }
+  //   },
+  //   onError: (err) => {
+  //     console.log("Signup failed:", err);
+  //   },
+  // });
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { mutate: deleteMutate, isPending: deleteCustomerPending } =
-    useMutation({
-      mutationFn: (id: string) => deleteCustomer(id),
-      onSuccess: (result) => {
-        if (!result.success) {
-          // Show API error in alert
-          //   setErrorMessage(result.message)
-          toast.success("Failed trying to delete Customer");
-        } else {
-          console.log("Signup success!", result);
-          setDeleteDialogOpen(false);
-          toast.success("Transaction deleted successfully");
-          queryClient.invalidateQueries({ queryKey: ["transactions"] });
-          queryClient.refetchQueries({ queryKey: ["transactions"] });
-        }
-      },
-      onError: (err) => {
-        console.log("Signup failed:", err);
-        toast.success("Failed trying to delete Customer");
-      },
-    });
+  // // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // const { mutate: deleteMutate, isPending: deleteCustomerPending } =
+  //   useMutation({
+  //     mutationFn: (id: string) => deleteCustomer(id),
+  //     onSuccess: (result) => {
+  //       if (!result.success) {
+  //         // Show API error in alert
+  //         //   setErrorMessage(result.message)
+  //         toast.success("Failed trying to delete Customer");
+  //       } else {
+  //         console.log("Signup success!", result);
+  //         setDeleteDialogOpen(false);
+  //         toast.success("Transaction deleted successfully");
+  //         queryClient.invalidateQueries({ queryKey: ["transactions"] });
+  //         queryClient.refetchQueries({ queryKey: ["transactions"] });
+  //       }
+  //     },
+  //     onError: (err) => {
+  //       console.log("Signup failed:", err);
+  //       toast.success("Failed trying to delete Customer");
+  //     },
+  //   });
 
-  useEffect(() => {
-    console.log(error);
-  }, [error]);
+  // useEffect(() => {
+  //   console.log(error);
+  // }, [error]);
 
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    reset,
-    formState: { errors },
-  } = useForm<CustomerFormValues>({
-    resolver: zodResolver(customerSchema),
-    defaultValues: {
-      firstName: "",
-      lastName: "",
-      email: "",
-      phone: "",
-      status: "ACTIVE",
-    },
-  });
+  // const {
+  //   register,
+  //   handleSubmit,
+  //   setValue,
+  //   reset,
+  //   formState: { errors },
+  // } = useForm<CustomerFormValues>({
+  //   resolver: zodResolver(customerSchema),
+  //   defaultValues: {
+  //     firstName: "",
+  //     lastName: "",
+  //     email: "",
+  //     phone: "",
+  //     status: "ACTIVE",
+  //   },
+  // });
 
-  const getStatusColor = (status: string) => {
-    return status === "Active" ? "bg-main-green" : "bg-yellow-500";
-  };
+  // const getStatusColor = (status: string) => {
+  //   return status === "Active" ? "bg-main-green" : "bg-yellow-500";
+  // };
 
-  const customerColumns = [
-    { key: "id", label: "Customer ID" },
-    { key: "firstName", label: "Name" },
-    { key: "email", label: "Email" },
-    { key: "phone", label: "Phone" },
-    { key: "status", label: "Status" },
-    // { key: "transactions", label: "Transactions" },
-    // {
-    //   key: "openTickets",
-    //   label: "Open Tickets",
-    //   render: (value: number) => (
-    //     <Badge variant={value > 0 ? "destructive" : "secondary"}>{value}</Badge>
-    //   ),
-    // },
-    // {
-    //   key: "totalSpent",
-    //   label: "Total Spent",
-    //   render: (value: string) => <span className="font-medium">{value}</span>,
-    // },
-    // { key: "lastActivity", label: "Last Activity" },
-  ];
+  // const customerColumns = [
+  //   { key: "id", label: "Customer ID" },
+  //   { key: "firstName", label: "Name" },
+  //   { key: "email", label: "Email" },
+  //   { key: "phone", label: "Phone" },
+  //   { key: "status", label: "Status" },
+  //   // { key: "transactions", label: "Transactions" },
+  //   // {
+  //   //   key: "openTickets",
+  //   //   label: "Open Tickets",
+  //   //   render: (value: number) => (
+  //   //     <Badge variant={value > 0 ? "destructive" : "secondary"}>{value}</Badge>
+  //   //   ),
+  //   // },
+  //   // {
+  //   //   key: "totalSpent",
+  //   //   label: "Total Spent",
+  //   //   render: (value: string) => <span className="font-medium">{value}</span>,
+  //   // },
+  //   // { key: "lastActivity", label: "Last Activity" },
+  // ];
 
-  const customerFilters = [
-    {
-      key: "status",
-      placeholder: "Filter by status",
-      options: [
-        { value: "all", label: "All Status" },
-        { value: "active", label: "Active" },
-        { value: "inactive", label: "Inactive" },
-      ],
-    },
-  ];
+  // const customerFilters = [
+  //   {
+  //     key: "status",
+  //     placeholder: "Filter by status",
+  //     options: [
+  //       { value: "all", label: "All Status" },
+  //       { value: "active", label: "Active" },
+  //       { value: "inactive", label: "Inactive" },
+  //     ],
+  //   },
+  // ];
 
-  const customerActions = [
-    // {
-    //   label: "View Profile",
-    //   icon: <Eye className="h-4 w-4" />,
-    //   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    //   onClick: (row: any) => console.log("View profile", row),
-    // },
-    // {
-    //   label: "Edit Customer",
-    //   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    //   onClick: (row: any) => console.log("Edit customer", row),
-    // },
-    // {
-    //   label: "View Transactions",
-    //   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    //   onClick: (row: any) => console.log("View transactions", row),
-    // },
-    // {
-    //   label: "Support History",
-    //   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    //   onClick: (row: any) => console.log("Support history", row),
-    // },
-    {
-      label: "Delete",
-      icon: <Trash2Icon className="h-4 w-4" />,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      onClick: (row: any) => {
-        setSelectedCustomerId(row.id);
-        setDeleteDialogOpen(true);
-      },
-    },
-  ];
+  // const customerActions = [
+  //   // {
+  //   //   label: "View Profile",
+  //   //   icon: <Eye className="h-4 w-4" />,
+  //   //   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  //   //   onClick: (row: any) => console.log("View profile", row),
+  //   // },
+  //   // {
+  //   //   label: "Edit Customer",
+  //   //   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  //   //   onClick: (row: any) => console.log("Edit customer", row),
+  //   // },
+  //   // {
+  //   //   label: "View Transactions",
+  //   //   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  //   //   onClick: (row: any) => console.log("View transactions", row),
+  //   // },
+  //   // {
+  //   //   label: "Support History",
+  //   //   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  //   //   onClick: (row: any) => console.log("Support history", row),
+  //   // },
+  //   {
+  //     label: "Delete",
+  //     icon: <Trash2Icon className="h-4 w-4" />,
+  //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  //     onClick: (row: any) => {
+  //       setSelectedCustomerId(row.id);
+  //       setDeleteDialogOpen(true);
+  //     },
+  //   },
+  // ];
 
-  const customerTabFilters = [
-    { key: "status", label: "All Customers", value: "all" },
-    { key: "status", label: "Active Customers", value: "ACTIVE" },
-    { key: "status", label: "Inactive Customers", value: "INACTIVE" },
-  ];
+  // const customerTabFilters = [
+  //   { key: "status", label: "All Customers", value: "all" },
+  //   { key: "status", label: "Active Customers", value: "ACTIVE" },
+  //   { key: "status", label: "Inactive Customers", value: "INACTIVE" },
+  // ];
 
-  const onSubmit = (data: CustomerFormValues) => {
-    mutate(data);
-  };
+  // const onSubmit = (data: CustomerFormValues) => {
+  //   mutate(data);
+  // };
 
-  const headerActions = (
-    <>
-      <Button onClick={() => setOpen(true)} className="flex items-center gap-2">
-        <Plus className="h-4 w-4" />
-        New Customer
-      </Button>
-      <DialogLayout
-        open={open}
-        onOpenChange={setOpen}
-        title="Add New Customer"
-        className="sm:max-w-[500px]"
-        footer={
-          <div className="flex justify-end gap-2">
-            <Button
-              variant="outline"
-              onClick={() => {
-                reset();
-                setOpen(false);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              disabled={createCustomerPending}
-              type="submit"
-              form="transaction-form"
-            >
-              {createCustomerPending ? "Creating Customer" : "Create Customer"}
-            </Button>
-          </div>
-        }
-      >
-        {/* <DialogLayout.Trigger asChild>
-            <Button className="flex items-center gap-2">
-              <Plus className="h-4 w-4" />
-              New Transaction
-            </Button>
-          </DialogLayout.Trigger> */}
-        <form
-          id="transaction-form"
-          onSubmit={handleSubmit(onSubmit)}
-          className="space-y-4"
-        >
-          {/* First & Last Name */}
-          <div className="grid grid-cols-2 gap-4">
-            <FormField
-              id="firstName"
-              label="First Name"
-              placeholder="firstName"
-              register={register}
-              error={errors.firstName}
-            />
-            <FormField
-              id="lastName"
-              label="Last Name"
-              placeholder="lastName"
-              register={register}
-              error={errors.lastName}
-            />
-          </div>
+  // const headerActions = (
+  //   <>
+  //     <Button onClick={() => setOpen(true)} className="flex items-center gap-2">
+  //       <Plus className="h-4 w-4" />
+  //       New Customer
+  //     </Button>
+  //     <DialogLayout
+  //       open={open}
+  //       onOpenChange={setOpen}
+  //       title="Add New Customer"
+  //       className="sm:max-w-[500px]"
+  //       footer={
+  //         <div className="flex justify-end gap-2">
+  //           <Button
+  //             variant="outline"
+  //             onClick={() => {
+  //               reset();
+  //               setOpen(false);
+  //             }}
+  //           >
+  //             Cancel
+  //           </Button>
+  //           <Button
+  //             disabled={createCustomerPending}
+  //             type="submit"
+  //             form="transaction-form"
+  //           >
+  //             {createCustomerPending ? "Creating Customer" : "Create Customer"}
+  //           </Button>
+  //         </div>
+  //       }
+  //     >
+  //       {/* <DialogLayout.Trigger asChild>
+  //           <Button className="flex items-center gap-2">
+  //             <Plus className="h-4 w-4" />
+  //             New Transaction
+  //           </Button>
+  //         </DialogLayout.Trigger> */}
+  //       <form
+  //         id="transaction-form"
+  //         onSubmit={handleSubmit(onSubmit)}
+  //         className="space-y-4"
+  //       >
+  //         {/* First & Last Name */}
+  //         <div className="grid grid-cols-2 gap-4">
+  //           <FormField
+  //             id="firstName"
+  //             label="First Name"
+  //             placeholder="firstName"
+  //             register={register}
+  //             error={errors.firstName}
+  //           />
+  //           <FormField
+  //             id="lastName"
+  //             label="Last Name"
+  //             placeholder="lastName"
+  //             register={register}
+  //             error={errors.lastName}
+  //           />
+  //         </div>
 
-          {/* Email & Phone */}
-          <div className="grid grid-cols-2 gap-4">
-            <FormField
-              id="email"
-              label="Email"
-              placeholder="email"
-              register={register}
-              error={errors.email}
-            />
-            <FormField
-              id="phone"
-              label="Phone"
-              placeholder="phone"
-              register={register}
-              error={errors.phone}
-            />
-          </div>
+  //         {/* Email & Phone */}
+  //         <div className="grid grid-cols-2 gap-4">
+  //           <FormField
+  //             id="email"
+  //             label="Email"
+  //             placeholder="email"
+  //             register={register}
+  //             error={errors.email}
+  //           />
+  //           <FormField
+  //             id="phone"
+  //             label="Phone"
+  //             placeholder="phone"
+  //             register={register}
+  //             error={errors.phone}
+  //           />
+  //         </div>
 
-          {/* Type & Status */}
+  //         {/* Type & Status */}
 
-          <SelectFieldLayout
-            id="status"
-            label="Status"
-            options={["ACTIVE", "INACTIVE"]}
-            placeholder="Select status"
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            onChange={(val) => setValue("status", val as any)}
-            className="w-full"
-            error={errors.status}
-          />
+  //         <SelectFieldLayout
+  //           id="status"
+  //           label="Status"
+  //           options={["ACTIVE", "INACTIVE"]}
+  //           placeholder="Select status"
+  //           // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  //           onChange={(val) => setValue("status", val as any)}
+  //           className="w-full"
+  //           error={errors.status}
+  //         />
 
-          {/* Amount */}
-        </form>
-      </DialogLayout>
-    </>
-  );
+  //         {/* Amount */}
+  //       </form>
+  //     </DialogLayout>
+  //   </>
+  // );
 
   return (
-    <DashboardLayout
-      isPending={isPending}
-      error={error?.message}
-      title="Customer Management"
-      breadcrumbs={[{ label: "Customers" }]}
-    >
-      <>
-        <DataTable
-          title="Customer List"
-          data={data?.data ?? []}
-          columns={customerColumns}
-          searchKeys={["firstName", "email", "id"]}
-          filters={customerFilters}
-          actions={customerActions}
-          headerActions={headerActions}
-          getBadgeColor={getStatusColor}
-          tabFilters={customerTabFilters}
-          tabFilterKey="status"
-        />
-      </>
-    </DashboardLayout>
+    // <DashboardLayout
+    //   isPending={isPending}
+    //   error={error?.message}
+    //   title="Customer Management"
+    //   breadcrumbs={[{ label: "Customers" }]}
+    // >
+    //   <>
+    //     <DataTable
+    //       title="Customer List"
+    //       data={data?.data ?? []}
+    //       columns={customerColumns}
+    //       searchKeys={["firstName", "email", "id"]}
+    //       filters={customerFilters}
+    //       actions={customerActions}
+    //       headerActions={headerActions}
+    //       getBadgeColor={getStatusColor}
+    //       tabFilters={customerTabFilters}
+    //       tabFilterKey="status"
+    //     />
+    //   </>
+    // </DashboardLayout>
+    <div>customer</div>
   );
 }
