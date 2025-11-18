@@ -3,8 +3,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 interface User {
-  firstName: string;
-  role: string;
+  access_token: string;
 }
 
 interface UserState {

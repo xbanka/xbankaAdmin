@@ -10,21 +10,21 @@ interface DashboardPageTypes{
 }
 
 const AuthGuardDashboard = ({children}: DashboardPageTypes) => {
-  // const { isAuthenticated, isHydrated } = useAuthGuard();
+  const { isAuthenticated, isHydrated } = useAuthGuard();
 
-  // if (!isHydrated) {
-  //   return <div className="flex items-center justify-center left-0 right-0 absolute top-1/2 -translate-y-1/2">
-  //       <LoaderSpinner />
-  //     </div>; // wait until Zustand loads
-  // }
+  if (!isHydrated) {
+    return <div className="flex items-center justify-center left-0 right-0 absolute top-1/2 -translate-y-1/2">
+        <LoaderSpinner />
+      </div>; // wait until Zustand loads
+  }
 
-  // if (!isAuthenticated) {
-  //   return (
-  //     <div className="flex items-center justify-center left-0 right-0 absolute top-1/2 -translate-y-1/2">
-  //       <LoaderSpinner />
-  //     </div>
-  //   );
-  // };
+  if (!isAuthenticated) {
+    return (
+      <div className="flex items-center justify-center left-0 right-0 absolute top-1/2 -translate-y-1/2">
+        <LoaderSpinner />
+      </div>
+    );
+  };
 
   return (
     <div className="">
