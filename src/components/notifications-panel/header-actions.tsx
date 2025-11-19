@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Bell, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -15,11 +15,25 @@ import { NotificationsPanel } from "./notifications-panel"
 
 export function HeaderActions() {
   const [showNotifications, setShowNotifications] = useState(false)
+  const notificationsRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
+        setShowNotifications(false)
+      }
+    }
+
+    if (showNotifications) {
+      document.addEventListener("mousedown", handleClickOutside)
+      return () => document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [showNotifications])
 
   return (
     <div className="flex justify-end w-[80%] items-center gap-4">
       {/* Notifications Bell */}
-      <div className="relative">
+      <div className="relative" ref={notificationsRef}>
         <Button
           variant="ghost"
           size="icon"
