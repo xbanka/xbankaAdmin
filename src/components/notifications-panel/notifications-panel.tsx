@@ -7,66 +7,85 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { useQuery } from "@tanstack/react-query"
+import { getNotifications } from "@/lib/actions/notificationsActions"
 
 interface Notification {
   id: string
-  type: "payout_request" | "approved" | "declined"
-  affiliate: {
-    name: string
-    avatar?: string
+  message: string
+  type: "system" | "payout_request" | "approved" | "declined"
+  is_read: boolean
+  read_at: string | null
+  user: {
+    first_name: string
+    last_name: string
+    email: string
+    account_name: string
   }
   amount: string
-  bank: string
-  method: string
-  status: "pending" | "completed" | "declined"
   timestamp: string
-  unread: boolean
 }
 
 const mockNotifications: Notification[] = [
   {
-    id: "1",
+    id: "3fa85f64-5717-4562-b3fc-2c963f66afa1",
+    message: "Affiliate Payout Request",
     type: "payout_request",
-    affiliate: { name: "@AliasRicer", avatar: "AR" },
+    is_read: false,
+    read_at: null,
+    user: {
+      first_name: "Joseph",
+      last_name: "Eyebiokin",
+      email: "joseph@example.com",
+      account_name: "GTBank",
+    },
     amount: "₦50,000",
-    bank: "Bank Transfer",
-    method: "GTBank",
-    status: "pending",
     timestamp: "2h ago",
-    unread: true,
   },
   {
-    id: "2",
+    id: "3fa85f64-5717-4562-b3fc-2c963f66afa2",
+    message: "Affiliate Payout Request",
     type: "payout_request",
-    affiliate: { name: "@dplajax", avatar: "DA" },
+    is_read: false,
+    read_at: null,
+    user: {
+      first_name: "David",
+      last_name: "Okonkwo",
+      email: "david@example.com",
+      account_name: "Kuda",
+    },
     amount: "₦50,000",
-    bank: "Kuda",
-    method: "GTBank",
-    status: "pending",
     timestamp: "2h ago",
-    unread: true,
   },
   {
-    id: "3",
+    id: "3fa85f64-5717-4562-b3fc-2c963f66afa3",
+    message: "Affiliate Payout Request",
     type: "payout_request",
-    affiliate: { name: "@TaylorGuest", avatar: "TG" },
+    is_read: true,
+    read_at: "2025-11-19T13:34:29.232Z",
+    user: {
+      first_name: "Taylor",
+      last_name: "Guest",
+      email: "taylor@example.com",
+      account_name: "UBA",
+    },
     amount: "₦60,000",
-    bank: "Kuda",
-    method: "Bank Transfer",
-    status: "pending",
     timestamp: "3h ago",
-    unread: false,
   },
   {
-    id: "4",
+    id: "3fa85f64-5717-4562-b3fc-2c963f66afa4",
+    message: "Payout Approved",
     type: "approved",
-    affiliate: { name: "@jamesFrost", avatar: "JF" },
+    is_read: true,
+    read_at: "2025-11-19T12:00:00.000Z",
+    user: {
+      first_name: "James",
+      last_name: "Frost",
+      email: "james@example.com",
+      account_name: "Access Bank",
+    },
     amount: "₦75,000",
-    bank: "UBA",
-    method: "Bank Transfer",
-    status: "completed",
     timestamp: "1d ago",
-    unread: false,
   },
 ]
 
@@ -75,31 +94,19 @@ export function NotificationsPanel({
 }: {
   onClose: () => void
 }) {
-  const [notifications, setNotifications] = useState(mockNotifications)
+   const [notifications, setNotifications] = useState(mockNotifications)
   const [activeTab, setActiveTab] = useState<"all" | "unread" | "archived">("all")
 
-  const unreadCount = notifications.filter((n) => n.unread).length
+  const unreadCount = notifications.filter((n) => !n.is_read).length
   const allCount = notifications.length
-  const archivedCount = 5 // Mock value
+  const archivedCount = 0
 
   const filteredNotifications = notifications.filter((n) => {
-    if (activeTab === "unread") return n.unread
-    if (activeTab === "archived") return false // Mock
+    if (activeTab === "unread") return !n.is_read
+    if (activeTab === "archived") return false
     return true
   })
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "pending":
-        return "bg-yellow-100 text-yellow-800"
-      case "completed":
-        return "bg-green-100 text-green-800"
-      case "declined":
-        return "bg-red-100 text-red-800"
-      default:
-        return "bg-gray-100 text-gray-800"
-    }
-  }
 
   return (
     <Card className="w-96 shadow-lg py-0 gap-0 rounded-lg border">
@@ -145,24 +152,26 @@ export function NotificationsPanel({
           ) : (
             <div className="space-y-0">
               {filteredNotifications.map((notification) => (
-                <div key={notification.id} className="bg-[#F1FFFD] p-4 cursor-pointer">
+                <div key={notification.id} className={`p-4 cursor-pointer transition-colors ${
+                    notification.is_read ? "bg-[#fafafa]" : "bg-[#F1FFFD]"
+                  }`}>
                   <div className="flex gap-[8px]">
                     {/* Avatar */}
                     <Avatar className="w-10 h-10 bg-[#F0F0F0] flex-shrink-0">
                       <AvatarFallback className="bg-[#F0F0F0] text-abstractCyan">
-                        {notification.affiliate.avatar || "NA"}
+                        {notification.user.first_name.charAt(0)}{notification.user.last_name.charAt(0)}
                       </AvatarFallback>
                     </Avatar>
 
                     {/* Content */}
                     <div className="flex flex-col justify-start items-start min-w-0">
-                      <p className="font-medium text-[16px] leading-[20px] text-[#111827] mb-[4px]">Affiliate Payout Request</p>
+                      <p className="font-medium text-[16px] leading-[20px] text-[#111827] mb-[4px]">{notification.message}</p>
 
                       <p className="font-medium text-[14px] leading-[12px] text-[#4B5563] mb-[8px]">
-                        {notification.affiliate.name} - Amount: {notification.amount}
+                        {notification.user.first_name} {notification.user.last_name} - Amount: {notification.amount}
                       </p>
                       <p className="font-medium text-[14px] leading-[12px] text-[#4B5563] mb-[12px]">
-                        Method: {notification.method} ({notification.bank})
+                        Bank Account: {notification.user.account_name}
                       </p>
 
                       {/* Action Button */}
