@@ -8,7 +8,7 @@ const page = async ({
 }) => {
     const { token } = await searchParams;
   return (
-    <div>
+    <div className='bg-[#FAFAFA] pt-[70px] h-screen'>
       <ResetPasswordPage token={token} />
     </div>
   )
