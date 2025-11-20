@@ -31,7 +31,7 @@ export function HeaderActions() {
   }, [showNotifications])
 
   return (
-    <div className="flex justify-end w-[80%] items-center gap-4">
+    <div className="flex absolute right-2 items-center gap-4">
       {/* Notifications Bell */}
       <div className="relative" ref={notificationsRef}>
         <Button

@@ -11,6 +11,10 @@ const AxiosInstance = axios.create({
 
 AxiosInstance.interceptors.request.use(
   (config) => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
     return config;
   },
   (error) => Promise.reject(error)
@@ -50,7 +54,7 @@ AxiosInstance.interceptors.response.use(
       } catch (refreshError) {
         if (typeof window !== "undefined") {
           localStorage.removeItem("accessToken");
-          window.location.href = "/auth/signin";
+          window.location.href = "/signin";
         }
         console.log(refreshError);
         return Promise.reject(refreshError);

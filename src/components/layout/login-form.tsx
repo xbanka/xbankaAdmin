@@ -26,6 +26,7 @@ import { toast } from "sonner";
 import { decodeAccessToken } from "@/lib/decodeToken";
 import { useUserStore } from "@/store/userStore";
 import PasswordField from "../ui/PasswordField";
+import Image from "next/image";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -50,12 +51,13 @@ export default function LoginForm() {
     mutationFn: (data: loginTypes) => loginAction(data),
     onSuccess: (result) => {
       decodeAccessToken(result.data.accessToken);
-      console.log(result, result.data.access_token)
-      console.log(decodeAccessToken(result.data.access_token))
+      console.log(result, result.data.access_token);
+      const access_token = result.data.access_token;
+      localStorage.setItem("accessToken", access_token);
+      console.log(decodeAccessToken(result.data.access_token));
       const data = {
         access_token: result.data.access_token,
       };
-      console.log(result.data)
       setUser(data);
       toast.success("User Loggedin");
       router.push("/");
@@ -70,74 +72,84 @@ export default function LoginForm() {
   };
 
   return (
-    <Card className="w-full max-w-sm mx-auto">
-      <CardHeader>
-        <CardTitle>Welcome Back, Login to your account</CardTitle>
-        <CardDescription>
-          Enter your email below to login to your account
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="flex flex-col gap-6">
-            <FormField
-              id="email"
-              label="Email Address"
-              type="text" // <-- prevents native popup, uses Zod validation
-              placeholder="john@example.com"
-              icon={Mail}
-              register={register}
-              error={errors.email}
-            />
-            <PasswordField
-              id="password"
-              label="Password"
-              placeholder="Enter your password"
-              icon={Lock}
-              register={register}
-              error={errors.password}
-            />
-            {error && (
-            <Alert variant="destructive">
-              <AlertDescription>{error.message}</AlertDescription>
-            </Alert>
-          )}
+    <div>
+      <div className="relative h-[100px] mx-auto w-[200px]">
+        <Image
+          src="/xBankaLogo.svg"
+          alt="xbanka"
+          className="object-cover"
+          fill
+        />
+      </div>
+      <Card className="w-full max-w-sm mx-auto">
+        <CardHeader>
+          <CardTitle>Welcome Back, Login to your account</CardTitle>
+          <CardDescription>
+            Enter your email below to login to your account
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div className="flex flex-col gap-6">
+              <FormField
+                id="email"
+                label="Email Address"
+                type="text" // <-- prevents native popup, uses Zod validation
+                placeholder="john@example.com"
+                icon={Mail}
+                register={register}
+                error={errors.email}
+              />
+              <PasswordField
+                id="password"
+                label="Password"
+                placeholder="Enter your password"
+                icon={Lock}
+                register={register}
+                error={errors.password}
+              />
+              {error && (
+                <Alert variant="destructive">
+                  <AlertDescription>{error.message}</AlertDescription>
+                </Alert>
+              )}
 
-            <div className="flex items-center justify-between">
-              <Link
-                href="/forgot-password"
-                className="text-sm text-[var(--abstractCyan)] hover:underline"
+              <div className="flex items-center justify-between">
+                <Link
+                  href="/forgot-password"
+                  className="text-sm text-[var(--abstractCyan)] hover:underline"
+                >
+                  Forgot password?
+                </Link>
+              </div>
+
+              <Button
+                type="submit"
+                disabled={isPending}
+                className="w-full"
+                style={{
+                  backgroundColor: "var(--abstractCyan)",
+                  borderColor: "var(--abstractCyan)",
+                }}
               >
-                Forgot password?
-              </Link>
+                {isPending ? "Signing in..." : "Sign In"}
+              </Button>
             </div>
+          </form>
 
-            <Button
-              type="submit"
-              disabled={isPending}
-              className="w-full"
-              style={{
-                backgroundColor: "var(--abstractCyan)",
-                borderColor: "var(--abstractCyan)",
-              }}
-            >
-              {isPending ? "Signing in..." : "Sign In"}
-            </Button>
+          <div className="text-center pt-4 border-t border-gray-200">
+            <p className="text-sm text-gray-600">
+              Don&apos;t have an account?{" "}
+              <Link
+                href="/signup"
+                className="font-semibold text-[var(--abstractCyan)] hover:underline"
+              >
+                Sign up here
+              </Link>
+            </p>
           </div>
-        </form>
-
-        <div className="text-center pt-4 border-t border-gray-200">
-          <p className="text-sm text-gray-600">
-            Don&apos;t have an account?{" "}
-            <Link
-              href="/signup"
-              className="font-semibold text-[var(--abstractCyan)] hover:underline"
-            >
-              Sign up here
-            </Link>
-          </p>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

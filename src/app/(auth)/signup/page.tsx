@@ -3,7 +3,7 @@ import React from 'react'
 
 const page = () => {
   return (
-    <div className='bg-[#FAFAFA] pt-[70px] h-screen'>
+    <div className='bg-[#FAFAFA] py-[70px] min-h-screen'>
       <SignupForm />
     </div>
   )
