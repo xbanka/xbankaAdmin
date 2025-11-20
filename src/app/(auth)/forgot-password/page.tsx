@@ -3,7 +3,7 @@ import React from 'react'
 
 const page = () => {
   return (
-    <div>
+    <div className='bg-[#FAFAFA] pt-[70px] h-screen'>
       <ForgotPassword />
     </div>
   )
