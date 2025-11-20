@@ -18,12 +18,13 @@ import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import {
-    passwordResetErp,
+  passwordResetErp,
   passwordResetErpProps,
 } from "@/lib/actions/passwordActions";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import PasswordField from "../ui/PasswordField";
+import Image from "next/image";
 // import { useRouter } from "next/navigation"
 
 const resetPasswordSchema = z
@@ -48,8 +49,7 @@ function ResetPasswordContent({ token }: { token?: string }) {
   //   const router = useRouter()
 
   const { mutate, isPending, error } = useMutation({
-    mutationFn: (data: passwordResetErpProps) =>
-      passwordResetErp(data),
+    mutationFn: (data: passwordResetErpProps) => passwordResetErp(data),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onSuccess: (data: any) => {
       toast.success(data.data?.message || "Bank details updated successfully!");
@@ -117,7 +117,7 @@ function ResetPasswordContent({ token }: { token?: string }) {
             )}
 
             <Button
-            className="w-full"
+              className="w-full"
               type="submit"
               size="sm"
               disabled={isPending}
@@ -144,14 +144,24 @@ function ResetPasswordContent({ token }: { token?: string }) {
 
 export default function ResetPasswordPage({ token }: { token?: string }) {
   return (
-    <Suspense
-      fallback={
-        <main className="flex items-center justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </main>
-      }
-    >
-      <ResetPasswordContent token={token} />
-    </Suspense>
+    <div>
+      <div className="relative h-[100px] mx-auto w-[200px]">
+        <Image
+          src="/xBankaLogo.svg"
+          alt="xbanka"
+          className="object-cover"
+          fill
+        />
+      </div>
+      <Suspense
+        fallback={
+          <main className="flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </main>
+        }
+      >
+        <ResetPasswordContent token={token} />
+      </Suspense>
+    </div>
   );
 }
