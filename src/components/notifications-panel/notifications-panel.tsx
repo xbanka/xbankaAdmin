@@ -20,13 +20,14 @@ interface Notification {
   type: "system" | "payout_request" | "approved" | "declined";
   is_read: boolean;
   read_at: string | null;
+  bank_name: string;
+  amount: number;
+  method: "string",
   user: {
     first_name: string;
     last_name: string;
     email: string;
-    account_name: string;
   };
-  amount: string;
   timestamp: string;
 }
 
@@ -218,10 +219,10 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
                           <p className="font-medium text-[14px] leading-[12px] text-[#4B5563] mb-[8px]">
                             {notification.user.first_name}{" "}
                             {notification.user.last_name} - Amount:{" "}
-                            {notification.amount}
+                            N {notification.amount}
                           </p>
                           <p className="font-medium text-[14px] leading-[12px] text-[#4B5563] mb-[12px]">
-                            Bank Account: {notification.user.account_name}
+                            Bank Account: {notification.bank_name}
                           </p>
 
                           {/* Action Button */}
