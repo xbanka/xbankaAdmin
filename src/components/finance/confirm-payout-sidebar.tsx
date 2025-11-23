@@ -114,7 +114,7 @@ export function ConfirmPayoutSidebar({
                   title="Bank Details"
                   content={
                     <div className="font-[500] text-[14px] leading-[18px]">
-                      {payout.bankDetails}
+                      {payout.affiliate.account_no}
                     </div>
                   }
                 />
