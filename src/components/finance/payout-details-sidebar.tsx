@@ -59,23 +59,23 @@ export function PayoutDetailsSidebar({
                 Affiliate Info
               </h3>
               <div className="grid grid-cols-3 gap-4 bg-white rounded-[8px] p-3">
-                <CustomDetailsName title="Name" body={payout.affiliate} />
+                <CustomDetailsName title="Name" body={payout.affiliate.first_name} />
                 <CustomDetailsName
                   title="Username"
-                  body={payout.affiliateHandle}
+                  body={payout.affiliate.username}
                 />
                 <CustomDetailsName title="Status" body="Verified" />
                 <CustomDetailsName
                   title="Commission rate"
-                  body={`${payout.commissionRate}%`}
+                  body={`${payout.amount}%`}
                 />
                 <CustomDetailsName
                   title="Total payout"
-                  body={`₦${payout.walletBalance.toLocaleString()}`}
+                  body={`₦${payout.amount.toLocaleString()}`}
                 />
                 <CustomDetailsName
                   title="Joined"
-                  body={`₦${payout.walletBalance.toLocaleString()}`}
+                  body={`₦${payout.amount.toLocaleString()}`}
                 />
               </div>
             </div>
@@ -105,13 +105,13 @@ export function PayoutDetailsSidebar({
                 title="Bank Details"
                 content={
                   <div className="font-[500] text-[14px] leading-[18px]">
-                    {payout.bankDetails}
+                    {payout.affiliate.account_no}
                   </div>
                 }
               />
             </div>
             </div>
-            {payout.note && (
+            {/* {payout.note && (
               <div className="bg-[#F5F5F5] space-y-1 p-3 rounded-[12px]">
                 <h3 className="text-[12px] font-[400] leading-[16px] text-[#606368]">
                   Note
@@ -120,7 +120,7 @@ export function PayoutDetailsSidebar({
                   {payout.note}
                 </p>
               </div>
-            )}
+            )} */}
           </div>
         </div>
 
