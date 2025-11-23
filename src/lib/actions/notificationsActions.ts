@@ -41,3 +41,40 @@ export const markAsReadNotification = async ({
     };
   }
 };
+
+export const getPayouts = async ({
+  page = 1,
+  limit = 10,
+  status,
+}: {
+  page?: number;
+  limit?: number;
+  status?: string | null;
+}) => {
+  try {
+    const response = await AxiosInstance.get(`/api/erp/payouts`, {
+      params: {
+        page,
+        limit,
+        status,
+      },
+    });
+
+    return {
+      success: true,
+      data: response.data.data,  // array of payouts
+      page: response.data.page,
+      limit: response.data.limit,
+      total: response.data.total,
+      pages: response.data.pages,
+      statusCode: response.status,
+    };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    throw {
+      success: false,
+      status: error.status,
+      message: error.message,
+    };
+  }
+};
