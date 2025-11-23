@@ -9,88 +9,94 @@ import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Filter, Search, Upload } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { SelectFieldLayout } from "@/components/layout/SelectFieldLayout";
+import { useQuery } from "@tanstack/react-query";
+import { getPayouts } from "@/lib/actions/notificationsActions";
 
 export interface PayoutData {
   id: string;
-  requestId: string;
-  affiliate: string;
-  affiliateHandle: string;
-  amount: number;
-  designatedBank: string;
-  status: "pending" | "completed" | "declined";
-  requestedDate: string;
-  reviewer: string;
-  commissionRate: number;
-  walletBalance: number;
-  paymentMethod: string;
-  bankDetails: string;
-  note?: string;
+  amount: string;
+  status: string;
+  payment_ref: string;
+  paid_at: string;
+  affiliate: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+    username: string;
+    phone_no: string;
+    bank: string;
+    account_no: string;
+    ref_code: string;
+    custom_refcode: string;
+    created_at: string;
+  };
 }
 
 // Mock data - replace with real API calls
-const MOCK_PAYOUTS: PayoutData[] = [
-  {
-    id: "1",
-    requestId: "PAYT-0122",
-    affiliate: "Joseph Eyebiakin",
-    affiliateHandle: "@AilenRoar",
-    amount: 450000,
-    designatedBank: "GTBank",
-    status: "pending",
-    requestedDate: "21 Sep 2025",
-    reviewer: "Accountant Name",
-    commissionRate: 2.5,
-    walletBalance: 500000,
-    paymentMethod: "Bank Transfer",
-    bankDetails: "DTB - 0122223445",
-    note: "Need urgent processing for client payment due tomorrow",
-  },
-  {
-    id: "2",
-    requestId: "PAYT-0123",
-    affiliate: "Amarachi",
-    affiliateHandle: "@SolanArksy",
-    amount: 155000,
-    designatedBank: "Kuda",
-    status: "pending",
-    requestedDate: "21 Sep 2025",
-    reviewer: "Accountant Name",
-    commissionRate: 2.5,
-    walletBalance: 500000,
-    paymentMethod: "Bank Transfer",
-    bankDetails: "DTB - 0122223445",
-  },
-  {
-    id: "3",
-    requestId: "PAYT-0124",
-    affiliate: "TaylorGuest",
-    affiliateHandle: "@TaylorGuest",
-    amount: 160000,
-    designatedBank: "Kuda",
-    status: "pending",
-    requestedDate: "21 Sep 2025",
-    reviewer: "Accountant Name",
-    commissionRate: 2.5,
-    walletBalance: 500000,
-    paymentMethod: "Bank Transfer",
-    bankDetails: "DTB - 0122223445",
-  },
-  {
-    id: "4",
-    requestId: "PAYT-0125",
-    affiliate: "OrganBlaze",
-    affiliateHandle: "@OrganBlaze",
-    amount: 165000,
-    designatedBank: "GTBank",
-    status: "declined",
-    requestedDate: "23 Sep 2025",
-    reviewer: "Accountant Name",
-    commissionRate: 2.5,
-    walletBalance: 500000,
-    paymentMethod: "Bank Transfer",
-    bankDetails: "DTB - 0122223445",
-  },
-];
+// const MOCK_PAYOUTS: PayoutData[] = [
+//   {
+//     id: "1",
+//     requestId: "PAYT-0122",
+//     affiliate: "Joseph Eyebiakin",
+//     affiliateHandle: "@AilenRoar",
+//     amount: 450000,
+//     designatedBank: "GTBank",
+//     status: "pending",
+//     requestedDate: "21 Sep 2025",
+//     reviewer: "Accountant Name",
+//     commissionRate: 2.5,
+//     walletBalance: 500000,
+//     paymentMethod: "Bank Transfer",
+//     bankDetails: "DTB - 0122223445",
+//     note: "Need urgent processing for client payment due tomorrow",
+//   },
+//   {
+//     id: "2",
+//     requestId: "PAYT-0123",
+//     affiliate: "Amarachi",
+//     affiliateHandle: "@SolanArksy",
+//     amount: 155000,
+//     designatedBank: "Kuda",
+//     status: "pending",
+//     requestedDate: "21 Sep 2025",
+//     reviewer: "Accountant Name",
+//     commissionRate: 2.5,
+//     walletBalance: 500000,
+//     paymentMethod: "Bank Transfer",
+//     bankDetails: "DTB - 0122223445",
+//   },
+//   {
+//     id: "3",
+//     requestId: "PAYT-0124",
+//     affiliate: "TaylorGuest",
+//     affiliateHandle: "@TaylorGuest",
+//     amount: 160000,
+//     designatedBank: "Kuda",
+//     status: "pending",
+//     requestedDate: "21 Sep 2025",
+//     reviewer: "Accountant Name",
+//     commissionRate: 2.5,
+//     walletBalance: 500000,
+//     paymentMethod: "Bank Transfer",
+//     bankDetails: "DTB - 0122223445",
+//   },
+//   {
+//     id: "4",
+//     requestId: "PAYT-0125",
+//     affiliate: "OrganBlaze",
+//     affiliateHandle: "@OrganBlaze",
+//     amount: 165000,
+//     designatedBank: "GTBank",
+//     status: "declined",
+//     requestedDate: "23 Sep 2025",
+//     reviewer: "Accountant Name",
+//     commissionRate: 2.5,
+//     walletBalance: 500000,
+//     paymentMethod: "Bank Transfer",
+//     bankDetails: "DTB - 0122223445",
+//   },
+// ];
 
 const filterOptions = ["all", "Date Submitted"];
 
@@ -98,7 +104,6 @@ export default function FinancePage() {
   const [selectedPayout, setSelectedPayout] = useState<PayoutData | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-  const [payouts, setPayouts] = useState<PayoutData[]>(MOCK_PAYOUTS);
   const [activeFilter, setActiveFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -109,21 +114,34 @@ export default function FinancePage() {
     undefined
   );
 
-  const filteredData = payouts.filter((item: PayoutData) => {
-    const matchesSearch =
-      item.affiliate?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.affiliateHandle?.toLowerCase().includes(searchQuery.toLowerCase());
-
-    const matchesStatus =
-      activeFilter === "all" ||
-      item.status?.toLowerCase() === activeFilter.toLowerCase();
-
-    const matchesTransactionType =
-      transactionTypeFilter === "all" ||
-      item.requestedDate?.toLowerCase() === transactionTypeFilter.toLowerCase();
-
-    return matchesSearch && matchesStatus && matchesTransactionType;
+  const { data, isPending, error } = useQuery({
+    queryKey: ["payouts", page, activeFilter],
+    queryFn: () =>
+      getPayouts({
+        page,
+        limit: 10,
+        status: activeFilter === "all" ? undefined : activeFilter,
+      }),
   });
+
+  const filteredData =
+    data?.data?.filter((item: PayoutData) => {
+      const matchesSearch =
+        item.affiliate?.username
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        item.affiliate?.bank.toLowerCase().includes(searchQuery.toLowerCase());
+
+      const matchesStatus =
+        activeFilter === "all" ||
+        item.status?.toLowerCase() === activeFilter.toLowerCase();
+
+      const matchesTransactionType =
+        transactionTypeFilter === "all" ||
+        item.status?.toLowerCase() === transactionTypeFilter.toLowerCase();
+
+      return matchesSearch && matchesStatus && matchesTransactionType;
+    }) || [];
 
   const handleSelectPayout = (payout: PayoutData) => {
     setSelectedPayout(payout);
@@ -131,15 +149,15 @@ export default function FinancePage() {
   };
 
   const handleDeclinePayout = () => {
-    if (selectedPayout) {
-      setPayouts(
-        payouts.map((p) =>
-          p.id === selectedPayout.id ? { ...p, status: "declined" as const } : p
-        )
-      );
-      setIsDetailsOpen(false);
-      setSelectedPayout(null);
-    }
+    // if (selectedPayout) {
+    //   setPayouts(
+    //     payouts.map((p) =>
+    //       p.id === selectedPayout.id ? { ...p, status: "declined" as const } : p
+    //     )
+    //   );
+    // }
+    setIsDetailsOpen(false);
+    setSelectedPayout(null);
   };
 
   const handleProcessPayout = () => {
@@ -148,33 +166,46 @@ export default function FinancePage() {
   };
 
   const handleConfirmPayout = () => {
-    if (selectedPayout) {
-      setPayouts(
-        payouts.map((p) =>
-          p.id === selectedPayout.id
-            ? { ...p, status: "completed" as const }
-            : p
-        )
-      );
-      setIsConfirmOpen(false);
-      setSelectedPayout(null);
-    }
+    // if (selectedPayout) {
+    //   setPayouts(
+    //     payouts.map((p) =>
+    //       p.id === selectedPayout.id
+    //         ? { ...p, status: "completed" as const }
+    //         : p
+    //     )
+    //   );
+    // }
+    setIsConfirmOpen(false);
+    setSelectedPayout(null);
   };
 
   const columns = [
-    { key: "requestId", header: "Request ID" },
-    { key: "affiliate", header: "Affiliate" },
-    // { key: "affiliateHandle", header: "Handle" },
+    { key: "id", header: "Request ID" },
     {
-      key: "amount",
-      header: "Amount (₦)",
-      render: (item: PayoutData) => (
-        <span className="font-medium text-gray-700">
-          ₦{item.amount.toLocaleString()}
-        </span>
-      ),
-    },
-    { key: "designatedBank", header: "Bank" },
+    key: "affiliate",
+    header: "Affiliate",
+    render: (item: PayoutData) => (
+      <span className="font-medium">
+        {item.affiliate.username}
+      </span>
+    ),
+  },
+    {
+    key: "amount",
+    header: "Amount (₦)",
+    render: (item: PayoutData) => (
+      <span className="font-medium text-gray-700">
+        ₦{Number(item.amount).toLocaleString()}
+      </span>
+    ),
+  },
+    {
+    key: "bank",
+    header: "Designated Bank",
+    render: (item: PayoutData) => (
+      <span>{item.affiliate.bank}</span>
+    ),
+  },
     {
       key: "status",
       header: "Status",
@@ -192,7 +223,13 @@ export default function FinancePage() {
         </span>
       ),
     },
-    { key: "requestedDate", header: "Requested Date" },
+   {
+    key: "requestedDate",
+    header: "Requested Date",
+    render: (item: PayoutData) => (
+      <span>{new Date(item.paid_at).toLocaleDateString()}</span>
+    ),
+  },
     { key: "requestedDate", header: "Reviewer" },
     {
       key: "actions",
@@ -220,7 +257,10 @@ export default function FinancePage() {
           <h1 className="text-[18px] font-[600] leading-[22px] text-[#111827]">
             Finance Overview
           </h1>
-          <Button size="sm" variant={"outline"}><Upload />Export</Button>
+          <Button size="sm" variant={"outline"}>
+            <Upload />
+            Export
+          </Button>
         </div>
 
         <div className="flex items-center justify-between mb-[24px]">

@@ -20,78 +20,16 @@ interface Notification {
   type: "system" | "payout_request" | "approved" | "declined";
   is_read: boolean;
   read_at: string | null;
+  bank_name: string;
+  amount: number;
+  method: "string",
   user: {
     first_name: string;
     last_name: string;
     email: string;
-    account_name: string;
   };
-  amount: string;
   timestamp: string;
 }
-
-// const mockNotifications: Notification[] = [
-//   {
-//     id: "3fa85f64-5717-4562-b3fc-2c963f66afa1",
-//     message: "Affiliate Payout Request",
-//     type: "payout_request",
-//     is_read: false,
-//     read_at: null,
-//     user: {
-//       first_name: "Joseph",
-//       last_name: "Eyebiokin",
-//       email: "joseph@example.com",
-//       account_name: "GTBank",
-//     },
-//     amount: "₦50,000",
-//     timestamp: "2h ago",
-//   },
-//   {
-//     id: "3fa85f64-5717-4562-b3fc-2c963f66afa2",
-//     message: "Affiliate Payout Request",
-//     type: "payout_request",
-//     is_read: false,
-//     read_at: null,
-//     user: {
-//       first_name: "David",
-//       last_name: "Okonkwo",
-//       email: "david@example.com",
-//       account_name: "Kuda",
-//     },
-//     amount: "₦50,000",
-//     timestamp: "2h ago",
-//   },
-//   {
-//     id: "3fa85f64-5717-4562-b3fc-2c963f66afa3",
-//     message: "Affiliate Payout Request",
-//     type: "payout_request",
-//     is_read: true,
-//     read_at: "2025-11-19T13:34:29.232Z",
-//     user: {
-//       first_name: "Taylor",
-//       last_name: "Guest",
-//       email: "taylor@example.com",
-//       account_name: "UBA",
-//     },
-//     amount: "₦60,000",
-//     timestamp: "3h ago",
-//   },
-//   {
-//     id: "3fa85f64-5717-4562-b3fc-2c963f66afa4",
-//     message: "Payout Approved",
-//     type: "approved",
-//     is_read: true,
-//     read_at: "2025-11-19T12:00:00.000Z",
-//     user: {
-//       first_name: "James",
-//       last_name: "Frost",
-//       email: "james@example.com",
-//       account_name: "Access Bank",
-//     },
-//     amount: "₦75,000",
-//     timestamp: "1d ago",
-//   },
-// ];
 
 export function NotificationsPanel({ onClose }: { onClose: () => void }) {
   const [activeTab, setActiveTab] = useState<"all" | "unread" | "archived">(
@@ -221,7 +159,7 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
                             {notification.amount}
                           </p>
                           <p className="font-medium text-[14px] leading-[12px] text-[#4B5563] mb-[12px]">
-                            Bank Account: {notification.user.account_name}
+                            Bank Account: {notification.bank_name}
                           </p>
 
                           {/* Action Button */}
