@@ -120,7 +120,7 @@ export function ConfirmPayoutSidebar({
                 />
               </div>
             </div>
-            {payout.note && (
+            {/* {payout.note && (
               <div className="bg-[#F5F5F5] space-y-1 p-3 rounded-[12px]">
                 <h3 className="text-[12px] font-[400] leading-[16px] text-[#606368]">
                   Note
@@ -129,7 +129,7 @@ export function ConfirmPayoutSidebar({
                   {payout.note}
                 </p>
               </div>
-            )}
+            )} */}
           </div>
         </div>
         {/* Form Fields */}
