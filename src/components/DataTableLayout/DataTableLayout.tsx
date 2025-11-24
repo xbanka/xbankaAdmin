@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import type React from "react"
@@ -142,32 +143,64 @@ export function DataTableLayout<T>({
       </div>
 
       {/* MOBILE CARD VIEW */}
-      <div className="md:hidden">
-        {isLoading && <div className="p-6 text-center text-gray-500">Loading...</div>}
+      {/* MOBILE CARD VIEW */}
+<div className="md:hidden">
+  {isLoading && <div className="p-6 text-center text-gray-500">Loading...</div>}
 
-        {!isLoading && isError && <div className="p-6 text-center text-red-500">{errorMessage}</div>}
+  {!isLoading && isError && <div className="p-6 text-center text-red-500">{errorMessage}</div>}
 
-        {!isLoading && !isError && paginatedData?.length === 0 && (
-          <div className="p-6 text-center text-[#111827] text-[14px] font-[500] leading-[18px]">{emptyMessage}</div>
-        )}
+  {!isLoading && !isError && paginatedData?.length === 0 && (
+    <div className="p-6 text-center text-[#111827] text-[14px] font-[500] leading-[18px]">
+      {emptyMessage}
+    </div>
+  )}
 
-        {!isLoading && !isError && (
-          <div className="space-y-3 p-4">
-            {paginatedData?.map((item) => (
-              <div key={rowKey(item)} className="bg-white border border-[#E5E7EB] rounded-[8px] p-4 space-y-3">
-                {visibleColumns.map((col) => (
-                  <div key={col.key as string} className="flex justify-between items-start gap-2">
-                    <span className="text-[12px] leading-[16px] text-[#606368] font-medium">{col.header}</span>
-                    <span className="text-[14px] font-[500] leading-[18px] text-[#111827] text-right">
-                      {col.render ? col.render(item) : (item as never)[col.key]}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            ))}
+  {!isLoading && !isError && (
+    <div className="space-y-4 p-4">
+      {paginatedData?.map((item) => (
+        <div
+          key={rowKey(item)}
+          className="bg-white border border-[#E5E7EB] rounded-[10px] p-4 shadow-sm space-y-3"
+        >
+          {/* Main top row */}
+          <div className="flex justify-between items-center">
+            <div className="flex flex-col">
+              <span className="text-[12px] text-[#606368] font-medium">Request ID</span>
+              <span className="text-[15px] font-[600] text-[#111827]">
+                {(item as any).requestId ?? (item as any).id}
+              </span>
+            </div>
+
+            {/* Status (rendered with your existing badge colors) */}
+            <div>
+              {columns.find((c) => c.key === "status")?.render?.(item)}
+            </div>
           </div>
-        )}
-      </div>
+
+          {/* Other fields */}
+          <div className="space-y-2 pt-2 border-t border-[#E5E7EB]">
+            {visibleColumns
+              .filter((col) => col.key !== "status" && col.key !== "actions" && col.key !== "requestId")
+              .map((col) => (
+                <div key={col.key as string} className="flex justify-between items-start">
+                  <span className="text-[12px] text-[#606368] font-medium">{col.header}</span>
+                  <span className="text-[14px] font-[500] text-[#111827] text-right">
+                    {col.render ? col.render(item) : (item as any)[col.key]}
+                  </span>
+                </div>
+              ))}
+          </div>
+
+          {/* Actions Button */}
+          <div className="pt-2">
+            {columns.find((c) => c.key === "actions")?.render?.(item)}
+          </div>
+        </div>
+      ))}
+    </div>
+  )}
+</div>
+
 
       {/* PAGINATION */}
       {totalPages > 1 && (
