@@ -11,6 +11,8 @@ import { Input } from "@/components/ui/input";
 import { SelectFieldLayout } from "@/components/layout/SelectFieldLayout";
 import { useQuery } from "@tanstack/react-query";
 import { getPayouts } from "@/lib/actions/notificationsActions";
+// import { useIndividualPayout } from "@/hooks/usePayout";
+import { usePayoutSidebarStore } from "@/store/usePayoutSidebarStore";
 
 export interface PayoutData {
   id: string;
@@ -33,71 +35,6 @@ export interface PayoutData {
   };
 }
 
-// Mock data - replace with real API calls
-// const MOCK_PAYOUTS: PayoutData[] = [
-//   {
-//     id: "1",
-//     requestId: "PAYT-0122",
-//     affiliate: "Joseph Eyebiakin",
-//     affiliateHandle: "@AilenRoar",
-//     amount: 450000,
-//     designatedBank: "GTBank",
-//     status: "pending",
-//     requestedDate: "21 Sep 2025",
-//     reviewer: "Accountant Name",
-//     commissionRate: 2.5,
-//     walletBalance: 500000,
-//     paymentMethod: "Bank Transfer",
-//     bankDetails: "DTB - 0122223445",
-//     note: "Need urgent processing for client payment due tomorrow",
-//   },
-//   {
-//     id: "2",
-//     requestId: "PAYT-0123",
-//     affiliate: "Amarachi",
-//     affiliateHandle: "@SolanArksy",
-//     amount: 155000,
-//     designatedBank: "Kuda",
-//     status: "pending",
-//     requestedDate: "21 Sep 2025",
-//     reviewer: "Accountant Name",
-//     commissionRate: 2.5,
-//     walletBalance: 500000,
-//     paymentMethod: "Bank Transfer",
-//     bankDetails: "DTB - 0122223445",
-//   },
-//   {
-//     id: "3",
-//     requestId: "PAYT-0124",
-//     affiliate: "TaylorGuest",
-//     affiliateHandle: "@TaylorGuest",
-//     amount: 160000,
-//     designatedBank: "Kuda",
-//     status: "pending",
-//     requestedDate: "21 Sep 2025",
-//     reviewer: "Accountant Name",
-//     commissionRate: 2.5,
-//     walletBalance: 500000,
-//     paymentMethod: "Bank Transfer",
-//     bankDetails: "DTB - 0122223445",
-//   },
-//   {
-//     id: "4",
-//     requestId: "PAYT-0125",
-//     affiliate: "OrganBlaze",
-//     affiliateHandle: "@OrganBlaze",
-//     amount: 165000,
-//     designatedBank: "GTBank",
-//     status: "declined",
-//     requestedDate: "23 Sep 2025",
-//     reviewer: "Accountant Name",
-//     commissionRate: 2.5,
-//     walletBalance: 500000,
-//     paymentMethod: "Bank Transfer",
-//     bankDetails: "DTB - 0122223445",
-//   },
-// ];
-
 const filterOptions = ["all", "Date Submitted"];
 
 export default function FinancePage() {
@@ -114,7 +51,9 @@ export default function FinancePage() {
     undefined
   );
 
-  const { data, isPending, error } = useQuery({
+  // const { isDetailsOpen, payout, isConfirmOpen, openDetailsSidebar, openConfirmSidebar, closeDetailsSidebar, closeConfirmSidebar } = usePayoutSidebarStore();
+
+  const { data, isPending, isError, error } = useQuery({
     queryKey: ["payouts", page, activeFilter],
     queryFn: () =>
       getPayouts({
@@ -124,13 +63,14 @@ export default function FinancePage() {
       }),
   });
 
+  // const { data: individualPayout, isPending: individualPayoutPending, error: individualPayoutError } = useIndividualPayout();
+
   const filteredData =
     data?.data?.filter((item: PayoutData) => {
       const matchesSearch =
-        item.affiliate?.username
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase()) ||
-        item.affiliate?.bank.toLowerCase().includes(searchQuery.toLowerCase());
+        item?.affiliate?.username
+          ?.includes(searchQuery.toLowerCase()) ||
+        item?.affiliate?.bank?.toLowerCase().includes(searchQuery.toLowerCase());
 
       const matchesStatus =
         activeFilter === "all" ||
@@ -180,7 +120,7 @@ export default function FinancePage() {
   };
 
   const columns = [
-    { key: "id", header: "Request ID" },
+    { key: "payment_ref", header: "Request ID" },
     {
     key: "affiliate",
     header: "Affiliate",
@@ -230,7 +170,7 @@ export default function FinancePage() {
       <span>{new Date(item.paid_at).toLocaleDateString()}</span>
     ),
   },
-    { key: "requestedDate", header: "Reviewer" },
+    // { key: "requestedDate", header: "Reviewer" },
     {
       key: "actions",
       header: "Actions",
@@ -263,7 +203,7 @@ export default function FinancePage() {
           </Button>
         </div>
 
-        <div className="flex items-center justify-between mb-[24px]">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-[24px]">
           <div className="flex gap-1">
             {["All", "Pending", "Completed", "Declined"].map((filter) => (
               <Button
@@ -290,7 +230,7 @@ export default function FinancePage() {
                 placeholder="Search by name or email"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="py-[10px] px-[12px] pl-10 w-64"
+                className="py-[10px] px-[12px] pl-10 md:w-64"
               />
             </div>
 
@@ -311,6 +251,9 @@ export default function FinancePage() {
         <DataTableLayout
           data={filteredData}
           columns={columns}
+          isError={isError}
+          isLoading={isPending}
+          errorMessage={error?.message}
           rowKey={(item) => item.id}
           itemsPerPage={5}
           emptyMessage="No payout requests available."
