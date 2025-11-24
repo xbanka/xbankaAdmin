@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { SelectFieldLayout } from "@/components/layout/SelectFieldLayout";
 import { useQuery } from "@tanstack/react-query";
 import { getPayouts } from "@/lib/actions/notificationsActions";
-import { useIndividualPayout } from "@/hooks/usePayout";
+// import { useIndividualPayout } from "@/hooks/usePayout";
 import { usePayoutSidebarStore } from "@/store/usePayoutSidebarStore";
 
 export interface PayoutData {
@@ -63,7 +63,7 @@ export default function FinancePage() {
       }),
   });
 
-  const { data: individualPayout, isPending: individualPayoutPending, error: individualPayoutError } = useIndividualPayout();
+  // const { data: individualPayout, isPending: individualPayoutPending, error: individualPayoutError } = useIndividualPayout();
 
   const filteredData =
     data?.data?.filter((item: PayoutData) => {
