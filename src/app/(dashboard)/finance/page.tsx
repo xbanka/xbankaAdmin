@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { DataTableLayout } from "@/components/DataTableLayout/DataTableLayout";
 import { PayoutDetailsSidebar } from "@/components/finance/payout-details-sidebar";
@@ -11,8 +11,9 @@ import { Input } from "@/components/ui/input";
 import { SelectFieldLayout } from "@/components/layout/SelectFieldLayout";
 import { useQuery } from "@tanstack/react-query";
 import { getPayouts } from "@/lib/actions/notificationsActions";
-// import { useIndividualPayout } from "@/hooks/usePayout";
+import { useIndividualPayout, useProcessPayout } from "@/hooks/usePayout";
 import { usePayoutSidebarStore } from "@/store/usePayoutSidebarStore";
+import { DialogLayout } from "@/components/layout/modalLayout";
 
 export interface PayoutData {
   id: string;
@@ -38,20 +39,24 @@ export interface PayoutData {
 const filterOptions = ["all", "Date Submitted"];
 
 export default function FinancePage() {
-  const [selectedPayout, setSelectedPayout] = useState<PayoutData | null>(null);
-  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [transactionTypeFilter, setTransactionTypeFilter] = useState("all");
   const [page, setPage] = useState(1);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [statusFilter, setStatusFilter] = useState<string | undefined>(
-    undefined
-  );
+  const [openModal, setOpenModal] = useState(false);
 
-  // const { isDetailsOpen, payout, isConfirmOpen, openDetailsSidebar, openConfirmSidebar, closeDetailsSidebar, closeConfirmSidebar } = usePayoutSidebarStore();
+  const {
+    isDetailsOpen,
+    payout,
+    isConfirmOpen,
+    openDetailsSidebar,
+    openConfirmSidebar,
+    closeDetailsSidebar,
+    closeConfirmSidebar,
+    selectedPayoutId,
+  } = usePayoutSidebarStore();
 
   const { data, isPending, isError, error } = useQuery({
     queryKey: ["payouts", page, activeFilter],
@@ -63,14 +68,21 @@ export default function FinancePage() {
       }),
   });
 
-  // const { data: individualPayout, isPending: individualPayoutPending, error: individualPayoutError } = useIndividualPayout();
+  const {
+    data: individualPayout,
+    isPending: individualPayoutPending,
+    error: individualPayoutError,
+  } = useIndividualPayout(selectedPayoutId ?? null);
+  const { mutate: processPayoutMutation, isPending: processingPayout } =
+    useProcessPayout();
 
   const filteredData =
     data?.data?.filter((item: PayoutData) => {
       const matchesSearch =
-        item?.affiliate?.username
-          ?.includes(searchQuery.toLowerCase()) ||
-        item?.affiliate?.bank?.toLowerCase().includes(searchQuery.toLowerCase());
+        item?.affiliate?.username?.includes(searchQuery.toLowerCase()) ||
+        item?.affiliate?.bank
+          ?.toLowerCase()
+          .includes(searchQuery.toLowerCase());
 
       const matchesStatus =
         activeFilter === "all" ||
@@ -84,75 +96,67 @@ export default function FinancePage() {
     }) || [];
 
   const handleSelectPayout = (payout: PayoutData) => {
-    setSelectedPayout(payout);
-    setIsDetailsOpen(true);
+    openDetailsSidebar(payout);
   };
 
   const handleDeclinePayout = () => {
-    // if (selectedPayout) {
-    //   setPayouts(
-    //     payouts.map((p) =>
-    //       p.id === selectedPayout.id ? { ...p, status: "declined" as const } : p
-    //     )
-    //   );
-    // }
-    setIsDetailsOpen(false);
-    setSelectedPayout(null);
+    closeDetailsSidebar();
   };
 
   const handleProcessPayout = () => {
-    setIsDetailsOpen(false);
-    setIsConfirmOpen(true);
+    closeDetailsSidebar();
+    if (payout) {
+      openConfirmSidebar(payout);
+    }
   };
 
   const handleConfirmPayout = () => {
-    // if (selectedPayout) {
-    //   setPayouts(
-    //     payouts.map((p) =>
-    //       p.id === selectedPayout.id
-    //         ? { ...p, status: "completed" as const }
-    //         : p
-    //     )
-    //   );
-    // }
-    setIsConfirmOpen(false);
-    setSelectedPayout(null);
+    setOpenModal(true);
+  };
+
+  const handlePayout = () => {
+  console.log("clicked", payout)
+    if (!payout) return;
+
+    processPayoutMutation(payout.id, {
+      onSuccess: () => {
+        setOpenModal(false);
+        closeConfirmSidebar();
+        closeDetailsSidebar();
+      },
+    });
   };
 
   const columns = [
     { key: "payment_ref", header: "Request ID" },
     {
-    key: "affiliate",
-    header: "Affiliate",
-    render: (item: PayoutData) => (
-      <span className="font-medium">
-        {item.affiliate.username}
-      </span>
-    ),
-  },
+      key: "affiliate",
+      header: "Affiliate",
+      render: (item: PayoutData) => (
+        <span className="font-medium">{item.affiliate.username}</span>
+      ),
+    },
     {
-    key: "amount",
-    header: "Amount (₦)",
-    render: (item: PayoutData) => (
-      <span className="font-medium text-gray-700">
-        ₦{Number(item.amount).toLocaleString()}
-      </span>
-    ),
-  },
+      key: "amount",
+      header: "Amount (₦)",
+      render: (item: PayoutData) => (
+        <span className="font-medium text-gray-700">
+          ₦{Number(item.amount).toLocaleString()}
+        </span>
+      ),
+    },
     {
-    key: "bank",
-    header: "Designated Bank",
-    render: (item: PayoutData) => (
-      <span>{item.affiliate.bank}</span>
-    ),
-  },
+      key: "bank",
+      header: "Designated Bank",
+      render: (item: PayoutData) => <span>{item.affiliate.bank}</span>,
+    },
     {
       key: "status",
       header: "Status",
       render: (item: PayoutData) => (
         <span
           className={`capitalize px-3 py-2 rounded-[36px] text-xs font-medium ${
-            item.status === "completed"
+            item.status === "paid"
               ? "bg-[#D1FAE5] text-[#37703F]"
               : item.status === "declined"
               ? "bg-[#FCE6E6] text-[#EF4444]"
@@ -163,13 +167,13 @@ export default function FinancePage() {
         </span>
       ),
     },
-   {
-    key: "requestedDate",
-    header: "Requested Date",
-    render: (item: PayoutData) => (
-      <span>{new Date(item.paid_at).toLocaleDateString()}</span>
-    ),
-  },
+    {
+      key: "requestedDate",
+      header: "Requested Date",
+      render: (item: PayoutData) => (
+        <span>{new Date(item.paid_at).toLocaleDateString()}</span>
+      ),
+    },
     // { key: "requestedDate", header: "Reviewer" },
     {
       key: "actions",
@@ -205,7 +209,7 @@ export default function FinancePage() {
 
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-[24px]">
           <div className="flex gap-1">
-            {["All", "Pending", "Completed", "Declined"].map((filter) => (
+            {["All", "Pending", "Paid", "Declined"].map((filter) => (
               <Button
                 key={filter}
                 variant={
@@ -259,24 +263,49 @@ export default function FinancePage() {
           emptyMessage="No payout requests available."
         />
 
-        {selectedPayout && (
+        {payout && (
           <PayoutDetailsSidebar
             isOpen={isDetailsOpen}
-            onClose={() => setIsDetailsOpen(false)}
-            payout={selectedPayout}
+            onClose={closeDetailsSidebar}
+            payout={payout}
             onDecline={handleDeclinePayout}
             onProcess={handleProcessPayout}
+            loading={individualPayoutPending}
+            error={individualPayoutError?.message || ""}
           />
         )}
 
-        {selectedPayout && (
+        {payout && (
           <ConfirmPayoutSidebar
             isOpen={isConfirmOpen}
-            onClose={() => setIsConfirmOpen(false)}
-            payout={selectedPayout}
+            onClose={closeConfirmSidebar}
+            payout={payout}
             onConfirm={handleConfirmPayout}
+            loading={false}
+            error={""}
           />
         )}
+
+        <DialogLayout
+          open={openModal}
+          onClose={() => setOpenModal(!openModal)}
+          title="Process Payout"
+        >
+          <div>
+            <h1>Are you sure you want to confirm payout</h1>
+            <div className="mt-[15px] flex gap-[20px]">
+              <Button
+                onClick={() => setOpenModal(!openModal)}
+                variant="outline"
+              >
+                Cancel
+              </Button>
+              <Button disabled={processingPayout} onClick={handlePayout}>
+                {processingPayout ? "Confirming..." : "Confirm"}
+              </Button>
+            </div>
+          </div>
+        </DialogLayout>
       </div>
     </DashboardLayout>
   );

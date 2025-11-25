@@ -2,7 +2,7 @@ import AxiosInstance from "../Axiosinstance/axiosInstance";
 
 export const getIndividualPayout = async (payout_id: string) => {
   try {
-    const response = await AxiosInstance.post(`/api/erp/payouts/{payout_id}`);
+    const response = await AxiosInstance.get(`/api/erp/payouts/${payout_id}`);
     return {
       success: true,
       data: response.data, // ✅ only return actual payload
