@@ -134,7 +134,7 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
                       }`}
                       onClick={() => {
                         markReadMutation.mutate({ id: notification.id });
-                        setSelectedPayoutId(notification.payout_id); 
+                        setSelectedPayoutId(notification.id); 
 
                         router.push('/finance');
                       }}
