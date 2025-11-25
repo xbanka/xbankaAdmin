@@ -5,6 +5,7 @@ import type React from "react"
 import { useState } from "react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
+import LoaderSpinner from "../ui/loaderSpinner"
 
 interface Column<T> {
   key: keyof T | string
@@ -99,7 +100,7 @@ export function DataTableLayout<T>({
             {isLoading && (
               <TableRow>
                 <TableCell colSpan={columns.length} className="text-center py-6 text-gray-500">
-                  Loading...
+                  <LoaderSpinner />
                 </TableCell>
               </TableRow>
             )}
