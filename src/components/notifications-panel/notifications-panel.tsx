@@ -7,40 +7,38 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getNotifications,
   markAsReadNotification,
 } from "@/lib/actions/notificationsActions";
 import LoaderSpinner from "../ui/loaderSpinner";
+import { usePayoutSidebarStore } from "@/store/usePayoutSidebarStore";
 
 interface Notification {
-  id: string;
-  message: string;
-  type: "system" | "payout_request" | "approved" | "declined";
-  is_read: boolean;
-  read_at: string | null;
-  bank_name: string;
-  amount: number;
-  method: "string",
-  user: {
-    first_name: string;
-    last_name: string;
-    email: string;
-  };
-  timestamp: string;
+  id: string,
+    message: string,
+    type: string,
+    is_read: boolean,
+    read_at: string,
+    bank_name: "string",
+    amount: number,
+    method: string
 }
 
 export function NotificationsPanel({ onClose }: { onClose: () => void }) {
   const [activeTab, setActiveTab] = useState<"all" | "unread" | "archived">(
     "all"
   );
+  const router = useRouter();
   const queryClient = useQueryClient();
 
   const { data, error, isPending } = useQuery({
     queryKey: ["allNotification"],
     queryFn: () => getNotifications(),
   });
+  const { setSelectedPayoutId } = usePayoutSidebarStore();
 
   const allCount = data?.data?.length;
   const archivedCount = 0;
@@ -134,16 +132,18 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
                       className={`p-4 cursor-pointer transition-colors ${
                         notification.is_read ? "bg-[#fafafa]" : "bg-[#F1FFFD]"
                       }`}
-                      onClick={() =>
-                        markReadMutation.mutate({ id: notification.id })
-                      }
+                      onClick={() => {
+                        markReadMutation.mutate({ id: notification.id });
+                        setSelectedPayoutId(notification.payout_id); 
+
+                        router.push('/finance');
+                      }}
                     >
                       <div className="flex gap-[8px]">
                         {/* Avatar */}
                         <Avatar className="w-10 h-10 bg-[#F0F0F0] flex-shrink-0">
                           <AvatarFallback className="bg-[#F0F0F0] text-abstractCyan">
-                            {notification.user.first_name.charAt(0)}
-                            {notification.user.last_name.charAt(0)}
+                            {notification.bank_name.charAt(0)}
                           </AvatarFallback>
                         </Avatar>
 
@@ -154,9 +154,8 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
                           </p>
 
                           <p className="font-medium text-[14px] leading-[12px] text-[#4B5563] mb-[8px]">
-                            {notification.user.first_name}{" "}
-                            {notification.user.last_name} - Amount:{" "}
-                            N {notification.amount}
+                            {notification.amount} - Amount:{" "}
+                            
                           </p>
                           <p className="font-medium text-[14px] leading-[12px] text-[#4B5563] mb-[12px]">
                             Bank Account: {notification.bank_name}
