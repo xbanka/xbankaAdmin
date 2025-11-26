@@ -60,10 +60,10 @@ export function HeaderActions() {
               <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=Joseph" />
               <AvatarFallback>JE</AvatarFallback>
             </Avatar>
-            <div className="text-left">
+            {/* <div className="text-left">
               <p className="text-sm font-medium leading-none">Joseph Eyebiokin</p>
               <p className="text-xs text-gray-500 leading-none">Admin</p>
-            </div>
+            </div> */}
             <ChevronDown className="w-4 h-4 text-gray-500" />
           </Button>
         </DropdownMenuTrigger>
@@ -71,7 +71,7 @@ export function HeaderActions() {
           <DropdownMenuItem>Profile Settings</DropdownMenuItem>
           <DropdownMenuItem>Account</DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem className="text-red-600">Logout</DropdownMenuItem>
+          {/* <DropdownMenuItem className="text-red-600">Logout</DropdownMenuItem> */}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
