@@ -115,7 +115,7 @@ export default function FinancePage() {
   };
 
   const handlePayout = () => {
-  console.log("clicked", payout)
+    console.log("clicked", payout);
     if (!payout) return;
 
     processPayoutMutation(payout.id, {
@@ -207,8 +207,8 @@ export default function FinancePage() {
           </Button>
         </div>
 
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-[24px]">
-          <div className="flex gap-1">
+        <div className="flex flex-col gap-2 md:gap-0 md:flex-row md:items-center md:justify-between mb-[24px]">
+          <div className="flex justify-center md:justify-start gap-1">
             {["All", "Pending", "Paid", "Declined"].map((filter) => (
               <Button
                 key={filter}
@@ -227,29 +227,29 @@ export default function FinancePage() {
               </Button>
             ))}
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col md:flex-row w-full md:justify-end items-center gap-3">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 placeholder="Search by name or email"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="py-[10px] px-[12px] pl-10 md:w-64"
+                className="py-[10px] px-[12px] pl-10 w-full md:w-64"
               />
             </div>
 
-            <SelectFieldLayout
+            {/* <SelectFieldLayout
               id="date"
               selectClassName="h-10 py-[8px]"
               options={filterOptions}
               placeholder="Transaction Type"
               onChange={setTransactionTypeFilter}
-            />
+            /> */}
 
-            <Button variant="outline">
+            {/* <Button variant="outline">
               <Filter className="h-4 w-4 mr-2" />
               Advanced filter
-            </Button>
+            </Button> */}
           </div>
         </div>
         <DataTableLayout
@@ -290,21 +290,17 @@ export default function FinancePage() {
           open={openModal}
           onClose={() => setOpenModal(!openModal)}
           title="Process Payout"
-        >
-          <div>
-            <h1>Are you sure you want to confirm payout</h1>
+          footer={
             <div className="mt-[15px] flex gap-[20px]">
-              <Button
-                onClick={() => setOpenModal(!openModal)}
-                variant="outline"
-              >
-                Cancel
-              </Button>
-              <Button disabled={processingPayout} onClick={handlePayout}>
+                <Button onClick={() => setOpenModal(!openModal)} variant="outline">Cancel</Button>
+
+              <Button variant="default" onClick={handlePayout}>
                 {processingPayout ? "Confirming..." : "Confirm"}
               </Button>
             </div>
-          </div>
+          }
+        >
+            <h1>Are you sure you want to confirm payout</h1>
         </DialogLayout>
       </div>
     </DashboardLayout>

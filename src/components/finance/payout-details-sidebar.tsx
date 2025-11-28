@@ -74,7 +74,7 @@ export function PayoutDetailsSidebar({
                 {error}
               </div>
             )}
-            
+
             {/* Content */}
             {showContent && (
               <div className="py-[16px] px-[24px] space-y-6 bg-[#F5F5F5]">
@@ -92,7 +92,7 @@ export function PayoutDetailsSidebar({
                       title="Username"
                       body={payout.affiliate.username}
                     />
-                    <CustomDetailsName title="Status" body="Verified" />
+                    <CustomDetailsName title="Status" body={payout.status} />
                     <CustomDetailsName
                       title="Commission rate"
                       body={`${payout.amount}%`}
@@ -174,7 +174,16 @@ export function PayoutDetailsSidebar({
               >
                 Hold/Flag Payout
               </Button>
-              <Button variant="default" onClick={onProcess}>
+              <Button
+                variant={payout.status === "paid" ? "outline" : "default"}
+                disabled={payout.status === "paid"}
+                className={
+                  payout.status === "paid"
+                    ? "cursor-not-allowed bg-gray-300 text-gray-500 border border-gray-300"
+                    : ""
+                }
+                onClick={onProcess}
+              >
                 Process Payout
               </Button>
             </div>
