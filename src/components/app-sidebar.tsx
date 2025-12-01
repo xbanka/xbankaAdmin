@@ -116,7 +116,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   //   ? [...rolePermissions[user.role as keyof typeof rolePermissions]]
   //   : [];
 
-  const { mutate } = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationFn: () => logoutAction(),
     onSuccess: (result) => {
       clearUser();
@@ -201,8 +201,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </DialogLayout.Close>
 
               {/* Logout button calls handler */}
-              <Button variant="destructive" onClick={handleLogout}>
-                Logout
+              <Button disabled={isPending} variant="destructive" onClick={handleLogout}>
+                { isPending ? "Logging out..." : "Logout"}
               </Button>
             </>
           }
