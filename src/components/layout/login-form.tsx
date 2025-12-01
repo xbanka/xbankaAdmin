@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -13,10 +12,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Eye, EyeOff, Mail, Lock } from "lucide-react";
+import { Mail, Lock } from "lucide-react";
 import { loginAction } from "@/lib/actions/actions";
 import { useMutation } from "@tanstack/react-query";
 import { loginTypes } from "@/lib/actions/actionTypes";
@@ -24,9 +21,9 @@ import { useRouter } from "next/navigation";
 import FormField from "./FormField";
 import { toast } from "sonner";
 import { decodeAccessToken } from "@/lib/decodeToken";
-import { useUserStore } from "@/store/userStore";
 import PasswordField from "../ui/PasswordField";
 import Image from "next/image";
+import { useAuthStore } from "@/store/useAuthState";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -36,8 +33,8 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginForm() {
-  const setUser = useUserStore((state) => state.setUser);
   const router = useRouter();
+   const login = useAuthStore((state) => state.login);
 
   const {
     register,
@@ -50,15 +47,11 @@ export default function LoginForm() {
   const { error, mutate, isPending } = useMutation({
     mutationFn: (data: loginTypes) => loginAction(data),
     onSuccess: (result) => {
-      decodeAccessToken(result.data.accessToken);
       console.log(result, result.data.access_token);
+      login(result.data.access_token);
       const access_token = result.data.access_token;
       localStorage.setItem("accessToken", access_token);
       console.log(decodeAccessToken(result.data.access_token));
-      const data = {
-        access_token: result.data.access_token,
-      };
-      setUser(data);
       toast.success("User Loggedin");
       router.push("/");
     },

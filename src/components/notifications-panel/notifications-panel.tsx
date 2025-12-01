@@ -24,7 +24,20 @@ interface Notification {
     read_at: string,
     bank_name: "string",
     amount: number,
-    method: string
+    method: string,
+    affiliate: {
+      id: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      first_name: "string",
+      last_name: "string",
+      email: "string",
+      username: "string",
+      phone_no: "string",
+      bank: "string",
+      account_no: "string",
+      ref_code: "string",
+      custom_refcode: "string",
+      created_at: "string"
+    }
 }
 
 export function NotificationsPanel({ onClose }: { onClose: () => void }) {
@@ -154,11 +167,10 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
                           </p>
 
                           <p className="font-medium text-[14px] leading-[12px] text-[#4B5563] mb-[8px]">
-                            {notification.amount} - Amount:{" "}
-                            
+                            Affiliate: {notification.affiliate.username}    Amount:{notification.amount}
                           </p>
                           <p className="font-medium text-[14px] leading-[12px] text-[#4B5563] mb-[12px]">
-                            Bank Account: {notification.bank_name}
+                            Method: {notification.method}({notification.bank_name})
                           </p>
 
                           {/* Action Button */}

@@ -1,26 +1,36 @@
-// store/userStore.ts
+
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-interface User {
-  access_token: string;
+export interface User {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  role: string;
+  created_at: "string";
 }
 
-interface UserState {
+interface UserStore {
   user: User | null;
-  setUser: (user: User) => void;
+  setUser: (user: Partial<User>) => void;
   clearUser: () => void;
 }
 
-export const useUserStore = create<UserState>()(
+export const useUserStore = create<UserStore>()(
   persist(
     (set) => ({
       user: null,
-      setUser: (user) => set({ user }),
+      setUser: (data) =>
+        set((state) => ({
+          user: state.user
+            ? { ...state.user, ...data }
+            : (data as User),
+        })),
       clearUser: () => set({ user: null }),
     }),
     {
-      name: "user-storage", // key in localStorage
+      name: "user-storage",
     }
   )
 );

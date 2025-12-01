@@ -3,23 +3,20 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useUserStore } from "@/store/userStore";
+import { useAuthStore } from "@/store/useAuthState";
 
 export function useAuthGuard() {
-  const user = useUserStore((s) => s.user);
   const router = useRouter();
-  const [isHydrated, setIsHydrated] = useState(false);
-
-  // Detect when Zustand has rehydrated from localStorage
-  useEffect(() => {
-    setIsHydrated(true);
-  }, []);
+  const { user, accessToken, hasHydrated } = useAuthStore();
 
   useEffect(() => {
-    if (isHydrated && !user) {
-      router.replace("/signin"); // ✅ absolute path
+    if (hasHydrated && !accessToken) {
+      const timeout = setTimeout(() => {
+        router.replace("/signin");
+      }, 100);
+      return () => clearTimeout(timeout);
     }
-  }, [isHydrated, user, router]);
+  }, [accessToken, hasHydrated, router]);
 
-  return { user, isAuthenticated: !!user, isHydrated };
+  return { user, isAuthenticated: !!user, hasHydrated };
 }
