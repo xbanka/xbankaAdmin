@@ -1,17 +1,19 @@
-import {jwtDecode} from "jwt-decode";
+// utils/decodeToken.ts
+import { jwtDecode, JwtPayload } from "jwt-decode";
 
-export function decodeAccessToken(token: string) {
-  if (!token) return { payload: null, expired: true };
+export interface DecodedToken extends JwtPayload {
+  // extend this with your backend’s claims
+  sub?: string;
+  email?: string;
+  role?: string;
+}
 
+export function decodeAccessToken(token: string): DecodedToken | null {
   try {
-    const decodedPayload = jwtDecode(token);
-    const currentTime = Math.floor(Date.now() / 1000);
-    const expired = decodedPayload.exp ? decodedPayload.exp < currentTime : true;
-
-    // console.log({ payload: decodedPayload, expired })
-    return { payload: decodedPayload, expired };
+    // return jwtDecode<DecodedToken>(token);
+    return jwtDecode(token);
   } catch (error) {
-    console.error("Failed to decode token:", error);
-    return { payload: null, expired: true };
+    console.error("Invalid access token", error);
+    return null;
   }
 }
