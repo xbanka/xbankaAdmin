@@ -5,17 +5,19 @@ import { useAuthGuard } from "@/hooks/useAuthGuard";
 import React from "react";
 import LoaderSpinner from "../ui/loaderSpinner";
 
-interface DashboardPageTypes{
-    children: React.ReactNode
+interface DashboardPageTypes {
+  children: React.ReactNode;
 }
 
-const AuthGuardDashboard = ({children}: DashboardPageTypes) => {
-  const { isAuthenticated, isHydrated } = useAuthGuard();
+const AuthGuardDashboard = ({ children }: DashboardPageTypes) => {
+  const { isAuthenticated, hasHydrated } = useAuthGuard();
 
-  if (!isHydrated) {
-    return <div className="flex items-center justify-center left-0 right-0 absolute top-1/2 -translate-y-1/2">
+  if (!hasHydrated) {
+    return (
+      <div className="flex items-center justify-center left-0 right-0 absolute top-1/2 -translate-y-1/2">
         <LoaderSpinner />
-      </div>; // wait until Zustand loads
+      </div>
+    ); // wait until Zustand loads
   }
 
   if (!isAuthenticated) {
@@ -24,13 +26,9 @@ const AuthGuardDashboard = ({children}: DashboardPageTypes) => {
         <LoaderSpinner />
       </div>
     );
-  };
+  }
 
-  return (
-    <div className="">
-      {children}
-    </div>
-  );
-}
+  return <div className="">{children}</div>;
+};
 
-export default AuthGuardDashboard
+export default AuthGuardDashboard;
