@@ -48,14 +48,15 @@ export const rejectPayout = async (payout_id: string) => {
 
     return {
       success: true,
-      data: response.data, // rejected payout payload
+      data: response.data, 
       status: response.status,
     };
-  } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     throw {
       success: false,
-      status: error.status || 500,
-      message: error.message || "Failed to reject payout",
+      status: error.status,
+      message: error.message,
     };
   }
 };
