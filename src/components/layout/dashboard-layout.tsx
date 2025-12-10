@@ -1,3 +1,4 @@
+"use client";
 import type React from "react";
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
@@ -10,7 +11,17 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { HeaderActions } from "../notifications-panel/header-actions";
-// import Error from "next/error"
+import { DialogLayout } from "./modalLayout";
+import { Button } from "../ui/button";
+import { ConfirmPayoutSidebar } from "../finance/confirm-payout-sidebar";
+import { PayoutDetailsSidebar } from "../finance/payout-details-sidebar";
+import {
+  useIndividualPayout,
+  useProcessPayout,
+  useRejectPayout,
+} from "@/hooks/usePayout";
+import { usePayoutSidebarStore } from "@/store/usePayoutSidebarStore";
+import { useState } from "react";
 
 interface DashboardLayoutProps {
   children?: React.ReactNode;
@@ -26,6 +37,66 @@ export function DashboardLayout({
   isPending,
   error,
 }: DashboardLayoutProps) {
+  const [openModal, setOpenModal] = useState(false);
+  const [rejectModal, setRejectModal] = useState(false);
+  const {
+    isDetailsOpen,
+    isConfirmOpen,
+    openConfirmSidebar,
+    closeDetailsSidebar,
+    closeConfirmSidebar,
+    selectedPayoutId,
+  } = usePayoutSidebarStore();
+  const {
+    data: individualPayout,
+    isPending: individualPayoutPending,
+    error: individualPayoutError,
+  } = useIndividualPayout(selectedPayoutId ?? null);
+
+  const payout = individualPayout?.data;
+
+  const { mutate: processPayoutMutation, isPending: processingPayout } =
+    useProcessPayout();
+  const { mutate: rejectPayoutMutation, isPending: rejectingPayout } =
+    useRejectPayout();
+
+  const handleProcessPayout = () => {
+    closeDetailsSidebar(); // close first sidebar
+    openConfirmSidebar();
+  };
+
+  const handleConfirmPayout = () => {
+    setOpenModal(true);
+  };
+
+  const handleDeclinePayout = () => {
+    closeDetailsSidebar();   // IMPORTANT
+  setRejectModal(true); 
+  };
+
+  const handleReject = () => {
+    if (!payout) return;
+    
+    rejectPayoutMutation(payout.id, {
+      onSuccess: () => {
+        setRejectModal(false);
+        closeConfirmSidebar();
+        closeDetailsSidebar();
+      },
+    });
+  };
+
+  const handlePayout = () => {
+    if (!payout) return;
+
+    processPayoutMutation(payout.id, {
+      onSuccess: () => {
+        setOpenModal(false);
+        closeConfirmSidebar();
+        closeDetailsSidebar();
+      },
+    });
+  };
   return (
     <SidebarInset>
       <header className="relative flex h-16 shrink-0 items-center gap-2 border-b px-4 bg-white">
@@ -71,6 +142,76 @@ export function DashboardLayout({
 
         {/* Render children only if no error and not loading */}
         {!isPending && !error && children}
+        {payout && (
+          <PayoutDetailsSidebar
+            isOpen={isDetailsOpen}
+            onClose={closeDetailsSidebar}
+            payout={payout}
+            onDecline={handleDeclinePayout}
+            onProcess={handleProcessPayout}
+            loading={individualPayoutPending}
+            error={individualPayoutError?.message || ""}
+          />
+        )}
+
+        {payout && (
+          <ConfirmPayoutSidebar
+            isOpen={isConfirmOpen}
+            onClose={closeConfirmSidebar}
+            payout={payout}
+            onConfirm={handleConfirmPayout}
+            loading={false}
+            error={""}
+          />
+        )}
+
+        <DialogLayout
+          open={openModal}
+          onClose={() => setOpenModal(false)}
+          title="Process Payout"
+          footer={
+            <div className="mt-[15px] flex gap-[20px]">
+              <Button
+                onClick={() => setOpenModal(!openModal)}
+                variant="outline"
+              >
+                Cancel
+              </Button>
+
+              <Button
+                disabled={processingPayout}
+                variant="default"
+                onClick={handlePayout}
+              >
+                {processingPayout ? "Confirming..." : "Confirm"}
+              </Button>
+            </div>
+          }
+        >
+          <h1>Are you sure you want to confirm payout</h1>
+        </DialogLayout>
+        <DialogLayout
+          open={rejectModal}
+          onClose={() => setRejectModal(false)}
+          title="Reject Payout"
+          footer={
+            <div className="mt-[15px] flex gap-[20px]">
+              <Button onClick={() => setRejectModal(false)} variant="outline">
+                Cancel
+              </Button>
+
+              <Button
+                disabled={rejectingPayout}
+                variant="default"
+                onClick={handleReject}
+              >
+                {processingPayout ? "Rejecting..." : "Reject"}
+              </Button>
+            </div>
+          }
+        >
+          <h1>Are you sure you want to reject payout</h1>
+        </DialogLayout>
       </div>
     </SidebarInset>
   );

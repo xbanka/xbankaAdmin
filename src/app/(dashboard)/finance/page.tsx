@@ -10,7 +10,6 @@ import { Search, Upload } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useQuery } from "@tanstack/react-query";
 import { getPayouts } from "@/lib/actions/notificationsActions";
-import { useIndividualPayout, useProcessPayout, useRejectPayout } from "@/hooks/usePayout";
 import { usePayoutSidebarStore } from "@/store/usePayoutSidebarStore";
 import { DialogLayout } from "@/components/layout/modalLayout";
 
@@ -43,20 +42,7 @@ export default function FinancePage() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [transactionTypeFilter, setTransactionTypeFilter] = useState("all");
   const [page, setPage] = useState(1);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [openModal, setOpenModal] = useState(false);
-  const [rejectModal, setRejectModal] = useState(false);
 
-  const {
-    isDetailsOpen,
-    payout,
-    isConfirmOpen,
-    openDetailsSidebar,
-    openConfirmSidebar,
-    closeDetailsSidebar,
-    closeConfirmSidebar,
-    selectedPayoutId,
-  } = usePayoutSidebarStore();
 
   const { data, isPending, isError, error } = useQuery({
     queryKey: ["payouts", page, activeFilter],
@@ -68,15 +54,12 @@ export default function FinancePage() {
       }),
   });
 
-  const {
-    data: individualPayout,
-    isPending: individualPayoutPending,
-    error: individualPayoutError,
-  } = useIndividualPayout(selectedPayoutId ?? null);
-  const { mutate: processPayoutMutation, isPending: processingPayout } =
-    useProcessPayout();
-  const { mutate: rejectPayoutMutation, isPending: rejectingPayout } =
-    useRejectPayout();
+  const { openDetailsSidebar } = usePayoutSidebarStore();
+
+const handleSelectPayout = (payout: PayoutData) => {
+  openDetailsSidebar(payout.id);
+};
+
 
   const filteredData =
     data?.data?.filter((item: PayoutData) => {
@@ -97,50 +80,6 @@ export default function FinancePage() {
       return matchesSearch && matchesStatus && matchesTransactionType;
     }) || [];
 
-  const handleSelectPayout = (payout: PayoutData) => {
-    openDetailsSidebar(payout);
-  };
-
-  
-  const handleProcessPayout = () => {
-    closeDetailsSidebar();
-    if (payout) {
-      openConfirmSidebar(payout);
-    }
-  };
-  
-  const handleConfirmPayout = () => {
-    setOpenModal(true);
-  };
-  
-  const handleDeclinePayout = () => {
-    setRejectModal(true);
-  };
-
-  const handleReject = () => {
-    if (!payout) return;
-    
-    closeDetailsSidebar();
-    rejectPayoutMutation(payout.id, {
-      onSuccess: () => {
-        setRejectModal(false);
-        closeConfirmSidebar();
-        closeDetailsSidebar();
-      },
-    });
-  }
-
-  const handlePayout = () => {
-    if (!payout) return;
-
-    processPayoutMutation(payout.id, {
-      onSuccess: () => {
-        setOpenModal(false);
-        closeConfirmSidebar();
-        closeDetailsSidebar();
-      },
-    });
-  };
 
   const columns = [
     { key: "payment_ref", header: "Request ID" },
@@ -278,7 +217,7 @@ export default function FinancePage() {
           emptyMessage="No payout requests available."
         />
 
-        {payout && (
+        {/* {payout && (
           <PayoutDetailsSidebar
             isOpen={isDetailsOpen}
             onClose={closeDetailsSidebar}
@@ -332,7 +271,7 @@ export default function FinancePage() {
           }
         >
             <h1>Are you sure you want to reject payout</h1>
-        </DialogLayout>
+        </DialogLayout> */}
       </div>
     </DashboardLayout>
   );

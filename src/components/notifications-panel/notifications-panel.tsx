@@ -17,40 +17,39 @@ import LoaderSpinner from "../ui/loaderSpinner";
 import { usePayoutSidebarStore } from "@/store/usePayoutSidebarStore";
 
 interface Notification {
-  id: string,
-    message: string,
-    type: string,
-    is_read: boolean,
-    read_at: string,
-    amount: number,
-    method: string,
-    affiliate: {
-      id: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-      first_name: "string",
-      last_name: "string",
-      email: "string",
-      username: "string",
-      phone_no: "string",
-      bank: "string",
-      account_no: "string",
-      ref_code: "string",
-      custom_refcode: "string",
-      created_at: "string"
-    }
+  id: string;
+  message: string;
+  type: string;
+  is_read: boolean;
+  read_at: string;
+  amount: number;
+  method: string;
+  affiliate: {
+    id: "3fa85f64-5717-4562-b3fc-2c963f66afa6";
+    first_name: "string";
+    last_name: "string";
+    email: "string";
+    username: "string";
+    phone_no: "string";
+    bank: "string";
+    account_no: "string";
+    ref_code: "string";
+    custom_refcode: "string";
+    created_at: "string";
+  };
 }
 
 export function NotificationsPanel({ onClose }: { onClose: () => void }) {
   const [activeTab, setActiveTab] = useState<"all" | "unread" | "archived">(
     "all"
   );
-  const router = useRouter();
   const queryClient = useQueryClient();
 
   const { data, error, isPending } = useQuery({
     queryKey: ["allNotification"],
     queryFn: () => getNotifications(),
   });
-  const { setSelectedPayoutId } = usePayoutSidebarStore();
+  const { openDetailsSidebar } = usePayoutSidebarStore();
 
   const allCount = data?.data?.length;
   const archivedCount = 0;
@@ -61,6 +60,12 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
       queryClient.invalidateQueries({ queryKey: ["allNotification"] });
     },
   });
+
+  const handleViewRequest = (id: string) => {
+    markReadMutation.mutate({ id });
+
+    openDetailsSidebar(id);
+  };
 
   const notifications = data?.data || [];
   const unreadCount = notifications.filter(
@@ -144,18 +149,14 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
                       className={`p-4 cursor-pointer transition-colors ${
                         notification.is_read ? "bg-[#fafafa]" : "bg-[#F1FFFD]"
                       }`}
-                      onClick={() => {
-                        markReadMutation.mutate({ id: notification.id });
-                        setSelectedPayoutId(notification.id); 
-
-                        router.push('/finance');
-                      }}
+                      onClick={() => handleViewRequest(notification.id)}
                     >
                       <div className="flex gap-[8px]">
                         {/* Avatar */}
                         <Avatar className="w-10 h-10 bg-[#F0F0F0] flex-shrink-0">
                           <AvatarFallback className="bg-[#F0F0F0] text-abstractCyan">
-                            {notification.affiliate.first_name.charAt(0)} {notification.affiliate.last_name.charAt(0)}
+                            {notification.affiliate.first_name.charAt(0)}{" "}
+                            {notification.affiliate.last_name.charAt(0)}
                           </AvatarFallback>
                         </Avatar>
 
@@ -166,10 +167,12 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
                           </p>
 
                           <p className="font-medium text-[14px] leading-[12px] text-[#4B5563] mb-[8px]">
-                            Affiliate: {notification.affiliate.username}    Amount:{notification.amount}
+                            Affiliate: {notification.affiliate.username} Amount:
+                            {notification.amount}
                           </p>
                           <p className="font-medium text-[14px] leading-[12px] text-[#4B5563] mb-[12px]">
-                            Method: {notification.method}({notification.affiliate.bank})
+                            Method: {notification.method}(
+                            {notification.affiliate.bank})
                           </p>
 
                           {/* Action Button */}
@@ -177,6 +180,7 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
                             variant="default"
                             size="sm"
                             className="mt-3 bg-teal-600 hover:bg-teal-700 text-white text-xs h-7"
+                            onClick={() => handleViewRequest(notification.id)}
                           >
                             View Request
                           </Button>
