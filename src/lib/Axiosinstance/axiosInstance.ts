@@ -35,22 +35,23 @@ AxiosInstance.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const refreshResponse = await AxiosInstance.post("/api/auth/erp/refresh", {
-          withCredentials: true,
-        }); // backend uses cookie
+        const refreshResponse = await AxiosInstance.post(
+          "/api/auth/erp/refresh",
+          {},
+          { withCredentials: true }
+        ); // backend uses cookie
         console.log(refreshResponse);
 
         const newAccessToken = refreshResponse.data?.access_token;
         if (newAccessToken) {
           localStorage.setItem("accessToken", newAccessToken);
-          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+          // originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+          originalRequest.headers = {
+            ...(originalRequest.headers || {}),
+            Authorization: `Bearer ${newAccessToken}`,
+          };
         }
-        return AxiosInstance({
-          ...originalRequest,
-          method: originalRequest.method || "get",
-          data: originalRequest.data || undefined,
-        });
+        return AxiosInstance(originalRequest);
       } catch (refreshError) {
         if (typeof window !== "undefined") {
           localStorage.removeItem("accessToken");

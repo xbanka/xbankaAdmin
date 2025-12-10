@@ -38,3 +38,24 @@ export const processPayout = async (payout_id: string) => {
     };
   }
 };
+
+
+export const rejectPayout = async (payout_id: string) => {
+  try {
+    const response = await AxiosInstance.post(
+      `/api/erp/payouts/${payout_id}/reject`
+    );
+
+    return {
+      success: true,
+      data: response.data, // rejected payout payload
+      status: response.status,
+    };
+  } catch (error) {
+    throw {
+      success: false,
+      status: error.status || 500,
+      message: error.message || "Failed to reject payout",
+    };
+  }
+};
