@@ -1,5 +1,5 @@
 
-import { getIndividualPayout, processPayout } from "@/lib/actions/payout";
+import { getIndividualPayout, processPayout, rejectPayout } from "@/lib/actions/payout";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -33,3 +33,22 @@ export const useProcessPayout = () => {
     },
   });
 };
+
+export const useRejectPayout = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payoutId: string) => rejectPayout(payoutId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["payouts"] });
+
+      // Invalidate individual payout
+      queryClient.invalidateQueries({
+        queryKey: ["individualPayout"],
+      });
+      toast.success("Payout rejected successfully");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+}

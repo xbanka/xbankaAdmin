@@ -22,7 +22,6 @@ interface Notification {
     type: string,
     is_read: boolean,
     read_at: string,
-    bank_name: "string",
     amount: number,
     method: string,
     affiliate: {
@@ -156,7 +155,7 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
                         {/* Avatar */}
                         <Avatar className="w-10 h-10 bg-[#F0F0F0] flex-shrink-0">
                           <AvatarFallback className="bg-[#F0F0F0] text-abstractCyan">
-                            {notification.bank_name.charAt(0)}
+                            {notification.affiliate.first_name.charAt(0)} {notification.affiliate.last_name.charAt(0)}
                           </AvatarFallback>
                         </Avatar>
 
@@ -170,7 +169,7 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
                             Affiliate: {notification.affiliate.username}    Amount:{notification.amount}
                           </p>
                           <p className="font-medium text-[14px] leading-[12px] text-[#4B5563] mb-[12px]">
-                            Method: {notification.method}({notification.bank_name})
+                            Method: {notification.method}({notification.affiliate.bank})
                           </p>
 
                           {/* Action Button */}
