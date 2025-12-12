@@ -48,7 +48,6 @@ export function BillPaymentTransactionForm({ onSubmit, isLoading = false }: Bill
   return (
     <div className="space-y-5">
       {/* Service Type & Transaction Type */}
-      {/* Service Type & Transaction Type */}
       <div className="grid grid-cols-2 gap-4">
         <SelectFieldLayout
           id="serviceType"
