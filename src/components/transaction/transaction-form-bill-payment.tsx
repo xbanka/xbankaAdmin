@@ -52,7 +52,7 @@ export function BillPaymentTransactionForm({ onSubmit, isLoading = false }: Bill
         <SelectFieldLayout
           id="serviceType"
           label="Service Type"
-          options={["Electricity Bill", "Water Bill", "Internet Bill"]}
+           options={["Crypto", "Gift Card", "Bills Payment"]}
           placeholder="Select service"
           onChange={(value) => handleSelectChange("serviceType", value)}
         />

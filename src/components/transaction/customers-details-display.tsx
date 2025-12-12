@@ -1,49 +1,40 @@
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Customer } from "./types"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Customer } from "./types";
+import FinanceDetailsHeader from "../layout/Finance/FinanceDetailsHeader";
+import CustomDetailsName from "../finance/CustomDetailsName";
 
 interface CustomerDetailsDisplayProps {
-  customer: Customer
+  customer: Customer;
+  displayTitle?: string;
 }
 
-export function CustomerDetailsDisplay({ customer }: CustomerDetailsDisplayProps) {
+export function CustomerDetailsDisplay({
+  customer,
+  displayTitle,
+}: CustomerDetailsDisplayProps) {
   return (
-    <div className="bg-gray-50 p-4 rounded-lg border border-[#E5E7EB] space-y-3">
-      {/* Customer Header */}
-      <div className="flex items-start gap-3">
-        <Avatar className="h-12 w-12">
-          <AvatarFallback className="bg-teal-500 text-white text-lg font-semibold">
-            {customer.name.charAt(0)}
-          </AvatarFallback>
-        </Avatar>
-        <div className="flex-1">
-          <h3 className="font-semibold text-[#111827]">{customer.name}</h3>
-          <p className="text-xs text-gray-500">Total Transactions: {customer.totalTransactions}</p>
-        </div>
-      </div>
-
-      {/* Customer Details Grid */}
-      <div className="grid grid-cols-2 gap-3 pt-2 border-t border-[#E5E7EB]">
-        <div>
-          <p className="text-xs text-gray-500 font-medium">Username</p>
-          <p className="text-sm text-[#111827] font-medium truncate">{customer.username}</p>
-        </div>
-        <div>
-          <p className="text-xs text-gray-500 font-medium">Email</p>
-          <p className="text-sm text-[#111827] font-medium truncate">{customer.email}</p>
-        </div>
-        <div>
-          <p className="text-xs text-gray-500 font-medium">Phone</p>
-          <p className="text-sm text-[#111827] font-medium">{customer.phone}</p>
-        </div>
-        <div>
-          <p className="text-xs text-gray-500 font-medium">Affiliate</p>
-          <p className="text-sm text-[#111827] font-medium">{customer.affiliateAttribution}</p>
-        </div>
-        <div className="col-span-2">
-          <p className="text-xs text-gray-500 font-medium">Assigned Rep</p>
-          <p className="text-sm text-[#111827] font-medium">{customer.assignedRep}</p>
+    <div className="py-[16px] px-[24px] bg-[#F5F5F5] space-y-2">
+      {/* Payment Details Summary */}
+      <h1 className="font-[500] text-[14px] leading-[20px]">{displayTitle}</h1>
+      <div className="space-y-[8px]">
+        <div className="grid grid-cols-3 gap-4 bg-white rounded-[8px] p-3">
+          <CustomDetailsName title="Name" body={customer.name} />
+          <CustomDetailsName title="Username" body={customer.username} />
+          <CustomDetailsName title="Email" body={customer.email} />
+          <CustomDetailsName
+            title="Total Transactions"
+            body={`₦${customer.totalTransactions}%`}
+          />
+          <CustomDetailsName
+            title="Affiliate"
+            body={customer.affiliateAttribution}
+          />
+          <CustomDetailsName
+            title="Joined"
+            body={customer.lastTransactionDate}
+          />
         </div>
       </div>
     </div>
-  )
+  );
 }

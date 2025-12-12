@@ -59,7 +59,7 @@ export default function Home() {
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
         onCustomerSelect={handleCustomerSelect}
-        customers={[]}
+        // customers={[]}
       />
 
       {/* Transaction Add Sidebar */}

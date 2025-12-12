@@ -50,7 +50,7 @@ export function CryptoTransactionForm({ onSubmit, isLoading = false }: CryptoTra
         <SelectFieldLayout
           id="serviceType"
           label="Service Type"
-          options={["Crypto Transfer", "Crypto Exchange"]}
+          options={["Crypto", "Gift Card", "Bills Payment"]}
           placeholder="Select service"
           onChange={(value) => handleSelectChange("serviceType", value)}
         />
