@@ -51,11 +51,11 @@ const data = {
     //   url: "/customerManagement",
     //   icon: Users,
     // },
-    // {
-    //   title: "Transactions",
-    //   url: "/transactions",
-    //   icon: CreditCard,
-    // },
+    {
+      title: "Transactions",
+      url: "/transactions",
+      icon: CreditCard,
+    },
     {
       title: "Finance",
       url: "/finance",
