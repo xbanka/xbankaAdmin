@@ -106,9 +106,7 @@ export function TransactionAddSidebar({
                   label="Service Type"
                   options={["crypto", "gift-card", "bill-payments"]}
                   placeholder="Select type"
-                  onChange={(value) =>
-                    handleSelectChange(value)
-                  }
+                  onChange={(value) => handleSelectChange(value as TransactionType)}
                 />
               </div>
             </div>
