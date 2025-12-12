@@ -15,21 +15,26 @@ interface TaskItem {
 }
 
 export interface TaskColumn {
-    id: string;
-    title: string;
-    color: string;
-    items: TaskItem[];
+  id: string;
+  title: string;
+  color: string;
+  items: TaskItem[];
 }
 
 export interface FilteredTasks {
-    id: string;
-    title: string;
-    assignedTo: string;
-    deadline: string;
-    priority: string;
-    status: string;
-    tags: string[];
-    subtasks: number;
-    comments: number;
-    attachments: number;
+  id: string;
+  title: string;
+  assignedTo: string;
+  deadline: string;
+  priority: string;
+  status: string;
+  tags: string[];
+  subtasks: number;
+  comments: number;
+  attachments: number;
+}
+
+export interface SidebarHeaderProps {
+  header: string;
+  onClose: () => void;
 }

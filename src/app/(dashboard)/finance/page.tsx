@@ -1,17 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { DataTableLayout } from "@/components/DataTableLayout/DataTableLayout";
-import { PayoutDetailsSidebar } from "@/components/finance/payout-details-sidebar";
-import { ConfirmPayoutSidebar } from "@/components/finance/confirm-payout-sidebar";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Search, Upload } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useQuery } from "@tanstack/react-query";
 import { getPayouts } from "@/lib/actions/notificationsActions";
 import { usePayoutSidebarStore } from "@/store/usePayoutSidebarStore";
-import { DialogLayout } from "@/components/layout/modalLayout";
 
 export interface PayoutData {
   id: string;
@@ -33,8 +30,6 @@ export interface PayoutData {
     created_at: string;
   };
 }
-
-const filterOptions = ["all", "Date Submitted"];
 
 export default function FinancePage() {
   const [activeFilter, setActiveFilter] = useState("all");

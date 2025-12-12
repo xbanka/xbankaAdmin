@@ -51,7 +51,7 @@ export function GiftCardTransactionForm({ onSubmit, isLoading = false }: GiftCar
         <SelectFieldLayout
           id="serviceType"
           label="Service Type"
-          options={["Gift Card", "Digital Card"]}
+           options={["Crypto", "Gift Card", "Bills Payment"]}
           placeholder="Select service"
           onChange={(value) => handleSelectChange("serviceType", value)}
         />
