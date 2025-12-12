@@ -10,6 +10,7 @@ import type { PayoutData } from "@/app/(dashboard)/finance/page";
 import FinanceDetailsHeader from "../layout/Finance/FinanceDetailsHeader";
 import { SelectFieldLayout } from "../layout/SelectFieldLayout";
 import LoaderSpinner from "../ui/loaderSpinner";
+import SidebarHeader from "../Sidebar/sidebar-header";
 
 interface ConfirmPayoutSidebarProps {
   isOpen: boolean;
@@ -30,25 +31,6 @@ export function ConfirmPayoutSidebar({
   loading,
   error,
 }: ConfirmPayoutSidebarProps) {
-  const [transactionTypeFilter, setTransactionTypeFilter] = useState("all");
-  const showContent = !loading && !error;
-
-  // const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const { name, value } = e.target;
-  //   setFormData((prev) => ({
-  //     ...prev,
-  //     [name]: value,
-  //   }));
-  // };
-
-  // const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   if (e.target.files) {
-  //     setFormData((prev) => ({
-  //       ...prev,
-  //       attachments: Array.from(e.target.files || []),
-  //     }));
-  //   }
-  // };
 
   const handleConfirm = () => {
     onConfirm();
@@ -74,7 +56,8 @@ export function ConfirmPayoutSidebar({
         <div className="flex flex-col h-full w-full">
           {/* Header */}
           <div className="w-full flex-1 overflow-y-auto">
-            <div className="sticky top-0 bg-white border-b border-[#E5E3E3] px-4 py-[18px] flex items-center justify-between">
+            <SidebarHeader header="Request Details" onClose={onClose} />
+            {/* <div className="sticky top-0 bg-white border-b border-[#E5E3E3] px-4 py-[18px] flex items-center justify-between">
               <h2 className="text-[18px] leading-[18px] font-semibold text-foreground">
                 Request Details
               </h2>
@@ -84,7 +67,7 @@ export function ConfirmPayoutSidebar({
               >
                 <X className="w-5 h-5" />
               </button>
-            </div>
+            </div> */}
 
             {/* LOADING STATE */}
             {loading && (
