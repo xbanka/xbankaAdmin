@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Customer } from "./types";
 import SidebarHeader from "../Sidebar/sidebar-header";
+import TransactionCustomerDetailsField from "./transaction-customer-details-field";
 
 interface CustomerSearchSidebarProps {
   isOpen: boolean;
@@ -62,11 +63,11 @@ export function CustomerSearchSidebar({
   const [activeCustomer, setActiveCustomer] = useState<Customer | null>(null);
 
   useEffect(() => {
-  if (isOpen) {
-    setSearchQuery("")
-    setActiveCustomer(null)
-  }
-}, [isOpen])
+    if (isOpen) {
+      setSearchQuery("");
+      setActiveCustomer(null);
+    }
+  }, [isOpen]);
 
   const filteredCustomers = useMemo(() => {
     if (!searchQuery) return [];
@@ -107,7 +108,7 @@ export function CustomerSearchSidebar({
         </div>
 
         {/* Customer List */}
-        <div className="flex-1 overflow-y-auto p-4">
+        <div className="flex-1 overflow-y-auto p-6">
           {isLoading ? (
             <div className="flex items-center justify-center h-full text-gray-500">
               Loading customers...
@@ -121,42 +122,37 @@ export function CustomerSearchSidebar({
               Start typing to search for customers
             </div>
           ) : activeCustomer ? (
-            <div className="space-y-4 p-4">
-              <div>
-                <p className="text-sm text-gray-500">Customer Name</p>
-                <p className="font-semibold text-[#111827]">
-                  {activeCustomer.name}
-                </p>
+            <div className="space-y-4">
+              <TransactionCustomerDetailsField
+                label="Customer Name"
+                body={activeCustomer.name}
+              />
+              <div className="flex items-center gap-4">
+                <TransactionCustomerDetailsField
+                label="Phone Number"
+                body={activeCustomer.phone}
+              />
+              <TransactionCustomerDetailsField
+                label="Email"
+                body={activeCustomer.email}
+              />
               </div>
-
-              <div>
-                <p className="text-sm text-gray-500">Username</p>
-                <p className="text-sm">{activeCustomer.username}</p>
-              </div>
-
-              <div>
-                <p className="text-sm text-gray-500">Email</p>
-                <p className="text-sm">{activeCustomer.email}</p>
-              </div>
-
-              <div>
-                <p className="text-sm text-gray-500">Phone</p>
-                <p className="text-sm">{activeCustomer.phone}</p>
+              <div className="flex items-center gap-4">
+                <TransactionCustomerDetailsField
+                label="Affiliate Attribution"
+                body={activeCustomer.affiliateAttribution}
+              />
+              <TransactionCustomerDetailsField
+                label="Assigned Rep"
+                body={activeCustomer.assignedRep}
+              />
               </div>
 
               <Button
-                className="w-full mt-6"
+                className="w-full mt-8 text-abstractCyan bg-transparent border border-dashed border-[#C2C7CF] hover:text-black"
                 onClick={() => onCustomerSelect(activeCustomer)}
               >
-                Add Transaction
-              </Button>
-
-              <Button
-                variant="ghost"
-                className="w-full"
-                onClick={() => setActiveCustomer(null)}
-              >
-                Back to search
+                + Add Transaction
               </Button>
             </div>
           ) : (
@@ -165,19 +161,19 @@ export function CustomerSearchSidebar({
                 <div
                   key={customer.id}
                   onClick={() => setActiveCustomer(customer)}
-                  className="w-full text-left p-4 transition-colors"
+                  className="w-full text-left p-4 transition-colors cursor-pointer rounded-md border hover:bg-abstractCyan shadow-md"
                 >
-                  <div className="flex items-start">
+                  <div className="flex items-start gap-3">
                     <p className="font-semibold text-[#111827] text-sm truncate">
                       {customer.name}
                     </p>
                     <p className="text-xs text-gray-500 truncate">
-                      {customer.username}
+                      {customer.affiliateAttribution}
                     </p>
                   </div>
-                  <div className="flex items-start">
+                  <div className="flex items-start gap-3">
                     <p className="text-xs text-gray-400 truncate">
-                      {customer.email}
+                      {customer.phone}
                     </p>
                     <p className="text-xs text-gray-400 truncate">
                       {customer.email}
