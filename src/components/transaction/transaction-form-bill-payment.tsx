@@ -31,16 +31,12 @@ export function BillPaymentTransactionForm({ isLoading = false, serviceType }: B
     resolver: zodResolver(billPaymentTransactionSchema),
     defaultValues: {
       serviceType: "",
-      transactionType: "",
       billCategory: "",
-      customerAmount: "",
+      amountToPay: "",
+      quantity: "",
       vendor: "",
-      vendorRate: "",
-      xibakaRate: "",
-      margin: "",
       meterNumber: "",
       meterType: "",
-      prepaid: "",
       transactionFee: "",
       receivingAccountWallet: "",
       paymentDate: "",
@@ -63,26 +59,15 @@ export function BillPaymentTransactionForm({ isLoading = false, serviceType }: B
       {/* Service Type & Transaction Type */}
       <div className="grid grid-cols-2 gap-4">
         <SelectFieldLayout
-          id="serviceType"
-          label="Service Type"
-          options={["Crypto", "Gift Card", "Bills Payment"]}
-          value={watch("serviceType")}
-          onChange={(value) => setValue("serviceType", value)}
-          error={errors.serviceType}
-        />
+                  id="serviceType"
+                  label="Service Type"
+                  options={["Crypto", "Gift Card", "Bills Payment"]}
+                  value={watch("serviceType")}
+                  onChange={(value) => setValue("serviceType", value)}
+                  error={errors.serviceType}
+                />
 
         <SelectFieldLayout
-          id="transactionType"
-          label="Transaction Type"
-          options={["Electricity Bill", "Water Bill", "Internet Bill"]}
-          value={watch("transactionType")}
-          onChange={(value) => setValue("transactionType", value)}
-          error={errors.transactionType}
-        />
-      </div>
-
-      {/* Bill Category */}
-      <SelectFieldLayout
         id="billCategory"
         label="Bill Category"
         options={["Electricity", "Water", "Internet", "Gas"]}
@@ -90,52 +75,6 @@ export function BillPaymentTransactionForm({ isLoading = false, serviceType }: B
         onChange={(value) => setValue("billCategory", value)}
         error={errors.billCategory}
       />
-
-      {/* Customer Amount & Vendor */}
-      <div className="grid grid-cols-2 gap-4">
-        <FormField
-          id="customerAmount"
-          label="Customer Amount"
-          placeholder="₦5,000"
-          register={register}
-          error={errors.customerAmount}
-        />
-
-        <SelectFieldLayout
-          id="vendor"
-          label="Vendor"
-          options={["EKEDC", "IKEJA", "ENUGU", "JED"]}
-          value={watch("vendor")}
-          onChange={(value) => setValue("vendor", value)}
-          error={errors.vendor}
-        />
-      </div>
-
-      {/* Vendor Rate, Xibaka Rate, Margin */}
-      <div className="grid grid-cols-3 gap-4">
-        <FormField
-          id="vendorRate"
-          label="Vendor Rate"
-          placeholder="1467"
-          register={register}
-          error={errors.vendorRate}
-        />
-
-        <FormField
-          id="xibakaRate"
-          label="Xibaka Rate"
-          placeholder="1467.5"
-          register={register}
-          error={errors.xibakaRate}
-        />
-
-        <FormField
-          id="margin"
-          label="Margin"
-          placeholder="0.5"
-          register={register}
-          error={errors.margin}
-        />
       </div>
 
       {/* Meter Number & Meter Type */}
@@ -158,23 +97,41 @@ export function BillPaymentTransactionForm({ isLoading = false, serviceType }: B
         />
       </div>
 
-      {/* Prepaid & Transaction Fee */}
+      {/* Customer Amount & Vendor */}
       <div className="grid grid-cols-2 gap-4">
-        <SelectFieldLayout
-          id="prepaid"
-          label="Prepaid"
-          options={["Yes", "No"]}
-          value={watch("prepaid")}
-          onChange={(value) => setValue("prepaid", value)}
-          error={errors.prepaid}
+        <FormField
+          id="amountToPay"
+          label="Amount to Pay"
+          placeholder="₦5,000"
+          register={register}
+          error={errors.amountToPay}
         />
 
         <FormField
           id="transactionFee"
           label="Transaction Fee"
-          placeholder="₦50"
+          placeholder="₦5,000"
           register={register}
           error={errors.transactionFee}
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <FormField
+          id="quantity"
+          label="Quantity"
+          placeholder="₦5,000"
+          register={register}
+          error={errors.quantity}
+        />
+
+        <SelectFieldLayout
+        id="vendor"
+        label="Vendor"
+        options={["Rayosh"]}
+        value={watch("vendor")}
+        onChange={(value) => setValue("vendor", value)}
+        error={errors.vendor}
         />
       </div>
 

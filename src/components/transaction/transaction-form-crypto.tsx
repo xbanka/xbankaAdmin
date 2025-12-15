@@ -1,60 +1,64 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useEffect, useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Upload } from "lucide-react"
-import { SelectFieldLayout } from "../layout/SelectFieldLayout"
-import { TransactionType } from "./types"
-import { useForm } from "react-hook-form"
-import { SERVICE_TYPE_LABELS } from "@/lib/helper"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { CryptoTransactionFormValues, cryptoTransactionSchema } from "@/lib/schema/crypto-transaction.schema"
-import FormField from "../layout/FormField"
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Upload } from "lucide-react";
+import { SelectFieldLayout } from "../layout/SelectFieldLayout";
+import { TransactionType } from "./types";
+import { useForm } from "react-hook-form";
+import { SERVICE_TYPE_LABELS } from "@/lib/helper";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  CryptoTransactionFormValues,
+  cryptoTransactionSchema,
+} from "@/lib/schema/crypto-transaction.schema";
+import FormField from "../layout/FormField";
 
 interface CryptoTransactionFormProps {
-  serviceType: TransactionType
-  isLoading?: boolean
+  serviceType: TransactionType;
+  isLoading?: boolean;
 }
 
-export function CryptoTransactionForm({ isLoading = false, serviceType }: CryptoTransactionFormProps) {
-
+export function CryptoTransactionForm({
+  isLoading = false,
+  serviceType,
+}: CryptoTransactionFormProps) {
   const {
-  register,
-  handleSubmit,
-  setValue,
-  formState: { errors },
-  watch
-} = useForm<CryptoTransactionFormValues>({
-  resolver: zodResolver(cryptoTransactionSchema),
-  defaultValues: {
-    serviceType: "",
-    transactionType: "",
-    customerAmount: "",
-    vendor: "",
-    vendorRate: "",
-    xbankaRate: "",
-    margin: "",
-    expectedPayout: "",
-    customerAccountWallet: "",
-    xbankaAccount: "",
-    paymentDate: "",
-  },
-})
-
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+    watch,
+  } = useForm<CryptoTransactionFormValues>({
+    resolver: zodResolver(cryptoTransactionSchema),
+    defaultValues: {
+      serviceType: "",
+      transactionType: "",
+      customerAmount: "",
+      vendor: "",
+      vendorRate: "",
+      xbankaRate: "",
+      margin: "",
+      expectedPayout: "",
+      customerAccountWallet: "",
+      xbankaAccount: "",
+      paymentDate: "",
+    },
+  });
 
   useEffect(() => {
     if (serviceType) {
-      setValue("serviceType", SERVICE_TYPE_LABELS[serviceType])
+      setValue("serviceType", SERVICE_TYPE_LABELS[serviceType]);
     }
-  }, [serviceType, setValue])
+  }, [serviceType, setValue]);
 
   const onSubmit = (data: CryptoTransactionFormValues) => {
-    console.log(data)
-  }
+    console.log(data);
+  };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
@@ -165,8 +169,12 @@ export function CryptoTransactionForm({ isLoading = false, serviceType }: Crypto
         <Label>Attachments</Label>
         <div className="mt-2 border-2 border-dashed border-[#E5E7EB] rounded-lg p-8 text-center cursor-pointer hover:bg-gray-50 transition">
           <Upload className="h-6 w-6 text-gray-400 mx-auto mb-2" />
-          <p className="text-sm text-gray-600">Upload screenshot, receipt, or proof document</p>
-          <p className="text-xs text-gray-400 mt-1">JPG, PNG, OR PDF • Max 5MB</p>
+          <p className="text-sm text-gray-600">
+            Upload screenshot, receipt, or proof document
+          </p>
+          <p className="text-xs text-gray-400 mt-1">
+            JPG, PNG, OR PDF • Max 5MB
+          </p>
         </div>
       </div>
 
@@ -178,5 +186,5 @@ export function CryptoTransactionForm({ isLoading = false, serviceType }: Crypto
         {isLoading ? "Submitting..." : "Submit for Verification"}
       </Button>
     </form>
-  )
+  );
 }
