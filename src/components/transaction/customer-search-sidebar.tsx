@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,54 +15,62 @@ interface CustomerSearchSidebarProps {
   isLoading?: boolean;
 }
 
-const mockCustomers: Customer[] = [
-  {
-    id: "1",
-    name: "Jane Smith",
-    username: "@janesmith",
-    email: "janesmith@gmail.com",
-    phone: "09023456789",
-    affiliateAttribution: "@Codixe",
-    assignedRep: "Joe Prochter",
-    totalTransactions: 12,
-    lastTransactionDate: "Nov 5, 2025",
-  },
-  {
-    id: "2",
-    name: "John Doe",
-    username: "@johndoe",
-    email: "johndoe@example.com",
-    phone: "08012345678",
-    affiliateAttribution: "@TechPartner",
-    assignedRep: "Sarah Johnson",
-    totalTransactions: 8,
-    lastTransactionDate: "Nov 3, 2025",
-  },
-  {
-    id: "3",
-    name: "Alice Johnson",
-    username: "@alicej",
-    email: "alice@company.com",
-    phone: "07098765432",
-    affiliateAttribution: "@Enterprise",
-    assignedRep: "Mike Chen",
-    totalTransactions: 15,
-    lastTransactionDate: "Nov 4, 2025",
-  },
-];
+// const mockCustomers: Customer[] = [
+//   {
+//     id: "1",
+//     name: "Jane Smith",
+//     username: "@janesmith",
+//     email: "janesmith@gmail.com",
+//     phone: "09023456789",
+//     affiliateAttribution: "@Codixe",
+//     assignedRep: "Joe Prochter",
+//     totalTransactions: 12,
+//     lastTransactionDate: "Nov 5, 2025",
+//   },
+//   {
+//     id: "2",
+//     name: "John Doe",
+//     username: "@johndoe",
+//     email: "johndoe@example.com",
+//     phone: "08012345678",
+//     affiliateAttribution: "@TechPartner",
+//     assignedRep: "Sarah Johnson",
+//     totalTransactions: 8,
+//     lastTransactionDate: "Nov 3, 2025",
+//   },
+//   {
+//     id: "3",
+//     name: "Alice Johnson",
+//     username: "@alicej",
+//     email: "alice@company.com",
+//     phone: "07098765432",
+//     affiliateAttribution: "@Enterprise",
+//     assignedRep: "Mike Chen",
+//     totalTransactions: 15,
+//     lastTransactionDate: "Nov 4, 2025",
+//   },
+// ];
 
 export function CustomerSearchSidebar({
   isOpen,
   onClose,
   onCustomerSelect,
-  customers = mockCustomers,
+  customers,
   isLoading = false,
 }: CustomerSearchSidebarProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeCustomer, setActiveCustomer] = useState<Customer | null>(null);
+
+  useEffect(() => {
+  if (isOpen) {
+    setSearchQuery("")
+    setActiveCustomer(null)
+  }
+}, [isOpen])
 
   const filteredCustomers = useMemo(() => {
     if (!searchQuery) return [];
-    return customers.filter(
+    return customers?.filter(
       (customer) =>
         customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         customer.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -89,7 +97,10 @@ export function CustomerSearchSidebar({
             <Input
               placeholder="Search customers here"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setActiveCustomer(null);
+              }}
               className="pl-10 py-2 h-10"
             />
           </div>
@@ -101,20 +112,59 @@ export function CustomerSearchSidebar({
             <div className="flex items-center justify-center h-full text-gray-500">
               Loading customers...
             </div>
-          ) : filteredCustomers.length === 0 && searchQuery ? (
+          ) : filteredCustomers?.length === 0 && searchQuery ? (
             <div className="text-center py-8 text-gray-500">
               No customers found
             </div>
-          ) : filteredCustomers.length === 0 ? (
+          ) : filteredCustomers?.length === 0 ? (
             <div className="text-center py-8 text-gray-500 text-sm">
               Start typing to search for customers
             </div>
+          ) : activeCustomer ? (
+            <div className="space-y-4 p-4">
+              <div>
+                <p className="text-sm text-gray-500">Customer Name</p>
+                <p className="font-semibold text-[#111827]">
+                  {activeCustomer.name}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-sm text-gray-500">Username</p>
+                <p className="text-sm">{activeCustomer.username}</p>
+              </div>
+
+              <div>
+                <p className="text-sm text-gray-500">Email</p>
+                <p className="text-sm">{activeCustomer.email}</p>
+              </div>
+
+              <div>
+                <p className="text-sm text-gray-500">Phone</p>
+                <p className="text-sm">{activeCustomer.phone}</p>
+              </div>
+
+              <Button
+                className="w-full mt-6"
+                onClick={() => onCustomerSelect(activeCustomer)}
+              >
+                Add Transaction
+              </Button>
+
+              <Button
+                variant="ghost"
+                className="w-full"
+                onClick={() => setActiveCustomer(null)}
+              >
+                Back to search
+              </Button>
+            </div>
           ) : (
             <div className="space-y-3">
-              {filteredCustomers.map((customer) => (
+              {filteredCustomers?.map((customer) => (
                 <div
                   key={customer.id}
-                  onClick={() => onCustomerSelect(customer)}
+                  onClick={() => setActiveCustomer(customer)}
                   className="w-full text-left p-4 transition-colors"
                 >
                   <div className="flex items-start">
