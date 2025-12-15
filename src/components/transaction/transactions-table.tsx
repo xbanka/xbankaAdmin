@@ -95,7 +95,7 @@ export function TransactionsTable({ data, onNewTransaction }: TransactionsTableP
             <Upload className="h-4 w-4 mr-2" />
             Export
           </Button>
-          <Button size="sm" className="bg-teal-500 hover:bg-teal-600 text-white" onClick={onNewTransaction}>
+          <Button size="sm" className="" onClick={onNewTransaction}>
             + New Transaction
           </Button>
         </div>

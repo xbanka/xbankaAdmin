@@ -2,195 +2,187 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { SelectFieldLayout } from "../layout/SelectFieldLayout"
 import { Upload } from "lucide-react"
+import { TransactionType } from "./types"
+import { GiftCardTransactionFormValues, giftCardTransactionSchema } from "@/lib/schema/giftcard-transaction.schema"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import FormField from "../layout/FormField"
+import { SERVICE_TYPE_LABELS } from "@/lib/helper"
 
 interface GiftCardTransactionFormProps {
-  onSubmit: (data: Record<string, string>) => void
+    serviceType: TransactionType
   isLoading?: boolean
 }
 
-export function GiftCardTransactionForm({ onSubmit, isLoading = false }: GiftCardTransactionFormProps) {
-  const [formData, setFormData] = useState({
-    serviceType: "",
-    cardType: "",
-    cardFaceValue: "",
-    currency: "",
-    quantity: "",
-    rayah: "",
-    vendor: "",
-    xibakaRate: "",
-    margin: "",
-    expectedPayout: "",
-    giftCardCode: "",
-    customerAccountWallet: "",
-    paymentDate: "",
+export function GiftCardTransactionForm({ isLoading = false, serviceType }: GiftCardTransactionFormProps) {
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<GiftCardTransactionFormValues>({
+    resolver: zodResolver(giftCardTransactionSchema),
+    defaultValues: {
+      serviceType: "",
+      cardType: "",
+      cardFaceValue: "",
+      currency: "",
+      quantity: "",
+      rayah: "",
+      vendor: "",
+      xbankaRate: "",
+      margin: "",
+      expectedPayout: "",
+      giftCardCode: "",
+      customerAccountWallet: "",
+      paymentDate: "",
+    },
   })
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+  useEffect(() => {
+    if (serviceType) {
+      setValue("serviceType", SERVICE_TYPE_LABELS[serviceType])
+    }
+  }, [serviceType, setValue])
 
-  const handleSelectChange = (name: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
-
-  const handleSubmit = () => {
-    onSubmit(formData)
+  const onSubmit = (data: GiftCardTransactionFormValues) => {
+    console.log("Gift card transaction:", data)
   }
 
   return (
-    <div className="space-y-5">
+    <div onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       {/* Service Type & Card Type */}
       <div className="grid grid-cols-2 gap-4">
         <SelectFieldLayout
           id="serviceType"
           label="Service Type"
-           options={["Crypto", "Gift Card", "Bills Payment"]}
-          placeholder="Select service"
-          onChange={(value) => handleSelectChange("serviceType", value)}
+          options={["Crypto", "Gift Card", "Bills Payment"]}
+          value={watch("serviceType")}
+          onChange={(value) => setValue("serviceType", value)}
+          error={errors.serviceType}
         />
+
         <SelectFieldLayout
           id="cardType"
           label="Card Type"
           options={["Amazon", "iTunes", "Steam", "Google Play"]}
-          placeholder="Select card type"
-          onChange={(value) => handleSelectChange("cardType", value)}
+          value={watch("cardType")}
+          onChange={(value) => setValue("cardType", value)}
+          error={errors.cardType}
         />
       </div>
 
       {/* Card Face Value & Currency */}
       <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="cardFaceValue">Card Face Value</Label>
-          <Input
-            id="cardFaceValue"
-            name="cardFaceValue"
-            placeholder="$100"
-            value={formData.cardFaceValue}
-            onChange={handleInputChange}
-            className="mt-2 h-10"
-          />
-        </div>
+        <FormField
+          id="cardFaceValue"
+          label="Card Face Value"
+          placeholder="$100"
+          register={register}
+          error={errors.cardFaceValue}
+        />
+
         <SelectFieldLayout
           id="currency"
           label="Currency"
           options={["Dollar (USD)", "Euro (EUR)", "Pound (GBP)"]}
-          placeholder="Select currency"
-          onChange={(value) => handleSelectChange("currency", value)}
+          value={watch("currency")}
+          onChange={(value) => setValue("currency", value)}
+          error={errors.currency}
         />
       </div>
 
       {/* Quantity & Rayah */}
       <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="quantity">Quantity</Label>
-          <Input
-            id="quantity"
-            name="quantity"
-            placeholder="2"
-            value={formData.quantity}
-            onChange={handleInputChange}
-            className="mt-2 h-10"
-          />
-        </div>
+        <FormField
+          id="quantity"
+          label="Quantity"
+          placeholder="2"
+          register={register}
+          error={errors.quantity}
+        />
+
         <SelectFieldLayout
           id="rayah"
           label="Rayah"
           options={["Rayah"]}
-          placeholder="Select"
-          onChange={(value) => handleSelectChange("rayah", value)}
+          value={watch("rayah")}
+          onChange={(value) => setValue("rayah", value)}
+          error={errors.rayah}
         />
       </div>
 
-      {/* Vendor, Xibaka Rate, Margin */}
+      {/* Vendor, Xbanka Rate, Margin */}
       <div className="grid grid-cols-3 gap-4">
         <SelectFieldLayout
           id="vendor"
           label="Vendor"
           options={["Rayah", "Direct", "Broker"]}
-          placeholder="Select vendor"
-          onChange={(value) => handleSelectChange("vendor", value)}
+          value={watch("vendor")}
+          onChange={(value) => setValue("vendor", value)}
+          error={errors.vendor}
         />
-        <div>
-          <Label htmlFor="xibakaRate">Xibaka Rate</Label>
-          <Input
-            id="xibakaRate"
-            name="xibakaRate"
-            placeholder="1467.5"
-            value={formData.xibakaRate}
-            onChange={handleInputChange}
-            className="mt-2 h-10"
-          />
-        </div>
-        <div>
-          <Label htmlFor="margin">Margin</Label>
-          <Input
-            id="margin"
-            name="margin"
-            placeholder="0.5"
-            value={formData.margin}
-            onChange={handleInputChange}
-            className="mt-2 h-10"
-          />
-        </div>
+
+        <FormField
+          id="xbankaRate"
+          label="Xbanka Rate"
+          placeholder="1467.5"
+          register={register}
+          error={errors.xbankaRate}
+        />
+
+        <FormField
+          id="margin"
+          label="Margin"
+          placeholder="0.5"
+          register={register}
+          error={errors.margin}
+        />
       </div>
 
       {/* Expected Payout & Gift Card Code */}
       <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="expectedPayout">Expected Payout</Label>
-          <Input
-            id="expectedPayout"
-            name="expectedPayout"
-            placeholder="₦146,750"
-            value={formData.expectedPayout}
-            onChange={handleInputChange}
-            className="mt-2 h-10"
-          />
-        </div>
-        <div>
-          <Label htmlFor="giftCardCode">Gift Card Code</Label>
-          <Input
-            id="giftCardCode"
-            name="giftCardCode"
-            placeholder="00234564684648"
-            value={formData.giftCardCode}
-            onChange={handleInputChange}
-            className="mt-2 h-10"
-          />
-        </div>
+        <FormField
+          id="expectedPayout"
+          label="Expected Payout"
+          placeholder="₦146,750"
+          register={register}
+          error={errors.expectedPayout}
+        />
+
+        <FormField
+          id="giftCardCode"
+          label="Gift Card Code"
+          placeholder="00234564684648"
+          register={register}
+          error={errors.giftCardCode}
+        />
       </div>
 
       {/* Customer Account & Payment Date */}
       <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="customerAccountWallet">Customer Account/Wallet</Label>
-          <Input
-            id="customerAccountWallet"
-            name="customerAccountWallet"
-            placeholder="GTB - 0123456789"
-            value={formData.customerAccountWallet}
-            onChange={handleInputChange}
-            className="mt-2 h-10"
-          />
-        </div>
-        <div>
-          <Label htmlFor="paymentDate">Payment Date</Label>
-          <Input
-            id="paymentDate"
-            name="paymentDate"
-            type="date"
-            value={formData.paymentDate}
-            onChange={handleInputChange}
-            className="mt-2 h-10"
-          />
-        </div>
+        <FormField
+          id="customerAccountWallet"
+          label="Customer Account / Wallet"
+          placeholder="GTB - 0123456789"
+          register={register}
+          error={errors.customerAccountWallet}
+        />
+
+        <FormField
+          id="paymentDate"
+          label="Payment Date"
+          type="date"
+          register={register}
+          error={errors.paymentDate}
+        />
       </div>
 
       {/* Attachments */}
@@ -205,7 +197,6 @@ export function GiftCardTransactionForm({ onSubmit, isLoading = false }: GiftCar
 
       {/* Submit Button */}
       <Button
-        onClick={handleSubmit}
         disabled={isLoading}
         className="w-full bg-teal-500 hover:bg-teal-600 text-white h-11"
       >
