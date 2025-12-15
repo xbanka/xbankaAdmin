@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { X, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CryptoTransactionForm } from "./transaction-form-crypto";
@@ -28,11 +28,17 @@ export function TransactionAddSidebar({
   const [selectedType, setSelectedType] = useState<TransactionType>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  useEffect(() => {
+    if (isOpen) {
+      setSelectedType(null); // or a default like "crypto"
+    }
+  }, [isOpen]);
+
   if (!isOpen || !customer) return null;
 
   const handleSelectChange = (type: TransactionType) => {
     setSelectedType(type);
-  }
+  };
 
   const handleFormSubmit = (data: Record<string, string>) => {
     setIsSubmitting(true);
@@ -90,7 +96,10 @@ export function TransactionAddSidebar({
         </div>
 
         {/* Content */}
-        <CustomerDetailsDisplay displayTitle="Customer info" customer={customer} />
+        <CustomerDetailsDisplay
+          displayTitle="Customer info"
+          customer={customer}
+        />
         <div className="flex-1 overflow-y-auto p-6">
           {!selectedType ? (
             <div className="space-y-6">
@@ -106,23 +115,26 @@ export function TransactionAddSidebar({
                   label="Service Type"
                   options={["crypto", "gift-card", "bill-payments"]}
                   placeholder="Select type"
-                  onChange={(value) => handleSelectChange(value as TransactionType)}
+                  value={selectedType}
+                  onChange={(value) =>
+                    handleSelectChange(value as TransactionType)
+                  }
                 />
               </div>
             </div>
           ) : selectedType === "crypto" ? (
             <CryptoTransactionForm
-              onSubmit={handleFormSubmit}
+            serviceType={selectedType}
               isLoading={isSubmitting}
             />
           ) : selectedType === "gift-card" ? (
             <GiftCardTransactionForm
-              onSubmit={handleFormSubmit}
+            serviceType={selectedType}
               isLoading={isSubmitting}
             />
           ) : (
             <BillPaymentTransactionForm
-              onSubmit={handleFormSubmit}
+            serviceType={selectedType}
               isLoading={isSubmitting}
             />
           )}

@@ -1,177 +1,167 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Upload } from "lucide-react"
-import { SelectFieldLayout } from "../layout/SelectFieldLayout"
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Upload } from "lucide-react";
+import { SelectFieldLayout } from "../layout/SelectFieldLayout";
+import { TransactionType } from "./types";
+import { useForm } from "react-hook-form";
+import { SERVICE_TYPE_LABELS } from "@/lib/helper";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  CryptoTransactionFormValues,
+  cryptoTransactionSchema,
+} from "@/lib/schema/crypto-transaction.schema";
+import FormField from "../layout/FormField";
 
 interface CryptoTransactionFormProps {
-  onSubmit: (data: Record<string, string>) => void
-  isLoading?: boolean
+  serviceType: TransactionType;
+  isLoading?: boolean;
 }
 
-export function CryptoTransactionForm({ onSubmit, isLoading = false }: CryptoTransactionFormProps) {
-  const [formData, setFormData] = useState({
-    serviceType: "",
-    transactionType: "",
-    customerAmount: "",
-    vendor: "",
-    vendorRate: "",
-    xibakaRate: "",
-    margin: "",
-    expectedPayout: "",
-    customerAccountWallet: "",
-    xibakaAccount: "",
-    paymentDate: "",
-    meterNumber: "",
-  })
+export function CryptoTransactionForm({
+  isLoading = false,
+  serviceType,
+}: CryptoTransactionFormProps) {
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+    watch,
+  } = useForm<CryptoTransactionFormValues>({
+    resolver: zodResolver(cryptoTransactionSchema),
+    defaultValues: {
+      serviceType: "",
+      transactionType: "",
+      customerAmount: "",
+      vendor: "",
+      vendorRate: "",
+      xbankaRate: "",
+      margin: "",
+      expectedPayout: "",
+      customerAccountWallet: "",
+      xbankaAccount: "",
+      paymentDate: "",
+    },
+  });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+  useEffect(() => {
+    if (serviceType) {
+      setValue("serviceType", SERVICE_TYPE_LABELS[serviceType]);
+    }
+  }, [serviceType, setValue]);
 
-  const handleSelectChange = (name: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
-
-  const handleSubmit = () => {
-    onSubmit(formData)
-  }
+  const onSubmit = (data: CryptoTransactionFormValues) => {
+    console.log(data);
+  };
 
   return (
-    <div className="space-y-5">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       {/* Service Type & Transaction Type */}
       <div className="grid grid-cols-2 gap-4">
         <SelectFieldLayout
           id="serviceType"
           label="Service Type"
           options={["Crypto", "Gift Card", "Bills Payment"]}
-          placeholder="Select service"
-          onChange={(value) => handleSelectChange("serviceType", value)}
+          value={watch("serviceType")}
+          onChange={(value) => setValue("serviceType", value)}
+          error={errors.serviceType}
         />
+
         <SelectFieldLayout
           id="transactionType"
           label="Transaction Type"
           options={["USDT - NGN", "BTC - NGN", "ETH - NGN"]}
-          placeholder="Select type"
-          onChange={(value) => handleSelectChange("transactionType", value)}
+          value={watch("transactionType")}
+          onChange={(value) => setValue("transactionType", value)}
+          error={errors.transactionType}
         />
       </div>
 
       {/* Customer Amount & Vendor */}
       <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="customerAmount">Customer Amount</Label>
-          <Input
-            id="customerAmount"
-            name="customerAmount"
-            placeholder="100 USDT"
-            value={formData.customerAmount}
-            onChange={handleInputChange}
-            className="mt-2 h-10"
-          />
-        </div>
+        <FormField
+          id="customerAmount"
+          label="Customer Amount"
+          placeholder="100 USDT"
+          register={register}
+          error={errors.customerAmount}
+        />
+
         <SelectFieldLayout
           id="vendor"
           label="Vendor"
           options={["Rayah", "Binance", "Kraken"]}
-          placeholder="Select vendor"
-          onChange={(value) => handleSelectChange("vendor", value)}
+          value={watch("vendor")}
+          onChange={(value) => setValue("vendor", value)}
+          error={errors.vendor}
         />
       </div>
 
       {/* Vendor Rate, Xibaka Rate, Margin */}
       <div className="grid grid-cols-3 gap-4">
-        <div>
-          <Label htmlFor="vendorRate">Vendor Rate</Label>
-          <Input
-            id="vendorRate"
-            name="vendorRate"
-            placeholder="1467"
-            value={formData.vendorRate}
-            onChange={handleInputChange}
-            className="mt-2 h-10"
-          />
-        </div>
-        <div>
-          <Label htmlFor="xibakaRate">Xibaka Rate</Label>
-          <Input
-            id="xibakaRate"
-            name="xibakaRate"
-            placeholder="1467.5"
-            value={formData.xibakaRate}
-            onChange={handleInputChange}
-            className="mt-2 h-10"
-          />
-        </div>
-        <div>
-          <Label htmlFor="margin">Margin</Label>
-          <Input
-            id="margin"
-            name="margin"
-            placeholder="0.5"
-            value={formData.margin}
-            onChange={handleInputChange}
-            className="mt-2 h-10"
-          />
-        </div>
+        <FormField
+          id="vendorRate"
+          label="Vendor Rate"
+          placeholder="1467"
+          register={register}
+          error={errors.vendorRate}
+        />
+        <FormField
+          id="xbankaRate"
+          label="Xbanka Rate"
+          placeholder="1467.5"
+          register={register}
+          error={errors.xbankaRate}
+        />
+        <FormField
+          id="margin"
+          label="Margin"
+          placeholder="0.5"
+          register={register}
+          error={errors.margin}
+        />
       </div>
 
       {/* Expected Payout & Customer Account */}
       <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="expectedPayout">Expected Payout</Label>
-          <Input
-            id="expectedPayout"
-            name="expectedPayout"
-            placeholder="₦146,750"
-            value={formData.expectedPayout}
-            onChange={handleInputChange}
-            className="mt-2 h-10"
-          />
-        </div>
-        <div>
-          <Label htmlFor="customerAccountWallet">Customer Account/Wallet</Label>
-          <Input
-            id="customerAccountWallet"
-            name="customerAccountWallet"
-            placeholder="GTB - 0123456789"
-            value={formData.customerAccountWallet}
-            onChange={handleInputChange}
-            className="mt-2 h-10"
-          />
-        </div>
+        <FormField
+          id="expectedPayout"
+          label="Expected Payout"
+          placeholder="₦146,750"
+          register={register}
+          error={errors.expectedPayout}
+        />
+        <FormField
+          id="customerAccountWallet"
+          label="Customer Account / Wallet"
+          placeholder="GTB - 0123456789"
+          register={register}
+          error={errors.customerAccountWallet}
+        />
       </div>
 
       {/* Xibaka Account & Payment Date */}
       <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="xibakaAccount">Xibaka Account</Label>
-          <Input
-            id="xibakaAccount"
-            name="xibakaAccount"
-            placeholder="GTB - 0123456789"
-            value={formData.xibakaAccount}
-            onChange={handleInputChange}
-            className="mt-2 h-10"
-          />
-        </div>
-        <div>
-          <Label htmlFor="paymentDate">Payment Date</Label>
-          <Input
-            id="paymentDate"
-            name="paymentDate"
-            type="date"
-            value={formData.paymentDate}
-            onChange={handleInputChange}
-            className="mt-2 h-10"
-          />
-        </div>
+        <FormField
+          id="xbankaAccount"
+          label="Xbanka Account"
+          placeholder="GTB - 0123456789"
+          register={register}
+          error={errors.xbankaAccount}
+        />
+        <FormField
+          id="paymentDate"
+          label="Payment Date"
+          type="date"
+          register={register}
+          error={errors.paymentDate}
+        />
       </div>
 
       {/* Attachments */}
@@ -179,19 +169,22 @@ export function CryptoTransactionForm({ onSubmit, isLoading = false }: CryptoTra
         <Label>Attachments</Label>
         <div className="mt-2 border-2 border-dashed border-[#E5E7EB] rounded-lg p-8 text-center cursor-pointer hover:bg-gray-50 transition">
           <Upload className="h-6 w-6 text-gray-400 mx-auto mb-2" />
-          <p className="text-sm text-gray-600">Upload screenshot, receipt, or proof document</p>
-          <p className="text-xs text-gray-400 mt-1">JPG, PNG, OR PDF • Max 5MB</p>
+          <p className="text-sm text-gray-600">
+            Upload screenshot, receipt, or proof document
+          </p>
+          <p className="text-xs text-gray-400 mt-1">
+            JPG, PNG, OR PDF • Max 5MB
+          </p>
         </div>
       </div>
 
       {/* Submit Button */}
       <Button
-        onClick={handleSubmit}
         disabled={isLoading}
         className="w-full bg-teal-500 hover:bg-teal-600 text-white h-11"
       >
         {isLoading ? "Submitting..." : "Submit for Verification"}
       </Button>
-    </div>
-  )
+    </form>
+  );
 }
