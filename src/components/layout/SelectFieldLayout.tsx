@@ -16,7 +16,7 @@ interface SelectFieldProps {
   icon?: LucideIcon;
   options: string[];
   placeholder?: string;
-  onChange: (value: string) => void;
+  onChange?: (value: string) => void;
   className?: string
   error?: FieldError;
   selectClassName?: string;

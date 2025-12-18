@@ -1,0 +1,111 @@
+import { Mail, Phone, User } from "lucide-react";
+import FormField from "../layout/FormField";
+import { DialogLayout } from "../layout/modalLayout";
+import { Button } from "../ui/button";
+import { useCreateCustomer } from "@/hooks/CustomerService";
+import { useForm } from "react-hook-form";
+import {
+  NewCustomerFormValues,
+  newCustomerSchema,
+} from "@/lib/schema/customer.schema";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+interface NewCustomerModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const NewCustomerModal = ({ isOpen, onClose }: NewCustomerModalProps) => {
+  const { mutate, isPending } = useCreateCustomer();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<NewCustomerFormValues>({
+    resolver: zodResolver(newCustomerSchema),
+  });
+
+  const onSubmit = (values: NewCustomerFormValues) => {
+    mutate(
+      {
+        first_name: values.firstName,
+        last_name: values.lastName,
+        email: values.email,
+        phone_no: values.phoneNumber,
+        note: values.note,
+      },
+      {
+        onSuccess: () => {
+          reset();
+          onClose();
+        },
+      }
+    );
+  };
+
+  return (
+    <DialogLayout
+      open={isOpen}
+      onClose={onClose}
+      title="Add Customer"
+      footer={
+        <div className="mt-[15px] flex gap-[20px]">
+          <Button onClick={onClose} variant="outline">
+            Cancel
+          </Button>
+
+          <Button
+            disabled={isPending}
+            variant="default"
+            onClick={handleSubmit(onSubmit)}
+          >
+            {isPending ? "Saving..." : "Save"}
+          </Button>
+        </div>
+      }
+    >
+      <form className="space-y-5">
+        <div className="flex items-center gap-5">
+          <FormField
+            id="firstName"
+            label="First Name"
+            icon={User}
+            placeholder="First name"
+            register={register}
+            error={errors.firstName}
+          />
+          <FormField
+            id="lastName"
+            label="Last Name"
+            icon={User}
+            placeholder="Last name"
+            register={register}
+            error={errors.lastName}
+          />
+        </div>
+        <div className="flex items-center gap-5">
+          <FormField
+            id="email"
+            label="Email"
+            icon={Mail}
+            placeholder="Email"
+            register={register}
+            error={errors.email}
+          />
+          <FormField
+            id="phoneNumber"
+            label="Phone Number"
+            icon={Phone}
+            placeholder="Phone Number"
+            register={register}
+            error={errors.phoneNumber}
+          />
+        </div>
+      </form>
+    </DialogLayout>
+  );
+};
+
+export default NewCustomerModal;

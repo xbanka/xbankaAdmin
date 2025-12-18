@@ -46,11 +46,11 @@ const data = {
       url: "/",
       icon: Home,
     },
-    // {
-    //   title: "Customer Management",
-    //   url: "/customerManagement",
-    //   icon: Users,
-    // },
+    {
+      title: "Customer Management",
+      url: "/customerManagement",
+      icon: Users,
+    },
     {
       title: "Transactions",
       url: "/transactions",

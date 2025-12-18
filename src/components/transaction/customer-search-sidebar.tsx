@@ -4,63 +4,51 @@ import { useState, useMemo, useEffect } from "react";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Customer } from "./types";
 import SidebarHeader from "../Sidebar/sidebar-header";
 import TransactionCustomerDetailsField from "./transaction-customer-details-field";
+import { useGetCustomer } from "@/hooks/CustomerService";
+import { useFormContext } from "react-hook-form";
+import FormField from "../layout/FormField";
 
 interface CustomerSearchSidebarProps {
   isOpen: boolean;
   onClose: () => void;
   onCustomerSelect: (customer: Customer) => void;
-  customers?: Customer[];
   isLoading?: boolean;
 }
-
-// const mockCustomers: Customer[] = [
-//   {
-//     id: "1",
-//     name: "Jane Smith",
-//     username: "@janesmith",
-//     email: "janesmith@gmail.com",
-//     phone: "09023456789",
-//     affiliateAttribution: "@Codixe",
-//     assignedRep: "Joe Prochter",
-//     totalTransactions: 12,
-//     lastTransactionDate: "Nov 5, 2025",
-//   },
-//   {
-//     id: "2",
-//     name: "John Doe",
-//     username: "@johndoe",
-//     email: "johndoe@example.com",
-//     phone: "08012345678",
-//     affiliateAttribution: "@TechPartner",
-//     assignedRep: "Sarah Johnson",
-//     totalTransactions: 8,
-//     lastTransactionDate: "Nov 3, 2025",
-//   },
-//   {
-//     id: "3",
-//     name: "Alice Johnson",
-//     username: "@alicej",
-//     email: "alice@company.com",
-//     phone: "07098765432",
-//     affiliateAttribution: "@Enterprise",
-//     assignedRep: "Mike Chen",
-//     totalTransactions: 15,
-//     lastTransactionDate: "Nov 4, 2025",
-//   },
-// ];
 
 export function CustomerSearchSidebar({
   isOpen,
   onClose,
   onCustomerSelect,
-  customers,
   isLoading = false,
 }: CustomerSearchSidebarProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCustomer, setActiveCustomer] = useState<Customer | null>(null);
+
+  const { setValue, register } = useFormContext();
+
+  const handleCustomerSelect = (customer: Customer) => {
+    setValue("customer", {
+      id: customer.id,
+      name: customer.name,
+      email: customer.email,
+      phone: customer.phone,
+      affiliateAttribution: customer.affiliateAttribution ?? "",
+      assignedRep: customer.assignedRep ?? "",
+    });
+  };
+
+  const { data, isLoading: customerLoading } = useGetCustomer(searchQuery);
+
+  const customers = useMemo(() => {
+    return (data?.data ?? []).map((c) => ({
+      id: c.id,
+      name: `${c.first_name} ${c.last_name}`,
+      email: c.email,
+      phone: c.phone_no,
+    }));
+  }, [data]);
 
   useEffect(() => {
     if (isOpen) {
@@ -68,16 +56,6 @@ export function CustomerSearchSidebar({
       setActiveCustomer(null);
     }
   }, [isOpen]);
-
-  const filteredCustomers = useMemo(() => {
-    if (!searchQuery) return [];
-    return customers?.filter(
-      (customer) =>
-        customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        customer.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        customer.email.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [searchQuery, customers]);
 
   if (!isOpen) return null;
 
@@ -113,11 +91,11 @@ export function CustomerSearchSidebar({
             <div className="flex items-center justify-center h-full text-gray-500">
               Loading customers...
             </div>
-          ) : filteredCustomers?.length === 0 && searchQuery ? (
+          ) : customers?.length === 0 && searchQuery ? (
             <div className="text-center py-8 text-gray-500">
               No customers found
             </div>
-          ) : filteredCustomers?.length === 0 ? (
+          ) : customers?.length === 0 ? (
             <div className="text-center py-8 text-gray-500 text-sm">
               Start typing to search for customers
             </div>
@@ -129,23 +107,33 @@ export function CustomerSearchSidebar({
               />
               <div className="flex items-center gap-4">
                 <TransactionCustomerDetailsField
-                label="Phone Number"
-                body={activeCustomer.phone}
-              />
-              <TransactionCustomerDetailsField
-                label="Email"
-                body={activeCustomer.email}
-              />
+                  label="Phone Number"
+                  body={activeCustomer.phone}
+                />
+                <TransactionCustomerDetailsField
+                  label="Email"
+                  body={activeCustomer.email}
+                />
               </div>
               <div className="flex items-center gap-4">
-                <TransactionCustomerDetailsField
-                label="Affiliate Attribution"
-                body={activeCustomer.affiliateAttribution}
-              />
-              <TransactionCustomerDetailsField
-                label="Assigned Rep"
-                body={activeCustomer.assignedRep}
-              />
+                {/* <TransactionCustomerDetailsField
+                  label="Affiliate Attribution"
+                  body={activeCustomer.affiliateAttribution}
+                /> */}
+                <FormField
+                  label="Affiliate Attribution"
+                  id="customer.affiliateAttribution"
+                  register={register}
+                />
+                <FormField
+                  label="Assigned Rep"
+                  id="customer.assignedRep"
+                  register={register}
+                />
+                {/* <TransactionCustomerDetailsField
+                  label="Assigned Rep"
+                  body={activeCustomer.assignedRep}
+                /> */}
               </div>
 
               <Button
@@ -157,7 +145,7 @@ export function CustomerSearchSidebar({
             </div>
           ) : (
             <div className="space-y-3">
-              {filteredCustomers?.map((customer) => (
+              {customers?.map((customer) => (
                 <div
                   key={customer.id}
                   onClick={() => setActiveCustomer(customer)}

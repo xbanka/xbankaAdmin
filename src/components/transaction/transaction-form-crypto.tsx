@@ -1,62 +1,22 @@
 "use client";
 
-import type React from "react";
-
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Upload } from "lucide-react";
 import { SelectFieldLayout } from "../layout/SelectFieldLayout";
-import { TransactionType } from "./types";
-import { useForm } from "react-hook-form";
-import { SERVICE_TYPE_LABELS } from "@/lib/helper";
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  CryptoTransactionFormValues,
-  cryptoTransactionSchema,
-} from "@/lib/schema/crypto-transaction.schema";
+import { useFormContext } from "react-hook-form";
 import FormField from "../layout/FormField";
 
-interface CryptoTransactionFormProps {
-  serviceType: TransactionType;
-  isLoading?: boolean;
-}
-
-export function CryptoTransactionForm({
-  isLoading = false,
-  serviceType,
-}: CryptoTransactionFormProps) {
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    formState: { errors },
-    watch,
-  } = useForm<CryptoTransactionFormValues>({
-    resolver: zodResolver(cryptoTransactionSchema),
-    defaultValues: {
-      serviceType: "",
-      transactionType: "",
-      customerAmount: "",
-      vendor: "",
-      vendorRate: "",
-      xbankaRate: "",
-      margin: "",
-      expectedPayout: "",
-      customerAccountWallet: "",
-      xbankaAccount: "",
-      paymentDate: "",
-    },
-  });
+export function CryptoTransactionForm() {
+  const { register, setValue, watch, handleSubmit } = useFormContext();
 
   useEffect(() => {
-    if (serviceType) {
-      setValue("serviceType", SERVICE_TYPE_LABELS[serviceType]);
-    }
-  }, [serviceType, setValue]);
+    setValue("details.serviceType", "crypto");
+  }, []);
 
-  const onSubmit = (data: CryptoTransactionFormValues) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const onSubmit = (data: any) => {
     console.log(data);
   };
 
@@ -69,98 +29,101 @@ export function CryptoTransactionForm({
           label="Service Type"
           options={["Crypto", "Gift Card", "Bills Payment"]}
           value={watch("serviceType")}
-          onChange={(value) => setValue("serviceType", value)}
-          error={errors.serviceType}
+          onChange={(value) => {
+            setValue("serviceType", value);
+            setValue("details.serviceType", value);
+          }}
+          // error={errors.serviceType}
         />
 
         <SelectFieldLayout
-          id="transactionType"
+          id="details.transactionType"
           label="Transaction Type"
           options={["USDT - NGN", "BTC - NGN", "ETH - NGN"]}
-          value={watch("transactionType")}
+          value={watch("details.transactionType")}
           onChange={(value) => setValue("transactionType", value)}
-          error={errors.transactionType}
+          // error={errors.transactionType}
         />
       </div>
 
       {/* Customer Amount & Vendor */}
       <div className="grid grid-cols-2 gap-4">
         <FormField
-          id="customerAmount"
+          id="details.customerAmount"
           label="Customer Amount"
           placeholder="100 USDT"
           register={register}
-          error={errors.customerAmount}
+          // error={errors.customerAmount}
         />
 
         <SelectFieldLayout
-          id="vendor"
+          id="details.vendor"
           label="Vendor"
           options={["Rayah", "Binance", "Kraken"]}
-          value={watch("vendor")}
+          value={watch("details.vendor")}
           onChange={(value) => setValue("vendor", value)}
-          error={errors.vendor}
+          // error={errors.vendor}
         />
       </div>
 
       {/* Vendor Rate, Xibaka Rate, Margin */}
       <div className="grid grid-cols-3 gap-4">
         <FormField
-          id="vendorRate"
+          id="details.vendorRate"
           label="Vendor Rate"
           placeholder="1467"
           register={register}
-          error={errors.vendorRate}
+          // error={errors.vendorRate}
         />
         <FormField
-          id="xbankaRate"
+          id="details.xbankaRate"
           label="Xbanka Rate"
           placeholder="1467.5"
           register={register}
-          error={errors.xbankaRate}
+          // error={errors.xbankaRate}
         />
         <FormField
-          id="margin"
+          id="details.margin"
           label="Margin"
           placeholder="0.5"
           register={register}
-          error={errors.margin}
+          // error={errors.margin}
         />
       </div>
 
       {/* Expected Payout & Customer Account */}
       <div className="grid grid-cols-2 gap-4">
         <FormField
-          id="expectedPayout"
+          id="details.expectedPayout"
           label="Expected Payout"
           placeholder="₦146,750"
           register={register}
-          error={errors.expectedPayout}
+          // error={errors.expectedPayout}
         />
         <FormField
-          id="customerAccountWallet"
+          id="details.customerAccountWallet"
           label="Customer Account / Wallet"
           placeholder="GTB - 0123456789"
           register={register}
-          error={errors.customerAccountWallet}
+          // error={errors.customerAccountWallet}
         />
       </div>
 
       {/* Xibaka Account & Payment Date */}
       <div className="grid grid-cols-2 gap-4">
         <FormField
-          id="xbankaAccount"
+          id="details.xbankaAccount"
           label="Xbanka Account"
           placeholder="GTB - 0123456789"
           register={register}
-          error={errors.xbankaAccount}
+          // error={errors.xbankaAccount}
         />
         <FormField
-          id="paymentDate"
+          id="details.paymentDate"
           label="Payment Date"
           type="date"
           register={register}
-          error={errors.paymentDate}
+          // error={errors.paymentDate}
         />
       </div>
 
@@ -180,10 +143,9 @@ export function CryptoTransactionForm({
 
       {/* Submit Button */}
       <Button
-        disabled={isLoading}
         className="w-full bg-teal-500 hover:bg-teal-600 text-white h-11"
       >
-        {isLoading ? "Submitting..." : "Submit for Verification"}
+        Submit for Verification
       </Button>
     </form>
   );
