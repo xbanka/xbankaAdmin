@@ -1,16 +1,10 @@
 "use client";
 
-import type React from "react";
-
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { X, Upload, Trash2 } from "lucide-react";
-import type { PayoutData } from "@/app/(dashboard)/finance/page";
 import FinanceDetailsHeader from "../layout/Finance/FinanceDetailsHeader";
-import { SelectFieldLayout } from "../layout/SelectFieldLayout";
 import LoaderSpinner from "../ui/loaderSpinner";
 import SidebarHeader from "../Sidebar/sidebar-header";
+import { PayoutData } from "@/lib/types";
 
 interface ConfirmPayoutSidebarProps {
   isOpen: boolean;
@@ -162,120 +156,3 @@ export function ConfirmPayoutSidebar({
   );
 }
 
-// {showContent && <div className="px-[24px] py-[20px]">
-//   <div className="space-y-4">
-//     {/* Account Source */}
-//     <SelectFieldLayout
-//     label="Select Account Source"
-//       id="date"
-//       selectClassName="h-10 py-[8px]"
-//       options={filterOptions}
-//       placeholder="Transaction Type"
-//       onChange={setTransactionTypeFilter}
-//     />
-
-//     {/* Payment Reference */}
-//     <div>
-//       <label
-//         htmlFor="paymentReference"
-//         className="block text-xs font-semibold text-gray-700 mb-2"
-//       >
-//         Payment Reference
-//       </label>
-//       <Input
-//         id="paymentReference"
-//         name="paymentReference"
-//         placeholder="e.g REF88656WER"
-//         value={formData.paymentReference}
-//         onChange={handleInputChange}
-//         className="h-10"
-//       />
-//     </div>
-
-//     {/* Bank Reference */}
-//     <div>
-//       <label
-//         htmlFor="bankReference"
-//         className="block text-xs font-semibold text-gray-700 mb-2"
-//       >
-//         Bank Reference
-//       </label>
-//       <Input
-//         id="bankReference"
-//         name="bankReference"
-//         placeholder="e.g REF88656WER"
-//         value={formData.bankReference}
-//         onChange={handleInputChange}
-//         className="h-10"
-//       />
-//     </div>
-//   </div>
-// </div>}
-
-// {showContent && <div className="px-[24px] py-[20px]">
-//   <h3 className="text-sm font-[500] leading-[20px] text-[#1E1F20] mb-1">
-//     Attachments
-//   </h3>
-//   <p className="text-xs text-[#606368] mb-3">
-//     Upload screenshot, receipt or proof of transaction
-//   </p>
-
-//   {/* Upload Area */}
-//   <label className="block border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-primary transition">
-//     <div className="flex flex-col items-center gap-2">
-//       <Upload className="w-5 h-5 text-gray-400" />
-//       <div className="text-xs">
-//         <p className="font-medium text-gray-700">
-//           Upload screenshot, receipt or proof document
-//         </p>
-//         <p className="text-gray-500">JPG, PNG, PDF, Max 5 MB</p>
-//       </div>
-//     </div>
-//     <input
-//       type="file"
-//       multiple
-//       onChange={handleFileChange}
-//       className="hidden"
-//       accept=".jpg,.jpeg,.png,.pdf"
-//     />
-//   </label>
-
-//   {/* Uploaded Files */}
-//   {formData.attachments.length > 0 && (
-//     <div className="mt-4 space-y-2">
-//       {formData.attachments.map((file, index) => (
-//         <div
-//           key={index}
-//           className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200"
-//         >
-//           <div className="flex items-center gap-2">
-//             <div className="w-8 h-8 bg-gray-200 rounded flex items-center justify-center text-xs font-semibold">
-//               {file.name.split(".").pop()?.toUpperCase()}
-//             </div>
-//             <div className="text-sm">
-//               <p className="font-medium text-foreground truncate">
-//                 {file.name}
-//               </p>
-//               <p className="text-xs text-gray-500">
-//                 {(file.size / 1024).toFixed(2)} KB
-//               </p>
-//             </div>
-//           </div>
-//           <button
-//             onClick={() =>
-//               setFormData((prev) => ({
-//                 ...prev,
-//                 attachments: prev.attachments.filter(
-//                   (_, i) => i !== index
-//                 ),
-//               }))
-//             }
-//             className="text-red-500 hover:text-red-700 p-1"
-//           >
-//             <Trash2 className="w-4 h-4" />
-//           </button>
-//         </div>
-//       ))}
-//     </div>
-//   )}
-// </div>}

@@ -6,16 +6,17 @@ import { Button } from "@/components/ui/button";
 import { CryptoTransactionForm } from "./transaction-form-crypto";
 import { GiftCardTransactionForm } from "./transaction-form-gift-card";
 import { BillPaymentTransactionForm } from "./transaction-form-bill-payment";
-import { Customer } from "./types";
+import { ActiveCustomer, Customer } from "./types";
 import { CustomerDetailsDisplay } from "./customers-details-display";
 import { SelectFieldLayout } from "../layout/SelectFieldLayout";
+import { useFormContext } from "react-hook-form";
 
 type TransactionType = "crypto" | "gift-card" | "bill-payments" | null;
 
 interface TransactionAddSidebarProps {
   isOpen: boolean;
   onClose: () => void;
-  customer: Customer | null;
+  customer: ActiveCustomer | null;
   onBack: () => void;
 }
 
@@ -28,36 +29,11 @@ export function TransactionAddSidebar({
   const [selectedType, setSelectedType] = useState<TransactionType>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    if (isOpen) {
-      setSelectedType(null); // or a default like "crypto"
-    }
-  }, [isOpen]);
+  const { watch, setValue } = useFormContext();
+
+  const serviceType = watch("serviceType");
 
   if (!isOpen || !customer) return null;
-
-  const handleSelectChange = (type: TransactionType) => {
-    setSelectedType(type);
-  };
-
-  const handleFormSubmit = (data: Record<string, string>) => {
-    setIsSubmitting(true);
-    // Simulate API call
-    setTimeout(() => {
-      console.log("Transaction submitted:", {
-        customer,
-        type: selectedType,
-        ...data,
-      });
-      setIsSubmitting(false);
-      setSelectedType(null);
-      onClose();
-    }, 1500);
-  };
-
-  const handleBack = () => {
-    setSelectedType(null);
-  };
 
   return (
     <div className="fixed inset-0 z-50 flex">
@@ -68,21 +44,21 @@ export function TransactionAddSidebar({
       <div className="max-w-[470px] bg-white shadow-lg flex flex-col h-full overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-[#E5E7EB]">
-          {selectedType && (
+          {serviceType && (
             <button
-              onClick={handleBack}
+              onClick={() => setValue("serviceType", undefined)}
               className="text-gray-400 hover:text-gray-600 mr-2"
             >
               <ArrowLeft className="h-5 w-5" />
             </button>
           )}
           <h2 className="text-lg font-semibold text-[#111827] flex-1">
-            {selectedType
+            {serviceType
               ? `Add ${
-                  selectedType === "bill-payments"
-                    ? "Bill Payment"
-                    : selectedType === "gift-card"
+                  serviceType === "gift-card"
                     ? "Gift Card"
+                    : serviceType === "bill-payments"
+                    ? "Bill Payment"
                     : "Crypto"
                 } Transaction`
               : "New Transaction"}
@@ -101,7 +77,7 @@ export function TransactionAddSidebar({
           customer={customer}
         />
         <div className="flex-1 overflow-y-auto p-6">
-          {!selectedType ? (
+          {!serviceType ? (
             <div className="space-y-6">
               {/* Customer Info */}
 
@@ -111,37 +87,28 @@ export function TransactionAddSidebar({
                   Transaction Information
                 </h3>
                 <SelectFieldLayout
-                  id="transactionType"
+                  id="serviceType"
                   label="Service Type"
                   options={["crypto", "gift-card", "bill-payments"]}
                   placeholder="Select type"
-                  value={selectedType}
-                  onChange={(value) =>
-                    handleSelectChange(value as TransactionType)
-                  }
+                  value={serviceType}
+                  onChange={(value) => {
+                    setValue("serviceType", value as TransactionType); // ✅ CHANGE
+                  }}
                 />
               </div>
             </div>
-          ) : selectedType === "crypto" ? (
-            <CryptoTransactionForm
-            serviceType={selectedType}
-              isLoading={isSubmitting}
-            />
-          ) : selectedType === "gift-card" ? (
-            <GiftCardTransactionForm
-            serviceType={selectedType}
-              isLoading={isSubmitting}
-            />
+          ) : serviceType === "crypto" ? (
+            <CryptoTransactionForm />
+          ) : serviceType === "gift-card" ? (
+            <GiftCardTransactionForm />
           ) : (
-            <BillPaymentTransactionForm
-            serviceType={selectedType}
-              isLoading={isSubmitting}
-            />
+            <BillPaymentTransactionForm />
           )}
         </div>
 
         {/* Footer - Close Button */}
-        {!selectedType && (
+        {!serviceType && (
           <div className="p-6 border-t border-[#E5E7EB]">
             <Button
               onClick={onClose}

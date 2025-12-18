@@ -1,88 +1,57 @@
-import { AxiosError } from "axios";
 import AxiosInstance from "../Axiosinstance/axiosInstance";
 
-export const getCustomers = async () => {
+const BASE_URL = "/api/customers";
+
+export const getCustomers = async (query?: string) => {
   try {
-    const response = await AxiosInstance.get("/customers", {
+    const url = query
+      ? `${BASE_URL}/search?q=${encodeURIComponent(query)}`
+      : `${BASE_URL}/all`;
+    const response = await AxiosInstance.get(url, {
       withCredentials: true,
     });
-    console.log(response);
     return {
       success: true,
-      data: response.data, // ✅ only return actual payload
+      data: response.data,
       status: response.status,
     };
-  } catch (err) {
-    const error = err as AxiosError<{ message?: string }>;
-    if (error.response) {
-      throw new Error(error.response.data?.message || "Something went wrong");
-    } else if (error.request) {
-      throw new Error("No response from server. Please try again later.");
-    } else {
-      throw new Error(error.message);
-    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    throw {
+      success: false,
+      status: error.status,
+      message: error.message,
+    };
   }
 };
 
-export const createNewCustomer = async (
-  firstName: string,
-  lastName: string,
-  email: string,
-  phone: string,
-  status: string
-) => {
+export const createCustomer = async (payload: {
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone_no: string;
+  note?: string;
+}) => {
   try {
     const response = await AxiosInstance.post(
-      "/customers/create",
-      {
-        firstName,
-        lastName,
-        email,
-        phone,
-        status,
-      },
+      "/api/customers/new",
+      payload,
       { withCredentials: true }
     );
-    console.log(response);
+
     return {
       success: true,
-      data: response.data, // ✅ only return actual payload
+      data: response.data,
       status: response.status,
     };
-  } catch (err) {
-    const error = err as AxiosError<{ message?: string }>;
-    if (error.response) {
-      throw new Error(error.response.data?.message || "Something went wrong");
-    } else if (error.request) {
-      throw new Error("No response from server. Please try again later.");
-    } else {
-      throw new Error(error.message);
-    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    throw {
+      success: false,
+      status: error?.response?.status,
+      message:
+        error.message ?? "Failed to create customer",
+    };
   }
 };
 
-export const deleteCustomer = async (
-  id: string,
-) => {
-  try {
-    const response = await AxiosInstance.delete(
-      `/customers/${id}`,
-      { withCredentials: true }
-    );
-    console.log(response);
-    return {
-      success: true,
-      data: response.data, // ✅ only return actual payload
-      status: response.status,
-    };
-  } catch (err) {
-    const error = err as AxiosError<{ message?: string }>;
-    if (error.response) {
-      throw new Error(error.response.data?.message || "Something went wrong");
-    } else if (error.request) {
-      throw new Error("No response from server. Please try again later.");
-    } else {
-      throw new Error(error.message);
-    }
-  }
-};
