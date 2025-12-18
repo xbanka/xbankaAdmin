@@ -1,8 +1,9 @@
 // lib/schemas/gift-card-transaction.schema.ts
 import { z } from "zod"
+import { ServiceTypeEnum } from "./service-type.schema"
 
 export const giftCardTransactionSchema = z.object({
-  serviceType: z.string().min(1, "Service type is required"),
+  serviceType: ServiceTypeEnum,
   cardType: z.string().min(1, "Card type is required"),
   cardFaceValue: z.string().min(1, "Card face value is required"),
   currency: z.string().min(1, "Currency is required"),
