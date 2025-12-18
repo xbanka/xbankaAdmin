@@ -1,17 +1,20 @@
 export interface TransactionRecord {
-  id: string
-  transactionId: string
-  customerId: string
-  customerName: string
-  serviceType: string
-  transactionType: string
-  amountIn: string
-  amountOut: string
-  vendorRate: string
-  xiibakaRate: string
-  margin: string
-  status: "completed" | "pending" | "failed"
-  createdAt: string
+  id: string;
+  transactionId: string;
+  customerId: string;
+  customerName: string;
+  serviceType: string;
+  transactionType: string;
+  amountIn: string;
+  amountOut: string;
+  vendorRate: string;
+  xiibakaRate: string;
+  margin: string;
+  status: "completed" | "pending" | "failed";
+  createdAt: string;
+  vendor: string;
+  assignedRep: string;
+  dateCreated: string;
 }
 
 export const mockTransactions: TransactionRecord[] = [
@@ -24,10 +27,13 @@ export const mockTransactions: TransactionRecord[] = [
     transactionType: "USDT - NGN",
     amountIn: "1250 USDT",
     amountOut: "₦1,800,000.00",
+    vendor: "Binance",
     vendorRate: "1465.5",
     xiibakaRate: "1468.5",
     margin: "1.0",
+    assignedRep: "Sarah Johnson",
     status: "completed",
+    dateCreated: "2025-03-10",
     createdAt: "2025-03-12",
   },
   {
@@ -39,10 +45,13 @@ export const mockTransactions: TransactionRecord[] = [
     transactionType: "Amazon",
     amountIn: "$300.00",
     amountOut: "₦150,000.00",
+    vendor: "Rayah",
     vendorRate: "500",
     xiibakaRate: "1475.5",
     margin: "1.0",
+    assignedRep: "Michael Adams",
     status: "completed",
+    dateCreated: "2025-03-11",
     createdAt: "2025-03-13",
   },
   {
@@ -54,10 +63,13 @@ export const mockTransactions: TransactionRecord[] = [
     transactionType: "Electricity Bill",
     amountIn: "₦650,000",
     amountOut: "₦650,000",
+    vendor: "IBEDC",
     vendorRate: "-",
     xiibakaRate: "-",
     margin: "-",
+    assignedRep: "Grace Thompson",
     status: "pending",
+    dateCreated: "2025-03-12",
     createdAt: "2025-03-14",
   },
   {
@@ -69,10 +81,13 @@ export const mockTransactions: TransactionRecord[] = [
     transactionType: "NGN - USDT",
     amountIn: "₦665,000",
     amountOut: "2000 USDT",
+    vendor: "Kraken",
     vendorRate: "200200",
     xiibakaRate: "200200",
     margin: "1.0",
+    assignedRep: "Daniel Brooks",
     status: "completed",
+    dateCreated: "2025-03-13",
     createdAt: "2025-03-15",
   },
   {
@@ -84,10 +99,13 @@ export const mockTransactions: TransactionRecord[] = [
     transactionType: "Electricity Bill",
     amountIn: "₦870,000",
     amountOut: "₦870,000",
+    vendor: "Eko Disco",
     vendorRate: "-",
     xiibakaRate: "-",
     margin: "-",
+    assignedRep: "Olivia Martins",
     status: "failed",
+    dateCreated: "2025-03-14",
     createdAt: "2025-03-16",
   },
   {
@@ -99,10 +117,13 @@ export const mockTransactions: TransactionRecord[] = [
     transactionType: "Steam",
     amountIn: "$150",
     amountOut: "₦150,000.00",
+    vendor: "Direct Vendor",
     vendorRate: "1000",
     xiibakaRate: "1000",
     margin: "1.0",
+    assignedRep: "Nathan Lee",
     status: "completed",
+    dateCreated: "2025-03-15",
     createdAt: "2025-03-17",
   },
   {
@@ -114,10 +135,13 @@ export const mockTransactions: TransactionRecord[] = [
     transactionType: "NGN - USDT",
     amountIn: "₦665,000",
     amountOut: "20 USDT",
+    vendor: "Binance",
     vendorRate: "1465.5",
     xiibakaRate: "1468.5",
     margin: "1.0",
+    assignedRep: "Sophia Carter",
     status: "completed",
+    dateCreated: "2025-03-16",
     createdAt: "2025-03-18",
   },
   {
@@ -129,10 +153,13 @@ export const mockTransactions: TransactionRecord[] = [
     transactionType: "NGN - USDT",
     amountIn: "₦665,000",
     amountOut: "300 USDT",
+    vendor: "Kraken",
     vendorRate: "1465.5",
     xiibakaRate: "1468.5",
     margin: "1.0",
+    assignedRep: "Isabella Moore",
     status: "completed",
+    dateCreated: "2025-03-17",
     createdAt: "2025-03-19",
   },
-]
+];

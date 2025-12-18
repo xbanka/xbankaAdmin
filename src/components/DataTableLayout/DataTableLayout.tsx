@@ -158,7 +158,7 @@ export function DataTableLayout<T>({
                 >
                   {columns.map((col) => (
                     <TableCell
-                      className="py-[19px] px-[20px] text-left"
+                      className="py-[19px] px-[20px] text-left whitespace-nowrap"
                       key={col.key as string}
                     >
                       {col.render ? col.render(item) : (item as never)[col.key]}

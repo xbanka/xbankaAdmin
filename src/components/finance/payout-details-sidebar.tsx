@@ -2,10 +2,10 @@
 
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
-import type { PayoutData } from "@/app/(dashboard)/finance/page";
 import CustomDetailsName from "./CustomDetailsName";
 import FinanceDetailsHeader from "../layout/Finance/FinanceDetailsHeader";
 import LoaderSpinner from "../ui/loaderSpinner";
+import { PayoutData } from "@/lib/types";
 
 interface PayoutDetailsSidebarProps {
   isOpen: boolean;

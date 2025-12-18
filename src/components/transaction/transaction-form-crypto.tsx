@@ -7,13 +7,11 @@ import { Upload } from "lucide-react";
 import { SelectFieldLayout } from "../layout/SelectFieldLayout";
 import { useFormContext } from "react-hook-form";
 import FormField from "../layout/FormField";
+import { SearchSelectFieldLayout } from "../layout/SearchableSelectLayout";
 
 export function CryptoTransactionForm() {
   const { register, setValue, watch, handleSubmit } = useFormContext();
 
-  useEffect(() => {
-    setValue("details.serviceType", "crypto");
-  }, []);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onSubmit = (data: any) => {
@@ -27,22 +25,17 @@ export function CryptoTransactionForm() {
         <SelectFieldLayout
           id="serviceType"
           label="Service Type"
-          options={["Crypto", "Gift Card", "Bills Payment"]}
+          options={["crypto", "gift-card", "bill-payments"]}
           value={watch("serviceType")}
-          onChange={(value) => {
-            setValue("serviceType", value);
-            setValue("details.serviceType", value);
-          }}
+          onChange={(value) => setValue("serviceType", value)}
           // error={errors.serviceType}
         />
-
-        <SelectFieldLayout
+        <SearchSelectFieldLayout
           id="details.transactionType"
           label="Transaction Type"
           options={["USDT - NGN", "BTC - NGN", "ETH - NGN"]}
           value={watch("details.transactionType")}
           onChange={(value) => setValue("transactionType", value)}
-          // error={errors.transactionType}
         />
       </div>
 
@@ -56,7 +49,7 @@ export function CryptoTransactionForm() {
           // error={errors.customerAmount}
         />
 
-        <SelectFieldLayout
+        <SearchSelectFieldLayout
           id="details.vendor"
           label="Vendor"
           options={["Rayah", "Binance", "Kraken"]}
