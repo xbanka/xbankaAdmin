@@ -38,3 +38,35 @@ export interface SidebarHeaderProps {
   header: string;
   onClose: () => void;
 }
+
+export interface Customer {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone_no: string;
+  note: string;
+  affiliateAttribution?: string
+  assignedRep?: string
+}
+
+export interface PayoutData {
+  id: string;
+  amount: string;
+  status: string;
+  payment_ref: string;
+  paid_at: string;
+  affiliate: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+    username: string;
+    phone_no: string;
+    bank: string;
+    account_no: string;
+    ref_code: string;
+    custom_refcode: string;
+    created_at: string;
+  };
+}

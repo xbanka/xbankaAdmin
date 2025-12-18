@@ -12,7 +12,7 @@ interface FormFieldProps {
   icon?: LucideIcon;
   // register: UseFormRegister<any>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  register: any;
+  register?: any;
   error?: FieldError;
 }
 

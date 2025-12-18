@@ -9,27 +9,7 @@ import { Input } from "@/components/ui/input";
 import { useQuery } from "@tanstack/react-query";
 import { getPayouts } from "@/lib/actions/notificationsActions";
 import { usePayoutSidebarStore } from "@/store/usePayoutSidebarStore";
-
-export interface PayoutData {
-  id: string;
-  amount: string;
-  status: string;
-  payment_ref: string;
-  paid_at: string;
-  affiliate: {
-    id: string;
-    first_name: string;
-    last_name: string;
-    email: string;
-    username: string;
-    phone_no: string;
-    bank: string;
-    account_no: string;
-    ref_code: string;
-    custom_refcode: string;
-    created_at: string;
-  };
-}
+import { PayoutData } from "@/lib/types";
 
 export default function FinancePage() {
   const [activeFilter, setActiveFilter] = useState("all");
@@ -186,19 +166,6 @@ const handleSelectPayout = (payout: PayoutData) => {
                 className="py-[10px] px-[12px] pl-10 w-full md:w-64"
               />
             </div>
-
-            {/* <SelectFieldLayout
-              id="date"
-              selectClassName="h-10 py-[8px]"
-              options={filterOptions}
-              placeholder="Transaction Type"
-              onChange={setTransactionTypeFilter}
-            /> */}
-
-            {/* <Button variant="outline">
-              <Filter className="h-4 w-4 mr-2" />
-              Advanced filter
-            </Button> */}
           </div>
         </div>
         <DataTableLayout
@@ -211,62 +178,6 @@ const handleSelectPayout = (payout: PayoutData) => {
           itemsPerPage={5}
           emptyMessage="No payout requests available."
         />
-
-        {/* {payout && (
-          <PayoutDetailsSidebar
-            isOpen={isDetailsOpen}
-            onClose={closeDetailsSidebar}
-            payout={payout}
-            onDecline={handleDeclinePayout}
-            onProcess={handleProcessPayout}
-            loading={individualPayoutPending}
-            error={individualPayoutError?.message || ""}
-          />
-        )}
-
-        {payout && (
-          <ConfirmPayoutSidebar
-            isOpen={isConfirmOpen}
-            onClose={closeConfirmSidebar}
-            payout={payout}
-            onConfirm={handleConfirmPayout}
-            loading={false}
-            error={""}
-          />
-        )}
-
-        <DialogLayout
-          open={openModal}
-          onClose={() => setOpenModal(false)}
-          title="Process Payout"
-          footer={
-            <div className="mt-[15px] flex gap-[20px]">
-                <Button onClick={() => setOpenModal(!openModal)} variant="outline">Cancel</Button>
-
-              <Button disabled={processingPayout} variant="default" onClick={handlePayout}>
-                {processingPayout ? "Confirming..." : "Confirm"}
-              </Button>
-            </div>
-          }
-        >
-            <h1>Are you sure you want to confirm payout</h1>
-        </DialogLayout>
-        <DialogLayout
-          open={rejectModal}
-          onClose={() => setRejectModal(false)}
-          title="Reject Payout"
-          footer={
-            <div className="mt-[15px] flex gap-[20px]">
-                <Button onClick={() => setRejectModal(false)} variant="outline">Cancel</Button>
-
-              <Button disabled={rejectingPayout} variant="default" onClick={handleReject}>
-                {processingPayout ? "Rejecting..." : "Reject"}
-              </Button>
-            </div>
-          }
-        >
-            <h1>Are you sure you want to reject payout</h1>
-        </DialogLayout> */}
       </div>
     </DashboardLayout>
   );
