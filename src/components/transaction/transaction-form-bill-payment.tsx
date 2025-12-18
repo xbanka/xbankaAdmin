@@ -1,71 +1,74 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useEffect, useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Upload } from "lucide-react"
-import { SelectFieldLayout } from "../layout/SelectFieldLayout"
-import { TransactionType } from "./types"
-import { SERVICE_TYPE_LABELS } from "@/lib/helper"
-import { BillPaymentTransactionFormValues, billPaymentTransactionSchema } from "@/lib/schema/bill-payment-transaction.schema"
-import { useForm, useFormContext } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import FormField from "../layout/FormField"
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Upload } from "lucide-react";
+import { SelectFieldLayout } from "../layout/SelectFieldLayout";
+import { TransactionType } from "./types";
+import { SERVICE_TYPE_LABELS } from "@/lib/helper";
+import {
+  BillPaymentTransactionFormValues,
+  billPaymentTransactionSchema,
+} from "@/lib/schema/bill-payment-transaction.schema";
+import { useForm, useFormContext } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import FormField from "../layout/FormField";
+import { SearchSelectFieldLayout } from "../layout/SearchableSelectLayout";
 
 export function BillPaymentTransactionForm() {
-//  const {
-//     register,
-//     handleSubmit,
-//     setValue,
-//     watch,
-//     formState: { errors },
-//   } = useForm<BillPaymentTransactionFormValues>({
-//     resolver: zodResolver(billPaymentTransactionSchema),
-//     defaultValues: {
-//       serviceType: "",
-//       billCategory: "",
-//       amountToPay: "",
-//       quantity: "",
-//       vendor: "",
-//       meterNumber: "",
-//       meterType: "",
-//       transactionFee: "",
-//       receivingAccountWallet: "",
-//       paymentDate: "",
-//     },
-//   })
+  //  const {
+  //     register,
+  //     handleSubmit,
+  //     setValue,
+  //     watch,
+  //     formState: { errors },
+  //   } = useForm<BillPaymentTransactionFormValues>({
+  //     resolver: zodResolver(billPaymentTransactionSchema),
+  //     defaultValues: {
+  //       serviceType: "",
+  //       billCategory: "",
+  //       amountToPay: "",
+  //       quantity: "",
+  //       vendor: "",
+  //       meterNumber: "",
+  //       meterType: "",
+  //       transactionFee: "",
+  //       receivingAccountWallet: "",
+  //       paymentDate: "",
+  //     },
+  //   })
 
-  const { watch, setValue, register } = useFormContext()
+  const { watch, setValue, register } = useFormContext();
 
   const onSubmit = (data: BillPaymentTransactionFormValues) => {
-    console.log("Bill payment transaction:", data)
-  }
-
+    console.log("Bill payment transaction:", data);
+  };
 
   return (
     <form className="space-y-5">
       {/* Service Type & Transaction Type */}
       <div className="grid grid-cols-2 gap-4">
         <SelectFieldLayout
-                  id="serviceType"
-                  label="Service Type"
-                  options={["Crypto", "Gift Card", "Bills Payment"]}
-                  value={watch("serviceType")}
-                  onChange={(value) => setValue("serviceType", value)}
-                  // error={errors.serviceType}
-                />
+          id="serviceType"
+          label="Service Type"
+          options={["crypto", "gift-card", "bill-payments"]}
+          value={watch("serviceType")}
+          onChange={(value) => setValue("serviceType", value)}
+          // error={errors.serviceType}
+        />
 
-        <SelectFieldLayout
-        id="billCategory"
-        label="Bill Category"
-        options={["Electricity", "Water", "Internet", "Gas"]}
-        value={watch("billCategory")}
-        onChange={(value) => setValue("billCategory", value)}
-        // error={errors.billCategory}
-      />
+        <SearchSelectFieldLayout
+          id="billCategory"
+          label="Bill Category"
+          options={["Electricity", "Water", "Internet", "Gas"]}
+          value={watch("billCategory")}
+          onChange={(value) => setValue("billCategory", value)}
+          // error={errors.billCategory}
+        />
       </div>
 
       {/* Meter Number & Meter Type */}
@@ -117,12 +120,12 @@ export function BillPaymentTransactionForm() {
         />
 
         <SelectFieldLayout
-        id="vendor"
-        label="Vendor"
-        options={["Rayosh"]}
-        value={watch("vendor")}
-        onChange={(value) => setValue("vendor", value)}
-        // error={errors.vendor}
+          id="vendor"
+          label="Vendor"
+          options={["Rayosh"]}
+          value={watch("vendor")}
+          onChange={(value) => setValue("vendor", value)}
+          // error={errors.vendor}
         />
       </div>
 
@@ -150,17 +153,19 @@ export function BillPaymentTransactionForm() {
         <Label>Attachments</Label>
         <div className="mt-2 border-2 border-dashed border-[#E5E7EB] rounded-lg p-8 text-center cursor-pointer hover:bg-gray-50 transition">
           <Upload className="h-6 w-6 text-gray-400 mx-auto mb-2" />
-          <p className="text-sm text-gray-600">Upload screenshot, receipt, or proof document</p>
-          <p className="text-xs text-gray-400 mt-1">JPG, PNG, OR PDF • Max 5MB</p>
+          <p className="text-sm text-gray-600">
+            Upload screenshot, receipt, or proof document
+          </p>
+          <p className="text-xs text-gray-400 mt-1">
+            JPG, PNG, OR PDF • Max 5MB
+          </p>
         </div>
       </div>
 
       {/* Submit Button */}
-      <Button
-        className="w-full bg-teal-500 hover:bg-teal-600 text-white h-11"
-      >
+      <Button className="w-full bg-teal-500 hover:bg-teal-600 text-white h-11">
         Submit for Verification
       </Button>
     </form>
-  )
+  );
 }

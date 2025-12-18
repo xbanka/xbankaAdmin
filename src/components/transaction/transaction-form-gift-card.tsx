@@ -7,13 +7,11 @@ import { SelectFieldLayout } from "../layout/SelectFieldLayout";
 import { Upload } from "lucide-react";
 import { useFormContext } from "react-hook-form";
 import FormField from "../layout/FormField";
+import { SearchSelectFieldLayout } from "../layout/SearchableSelectLayout";
+
 
 export function GiftCardTransactionForm() {
   const { register, setValue, watch, handleSubmit } = useFormContext();
-
-  useEffect(() => {
-    setValue("details.serviceType", "gift-card");
-  }, [setValue]);
 
   const onSubmit = () => {};
 
@@ -24,17 +22,14 @@ export function GiftCardTransactionForm() {
         <SelectFieldLayout
           id="serviceType"
           label="Service Type"
-          options={["Crypto", "Gift Card", "Bills Payment"]}
+          options={["crypto", "gift-card", "bill-payments"]}
           value={watch("serviceType")}
-          onChange={(value) => {
-            setValue("serviceType", value);
-            setValue("details.serviceType", value);
-          }}
+          onChange={(value) => setValue("serviceType", value)}
           // error={errors.serviceType}
         />
 
-        <SelectFieldLayout
-          id="details.cardType"
+        <SearchSelectFieldLayout
+        id="details.cardType"
           label="Card Type"
           options={["Amazon", "iTunes", "Steam", "Google Play"]}
           value={watch("details.cardType")}
@@ -74,23 +69,22 @@ export function GiftCardTransactionForm() {
         />
 
         <SelectFieldLayout
-          id="details.rayah"
-          label="Rayah"
-          options={["Rayah"]}
-          value={watch("details.rayah")}
-          onChange={(value) => setValue("details.rayah", value)}
+          id="details.vendor"
+          label="Vendor"
+          options={["Rayah", "Direct", "Broker"]}
+          value={watch("details.vendor")}
+          onChange={(value) => setValue("details.vendor", value)}
           // error={errors.rayah}
         />
       </div>
 
       {/* Vendor, Xbanka Rate, Margin */}
       <div className="grid grid-cols-3 gap-4">
-        <SelectFieldLayout
-          id="details.vendor"
-          label="Vendor"
-          options={["Rayah", "Direct", "Broker"]}
-          value={watch("details.vendor")}
-          onChange={(value) => setValue("details.vendor", value)}
+        <FormField
+          id="details.vendorRate"
+          label="Vendor Rate"
+          placeholder="Enter ventor rate"
+          register={register}
           // error={errors.vendor}
         />
 

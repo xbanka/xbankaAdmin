@@ -10,7 +10,7 @@ export function TransactionFormProvider({ children }: {children: ReactNode}) {
     resolver: zodResolver(transactionSchema),
     defaultValues: {
       customer: {},
-      serviceType: null,
+      serviceType:  undefined,
       details: {},
     },
     mode: "onChange",

@@ -1,10 +1,10 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Customer } from "./types";
+import { ActiveCustomer, Customer } from "./types";
 import FinanceDetailsHeader from "../layout/Finance/FinanceDetailsHeader";
 import CustomDetailsName from "../finance/CustomDetailsName";
 
 interface CustomerDetailsDisplayProps {
-  customer: Customer;
+  customer: ActiveCustomer;
   displayTitle?: string;
 }
 
@@ -19,19 +19,19 @@ export function CustomerDetailsDisplay({
       <div className="space-y-[8px]">
         <div className="grid grid-cols-3 gap-4 bg-white rounded-[8px] p-3">
           <CustomDetailsName title="Name" body={customer.name} />
-          <CustomDetailsName title="Username" body={customer.username} />
+          <CustomDetailsName title="Username" body={customer.name} />
           <CustomDetailsName title="Email" body={customer.email} />
           <CustomDetailsName
             title="Total Transactions"
-            body={`₦${customer.totalTransactions}%`}
+            body={`₦${customer.phone}%`}
           />
           <CustomDetailsName
             title="Affiliate"
-            body={customer.affiliateAttribution}
+            body={customer.phone}
           />
           <CustomDetailsName
             title="Joined"
-            body={customer.lastTransactionDate}
+            body={customer.phone}
           />
         </div>
       </div>

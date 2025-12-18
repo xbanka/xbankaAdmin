@@ -3,56 +3,21 @@
 import { useState } from "react";
 import { CustomerSearchSidebar } from "@/components/transaction/customer-search-sidebar";
 import { TransactionAddSidebar } from "@/components/transaction/transaction-add-sidebar";
-import { Customer } from "@/components/transaction/types";
+import { ActiveCustomer, Customer } from "@/components/transaction/types";
 import { TransactionsTable } from "@/components/transaction/transactions-table";
 import { mockTransactions } from "@/components/transaction/transaction-data";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { TransactionFormProvider } from "@/components/transaction/transaction-form-provider";
 
-const mockCustomers: Customer[] = [
-  {
-    id: "1",
-    name: "Jane Smith",
-    username: "@janesmith",
-    email: "janesmith@gmail.com",
-    phone: "09023456789",
-    affiliateAttribution: "@Codixe",
-    assignedRep: "Joe Prochter",
-    totalTransactions: 12,
-    lastTransactionDate: "Nov 5, 2025",
-  },
-  {
-    id: "2",
-    name: "John Doe",
-    username: "@johndoe",
-    email: "johndoe@example.com",
-    phone: "08012345678",
-    affiliateAttribution: "@TechPartner",
-    assignedRep: "Sarah Johnson",
-    totalTransactions: 8,
-    lastTransactionDate: "Nov 3, 2025",
-  },
-  {
-    id: "3",
-    name: "Alice Johnson",
-    username: "@alicej",
-    email: "alice@company.com",
-    phone: "07098765432",
-    affiliateAttribution: "@Enterprise",
-    assignedRep: "Mike Chen",
-    totalTransactions: 15,
-    lastTransactionDate: "Nov 4, 2025",
-  },
-];
 
 export default function Home() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isAddOpen, setIsAddOpen] = useState(false);
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
+  const [selectedCustomer, setSelectedCustomer] = useState<ActiveCustomer | null>(
     null
   );
 
-  const handleCustomerSelect = (customer: Customer) => {
+  const handleCustomerSelect = (customer: ActiveCustomer) => {
     setSelectedCustomer(customer);
     setIsSearchOpen(false);
     setIsAddOpen(true);

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { Search } from "lucide-react";
+import { Search, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import SidebarHeader from "../Sidebar/sidebar-header";
@@ -9,11 +9,12 @@ import TransactionCustomerDetailsField from "./transaction-customer-details-fiel
 import { useGetCustomer } from "@/hooks/CustomerService";
 import { useFormContext } from "react-hook-form";
 import FormField from "../layout/FormField";
+import { ActiveCustomer, Customer } from "./types";
 
 interface CustomerSearchSidebarProps {
   isOpen: boolean;
   onClose: () => void;
-  onCustomerSelect: (customer: Customer) => void;
+  onCustomerSelect: (customer: ActiveCustomer) => void;
   isLoading?: boolean;
 }
 
@@ -24,16 +25,16 @@ export function CustomerSearchSidebar({
   isLoading = false,
 }: CustomerSearchSidebarProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeCustomer, setActiveCustomer] = useState<Customer | null>(null);
+  const [activeCustomer, setActiveCustomer] = useState<ActiveCustomer | null>();
 
   const { setValue, register } = useFormContext();
 
   const handleCustomerSelect = (customer: Customer) => {
     setValue("customer", {
       id: customer.id,
-      name: customer.name,
+      name: customer.first_name,
       email: customer.email,
-      phone: customer.phone,
+      phone: customer.phone_no,
       affiliateAttribution: customer.affiliateAttribution ?? "",
       assignedRep: customer.assignedRep ?? "",
     });
@@ -41,8 +42,14 @@ export function CustomerSearchSidebar({
 
   const { data, isLoading: customerLoading } = useGetCustomer(searchQuery);
 
+  const handleActiveCustomer = (customer: ActiveCustomer) => {
+    setActiveCustomer(customer)
+    console.log(customer)
+    setSearchQuery("")
+  }
+
   const customers = useMemo(() => {
-    return (data?.data ?? []).map((c) => ({
+    return (data?.data ?? []).map((c: Customer) => ({
       id: c.id,
       name: `${c.first_name} ${c.last_name}`,
       email: c.email,
@@ -71,17 +78,51 @@ export function CustomerSearchSidebar({
 
         {/* Search Input */}
         <div className="p-6">
+          <label className="block text-sm font-medium text-gray-700 mb-2">Search Customer</label>
           <div className="relative">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400 z-10" />
             <Input
-              placeholder="Search customers here"
+              placeholder="Customer name or username"
               value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setActiveCustomer(null);
-              }}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 py-2 h-10"
             />
+
+            {searchQuery && customers.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto z-20">
+                {customers.map((customer: ActiveCustomer) => (
+                  <button
+                    key={customer.id}
+                    onClick={() => handleActiveCustomer(customer)}
+                    className="w-full text-left p-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <User className="h-4 w-4 text-gray-500" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-gray-900 text-sm">
+                          {customer.name}
+                        </p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-xs text-gray-600">{customer.name}</span>
+                          <span className="text-xs text-gray-400">•</span>
+                          <span className="text-xs text-gray-600 truncate">{customer.email}</span>
+                          <span className="text-xs text-gray-400">•</span>
+                          <span className="text-xs text-gray-600">{customer.phone}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {searchQuery && customers.length === 0 && !isLoading && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-20">
+                <p className="text-sm text-gray-500 text-center">No customers found</p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -99,20 +140,20 @@ export function CustomerSearchSidebar({
             <div className="text-center py-8 text-gray-500 text-sm">
               Start typing to search for customers
             </div>
-          ) : activeCustomer ? (
+          ) : activeCustomer && (
             <div className="space-y-4">
               <TransactionCustomerDetailsField
                 label="Customer Name"
-                body={activeCustomer.name}
+                body={activeCustomer?.name}
               />
               <div className="flex items-center gap-4">
                 <TransactionCustomerDetailsField
                   label="Phone Number"
-                  body={activeCustomer.phone}
+                  body={activeCustomer?.phone}
                 />
                 <TransactionCustomerDetailsField
                   label="Email"
-                  body={activeCustomer.email}
+                  body={activeCustomer?.email}
                 />
               </div>
               <div className="flex items-center gap-4">
@@ -143,34 +184,7 @@ export function CustomerSearchSidebar({
                 + Add Transaction
               </Button>
             </div>
-          ) : (
-            <div className="space-y-3">
-              {customers?.map((customer) => (
-                <div
-                  key={customer.id}
-                  onClick={() => setActiveCustomer(customer)}
-                  className="w-full text-left p-4 transition-colors cursor-pointer rounded-md border hover:bg-abstractCyan shadow-md"
-                >
-                  <div className="flex items-start gap-3">
-                    <p className="font-semibold text-[#111827] text-sm truncate">
-                      {customer.name}
-                    </p>
-                    <p className="text-xs text-gray-500 truncate">
-                      {customer.affiliateAttribution}
-                    </p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <p className="text-xs text-gray-400 truncate">
-                      {customer.phone}
-                    </p>
-                    <p className="text-xs text-gray-400 truncate">
-                      {customer.email}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          ) }
         </div>
 
         {/* Footer */}

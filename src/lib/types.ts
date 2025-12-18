@@ -46,6 +46,8 @@ export interface Customer {
   email: string;
   phone_no: string;
   note: string;
+  affiliateAttribution?: string
+  assignedRep?: string
 }
 
 export interface PayoutData {

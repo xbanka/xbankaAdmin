@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { CryptoTransactionForm } from "./transaction-form-crypto";
 import { GiftCardTransactionForm } from "./transaction-form-gift-card";
 import { BillPaymentTransactionForm } from "./transaction-form-bill-payment";
-import { Customer } from "./types";
+import { ActiveCustomer, Customer } from "./types";
 import { CustomerDetailsDisplay } from "./customers-details-display";
 import { SelectFieldLayout } from "../layout/SelectFieldLayout";
 import { useFormContext } from "react-hook-form";
@@ -16,7 +16,7 @@ type TransactionType = "crypto" | "gift-card" | "bill-payments" | null;
 interface TransactionAddSidebarProps {
   isOpen: boolean;
   onClose: () => void;
-  customer: Customer | null;
+  customer: ActiveCustomer | null;
   onBack: () => void;
 }
 
@@ -26,12 +26,12 @@ export function TransactionAddSidebar({
   customer,
   onBack,
 }: TransactionAddSidebarProps) {
+  const [selectedType, setSelectedType] = useState<TransactionType>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { watch, setValue } = useFormContext();
 
   const serviceType = watch("serviceType");
-
 
   if (!isOpen || !customer) return null;
 
@@ -54,11 +54,13 @@ export function TransactionAddSidebar({
           )}
           <h2 className="text-lg font-semibold text-[#111827] flex-1">
             {serviceType
-              ? `Add ${serviceType === "gift-card"
-                  ? "Gift Card"
-                  : serviceType === "bill-payments"
-                  ? "Bill Payment"
-                  : "Crypto"} Transaction`
+              ? `Add ${
+                  serviceType === "gift-card"
+                    ? "Gift Card"
+                    : serviceType === "bill-payments"
+                    ? "Bill Payment"
+                    : "Crypto"
+                } Transaction`
               : "New Transaction"}
           </h2>
           <button
@@ -85,24 +87,23 @@ export function TransactionAddSidebar({
                   Transaction Information
                 </h3>
                 <SelectFieldLayout
-                  id="transactionType"
+                  id="serviceType"
                   label="Service Type"
                   options={["crypto", "gift-card", "bill-payments"]}
                   placeholder="Select type"
                   value={serviceType}
-                  onChange={(value) => setValue("serviceType", value)}
+                  onChange={(value) => {
+                    setValue("serviceType", value as TransactionType); // ✅ CHANGE
+                  }}
                 />
               </div>
             </div>
           ) : serviceType === "crypto" ? (
-            <CryptoTransactionForm
-            />
+            <CryptoTransactionForm />
           ) : serviceType === "gift-card" ? (
-            <GiftCardTransactionForm
-            />
+            <GiftCardTransactionForm />
           ) : (
-            <BillPaymentTransactionForm
-            />
+            <BillPaymentTransactionForm />
           )}
         </div>
 
