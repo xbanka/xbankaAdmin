@@ -1,4 +1,3 @@
-import { PayoutData } from "@/app/(dashboard)/finance/page";
 import { create } from "zustand";
 
 interface PayoutSidebarStore {
