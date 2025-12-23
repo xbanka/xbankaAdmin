@@ -96,78 +96,80 @@ export function DataTableLayout<T>({
   return (
     <div className="w-full border border-[#E5E7EB] rounded-[8px] overflow-hidden">
       {/* DESKTOP TABLE */}
-      <div className="hidden md:block max-w-full overflow-x-auto">
-        <Table className="min-w-full table-fixed">
-          <TableHeader>
-            <TableRow className="bg-[#FAFAFA]">
-              {columns.map((col) => (
-                <TableHead
-                  key={col.key as string}
-                  className={`font-medium py-[8px] px-[20px] text-[12px] leading-[16px] text-[#606368] ${
-                    col.className ?? ""
-                  }`}
-                >
-                  {col.header}
-                </TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
-
-          <TableBody>
-            {/* Loading State */}
-            {isLoading && (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="text-center py-6 text-gray-500"
-                >
-                  <LoaderSpinner />
-                </TableCell>
+      <div className="hidden md:block w-full overflow-x-auto">
+        <div className="inline-block min-w-full">
+          <Table className="w-full">
+            <TableHeader>
+              <TableRow className="bg-[#FAFAFA]">
+                {columns.map((col) => (
+                  <TableHead
+                    key={col.key as string}
+                    className={`font-medium py-[8px] px-[20px] text-[12px] leading-[16px] text-[#606368] ${
+                      col.className ?? ""
+                    }`}
+                  >
+                    {col.header}
+                  </TableHead>
+                ))}
               </TableRow>
-            )}
+            </TableHeader>
 
-            {/* Error State */}
-            {!isLoading && isError && (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="text-center py-6 text-red-500"
-                >
-                  {errorMessage}
-                </TableCell>
-              </TableRow>
-            )}
-
-            {!isLoading && !isError && paginatedData?.length === 0 && (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="text-center text-[#111827] text-[14px] font-[500] leading-[18px] py-6"
-                >
-                  {emptyMessage}
-                </TableCell>
-              </TableRow>
-            )}
-
-            {!isLoading &&
-              !isError &&
-              paginatedData?.map((item) => (
-                <TableRow
-                  key={rowKey(item)}
-                  className="hover:bg-gray-50 text-left text-[#111827] text-[14px] font-[500] leading-[18px]"
-                >
-                  {columns.map((col) => (
-                    <TableCell
-                      className="py-[19px] px-[20px] text-left whitespace-nowrap"
-                      key={col.key as string}
-                    >
-                      {col.render ? col.render(item) : (item as never)[col.key]}
-                    </TableCell>
-                  ))}
+            <TableBody>
+              {/* Loading State */}
+              {isLoading && (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="text-center py-6 text-gray-500"
+                  >
+                    <LoaderSpinner />
+                  </TableCell>
                 </TableRow>
-              ))}
-          </TableBody>
-        </Table>
+              )}
+
+              {/* Error State */}
+              {!isLoading && isError && (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="text-center py-6 text-red-500"
+                  >
+                    {errorMessage}
+                  </TableCell>
+                </TableRow>
+              )}
+
+              {!isLoading && !isError && paginatedData?.length === 0 && (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="text-center text-[#111827] text-[14px] font-[500] leading-[18px] py-6"
+                  >
+                    {emptyMessage}
+                  </TableCell>
+                </TableRow>
+              )}
+
+              {!isLoading &&
+                !isError &&
+                paginatedData?.map((item) => (
+                  <TableRow
+                    key={rowKey(item)}
+                    className="hover:bg-gray-50 text-left text-[#111827] text-[14px] font-[500] leading-[18px]"
+                  >
+                    {columns.map((col) => (
+                      <TableCell
+                        className="py-[19px] px-[20px] text-left"
+                        key={col.key as string}
+                      >
+                        {col.render ? col.render(item) : (item as never)[col.key]}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
 
       {/* MOBILE CARD VIEW */}

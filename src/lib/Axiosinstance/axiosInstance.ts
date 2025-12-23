@@ -1,4 +1,5 @@
 import axios from "axios";
+import { toast } from "sonner";
 
 const AxiosInstance = axios.create({
   baseURL: "https://api.xbankang.com/",
@@ -25,6 +26,40 @@ AxiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    if (
+      error.response?.status === 401 &&
+      originalRequest?.url?.includes("/api/auth/erp/refresh")
+    ) {
+      localStorage.removeItem("accessToken");
+
+      if (typeof window !== "undefined") {
+        window.location.href = "/signin";
+      }
+
+      return Promise.reject(error);
+    }
+    if (
+      error.response?.status === 401 &&
+      error.response?.data?.detail === "Refresh token missing"
+    ) {
+      localStorage.removeItem("accessToken");
+
+      if (typeof window !== "undefined") {
+        window.location.href = "/signin";
+      }
+
+      return Promise.reject(error);
+    }
+    if (
+      error.response?.status === 401 &&
+      error.response?.data?.detail === "Invalid user type"
+    ) {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("accessToken");
+        window.location.href = "/signin";
+      }
+      return Promise.reject(error);
+    }
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
@@ -66,16 +101,14 @@ AxiosInstance.interceptors.response.use(
       error.response?.data?.error ||
       error.response?.data?.detail ||
       error.response?.data?.errors?.[0] ||
-      null;
+      error.message ||
+      "Something went wrong" ||
+      String(error);
 
     const customError = {
       success: false,
       status: error.response?.status || 500,
-      message:
-        apiMessage ||
-        (error.request
-          ? "No response from server. Please try again later."
-          : error.message || "Something went wrong"),
+      message: apiMessage,
       raw: error, // keep raw error if you need debugging
     };
 

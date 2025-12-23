@@ -68,95 +68,94 @@ export default function SignupForm() {
           fill
         />
       </div>
-      <Card className="w-full max-w-sm mx-auto">
-        <CardHeader>
-          <CardTitle>Signup to your account</CardTitle>
-          <CardDescription>
-            Enter your details below to signup to your account
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <div className="flex flex-col gap-6">
-              <div className="grid grid-cols-2 gap-4">
+      <div className="px-[25px] md:px-0">
+        <Card className="w-full max-w-sm mx-auto">
+          <CardHeader>
+            <CardTitle>Signup to your account</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <div className="flex flex-col gap-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    id="firstName"
+                    label="First Name"
+                    placeholder="John"
+                    icon={User}
+                    register={register}
+                    error={errors.firstName}
+                  />
+                  <FormField
+                    id="lastName"
+                    label="Last Name"
+                    placeholder="Doe"
+                    icon={User}
+                    register={register}
+                    error={errors.lastName}
+                  />
+                </div>
+
                 <FormField
-                  id="firstName"
-                  label="First Name"
-                  placeholder="John"
-                  icon={User}
+                  id="email"
+                  label="Email Address"
+                  type="text" // <-- prevents native popup, uses Zod validation
+                  placeholder="john@example.com"
+                  icon={Mail}
                   register={register}
-                  error={errors.firstName}
+                  error={errors.email}
                 />
-                <FormField
-                  id="lastName"
-                  label="Last Name"
-                  placeholder="Doe"
-                  icon={User}
+
+                <PasswordField
+                  id="password"
+                  label="Password"
+                  placeholder="Enter your password"
+                  icon={Lock}
                   register={register}
-                  error={errors.lastName}
+                  error={errors.password}
                 />
+
+                <PasswordField
+                  id="confirmPassword"
+                  label="Confirm Password"
+                  placeholder="Enter your password"
+                  icon={Lock}
+                  register={register}
+                  error={errors.confirmPassword}
+                />
+                {error && (
+                  <Alert variant="destructive">
+                    <AlertDescription>{error.message}</AlertDescription>
+                  </Alert>
+                )}
+
+                <Button
+                  type="submit"
+                  disabled={isPending}
+                  className="w-full transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                  style={{
+                    backgroundColor: "var(--abstractCyan)",
+                    borderColor: "var(--abstractCyan)",
+                  }}
+                >
+                  {isPending ? "Creating Account..." : "Create Account"}
+                </Button>
               </div>
+            </form>
 
-              <FormField
-                id="email"
-                label="Email Address"
-                type="text" // <-- prevents native popup, uses Zod validation
-                placeholder="john@example.com"
-                icon={Mail}
-                register={register}
-                error={errors.email}
-              />
-
-              <PasswordField
-                id="password"
-                label="Password"
-                placeholder="Enter your password"
-                icon={Lock}
-                register={register}
-                error={errors.password}
-              />
-
-              <PasswordField
-                id="confirmPassword"
-                label="Confirm Password"
-                placeholder="Enter your password"
-                icon={Lock}
-                register={register}
-                error={errors.confirmPassword}
-              />
-              {error && (
-                <Alert variant="destructive">
-                  <AlertDescription>{error.message}</AlertDescription>
-                </Alert>
-              )}
-
-              <Button
-                type="submit"
-                disabled={isPending}
-                className="w-full transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
-                style={{
-                  backgroundColor: "var(--abstractCyan)",
-                  borderColor: "var(--abstractCyan)",
-                }}
-              >
-                {isPending ? "Creating Account..." : "Create Account"}
-              </Button>
+            <div className="text-center pt-4 border-t border-gray-200">
+              <p className="text-sm text-gray-600">
+                Already have an account?{" "}
+                <Link
+                  href="/signin"
+                  className="font-semibold text-[var(--abstractCyan)] hover:underline"
+                >
+                  Sign in here
+                </Link>
+              </p>
             </div>
-          </form>
-
-          <div className="text-center pt-4 border-t border-gray-200">
-            <p className="text-sm text-gray-600">
-              Already have an account?{" "}
-              <Link
-                href="/signin"
-                className="font-semibold text-[var(--abstractCyan)] hover:underline"
-              >
-                Sign in here
-              </Link>
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

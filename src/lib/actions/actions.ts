@@ -55,8 +55,6 @@ export const verifyEmailAction = async (token: string) => {
 };
 
 export const loginAction = async (data: loginTypes) => {
-  // Insert into DB, call API, etc.
-  try {
     const response = await AxiosInstance.post(
       "/api/auth/erp/login",
       {
@@ -65,20 +63,11 @@ export const loginAction = async (data: loginTypes) => {
       },
       { withCredentials: true }
     );
-    console.log(response);
     return {
       success: true,
       data: response.data, // ✅ only return actual payload
       status: response.status,
     };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (error: any) {
-    throw {
-      success: false,
-      status: error.status,
-      message: error.message,
-    };
-  }
 };
 
 export const logoutAction = async () => {
