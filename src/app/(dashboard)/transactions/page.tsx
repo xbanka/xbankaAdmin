@@ -3,19 +3,18 @@
 import { useState } from "react";
 import { CustomerSearchSidebar } from "@/components/transaction/customer-search-sidebar";
 import { TransactionAddSidebar } from "@/components/transaction/transaction-add-sidebar";
-import { ActiveCustomer, Customer } from "@/components/transaction/types";
+import { ActiveCustomer } from "@/components/transaction/types";
 import { TransactionsTable } from "@/components/transaction/transactions-table";
 import { mockTransactions } from "@/components/transaction/transaction-data";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { TransactionFormProvider } from "@/components/transaction/transaction-form-provider";
-
+import Header from "@/components/ui/Header";
 
 export default function Home() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isAddOpen, setIsAddOpen] = useState(false);
-  const [selectedCustomer, setSelectedCustomer] = useState<ActiveCustomer | null>(
-    null
-  );
+  const [selectedCustomer, setSelectedCustomer] =
+    useState<ActiveCustomer | null>(null);
 
   const handleCustomerSelect = (customer: ActiveCustomer) => {
     setSelectedCustomer(customer);
@@ -35,34 +34,16 @@ export default function Home() {
 
   return (
     <DashboardLayout>
-      <div className="mx-auto w-full">
+      <div className="w-full">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[#111827] mb-2">
-            Transactions
-          </h1>
-          <p className="text-gray-600">
-            Manage and track all your customer transactions
-          </p>
+          <Header text="Transactions" />
         </div>
-
-        {/* <div className="bg-white rounded-lg shadow p-8 text-center">
-          <Button
-            onClick={() => setIsSearchOpen(true)}
-            className="bg-teal-500 hover:bg-teal-600 text-white h-12 px-8 inline-flex items-center gap-2"
-          >
-            <Plus className="h-5 w-5" />
-            New Transaction
-          </Button>
-
-          <div className="mt-12 text-gray-500">
-            <p className="text-lg font-medium">Click "New Transaction" to get started</p>
-            <p className="text-sm mt-2">Search for a customer and create a new transaction</p>
-          </div>
-        </div> */}
-        <TransactionsTable
-          data={mockTransactions}
-          onNewTransaction={() => setIsSearchOpen(true)}
-        />
+        <div className="lg:min-w-[1050px] xl:min-w-[1300px]">
+          <TransactionsTable
+            data={mockTransactions}
+            onNewTransaction={() => setIsSearchOpen(true)}
+          />
+        </div>
       </div>
 
       <TransactionFormProvider>

@@ -120,6 +120,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     mutationFn: () => logoutAction(),
     onSuccess: (result) => {
       clearUser();
+      localStorage.removeItem("accessToken");
       router.push("/signin");
       toast.success(result.data.message);
       setOpen(false);
