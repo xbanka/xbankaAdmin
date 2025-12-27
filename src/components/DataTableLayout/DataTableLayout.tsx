@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import LoaderSpinner from "../ui/loaderSpinner";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface Column<T> {
   key: keyof T | string;
@@ -252,18 +253,9 @@ export function DataTableLayout<T>({
       {/* PAGINATION */}
       {totalPages > 1 && (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-4 py-3 border-t mt-2">
-          <p className="text-sm text-gray-600">
+          <p className="font-[500] text-[12px] leading-[16px] text-[#606368]">
             Page {page} of {totalPages}
           </p>
-          <div className="flex items-center gap-2 overflow-x-auto">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handlePageChange(page - 1)}
-              disabled={page === 1}
-            >
-              Previous
-            </Button>
             <div className="flex gap-1">
               {generatePageButtons().map((p, i) =>
                 p === "..." ? (
@@ -275,7 +267,7 @@ export function DataTableLayout<T>({
                     key={i}
                     variant={p === page ? "default" : "outline"}
                     size="sm"
-                    className="w-8 h-8 p-0"
+                    className="w-6 h-6 p-2 rounded-[6px] font-[400] text-[12px] leading-4"
                     onClick={() => handlePageChange(p as number)}
                   >
                     {p}
@@ -283,13 +275,24 @@ export function DataTableLayout<T>({
                 )
               )}
             </div>
+          <div className="flex items-center gap-2 overflow-x-auto">
             <Button
               variant="outline"
+              className="border border-[#E5E3E3]"
+              size="sm"
+              onClick={() => handlePageChange(page - 1)}
+              disabled={page === 1}
+            >
+              <ChevronLeft />
+            </Button>
+            <Button
+              variant="outline"
+              className="border border-[#E5E3E3]"
               size="sm"
               onClick={() => handlePageChange(page + 1)}
               disabled={page === totalPages}
             >
-              Next
+              <ChevronRight />
             </Button>
           </div>
         </div>

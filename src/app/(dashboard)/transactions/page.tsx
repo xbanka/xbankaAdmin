@@ -8,6 +8,7 @@ import { TransactionsTable } from "@/components/transaction/transactions-table";
 import { mockTransactions } from "@/components/transaction/transaction-data";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { TransactionFormProvider } from "@/components/transaction/transaction-form-provider";
+import Header from "@/components/ui/Header";
 
 export default function Home() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -35,14 +36,9 @@ export default function Home() {
     <DashboardLayout>
       <div className="w-full">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[#111827] mb-2">
-            Transactions
-          </h1>
-          <p className="text-gray-600">
-            Manage and track all your customer transactions
-          </p>
+          <Header text="Transactions" />
         </div>
-        <div className="max-w-[1050px] lg:w-full">
+        <div className="lg:min-w-[1050px] xl:min-w-[1300px]">
           <TransactionsTable
             data={mockTransactions}
             onNewTransaction={() => setIsSearchOpen(true)}

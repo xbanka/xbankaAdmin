@@ -10,6 +10,8 @@ import { useQuery } from "@tanstack/react-query";
 import { getPayouts } from "@/lib/actions/notificationsActions";
 import { usePayoutSidebarStore } from "@/store/usePayoutSidebarStore";
 import { PayoutData } from "@/lib/types";
+import Header from "@/components/ui/Header";
+import { FilterTabs } from "@/components/ui/FilterTabs";
 
 export default function FinancePage() {
   const [activeFilter, setActiveFilter] = useState("all");
@@ -17,7 +19,6 @@ export default function FinancePage() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [transactionTypeFilter, setTransactionTypeFilter] = useState("all");
   const [page, setPage] = useState(1);
-
 
   const { data, isPending, isError, error } = useQuery({
     queryKey: ["payouts", page, activeFilter],
@@ -31,10 +32,9 @@ export default function FinancePage() {
 
   const { openDetailsSidebar } = usePayoutSidebarStore();
 
-const handleSelectPayout = (payout: PayoutData) => {
-  openDetailsSidebar(payout.id);
-};
-
+  const handleSelectPayout = (payout: PayoutData) => {
+    openDetailsSidebar(payout.id);
+  };
 
   const filteredData =
     data?.data?.filter((item: PayoutData) => {
@@ -54,7 +54,6 @@ const handleSelectPayout = (payout: PayoutData) => {
 
       return matchesSearch && matchesStatus && matchesTransactionType;
     }) || [];
-
 
   const columns = [
     { key: "payment_ref", header: "Request ID" },
@@ -127,9 +126,8 @@ const handleSelectPayout = (payout: PayoutData) => {
     >
       <div>
         <div className="flex items-center justify-between mb-[24px]">
-          <h1 className="text-[18px] font-[600] leading-[22px] text-[#111827]">
-            Finance Overview
-          </h1>
+          <Header text="Finance Overview" />
+
           <Button size="sm" variant={"outline"}>
             <Upload />
             Export
@@ -137,25 +135,11 @@ const handleSelectPayout = (payout: PayoutData) => {
         </div>
 
         <div className="flex flex-col gap-2 md:gap-0 md:flex-row md:items-center md:justify-between mb-[24px]">
-          <div className="flex justify-center md:justify-start gap-1">
-            {["All", "Pending", "Paid", "Rejected"].map((filter) => (
-              <Button
-                key={filter}
-                variant={
-                  activeFilter === filter.toLowerCase() ? "default" : "ghost"
-                }
-                size="sm"
-                onClick={() => setActiveFilter(filter.toLowerCase())}
-                className={
-                  activeFilter === filter.toLowerCase()
-                    ? "bg-abstractCyan border border-abstractCyan text-[#111827] p-2 font-[500] text-[14px] leading-[18px]"
-                    : "font-[500] text-[14px] leading-[18px] text-[#111827] p-2"
-                }
-              >
-                {filter}
-              </Button>
-            ))}
-          </div>
+          <FilterTabs
+            filters={["All", "Pending", "Paid", "Rejected"]}
+            value={activeFilter}
+            onChange={setActiveFilter}
+          />
           <div className="flex flex-col md:flex-row w-full md:justify-end items-center gap-3">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />

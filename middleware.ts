@@ -2,9 +2,16 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(req: NextRequest) {
-  const refreshToken = req.cookies.get("refresh_token");
+  const { pathname } = req.nextUrl;
 
-  if (!refreshToken) {
+  // Allow auth routes
+  if (pathname.startsWith("/signin")) {
+    return NextResponse.next();
+  }
+
+  const accessToken = req.cookies.get("access_token");
+
+  if (!accessToken) {
     return NextResponse.redirect(new URL("/signin", req.url));
   }
 
@@ -12,5 +19,5 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!signin|signup|api|_next|favicon.ico).*)"],
+  matcher: ["/", "/dashboard/:path*"],
 };
