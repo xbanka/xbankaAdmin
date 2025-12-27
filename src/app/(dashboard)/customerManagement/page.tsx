@@ -10,6 +10,8 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import NewCustomerModal from "@/components/CustomerManagement/NewCustomerModal";
+import Header from "@/components/ui/Header";
+import { Upload } from "lucide-react";
 
 const customerSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -22,28 +24,15 @@ const customerSchema = z.object({
 type CustomerFormValues = z.infer<typeof customerSchema>;
 
 export default function CustomerManagement() {
-  const queryClient = useQueryClient();
   const [openModal, setOpenModal] = useState(false);
   const [search, setSearch] = useState("");
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(
-    null
-  );
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const { data, isLoading, isError, error } = useGetCustomer(search);
 
   const customers: Customer[] = data?.data ?? [];
 
-  const onSubmit = (data: CustomerFormValues) => {
-    // mutate(data);
-    console.log(data);
-  };
-
-  
   const handleClose = () => {
-    setOpenModal(false)
-  }
+    setOpenModal(false);
+  };
 
   const columns = [
     { key: "first_name", header: "First Name" },
@@ -55,17 +44,24 @@ export default function CustomerManagement() {
   return (
     <DashboardLayout>
       <div className="space-y-4">
+        <div className="flex items-center justify-between mb-[24px]">
+          <Header text="Customer Overview" />
+
+          <Button size="sm" variant={"outline"}>
+            <Upload />
+            Export
+          </Button>
+        </div>
         {/* Search */}
-        <div className="flex items-start">
-          <Button onClick={() => setOpenModal(true)}>Add Customer</Button>
+        <div className="flex items-start justify-between">
           <div className="flex gap-2 max-w-md">
             <Input
               placeholder="Search customers..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
-            <Button onClick={() => null}>Search</Button>
           </div>
+          <Button onClick={() => setOpenModal(true)}>Add Customer</Button>
         </div>
 
         {/* Table */}
@@ -79,10 +75,7 @@ export default function CustomerManagement() {
           emptyMessage="No customers found."
         />
       </div>
-      <NewCustomerModal
-        isOpen={openModal}
-        onClose={handleClose}
-      />
+      <NewCustomerModal isOpen={openModal} onClose={handleClose} />
     </DashboardLayout>
   );
 }

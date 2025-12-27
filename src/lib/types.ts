@@ -70,3 +70,14 @@ export interface PayoutData {
     created_at: string;
   };
 }
+
+export interface HeaderProps{
+    text: string
+}
+
+export interface FilterTabsProps {
+  filters: string[];
+  value: string;
+  onChange: (value: string) => void;
+  className?: string;
+}

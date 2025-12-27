@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Search, Upload } from "lucide-react";
 import type { TransactionRecord } from "./transaction-data";
 import { DataTableLayout } from "../DataTableLayout/DataTableLayout";
+import { FilterTabs } from "../ui/FilterTabs";
 
 interface TransactionsTableProps {
   data: TransactionRecord[];
@@ -80,15 +81,20 @@ export function TransactionsTable({
             item.status === "completed"
               ? "bg-[#D1FAE5] text-[#37703F]"
               : item.status === "failed"
-                ? "bg-[#FCE6E6] text-[#EF4444]"
-                : "bg-[#FFF8D8] text-[#B29504]"
+              ? "bg-[#FCE6E6] text-[#EF4444]"
+              : "bg-[#FFF8D8] text-[#B29504]"
           }`}
         >
           {item.status}
         </span>
       ),
     },
-  ]
+    { key: "vendor", header: "Vendor" },
+
+    { key: "assignedRep", header: "Assigned Rep" },
+
+    { key: "dateCreated", header: "Date" },
+  ];
 
   return (
     <div className="">
@@ -109,25 +115,13 @@ export function TransactionsTable({
       </div>
 
       {/* Filter Buttons */}
-      <div className="flex items-center">
+      <div className="flex items-center justify-between">
         <div className="flex flex-wrap gap-2 mb-6 ">
-          {["All", "Crypto", "Gift Cards", "Bill Payments"].map((filter) => (
-            <Button
-              key={filter}
-              variant={
-                activeFilter === filter.toLowerCase() ? "default" : "ghost"
-              }
-              size="sm"
-              onClick={() => setActiveFilter(filter.toLowerCase())}
-              className={
-                activeFilter === filter.toLowerCase()
-                  ? "bg-blue-500 border border-blue-500 text-white"
-                  : "border border-gray-300 text-gray-700"
-              }
-            >
-              {filter}
-            </Button>
-          ))}
+          <FilterTabs
+            filters={["All", "Crypto", "Gift Cards", "Bill Payments"]}
+            value={activeFilter}
+            onChange={setActiveFilter}
+          />
         </div>
 
         {/* Search and Filters */}
@@ -145,13 +139,13 @@ export function TransactionsTable({
       </div>
 
       {/* Data Table */}
-        <DataTableLayout
-          data={filteredData}
-          columns={columns}
-          rowKey={(item) => item.id}
-          itemsPerPage={10}
-          emptyMessage="No transactions found."
-        />
+      <DataTableLayout
+        data={filteredData}
+        columns={columns}
+        rowKey={(item) => item.id}
+        itemsPerPage={10}
+        emptyMessage="No transactions found."
+      />
     </div>
   );
 }

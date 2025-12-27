@@ -2,33 +2,23 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import Link from "next/link";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Mail, Lock } from "lucide-react";
-import { loginAction } from "@/lib/actions/actions";
-import { useMutation } from "@tanstack/react-query";
-import { loginTypes } from "@/lib/actions/actionTypes";
-import { useRouter } from "next/navigation";
 import FormField from "./FormField";
-import { toast } from "sonner";
-import { decodeAccessToken } from "@/lib/decodeToken";
 import PasswordField from "../ui/PasswordField";
 import Image from "next/image";
-import { useAuthStore } from "@/store/useAuthState";
 import { LoginFormData, loginSchema } from "@/lib/schema/login.schema";
+import { useLogin } from "@/lib/services/login.service";
 
 export default function LoginForm() {
-  const router = useRouter();
-   const login = useAuthStore((state) => state.login);
 
   const {
     register,
@@ -38,21 +28,7 @@ export default function LoginForm() {
     resolver: zodResolver(loginSchema),
   });
 
-  const { error, mutate, isPending } = useMutation({
-    mutationFn: (data: loginTypes) => loginAction(data),
-    onSuccess: (result) => {
-      console.log(result, result.data.access_token);
-      login(result.data.access_token);
-      const access_token = result.data.access_token;
-      localStorage.setItem("accessToken", access_token);
-      console.log(decodeAccessToken(result.data.access_token));
-      toast.success("User Loggedin");
-      router.push("/");
-    },
-    onError: (err) => {
-      console.log("Signup failed:", err);
-    },
-  });
+  const { error, mutate, isPending } = useLogin()
 
   const onSubmit = async (data: LoginFormData) => {
     mutate(data);
