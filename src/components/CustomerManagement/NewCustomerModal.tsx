@@ -47,27 +47,29 @@ const NewCustomerModal = ({ isOpen, onClose }: NewCustomerModalProps) => {
 
   return (
     <DialogLayout
+      className=""
       open={isOpen}
       onClose={onClose}
       title="Add Customer"
       footer={
-        <div className="mt-[15px] flex gap-[20px]">
-          <Button onClick={onClose} variant="outline">
+        <>
+          <Button className="flex-1" onClick={onClose} variant="outline">
             Cancel
           </Button>
 
           <Button
             disabled={isPending}
             variant="default"
+            className="flex-1"
             onClick={handleSubmit(onSubmit)}
           >
             {isPending ? "Saving..." : "Save"}
           </Button>
-        </div>
+        </>
       }
     >
       <form className="space-y-5">
-        <div className="flex items-center gap-5">
+        <div className="flex items-center justify-between gap-5">
           <FormField
             id="firstName"
             label="First Name"
@@ -85,7 +87,7 @@ const NewCustomerModal = ({ isOpen, onClose }: NewCustomerModalProps) => {
             error={errors.lastName}
           />
         </div>
-        <div className="flex items-center gap-5">
+        <div className="flex items-center justify-between gap-5">
           <FormField
             id="email"
             label="Email"
