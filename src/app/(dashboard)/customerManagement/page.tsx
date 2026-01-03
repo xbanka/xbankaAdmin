@@ -1,27 +1,15 @@
 "use client";
 
-import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Customer } from "@/lib/types/transactionTypes";
 import { useGetCustomer } from "@/hooks/CustomerService";
 import { Input } from "@/components/ui/input";
 import { DataTableLayout } from "@/components/DataTableLayout/DataTableLayout";
 import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import NewCustomerModal from "@/components/CustomerManagement/NewCustomerModal";
 import Header from "@/components/ui/Header";
 import { Upload } from "lucide-react";
-
-const customerSchema = z.object({
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  email: z.string().email("Invalid email"),
-  phone: z.string().min(10, "Phone number is too short"),
-  status: z.enum(["ACTIVE", "INACTIVE"]),
-});
-
-type CustomerFormValues = z.infer<typeof customerSchema>;
 
 export default function CustomerManagement() {
   const [openModal, setOpenModal] = useState(false);
@@ -54,7 +42,7 @@ export default function CustomerManagement() {
         </div>
         {/* Search */}
         <div className="flex flex-col gap-2 lg:flex-row items-start justify-between">
-          <div className="flex gap-2 w-full lg:max-w-md">
+          <div className="flex gap-2 w-full lg:w-[200px]">
             <Input
               placeholder="Search customers..."
               value={search}
@@ -62,7 +50,7 @@ export default function CustomerManagement() {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-          <Button className="w-full lg:max-w-md" onClick={() => setOpenModal(true)}>+ Add Customer</Button>
+          <Button className="w-full lg:w-[161px]" onClick={() => setOpenModal(true)}>+ Add Customer</Button>
         </div>
 
         {/* Table */}
