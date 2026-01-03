@@ -9,7 +9,7 @@ import TransactionCustomerDetailsField from "./transaction-customer-details-fiel
 import { useGetCustomer } from "@/hooks/CustomerService";
 import { useFormContext } from "react-hook-form";
 import FormField from "../layout/FormField";
-import { ActiveCustomer, Customer } from "./types";
+import { ActiveCustomer, Customer } from "../../lib/types/transactionTypes";
 
 interface CustomerSearchSidebarProps {
   isOpen: boolean;

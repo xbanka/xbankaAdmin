@@ -59,7 +59,7 @@ function DialogLayoutRoot({
 
         <div className="py-2">{children}</div>
 
-        {footer && <DialogFooter>{footer}</DialogFooter>}
+        {footer && <DialogFooter className="flex w-full gap-5">{footer}</DialogFooter>}
       </DialogContent>
     </Dialog>
   )
