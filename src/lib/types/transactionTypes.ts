@@ -1,3 +1,5 @@
+import { TransactionRecord } from "@/components/transaction/transaction-data";
+
 export type TransactionType = "crypto" | "gift-card" | "bill-payments";
 export type ServiceType = "crypto" | "gift-card" | "bill-payments"
 
@@ -67,6 +69,12 @@ export interface BillPaymentTransaction {
   transactionFee: string;
   receivingAccountWallet: string;
   paymentDate: string;
+}
+
+export interface TransactionsTableProps {
+  data: TransactionRecord[];
+  onNewTransaction: () => void;
+  onCustomerDetailsOpen?: (customer: TransactionRecord) => void
 }
 
 export type TransactionData =

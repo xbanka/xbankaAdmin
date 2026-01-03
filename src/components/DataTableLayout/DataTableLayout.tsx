@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import LoaderSpinner from "../ui/loaderSpinner";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface Column<T> {
   key: keyof T | string;
@@ -35,6 +36,7 @@ interface DataTableLayoutProps<T> {
   isLoading?: boolean;
   isError?: boolean;
   errorMessage?: string;
+  className?: string
 }
 
 export function DataTableLayout<T>({
@@ -49,6 +51,7 @@ export function DataTableLayout<T>({
   isLoading = false,
   isError = false,
   errorMessage = "Failed to load data.",
+  className
 }: DataTableLayoutProps<T>) {
   const [localPage, setLocalPage] = useState(1);
   const page = currentPage ?? localPage;
@@ -95,11 +98,10 @@ export function DataTableLayout<T>({
   const visibleColumns = columns.filter((col) => !col.hiddenOnMobile);
 
   return (
-    <div className="w-full border border-[#E5E7EB] rounded-[8px] overflow-hidden">
+    <div className={cn("w-full max-w-full border border-[#E5E7EB] rounded-[8px] overflow-hidden", className)}>
       {/* DESKTOP TABLE */}
       <div className="hidden md:block w-full overflow-x-auto">
-        <div className="inline-block min-w-full">
-          <Table className="w-full">
+          <Table className="min-w-max w-full">
             <TableHeader>
               <TableRow className="bg-[#FAFAFA]">
                 {columns.map((col) => (
@@ -160,7 +162,7 @@ export function DataTableLayout<T>({
                   >
                     {columns.map((col) => (
                       <TableCell
-                        className="py-[19px] px-[20px] text-left"
+                        className={cn("py-[19px] px-[20px] text-left", col.className)}
                         key={col.key as string}
                       >
                         {col.render ? col.render(item) : (item as never)[col.key]}
@@ -170,7 +172,6 @@ export function DataTableLayout<T>({
                 ))}
             </TableBody>
           </Table>
-        </div>
       </div>
 
       {/* MOBILE CARD VIEW */}

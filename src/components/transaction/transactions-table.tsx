@@ -7,18 +7,22 @@ import { Search, Upload } from "lucide-react";
 import type { TransactionRecord } from "./transaction-data";
 import { DataTableLayout } from "../DataTableLayout/DataTableLayout";
 import { FilterTabs } from "../ui/FilterTabs";
-
-interface TransactionsTableProps {
-  data: TransactionRecord[];
-  onNewTransaction: () => void;
-}
+import { TransactionsTableProps } from "@/lib/types/transactionTypes";
+import { CustomerInfoPopup } from "./customer-info-popup";
 
 export function TransactionsTable({
   data,
   onNewTransaction,
+  onCustomerDetailsOpen,
 }: TransactionsTableProps) {
   const [activeFilter, setActiveFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCustomer, setSelectedCustomer] =
+    useState<TransactionRecord | null>(null);
+  const [popupPosition, setPopupPosition] = useState<{
+    top: number;
+    left: number;
+  }>({ top: 0, left: 0 });
 
   const filteredData = data.filter((item) => {
     const matchesSearch =
@@ -32,14 +36,31 @@ export function TransactionsTable({
     return matchesSearch && matchesType;
   });
 
+  const handleCustomerClick = (
+    item: TransactionRecord,
+    e: React.MouseEvent
+  ) => {
+    setSelectedCustomer(item);
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    setPopupPosition({
+      top: rect.bottom + 8, // Position 8px below the customer cell
+      left: rect.left + rect.width / 2, // Center with the customer name column
+    });
+  };
+
   const columns = [
     { key: "transactionId", header: "Tan ID" },
     {
       key: "customerName",
       header: "Customer",
       render: (item: TransactionRecord) => (
-        <div className="flex flex-col">
-          <span className="font-medium">{item.customerName}</span>
+        <div
+          onClick={(e) => handleCustomerClick(item, e)}
+          className="relative flex flex-col cursor-pointer hover:text-teal-600 transition"
+        >
+          <span className="font-medium text-teal-600 hover:underline">
+            {item.customerName}
+          </span>
           <span className="text-xs text-gray-500">{item.customerId}</span>
         </div>
       ),
@@ -145,6 +166,18 @@ export function TransactionsTable({
         rowKey={(item) => item.id}
         itemsPerPage={10}
         emptyMessage="No transactions found."
+      />
+
+      <CustomerInfoPopup
+        customer={selectedCustomer}
+        popupPosition={popupPosition}
+        onClose={() => setSelectedCustomer(null)}
+        onViewDetails={() => {
+          if (selectedCustomer && onCustomerDetailsOpen) {
+            onCustomerDetailsOpen(selectedCustomer);
+            setSelectedCustomer(null);
+          }
+        }}
       />
     </div>
   );

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { CryptoTransactionForm } from "./transaction-form-crypto";
 import { GiftCardTransactionForm } from "./transaction-form-gift-card";
 import { BillPaymentTransactionForm } from "./transaction-form-bill-payment";
-import { ActiveCustomer, Customer } from "./types";
+import { ActiveCustomer, Customer } from "../../lib/types/transactionTypes";
 import { CustomerDetailsDisplay } from "./customers-details-display";
 import { SelectFieldLayout } from "../layout/SelectFieldLayout";
 import { useFormContext } from "react-hook-form";

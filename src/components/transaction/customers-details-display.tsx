@@ -1,5 +1,5 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { ActiveCustomer, Customer } from "./types";
+import { ActiveCustomer, Customer } from "../../lib/types/transactionTypes";
 import FinanceDetailsHeader from "../layout/Finance/FinanceDetailsHeader";
 import CustomDetailsName from "../finance/CustomDetailsName";
 

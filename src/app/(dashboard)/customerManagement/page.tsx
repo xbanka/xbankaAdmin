@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import { Customer } from "@/components/transaction/types";
+import { Customer } from "@/lib/types/transactionTypes";
 import { useGetCustomer } from "@/hooks/CustomerService";
 import { Input } from "@/components/ui/input";
 import { DataTableLayout } from "@/components/DataTableLayout/DataTableLayout";
@@ -53,15 +53,16 @@ export default function CustomerManagement() {
           </Button>
         </div>
         {/* Search */}
-        <div className="flex items-start justify-between">
-          <div className="flex gap-2 max-w-md">
+        <div className="flex flex-col gap-2 lg:flex-row items-start justify-between">
+          <div className="flex gap-2 w-full lg:max-w-md">
             <Input
               placeholder="Search customers..."
               value={search}
+              className=""
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-          <Button onClick={() => setOpenModal(true)}>Add Customer</Button>
+          <Button className="w-full lg:max-w-md" onClick={() => setOpenModal(true)}>+ Add Customer</Button>
         </div>
 
         {/* Table */}
