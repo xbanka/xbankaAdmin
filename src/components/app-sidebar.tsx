@@ -61,11 +61,11 @@ const data = {
       url: "/finance",
       icon: Banknote,
     },
-    // {
-    //   title: "Support Center",
-    //   url: "/support",
-    //   icon: HelpCircle,
-    // },
+    {
+      title: "Support Center",
+      url: "/support",
+      icon: HelpCircle,
+    },
     // {
     //   title: "Refunds & Disputes",
     //   url: "/refunds",
