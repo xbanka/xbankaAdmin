@@ -16,6 +16,9 @@ import {
 import { SupportChat } from "./types";
 import ChatSummaryCard from "./chat-summary-card";
 import { FilterTabs } from "../ui/FilterTabs";
+import { DashboardLayout } from "../layout/dashboard-layout";
+import { DataTableLayout } from "../DataTableLayout/DataTableLayout";
+import { getPriorityColor } from "@/lib/utils/statusStyles";
 
 const mockChats: SupportChat[] = [
   {
@@ -150,6 +153,82 @@ export function SupportDashboard({ onSelectChat }: SupportDashboardProps) {
     });
   }, [searchTerm, filterTab]);
 
+  const tableColumns = [
+    {
+      key: "id",
+      header: "Chat ID",
+      render: (chat: SupportChat) => (
+        <span className="font-[500] text-[14px] leading-[18px] text-[#111827]">
+          {chat.id}
+        </span>
+      ),
+    },
+    {
+      key: "subject",
+      header: "Subject",
+      render: (chat: SupportChat) => chat.subject,
+    },
+    {
+      key: "customer",
+      header: "Customer",
+      render: (chat: SupportChat) => chat.customer.name,
+    },
+    {
+      key: "channel",
+      header: "Channel",
+      render: (chat: SupportChat) => (
+        <span className="text-center text-xl">
+          {getChannelIcon(chat.channel)}
+        </span>
+      ),
+    },
+    {
+      key: "priority",
+      header: "Priority",
+      render: (chat: SupportChat) => (
+        <Badge
+          className={`capitalize px-3 py-2 rounded-[36px] text-xs font-medium ${getPriorityColor(
+            chat.priority
+          )}`}
+        >
+          {chat.priority.charAt(0).toUpperCase() + chat.priority.slice(1)}
+        </Badge>
+      ),
+    },
+    {
+      key: "agent",
+      header: "Agent",
+      render: (chat: SupportChat) => chat.agent?.name || "Unassigned",
+    },
+    {
+      key: "createdAt",
+      header: "Date & Time",
+      render: (chat: SupportChat) => (
+        <span className="text-sm">
+          {chat.createdAt.toLocaleDateString()}{" "}
+          {chat.createdAt.toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
+        </span>
+      ),
+    },
+    {
+      key: "action",
+      header: "Action",
+      render: (chat: SupportChat) => (
+        <Button
+          onClick={() => onSelectChat(chat)}
+          size="sm"
+          variant="ghost"
+          className="text-abstractCyan hover:text-abstractCyan/70"
+        >
+          View
+        </Button>
+      ),
+    },
+  ];
+
   const stats = {
     totalChats: mockChats.length,
     totalTickets: 32,
@@ -157,19 +236,6 @@ export function SupportDashboard({ onSelectChat }: SupportDashboardProps) {
       (c) => c.status !== "closed" && c.status !== "resolved"
     ).length,
     avgResponseRate: "92%",
-  };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "high":
-        return "bg-red-100 text-red-800";
-      case "medium":
-        return "bg-yellow-100 text-yellow-800";
-      case "low":
-        return "bg-green-100 text-green-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
   };
 
   const getChannelIcon = (channel: string) => {
@@ -182,27 +248,13 @@ export function SupportDashboard({ onSelectChat }: SupportDashboardProps) {
     return icons[channel] || "📱";
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "new":
-        return "text-blue-600";
-      case "assigned":
-        return "text-orange-600";
-      case "in-progress":
-        return "text-purple-600";
-      case "resolved":
-        return "text-green-600";
-      case "closed":
-        return "text-gray-600";
-      default:
-        return "text-gray-600";
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-gray-50">
+    <DashboardLayout
+      isPending={false}
+      // error={""}
+      breadcrumbs={[{ label: "Support" }]}>
       <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-8 py-6">
+        <div className="">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">
@@ -210,7 +262,7 @@ export function SupportDashboard({ onSelectChat }: SupportDashboardProps) {
               </h1>
             </div>
             <div className="flex items-center gap-4">
-              <Button className="bg-teal-500 hover:bg-teal-600 text-white">
+              <Button>
                 <Plus className="w-4 h-4 mr-2" />
                 New Ticket
               </Button>
@@ -265,147 +317,28 @@ export function SupportDashboard({ onSelectChat }: SupportDashboardProps) {
           {/* Filters and Search */}
           <div className="flex flex-wrap gap-2 mb-6 ">
             <FilterTabs
-              filters={["all", "assigned", "unassigned", "pending", "closed"]}
+              filters={["all", "assigned", "unassigned"]}
               value={filterTab}
               onChange={setFilterTab}
             />
           </div>
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-6">
-            <div className="flex gap-2">
-              {["all", "assigned", "unassigned", "pending", "closed"].map(
-                (tab) => (
-                  <button
-                    key={tab}
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    onClick={() => setFilterTab(tab as any)}
-                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                      filterTab === tab
-                        ? "bg-teal-500 text-white"
-                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                    }`}
-                  >
-                    {tab.charAt(0).toUpperCase() + tab.slice(1)}{" "}
-                    {tab === "assigned" ? "Ticket" : ""}
-                  </button>
-                )
-              )}
-            </div>
-            <div className="relative w-full md:w-64">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <Input
-                placeholder="Search chats..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-          </div>
+          {/* {tab.charAt(0).toUpperCase() + tab.slice(1)} */}
         </div>
       </div>
 
       {/* Chats Table */}
-      <div className="max-w-7xl mx-auto px-8 py-8">
+      <div className="">
         <div className="bg-white rounded-lg shadow overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
-                    Chat ID
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
-                    Subject
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
-                    Customer
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
-                    Channel
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
-                    Priority
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
-                    Agent
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
-                    Date & Time
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
-                    Action
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {filteredChats.map((chat) => (
-                  <tr
-                    key={chat.id}
-                    className="hover:bg-gray-50 transition-colors cursor-pointer"
-                  >
-                    <td className="px-6 py-4">
-                      <span className="font-semibold text-teal-600">
-                        {chat.id}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-gray-900">{chat.subject}</td>
-                    <td className="px-6 py-4 text-gray-900">
-                      {chat.customer.name}
-                    </td>
-                    <td className="px-6 py-4 text-center text-xl">
-                      {getChannelIcon(chat.channel)}
-                    </td>
-                    <td className="px-6 py-4">
-                      <Badge className={getPriorityColor(chat.priority)}>
-                        {chat.priority.charAt(0).toUpperCase() +
-                          chat.priority.slice(1)}
-                      </Badge>
-                    </td>
-                    <td className="px-6 py-4 text-gray-900">
-                      {chat.agent?.name || "Unassigned"}
-                    </td>
-                    <td className="px-6 py-4 text-gray-900 text-sm">
-                      {chat.createdAt.toLocaleDateString()}{" "}
-                      {chat.createdAt.toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </td>
-                    <td className="px-6 py-4">
-                      <Button
-                        onClick={() => onSelectChat(chat)}
-                        size="sm"
-                        variant="ghost"
-                        className="text-teal-600 hover:text-teal-700"
-                      >
-                        View
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Pagination */}
-          <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-            <p className="text-sm text-gray-600">Page 1 of 30</p>
-            <div className="flex gap-2">
-              {[1, 2, 3, "...", 10, 11, 12].map((page, idx) => (
-                <button
-                  key={idx}
-                  className={`px-3 py-2 text-sm rounded ${
-                    page === 1
-                      ? "bg-teal-500 text-white"
-                      : "border border-gray-300 text-gray-700 hover:bg-gray-50"
-                  }`}
-                >
-                  {page}
-                </button>
-              ))}
-            </div>
-          </div>
+          <DataTableLayout
+            data={filteredChats}
+            columns={tableColumns}
+            rowKey={(chat) => chat.id}
+            emptyMessage="No support chats found."
+            itemsPerPage={10}
+            totalCount={filteredChats.length}
+          />
         </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 }
