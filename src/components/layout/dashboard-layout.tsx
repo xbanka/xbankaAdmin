@@ -105,7 +105,7 @@ export function DashboardLayout({
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
+              <BreadcrumbLink href="/">Dashboard</BreadcrumbLink>
             </BreadcrumbItem>
             {breadcrumbs.map((crumb, index) => (
               <div key={index} className="flex items-center">
@@ -170,10 +170,11 @@ export function DashboardLayout({
           onClose={() => setOpenModal(false)}
           title="Process Payout"
           footer={
-            <div className="mt-[15px] flex gap-[20px]">
+            <div className="w-full flex gap-[20px]">
               <Button
                 onClick={() => setOpenModal(!openModal)}
                 variant="outline"
+                className="flex-1"
               >
                 Cancel
               </Button>
@@ -182,6 +183,7 @@ export function DashboardLayout({
                 disabled={processingPayout}
                 variant="default"
                 onClick={handlePayout}
+                className="flex-1"
               >
                 {processingPayout ? "Confirming..." : "Confirm"}
               </Button>
@@ -195,15 +197,16 @@ export function DashboardLayout({
           onClose={() => setRejectModal(false)}
           title="Reject Payout"
           footer={
-            <div className="mt-[15px] flex gap-[20px]">
-              <Button onClick={() => setRejectModal(false)} variant="outline">
+            <div className="w-full flex gap-[20px]">
+              <Button onClick={() => setRejectModal(false)} variant="outline" className="flex-1">
                 Cancel
               </Button>
 
               <Button
                 disabled={rejectingPayout}
-                variant="default"
+                variant="destructive"
                 onClick={handleReject}
+                className="flex-1"
               >
                 {processingPayout ? "Rejecting..." : "Reject"}
               </Button>

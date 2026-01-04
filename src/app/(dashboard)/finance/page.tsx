@@ -12,6 +12,7 @@ import { usePayoutSidebarStore } from "@/store/usePayoutSidebarStore";
 import { PayoutData } from "@/lib/types";
 import Header from "@/components/ui/Header";
 import { FilterTabs } from "@/components/ui/FilterTabs";
+import { getStatusStyles } from "@/lib/utils/statusStyles";
 
 export default function FinancePage() {
   const [activeFilter, setActiveFilter] = useState("all");
@@ -83,13 +84,9 @@ export default function FinancePage() {
       header: "Status",
       render: (item: PayoutData) => (
         <span
-          className={`capitalize px-3 py-2 rounded-[36px] text-xs font-medium ${
-            item.status === "paid"
-              ? "bg-[#D1FAE5] text-[#37703F]"
-              : item.status === "rejected"
-              ? "bg-[#FCE6E6] text-[#EF4444]"
-              : "bg-[#FFF8D8] text-[#B29504]"
-          }`}
+          className={`capitalize px-3 py-2 rounded-[36px] text-xs font-medium ${getStatusStyles(
+            item.status
+          )}`}
         >
           {item.status}
         </span>
@@ -121,7 +118,6 @@ export default function FinancePage() {
     <DashboardLayout
       isPending={false}
       // error={""}
-      title="Finance"
       breadcrumbs={[{ label: "Finance" }]}
     >
       <div>

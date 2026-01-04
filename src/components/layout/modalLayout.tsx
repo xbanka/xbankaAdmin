@@ -43,7 +43,7 @@ function DialogLayoutRoot({
     <Dialog open={open} defaultOpen={defaultOpen} onOpenChange={onOpenChange}>
       <DialogContent showCloseButton={showCloseButton} className={cn(className)}>
         {(title || description) && (
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between">
           <DialogHeader>
             {title && <DialogTitle>{title}</DialogTitle>}
             {description && <DialogDescription>{description}</DialogDescription>}

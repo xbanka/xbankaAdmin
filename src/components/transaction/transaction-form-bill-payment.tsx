@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Upload } from "lucide-react";
 import { SelectFieldLayout } from "../layout/SelectFieldLayout";
 import { TransactionType } from "../../lib/types/transactionTypes";
-import { SERVICE_TYPE_LABELS } from "@/lib/helper";
+import { SERVICE_TYPE_LABELS } from "@/lib/utils/helper";
 import {
   BillPaymentTransactionFormValues,
   billPaymentTransactionSchema,
