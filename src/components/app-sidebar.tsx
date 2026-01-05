@@ -14,13 +14,7 @@ import {
   Home,
   Users,
   CreditCard,
-  Settings,
   HelpCircle,
-  AlertTriangle,
-  FileText,
-  CheckSquare,
-  BarChart3,
-  Package,
   Banknote,
   LogOutIcon,
 } from "lucide-react";
@@ -32,7 +26,6 @@ import { DialogLayout } from "./layout/modalLayout";
 import { useUserStore } from "@/store/userStore";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
-// import Cookies from "js-cookie";
 import { logoutAction } from "@/lib/actions/actions";
 import { toast } from "sonner";
 // import { rolePermissions } from "@/lib/rolePermissions";
@@ -192,17 +185,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
         <DialogLayout
           open={open}
-          onOpenChange={setOpen}
+          onClose={() => setOpen(false)}
           title="Logout"
           footer={
             <>
               {/* Cancel just closes the dialog */}
               <DialogLayout.Close asChild>
-                <Button variant="outline">Cancel</Button>
+                <Button onClick={() => setOpen(false)} className="flex-1" variant="outline">Cancel</Button>
               </DialogLayout.Close>
 
               {/* Logout button calls handler */}
-              <Button disabled={isPending} variant="destructive" onClick={handleLogout}>
+              <Button className="flex-1" disabled={isPending} variant="destructive" onClick={handleLogout}>
                 { isPending ? "Logging out..." : "Logout"}
               </Button>
             </>

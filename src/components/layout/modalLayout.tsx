@@ -50,7 +50,7 @@ function DialogLayoutRoot({
           </DialogHeader>
           <button
             onClick={onClose}
-            className="text-muted-foreground hover:text-foreground transition"
+            className="text-muted-foreground cursor-pointer hover:text-foreground transition"
           >
             <X className="h-5 w-5" />
           </button>
