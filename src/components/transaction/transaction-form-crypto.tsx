@@ -33,9 +33,9 @@ export function CryptoTransactionForm() {
         <SearchSelectFieldLayout
           id="details.transactionType"
           label="Transaction Type"
-          options={["USDT - NGN", "BTC - NGN", "ETH - NGN"]}
+          options={["USDT - NGN", "BTC - NGN", "ETH - NGN", "NGN - USDT", "NGN - BTC", "NGN - ETH"]}
           value={watch("details.transactionType")}
-          onChange={(value) => setValue("transactionType", value)}
+          onChange={(value) => setValue("details.transactionType", value)}
         />
       </div>
 
@@ -44,7 +44,7 @@ export function CryptoTransactionForm() {
         <FormField
           id="details.customerAmount"
           label="Customer Amount"
-          placeholder="100 USDT"
+          placeholder="Enter customer amount"
           register={register}
           // error={errors.customerAmount}
         />
@@ -54,7 +54,7 @@ export function CryptoTransactionForm() {
           label="Vendor"
           options={["Rayah", "Binance", "Kraken"]}
           value={watch("details.vendor")}
-          onChange={(value) => setValue("vendor", value)}
+          onChange={(value) => setValue("details.vendor", value)}
           // error={errors.vendor}
         />
       </div>
@@ -64,21 +64,21 @@ export function CryptoTransactionForm() {
         <FormField
           id="details.vendorRate"
           label="Vendor Rate"
-          placeholder="1467"
+          placeholder="Enter vendor's rate"
           register={register}
           // error={errors.vendorRate}
         />
         <FormField
           id="details.xbankaRate"
           label="Xbanka Rate"
-          placeholder="1467.5"
+          placeholder="Enter xbanka's rate"
           register={register}
           // error={errors.xbankaRate}
         />
         <FormField
           id="details.margin"
           label="Margin"
-          placeholder="0.5"
+          placeholder="Enter margin"
           register={register}
           // error={errors.margin}
         />
@@ -89,27 +89,29 @@ export function CryptoTransactionForm() {
         <FormField
           id="details.expectedPayout"
           label="Expected Payout"
-          placeholder="₦146,750"
+          placeholder="Enter expected payout"
           register={register}
           // error={errors.expectedPayout}
         />
-        <FormField
+        <SearchSelectFieldLayout
           id="details.customerAccountWallet"
           label="Customer Account / Wallet"
-          placeholder="GTB - 0123456789"
-          register={register}
-          // error={errors.customerAccountWallet}
+          options={["GTB - 0123456789"]}
+          value={watch("details.customerAccountWallet")}
+          onChange={(value) => setValue("details.customerAccountWallet", value)}
+          // error={errors.vendor}
         />
       </div>
 
       {/* Xibaka Account & Payment Date */}
       <div className="grid grid-cols-2 gap-4">
-        <FormField
+        <SearchSelectFieldLayout
           id="details.xbankaAccount"
           label="Xbanka Account"
-          placeholder="GTB - 0123456789"
-          register={register}
-          // error={errors.xbankaAccount}
+          options={["GTB - 0123456789"]}
+          value={watch("details.xbankaAccount")}
+          onChange={(value) => setValue("details.xbankaAccount", value)}
+          // error={errors.vendor}
         />
         <FormField
           id="details.paymentDate"
@@ -136,7 +138,7 @@ export function CryptoTransactionForm() {
 
       {/* Submit Button */}
       <Button
-        className="w-full bg-teal-500 hover:bg-teal-600 text-white h-11"
+        className="w-full"
       >
         Submit for Verification
       </Button>

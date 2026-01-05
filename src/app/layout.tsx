@@ -37,7 +37,6 @@ export default function RootLayout({
         <Toaster
         position="top-right"
           richColors  // enables built-in colors
-          expand      // expands stacked toasts
           closeButton // adds a close button
         />
       </body>

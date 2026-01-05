@@ -1,3 +1,5 @@
+import { LucideIcon } from "lucide-react"
+
 export interface SupportChat {
   id: string
   subject: string
@@ -36,4 +38,12 @@ export interface CustomerLogDetails {
   bankName: string
   bankAccount: string
   documents: File[]
+}
+
+export interface ChatSummaryCardProps{
+    className?: string, 
+    header: string, 
+    totalChats: string | number, 
+    footer: string,
+    icon: LucideIcon
 }
