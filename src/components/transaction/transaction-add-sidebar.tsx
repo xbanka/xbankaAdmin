@@ -41,7 +41,7 @@ export function TransactionAddSidebar({
       <div className="flex-1 bg-black/50" onClick={onClose} />
 
       {/* Sidebar */}
-      <div className="max-w-[470px] bg-white shadow-lg flex flex-col h-full overflow-hidden">
+      <div className="max-w-[470px] bg-white shadow-lg flex flex-col overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-[#E5E7EB]">
           {serviceType && (
@@ -76,7 +76,7 @@ export function TransactionAddSidebar({
           displayTitle="Customer info"
           customer={customer}
         />
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 p-6">
           {!serviceType ? (
             <div className="space-y-6">
               {/* Customer Info */}
