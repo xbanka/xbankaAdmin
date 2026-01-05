@@ -144,7 +144,7 @@ export function ConfirmPayoutSidebar({
               Cancel
             </Button>
             <Button
-              className="flex-1 bg-teal-600 hover:bg-teal-700 text-white"
+              className="flex-1"
               onClick={handleConfirm}
             >
               Confirm Payout

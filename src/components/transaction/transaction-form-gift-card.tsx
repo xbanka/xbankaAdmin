@@ -8,7 +8,7 @@ import { Upload } from "lucide-react";
 import { useFormContext } from "react-hook-form";
 import FormField from "../layout/FormField";
 import { SearchSelectFieldLayout } from "../layout/SearchableSelectLayout";
-
+import { GetGiftCards } from "@/lib/data";
 
 export function GiftCardTransactionForm() {
   const { register, setValue, watch, handleSubmit } = useFormContext();
@@ -29,9 +29,9 @@ export function GiftCardTransactionForm() {
         />
 
         <SearchSelectFieldLayout
-        id="details.cardType"
+          id="details.cardType"
           label="Card Type"
-          options={["Amazon", "iTunes", "Steam", "Google Play"]}
+          options={GetGiftCards}
           value={watch("details.cardType")}
           onChange={(value) => setValue("details.cardType", value)}
           // error={errors.cardType}
@@ -43,18 +43,18 @@ export function GiftCardTransactionForm() {
         <FormField
           id="cardFaceValue"
           label="Card Face Value"
-          placeholder="$100"
+          placeholder="Enter a card face value"
           register={register}
           // error={errors.cardFaceValue}
         />
 
-        <SelectFieldLayout
+        <SearchSelectFieldLayout
           id="currency"
           label="Currency"
           options={["Dollar (USD)", "Euro (EUR)", "Pound (GBP)"]}
           value={watch("currency")}
           onChange={(value) => setValue("currency", value)}
-          // error={errors.currency}
+          // error={errors.cardType}
         />
       </div>
 
@@ -63,18 +63,18 @@ export function GiftCardTransactionForm() {
         <FormField
           id="details.quantity"
           label="Quantity"
-          placeholder="2"
+          placeholder="Enter quantity"
           register={register}
           // error={errors.quantity}
         />
 
-        <SelectFieldLayout
+        <SearchSelectFieldLayout
           id="details.vendor"
           label="Vendor"
           options={["Rayah", "Direct", "Broker"]}
           value={watch("details.vendor")}
           onChange={(value) => setValue("details.vendor", value)}
-          // error={errors.rayah}
+          // error={errors.cardType}
         />
       </div>
 
@@ -91,7 +91,7 @@ export function GiftCardTransactionForm() {
         <FormField
           id="details.xbankaRate"
           label="Xbanka Rate"
-          placeholder="1467.5"
+          placeholder="Enter Xbanka Rate"
           register={register}
           // error={errors.xbankaRate}
         />
@@ -99,7 +99,7 @@ export function GiftCardTransactionForm() {
         <FormField
           id="details.margin"
           label="Margin"
-          placeholder="0.5"
+          placeholder="Enter Margin"
           register={register}
           // error={errors.margin}
         />
@@ -110,7 +110,7 @@ export function GiftCardTransactionForm() {
         <FormField
           id="details.expectedPayout"
           label="Expected Payout"
-          placeholder="₦146,750"
+          placeholder="Enter expected payout"
           register={register}
           // error={errors.expectedPayout}
         />
@@ -118,7 +118,7 @@ export function GiftCardTransactionForm() {
         <FormField
           id="details.giftCardCode"
           label="Gift Card Code"
-          placeholder="00234564684648"
+          placeholder="Enter gift card code"
           register={register}
           // error={errors.giftCardCode}
         />
@@ -126,12 +126,13 @@ export function GiftCardTransactionForm() {
 
       {/* Customer Account & Payment Date */}
       <div className="grid grid-cols-2 gap-4">
-        <FormField
+        <SearchSelectFieldLayout
           id="details.customerAccountWallet"
           label="Customer Account / Wallet"
-          placeholder="GTB - 0123456789"
-          register={register}
-          // error={errors.customerAccountWallet}
+          options={["GTB - 0123456789"]}
+          value={watch("details.customerAccountWallet")}
+          onChange={(value) => setValue("details.customerAccountWallet", value)}
+          // error={errors.cardType}
         />
 
         <FormField
@@ -158,9 +159,7 @@ export function GiftCardTransactionForm() {
       </div>
 
       {/* Submit Button */}
-      <Button className="w-full bg-teal-500 hover:bg-teal-600 text-white h-11">
-        Submit for Verification
-      </Button>
+      <Button className="w-full">Submit for Verification</Button>
     </div>
   );
 }

@@ -161,8 +161,13 @@ export function PayoutDetailsSidebar({
           {showContent && (
             <div className="sticky bottom-0 bg-white border-t border-gray-200 py-[16px] px-[20px] flex gap-4">
               <Button
-                variant="outline"
-                className="flex-1 bg-transparent border border-[#FFB3AF] text-[#C00400] font-[500] text-[14px] leading-[18px]"
+              variant={payout.status === "rejected" ? "outline" : "default"}
+                disabled={payout.status === "rejected"}
+                className={
+                  payout.status === "rejected"
+                    ? "cursor-not-allowed flex-1 bg-transparent border border-destructive text-destructive font-[500] text-[14px] leading-[18px]"
+                    : "flex-1"
+                }
                 onClick={onDecline}
               >
                 Decline Request
@@ -171,6 +176,7 @@ export function PayoutDetailsSidebar({
                 variant="outline"
                 className="flex-1 bg-transparent text-[#606368] font-[500] text-[14px] leading-[18px]"
                 onClick={onDecline}
+                disabled={true}
               >
                 Hold/Flag Payout
               </Button>
@@ -179,8 +185,8 @@ export function PayoutDetailsSidebar({
                 disabled={payout.status === "paid"}
                 className={
                   payout.status === "paid"
-                    ? "cursor-not-allowed bg-gray-300 text-gray-500 border border-gray-300"
-                    : ""
+                    ? "flex-1 cursor-not-allowed bg-gray-300 text-gray-500 border border-gray-300"
+                    : "flex-1"
                 }
                 onClick={onProcess}
               >

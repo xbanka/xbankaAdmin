@@ -43,14 +43,14 @@ function DialogLayoutRoot({
     <Dialog open={open} defaultOpen={defaultOpen} onOpenChange={onOpenChange}>
       <DialogContent showCloseButton={showCloseButton} className={cn(className)}>
         {(title || description) && (
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between">
           <DialogHeader>
             {title && <DialogTitle>{title}</DialogTitle>}
             {description && <DialogDescription>{description}</DialogDescription>}
           </DialogHeader>
           <button
             onClick={onClose}
-            className="text-muted-foreground hover:text-foreground transition"
+            className="text-muted-foreground cursor-pointer hover:text-foreground transition"
           >
             <X className="h-5 w-5" />
           </button>

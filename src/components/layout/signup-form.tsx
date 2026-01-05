@@ -4,13 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import Link from "next/link";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Mail, Lock, User } from "lucide-react";
@@ -18,6 +12,7 @@ import FormField from "./FormField";
 import PasswordField from "../ui/PasswordField";
 import { useSignup } from "@/hooks/SignupService";
 import Image from "next/image";
+import { useState } from "react";
 
 const signupSchema = z
   .object({
@@ -41,6 +36,8 @@ const signupSchema = z
 export type SignupFormData = z.infer<typeof signupSchema>;
 
 export default function SignupForm() {
+  const [showSuccess, setShowSuccess] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -50,13 +47,46 @@ export default function SignupForm() {
     resolver: zodResolver(signupSchema),
   });
 
-  const { error, mutate, isPending } = useSignup();
+  const { data, error, mutate, isSuccess, isPending } = useSignup();
 
   const onSubmit = async (data: SignupFormData) => {
     mutate(data, {
-      onSuccess: () => reset(),
+      onSuccess: () => {
+        reset(), 
+        setShowSuccess(true);
+      },
     });
   };
+
+  if (showSuccess && isSuccess && data?.success) {
+    return (
+      <Card className="w-full max-w-sm mx-auto">
+        <CardContent>
+          <div className="text-center space-y-3">
+            <div className="w-10 h-10 bg-[var(--customCyan)] rounded-full flex items-center justify-center mx-auto">
+              <Mail className="w-5 h-5 text-[var(--abstractCyan)]" />
+            </div>
+            <h2 className="text-[20px] font-bold text-gray-900">
+              Check Your Email
+            </h2>
+            <p className="text-gray-600 text-[16px]">
+              We&apos;ve sent a verification link to your email address. Please
+              check your inbox and click the link to verify your account.
+            </p>
+            <Link href="">
+              <Button
+                className="w-full"
+                size="sm"
+                onClick={() => setShowSuccess(false)}
+              >
+                Ok
+              </Button>
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div>

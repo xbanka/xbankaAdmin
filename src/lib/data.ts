@@ -1,0 +1,23 @@
+export const GetGiftCards = [
+  "Amazon Gift Card",
+  "Apple / iTunes Gift Card",
+  "Google Play Gift Card",
+  "Steam Gift Card",
+  "Xbox Gift Card",
+  "PlayStation Gift Card",
+  "Razer Gold Gift Card",
+  "eBay Gift Card",
+  "Nike Gift Card",
+  "Sephora Gift Card",
+  "Walmart Gift Card",
+  "Nordstrom Gift Card",
+  "Target Gift Card",
+  "Visa Gift Card",
+  "Mastercard Gift Card",
+  "Starbucks Gift Card",
+  "Netflix Gift Card",
+  "Disney Gift Card",
+  "Best Buy Gift Card",
+  "Carrefour Gift Card",
+  "Zalando Gift Card"
+]
