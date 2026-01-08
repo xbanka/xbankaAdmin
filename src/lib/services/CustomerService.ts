@@ -1,6 +1,6 @@
 import { createCustomer, getCustomers } from "@/lib/actions/customerAction";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useDebounce } from "./useDebounce";
+import { useDebounce } from "../../hooks/useDebounce";
 import { toast } from "sonner";
 
 export const useGetCustomer = (search: string) => {

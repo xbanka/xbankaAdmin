@@ -9,6 +9,7 @@ import { DataTableLayout } from "../DataTableLayout/DataTableLayout";
 import { FilterTabs } from "../ui/FilterTabs";
 import { TransactionsTableProps } from "@/lib/types/transactionTypes";
 import { CustomerInfoPopup } from "./customer-info-popup";
+import { useTransactions } from "@/lib/services/transaction.service";
 
 export function TransactionsTable({
   data,
@@ -48,10 +49,14 @@ export function TransactionsTable({
     });
   };
 
+  const { data: transactionData } = useTransactions();
+console.log(transactionData)
+ const transactions = transactionData?.data?.data ?? [];
+
   const columns = [
-    { key: "transactionId", header: "Tan ID" },
+    { key: "id", header: "Tan ID" },
     {
-      key: "customerName",
+      key: "affiliate_source",
       header: "Customer",
       render: (item: TransactionRecord) => (
         <div
@@ -74,19 +79,19 @@ export function TransactionsTable({
       header: "Transaction Type",
     },
     {
-      key: "amountIn",
+      key: "commission_amount",
       header: "Amount In",
     },
     {
-      key: "amountOut",
+      key: "commission_rate",
       header: "Amount Out",
     },
     {
-      key: "vendorRate",
+      key: "vendor_rate",
       header: "Vendor Rate",
     },
     {
-      key: "xiibakaRate",
+      key: "xbanka_rate",
       header: "Xibaka Rate",
     },
     {
@@ -114,7 +119,10 @@ export function TransactionsTable({
 
     { key: "assignedRep", header: "Assigned Rep" },
 
-    { key: "dateCreated", header: "Date" },
+    { key: "created_at",
+    header: "Date",
+    render: (item: any) =>
+      new Date(item.created_at).toLocaleDateString(), },
   ];
 
   return (
@@ -158,15 +166,15 @@ export function TransactionsTable({
           </div>
         </div>
       </div>
-
-      {/* Data Table */}
-      <DataTableLayout
-        data={filteredData}
-        columns={columns}
-        rowKey={(item) => item.id}
-        itemsPerPage={10}
-        emptyMessage="No transactions found."
-      />
+      <div className="lg:max-w-[1060px] xl:min-w-full min-h-screen">
+        <DataTableLayout
+          data={transactions}
+          columns={columns}
+          rowKey={(item) => item.id}
+          itemsPerPage={10}
+          emptyMessage="No transactions found."
+        />
+      </div>
 
       <CustomerInfoPopup
         customer={selectedCustomer}
