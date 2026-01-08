@@ -23,6 +23,8 @@ export default function Home() {
   const [selectedTransactionCustomer, setSelectedTransactionCustomer] =
     useState<TransactionRecord | null>(null);
 
+    
+
   const handleCustomerSelect = (customer: ActiveCustomer) => {
     setSelectedCustomer(customer);
     setIsSearchOpen(false);

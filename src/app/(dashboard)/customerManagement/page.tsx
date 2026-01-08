@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Customer } from "@/lib/types/transactionTypes";
-import { useGetCustomer } from "@/hooks/CustomerService";
+import { useGetCustomer } from "@/lib/services/CustomerService";
 import { Input } from "@/components/ui/input";
 import { DataTableLayout } from "@/components/DataTableLayout/DataTableLayout";
 import { useState } from "react";
