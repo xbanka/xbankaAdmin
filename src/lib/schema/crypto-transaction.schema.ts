@@ -1,33 +1,41 @@
 // lib/schemas/crypto-transaction.schema.ts
 import { z } from "zod";
-import { ServiceTypeEnum } from "./service-type.schema";
+import { giftCardTransactionSchema } from "./giftcard-transaction.schema";
+import { billPaymentTransactionSchema } from "./bill-payment-transaction.schema";
 
 export const cryptoTransactionSchema = z.object({
-  serviceType: ServiceTypeEnum,
 
-  transactionType: z.string().min(1, "Transaction type is required"),
+    serviceType: z.literal("crypto"),
 
-  customerAmount: z.string().min(1, "Customer amount is required"),
+    transactionType: z.string().min(1, "Transaction type is required"),
 
-  vendor: z.string().min(1, "Vendor is required"),
+    customerAmount: z.string().min(1, "Customer amount is required"),
 
-  vendorRate: z.string().min(1, "Vendor rate is required"),
+    vendor: z.string().min(1, "Vendor is required"),
 
-  xbankaRate: z.string().min(1, "Xbanka rate is required"),
+    vendorRate: z.string().min(1, "Vendor rate is required"),
 
-  margin: z.string().min(1, "Margin is required"),
+    xbankaRate: z.string().min(1, "Xbanka rate is required"),
 
-  expectedPayout: z.string().min(1, "Expected payout is required"),
+    margin: z.string().min(1, "Margin is required"),
 
-  customerAccountWallet: z
-    .string()
-    .min(1, "Customer account/wallet is required"),
+    expectedPayout: z.string().min(1, "Expected payout is required"),
 
-  xbankaAccount: z.string().min(1, "Xbanka account is required"),
+    customerAccountWallet: z
+      .string()
+      .min(1, "Customer account/wallet is required"),
 
-  paymentDate: z.string().min(1, "Payment date is required"),
+    xbankaAccount: z.string().min(1, "Xbanka account is required"),
+
+    paymentDate: z.string().min(1, "Payment date is required"),
 });
 
 export type CryptoTransactionFormValues = z.infer<
   typeof cryptoTransactionSchema
 >;
+
+export const transactionSchema = z.discriminatedUnion("serviceType", [
+  cryptoTransactionSchema,
+  giftCardTransactionSchema,
+  billPaymentTransactionSchema,
+]);

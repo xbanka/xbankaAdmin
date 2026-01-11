@@ -9,14 +9,50 @@ import { useFormContext } from "react-hook-form";
 import FormField from "../layout/FormField";
 import { SearchSelectFieldLayout } from "../layout/SearchableSelectLayout";
 import { GetGiftCards } from "@/lib/data";
+import { useCreateTransaction } from "@/lib/services/transaction.service";
+import { mapTransactionToApiPayload } from "@/lib/mappers/transactionPayload.mapper";
+import { calculateMargin } from "@/lib/utils/calculateMargin";
 
 export function GiftCardTransactionForm() {
-  const { register, setValue, watch, handleSubmit } = useFormContext();
+  const { mutate } = useCreateTransaction();
+  const {
+    register,
+    setValue,
+    watch,
+    handleSubmit,
+    formState: { errors },
+  } = useFormContext();
 
-  const onSubmit = () => {};
+  const onSubmit = (data) => {
+    console.log("clicked", data);
+    const payload = mapTransactionToApiPayload(data);
+
+    mutate(payload);
+    // const parsed = submitTransactionSchema.safeParse(data);
+
+    // if (!parsed.success) {
+    //   console.log("parsed error");
+    //   console.error(parsed.error.format());
+    //   return;
+    // }
+
+    // console.log("VALID SUBMISSION:", parsed.data);
+  };
+
+  const xbankasRate = watch("details.xbankaRate");
+  const vendorRate = watch("details.vendorRate");
+
+  useEffect(() => {
+    const margin = calculateMargin(xbankasRate, vendorRate);
+    console.log("details.margin:", margin);
+    setValue("details.margin", margin, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+  }, [xbankasRate, vendorRate, setValue]);
 
   return (
-    <div onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       {/* Service Type & Card Type */}
       <div className="grid grid-cols-2 gap-4">
         <SelectFieldLayout
@@ -24,8 +60,18 @@ export function GiftCardTransactionForm() {
           label="Service Type"
           options={["crypto", "gift-card", "bill-payments"]}
           value={watch("serviceType")}
-          onChange={(value) => setValue("serviceType", value)}
-          // error={errors.serviceType}
+          onChange={(value) => {
+            setValue("serviceType", value, {
+              shouldValidate: true,
+              shouldDirty: true,
+            });
+
+            setValue("details.serviceType", value, {
+              shouldValidate: true,
+              shouldDirty: true,
+            });
+          }}
+          error={errors.serviceType}
         />
 
         <SearchSelectFieldLayout
@@ -34,27 +80,32 @@ export function GiftCardTransactionForm() {
           options={GetGiftCards}
           value={watch("details.cardType")}
           onChange={(value) => setValue("details.cardType", value)}
-          // error={errors.cardType}
+          error={errors.cardType}
         />
       </div>
 
       {/* Card Face Value & Currency */}
       <div className="grid grid-cols-2 gap-4">
         <FormField
-          id="cardFaceValue"
+          id="details.cardFaceValue"
           label="Card Face Value"
           placeholder="Enter a card face value"
           register={register}
-          // error={errors.cardFaceValue}
+          error={errors.cardFaceValue}
         />
 
         <SearchSelectFieldLayout
-          id="currency"
+          id="details.currency"
           label="Currency"
           options={["Dollar (USD)", "Euro (EUR)", "Pound (GBP)"]}
-          value={watch("currency")}
-          onChange={(value) => setValue("currency", value)}
-          // error={errors.cardType}
+          value={watch("details.currency")}
+          onChange={(value) =>
+            setValue("details.currency", value, {
+              shouldValidate: true,
+              shouldDirty: true,
+            })
+          }
+          error={errors.cardType}
         />
       </div>
 
@@ -65,7 +116,7 @@ export function GiftCardTransactionForm() {
           label="Quantity"
           placeholder="Enter quantity"
           register={register}
-          // error={errors.quantity}
+          error={errors.quantity}
         />
 
         <SearchSelectFieldLayout
@@ -74,7 +125,7 @@ export function GiftCardTransactionForm() {
           options={["Rayah", "Direct", "Broker"]}
           value={watch("details.vendor")}
           onChange={(value) => setValue("details.vendor", value)}
-          // error={errors.cardType}
+          error={errors.cardType}
         />
       </div>
 
@@ -85,7 +136,7 @@ export function GiftCardTransactionForm() {
           label="Vendor Rate"
           placeholder="Enter ventor rate"
           register={register}
-          // error={errors.vendor}
+          error={errors.vendor}
         />
 
         <FormField
@@ -93,7 +144,7 @@ export function GiftCardTransactionForm() {
           label="Xbanka Rate"
           placeholder="Enter Xbanka Rate"
           register={register}
-          // error={errors.xbankaRate}
+          error={errors.xbankaRate}
         />
 
         <FormField
@@ -101,7 +152,8 @@ export function GiftCardTransactionForm() {
           label="Margin"
           placeholder="Enter Margin"
           register={register}
-          // error={errors.margin}
+          readOnly
+          error={errors.margin}
         />
       </div>
 
@@ -112,7 +164,7 @@ export function GiftCardTransactionForm() {
           label="Expected Payout"
           placeholder="Enter expected payout"
           register={register}
-          // error={errors.expectedPayout}
+          error={errors.expectedPayout}
         />
 
         <FormField
@@ -120,19 +172,18 @@ export function GiftCardTransactionForm() {
           label="Gift Card Code"
           placeholder="Enter gift card code"
           register={register}
-          // error={errors.giftCardCode}
+          error={errors.giftCardCode}
         />
       </div>
 
       {/* Customer Account & Payment Date */}
       <div className="grid grid-cols-2 gap-4">
-        <SearchSelectFieldLayout
+        <FormField
           id="details.customerAccountWallet"
           label="Customer Account / Wallet"
-          options={["GTB - 0123456789"]}
-          value={watch("details.customerAccountWallet")}
-          onChange={(value) => setValue("details.customerAccountWallet", value)}
-          // error={errors.cardType}
+          placeholder="Enter customer account"
+          register={register}
+          error={errors.customerAccountWallet}
         />
 
         <FormField
@@ -140,7 +191,7 @@ export function GiftCardTransactionForm() {
           label="Payment Date"
           type="date"
           register={register}
-          // error={errors.paymentDate}
+          error={errors.paymentDate}
         />
       </div>
 
@@ -159,7 +210,9 @@ export function GiftCardTransactionForm() {
       </div>
 
       {/* Submit Button */}
-      <Button className="w-full">Submit for Verification</Button>
-    </div>
+      <Button type="submit" className="w-full">
+        Submit for Verification
+      </Button>
+    </form>
   );
 }

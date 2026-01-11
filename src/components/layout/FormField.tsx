@@ -14,6 +14,7 @@ interface FormFieldProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   register?: any;
   error?: FieldError;
+  readOnly?: boolean
 }
 
 const FormField = ({
@@ -21,6 +22,7 @@ const FormField = ({
   label,
   type = "text",
   placeholder,
+  readOnly,
   icon: Icon,
   register,
   error,
@@ -35,6 +37,7 @@ const FormField = ({
           type={type}
           placeholder={placeholder}
           className={`${ Icon ? "pl-10" : "px-3"} border-gray-200 focus:border-[var(--abstractCyan)]`}
+          readOnly={readOnly}
           {...register(id)}
         />
       </div>
