@@ -12,7 +12,6 @@ import { CustomerInfoPopup } from "./customer-info-popup";
 import { useTransactions } from "@/lib/services/transaction.service";
 
 export function TransactionsTable({
-  data,
   onNewTransaction,
   onCustomerDetailsOpen,
 }: TransactionsTableProps) {
@@ -24,18 +23,6 @@ export function TransactionsTable({
     top: number;
     left: number;
   }>({ top: 0, left: 0 });
-
-  const filteredData = data.filter((item) => {
-    const matchesSearch =
-      item.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.transactionId.toLowerCase().includes(searchQuery.toLowerCase());
-
-    const matchesType =
-      activeFilter === "all" ||
-      item.serviceType.toLowerCase() === activeFilter.toLowerCase();
-
-    return matchesSearch && matchesType;
-  });
 
   const handleCustomerClick = (
     item: TransactionRecord,
@@ -50,8 +37,18 @@ export function TransactionsTable({
   };
 
   const { data: transactionData } = useTransactions();
-console.log(transactionData)
- const transactions = transactionData?.data?.data ?? [];
+  const transactions = transactionData?.data?.data ?? [];
+  const filteredData = transactions.filter((item: TransactionRecord) => {
+    const matchesSearch =
+    item?.customer.first_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    item?.id?.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesType =
+    activeFilter === "all" ||
+    item?.service_type?.toLowerCase() === activeFilter.toLowerCase();
+    
+    return matchesSearch && matchesType;
+  });
 
   const columns = [
     { key: "id", header: "Tan ID" },
@@ -64,14 +61,14 @@ console.log(transactionData)
           className="relative flex flex-col cursor-pointer hover:text-teal-600 transition"
         >
           <span className="font-medium text-teal-600 hover:underline">
-            {item.customerName}
+            {item.customer.first_name} {item.customer.last_name}
           </span>
-          <span className="text-xs text-gray-500">{item.customerId}</span>
+          <span className="text-xs text-gray-500">{item.customer.email}</span>
         </div>
       ),
     },
     {
-      key: "serviceType",
+      key: "service_type",
       header: "Service Type",
     },
     {
@@ -79,11 +76,11 @@ console.log(transactionData)
       header: "Transaction Type",
     },
     {
-      key: "commission_amount",
+      key: "amount_in",
       header: "Amount In",
     },
     {
-      key: "commission_rate",
+      key: "amount_out",
       header: "Amount Out",
     },
     {
@@ -92,7 +89,7 @@ console.log(transactionData)
     },
     {
       key: "xbanka_rate",
-      header: "Xibaka Rate",
+      header: "Xbanka Rate",
     },
     {
       key: "margin",
@@ -119,10 +116,11 @@ console.log(transactionData)
 
     { key: "assignedRep", header: "Assigned Rep" },
 
-    { key: "created_at",
-    header: "Date",
-    render: (item: any) =>
-      new Date(item.created_at).toLocaleDateString(), },
+    {
+      key: "created_at",
+      header: "Date",
+      render: (item: TransactionRecord) => new Date(item.created_at).toLocaleDateString(),
+    },
   ];
 
   return (

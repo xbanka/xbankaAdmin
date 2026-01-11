@@ -6,7 +6,6 @@ import { TransactionAddSidebar } from "@/components/transaction/transaction-add-
 import { ActiveCustomer } from "@/lib/types/transactionTypes";
 import { TransactionsTable } from "@/components/transaction/transactions-table";
 import {
-  mockTransactions,
   TransactionRecord,
 } from "@/components/transaction/transaction-data";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
@@ -51,7 +50,6 @@ export default function Home() {
           <Header text="Transactions" />
         </div>
         <TransactionsTable
-          data={mockTransactions}
           onNewTransaction={() => setIsSearchOpen(true)}
           onCustomerDetailsOpen={handleCustomerDetailsOpen}
         />
@@ -74,13 +72,13 @@ export default function Home() {
           onBack={handleBackToSearch}
         />
       </TransactionFormProvider>
-      <CustomerTransactionsSidebar
+      {/* <CustomerTransactionsSidebar
         isOpen={isCustomerDetailsOpen}
         onClose={() => setIsCustomerDetailsOpen(false)}
         onBack={() => setIsCustomerDetailsOpen(false)}
         customer={selectedTransactionCustomer}
         transactions={mockTransactions}
-      />
+      /> */}
     </DashboardLayout>
   );
 }
