@@ -9,18 +9,23 @@ import { useFormContext } from "react-hook-form";
 import FormField from "../layout/FormField";
 import { SearchSelectFieldLayout } from "../layout/SearchableSelectLayout";
 import { calculateMargin } from "@/lib/utils/calculateMargin";
-import { submitTransactionSchema } from "@/lib/schema/transaction.schema";
+import { TransactionFormValues } from "@/lib/schema/transaction.schema";
 import { mapTransactionToApiPayload } from "@/lib/mappers/transactionPayload.mapper";
 import { useCreateTransaction } from "@/lib/services/transaction.service";
 
 export function CryptoTransactionForm() {
   const { mutate } = useCreateTransaction();
-  const { register, setValue, watch, handleSubmit, formState: { errors } } =
-    useFormContext();
+  const {
+    register,
+    setValue,
+    watch,
+    handleSubmit,
+    formState: { errors },
+  } = useFormContext<TransactionFormValues>();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onSubmit = (data: any) => {
-    console.log("clicked", data)
+    console.log("clicked", data);
     const payload = mapTransactionToApiPayload(data);
 
     mutate(payload);
@@ -39,10 +44,10 @@ export function CryptoTransactionForm() {
   useEffect(() => {
     const margin = calculateMargin(xbankasRate, vendorRate);
     console.log("details.margin:", margin);
-    setValue("details.margin", margin, {
-      shouldValidate: true,
-      shouldDirty: true,
-    });
+    setValue("details.margin", margin?.toString() ?? "", {
+    shouldValidate: true,
+    shouldDirty: true,
+  });
   }, [xbankasRate, vendorRate, setValue]);
 
   return (
@@ -60,7 +65,7 @@ export function CryptoTransactionForm() {
               shouldDirty: true,
             })
           }
-          error={errors.serviceType}
+          error={errors?.serviceType}
         />
         <SearchSelectFieldLayout
           id="details.transactionType"
@@ -73,7 +78,7 @@ export function CryptoTransactionForm() {
             "NGN-BTC",
             "NGN-ETH",
           ]}
-          value={watch("details.transactionType")}
+          value={watch("details.transactionType") ?? ""}
           onChange={(value) => setValue("details.transactionType", value)}
         />
       </div>
@@ -85,7 +90,7 @@ export function CryptoTransactionForm() {
           label="Customer Amount"
           placeholder="Enter customer amount"
           register={register}
-          error={errors.customerAmount}
+          error={errors.details?.customerAmount}
         />
 
         <SearchSelectFieldLayout
@@ -94,7 +99,7 @@ export function CryptoTransactionForm() {
           options={["Rayah", "Binance", "Kraken"]}
           value={watch("details.vendor")}
           onChange={(value) => setValue("details.vendor", value)}
-          error={errors.vendor}
+          error={errors.details?.vendor}
         />
       </div>
 
@@ -105,14 +110,14 @@ export function CryptoTransactionForm() {
           label="Vendor Rate"
           placeholder="Enter vendor's rate"
           register={register}
-          error={errors.vendorRate}
+          error={errors.details?.vendorRate}
         />
         <FormField
           id="details.xbankaRate"
           label="Xbanka Rate"
           placeholder="Enter xbanka's rate"
           register={register}
-          error={errors.xbankaRate}
+          error={errors.details?.xbankaRate}
         />
         <FormField
           id="details.margin"
@@ -120,7 +125,7 @@ export function CryptoTransactionForm() {
           readOnly
           placeholder="Enter margin"
           register={register}
-          error={errors.margin}
+          error={errors.details?.margin}
         />
       </div>
 
@@ -131,14 +136,14 @@ export function CryptoTransactionForm() {
           label="Expected Payout"
           placeholder="Enter expected payout"
           register={register}
-          error={errors.expectedPayout}
+          error={errors.details?.expectedPayout}
         />
         <FormField
           id="details.customerAccountWallet"
           label="Customer Account / Wallet"
           placeholder="Enter customer account"
           register={register}
-          error={errors.customerAccountWallet}
+          error={errors.details?.customerAccountWallet}
         />
       </div>
 
@@ -148,16 +153,21 @@ export function CryptoTransactionForm() {
           id="details.xbankaAccount"
           label="Xbanka Account"
           options={["GTB - 0123456789"]}
-          value={watch("details.xbankaAccount")}
-          onChange={(value) => setValue("details.xbankaAccount", value)}
-          error={errors.vendor}
+          value={watch("details.xbankaAccount") ?? ""}
+          onChange={(value) =>
+            setValue("details.xbankaAccount", value, {
+              shouldValidate: true,
+              shouldDirty: true,
+            })
+          }
+          error={errors.details?.xbankaAccount}
         />
         <FormField
           id="details.paymentDate"
           label="Payment Date"
           type="date"
           register={register}
-          error={errors.paymentDate}
+          error={errors.details?.paymentDate}
         />
       </div>
 

@@ -12,6 +12,7 @@ import { GetGiftCards } from "@/lib/data";
 import { useCreateTransaction } from "@/lib/services/transaction.service";
 import { mapTransactionToApiPayload } from "@/lib/mappers/transactionPayload.mapper";
 import { calculateMargin } from "@/lib/utils/calculateMargin";
+import { TransactionFormValues } from "@/lib/schema/transaction.schema";
 
 export function GiftCardTransactionForm() {
   const { mutate } = useCreateTransaction();
@@ -21,22 +22,13 @@ export function GiftCardTransactionForm() {
     watch,
     handleSubmit,
     formState: { errors },
-  } = useFormContext();
+  } = useFormContext<TransactionFormValues>();
 
-  const onSubmit = (data) => {
+  const onSubmit = (data: TransactionFormValues) => {
     console.log("clicked", data);
     const payload = mapTransactionToApiPayload(data);
 
     mutate(payload);
-    // const parsed = submitTransactionSchema.safeParse(data);
-
-    // if (!parsed.success) {
-    //   console.log("parsed error");
-    //   console.error(parsed.error.format());
-    //   return;
-    // }
-
-    // console.log("VALID SUBMISSION:", parsed.data);
   };
 
   const xbankasRate = watch("details.xbankaRate");
@@ -45,7 +37,7 @@ export function GiftCardTransactionForm() {
   useEffect(() => {
     const margin = calculateMargin(xbankasRate, vendorRate);
     console.log("details.margin:", margin);
-    setValue("details.margin", margin, {
+    setValue("details.margin", margin?.toString() ?? "", {
       shouldValidate: true,
       shouldDirty: true,
     });
@@ -80,7 +72,7 @@ export function GiftCardTransactionForm() {
           options={GetGiftCards}
           value={watch("details.cardType")}
           onChange={(value) => setValue("details.cardType", value)}
-          error={errors.cardType}
+          error={errors.details?.cardType}
         />
       </div>
 
@@ -91,7 +83,7 @@ export function GiftCardTransactionForm() {
           label="Card Face Value"
           placeholder="Enter a card face value"
           register={register}
-          error={errors.cardFaceValue}
+          error={errors.details?.cardFaceValue}
         />
 
         <SearchSelectFieldLayout
@@ -105,7 +97,7 @@ export function GiftCardTransactionForm() {
               shouldDirty: true,
             })
           }
-          error={errors.cardType}
+          error={errors.details?.currency}
         />
       </div>
 
@@ -116,7 +108,7 @@ export function GiftCardTransactionForm() {
           label="Quantity"
           placeholder="Enter quantity"
           register={register}
-          error={errors.quantity}
+          error={errors.details?.quantity}
         />
 
         <SearchSelectFieldLayout
@@ -125,7 +117,7 @@ export function GiftCardTransactionForm() {
           options={["Rayah", "Direct", "Broker"]}
           value={watch("details.vendor")}
           onChange={(value) => setValue("details.vendor", value)}
-          error={errors.cardType}
+          error={errors.details?.vendor}
         />
       </div>
 
@@ -136,7 +128,7 @@ export function GiftCardTransactionForm() {
           label="Vendor Rate"
           placeholder="Enter ventor rate"
           register={register}
-          error={errors.vendor}
+          error={errors.details?.vendorRate}
         />
 
         <FormField
@@ -144,7 +136,7 @@ export function GiftCardTransactionForm() {
           label="Xbanka Rate"
           placeholder="Enter Xbanka Rate"
           register={register}
-          error={errors.xbankaRate}
+          error={errors.details?.vendorRate}
         />
 
         <FormField
@@ -153,7 +145,7 @@ export function GiftCardTransactionForm() {
           placeholder="Enter Margin"
           register={register}
           readOnly
-          error={errors.margin}
+          error={errors.details?.margin}
         />
       </div>
 
@@ -164,7 +156,7 @@ export function GiftCardTransactionForm() {
           label="Expected Payout"
           placeholder="Enter expected payout"
           register={register}
-          error={errors.expectedPayout}
+          error={errors.details?.expectedPayout}
         />
 
         <FormField
@@ -172,7 +164,7 @@ export function GiftCardTransactionForm() {
           label="Gift Card Code"
           placeholder="Enter gift card code"
           register={register}
-          error={errors.giftCardCode}
+          error={errors.details?.giftCardCode}
         />
       </div>
 
@@ -183,7 +175,7 @@ export function GiftCardTransactionForm() {
           label="Customer Account / Wallet"
           placeholder="Enter customer account"
           register={register}
-          error={errors.customerAccountWallet}
+          error={errors.details?.customerAccountWallet}
         />
 
         <FormField
@@ -191,7 +183,7 @@ export function GiftCardTransactionForm() {
           label="Payment Date"
           type="date"
           register={register}
-          error={errors.paymentDate}
+          error={errors.details?.paymentDate}
         />
       </div>
 

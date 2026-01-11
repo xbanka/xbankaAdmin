@@ -15,7 +15,32 @@ export const customerBaseSchema = z.object({
 export const transactionSchema = z.object({
   customer: customerBaseSchema.partial().optional(), // ✅ relaxed
   serviceType: z.enum(["crypto", "gift-card", "bill-payments"]).optional(),
-  details: z.object({}).passthrough().optional(),
+ details: z
+    .object({
+      /* ---- CRYPTO FIELDS ---- */
+      transactionType: z.string().optional(),
+      customerAmount: z.string().optional(),
+      vendor: z.string().optional(),
+      vendorRate: z.string().optional(),
+      xbankaRate: z.string().optional(),
+      margin: z.string().optional(),
+      expectedPayout: z.string().optional(),
+      customerAccountWallet: z.string().optional(),
+      xbankaAccount: z.string().optional(),
+      paymentDate: z.string().optional(),
+
+      /* ---- GIFT CARD FIELDS ---- */
+      cardType: z.string().optional(),
+      cardFaceValue: z.string().optional(),
+      currency: z.string().optional(),
+      quantity: z.string().optional(),
+      giftCardCode: z.string().optional(),
+
+      /* ---- BILL PAYMENT (later) ---- */
+      // biller: z.string().optional(),
+      // reference: z.string().optional(),
+    })
+    .optional(),
 });
 
 
