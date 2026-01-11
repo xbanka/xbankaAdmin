@@ -5,3 +5,5 @@ export const ServiceTypeEnum = z.enum([
   "gift-card",
   "bill-payments",
 ])
+
+export type ServiceType = "crypto" | "gift-card" | "bill-payments";

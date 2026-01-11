@@ -96,9 +96,9 @@ export function TransactionAddSidebar({
               </div>
             </div>
           ) : serviceType === "crypto" ? (
-            <CryptoTransactionForm />
+            <CryptoTransactionForm handleClose={onClose} />
           ) : serviceType === "gift-card" ? (
-            <GiftCardTransactionForm />
+            <GiftCardTransactionForm handleClose={onClose} />
           ) : (
             <BillPaymentTransactionForm />
           )}

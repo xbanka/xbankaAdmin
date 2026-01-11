@@ -72,7 +72,6 @@ export interface BillPaymentTransaction {
 }
 
 export interface TransactionsTableProps {
-  data: TransactionRecord[];
   onNewTransaction: () => void;
   onCustomerDetailsOpen?: (customer: TransactionRecord) => void
 }

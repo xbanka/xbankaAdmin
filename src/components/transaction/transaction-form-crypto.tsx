@@ -12,11 +12,18 @@ import { calculateMargin } from "@/lib/utils/calculateMargin";
 import { TransactionFormValues } from "@/lib/schema/transaction.schema";
 import { mapTransactionToApiPayload } from "@/lib/mappers/transactionPayload.mapper";
 import { useCreateTransaction } from "@/lib/services/transaction.service";
+import { ServiceType } from "@/lib/schema/service-type.schema";
+import { toast } from "sonner";
 
-export function CryptoTransactionForm() {
+export function CryptoTransactionForm({
+  handleClose,
+}: {
+  handleClose: () => void;
+}) {
   const { mutate } = useCreateTransaction();
   const {
     register,
+    reset,
     setValue,
     watch,
     handleSubmit,
@@ -28,12 +35,13 @@ export function CryptoTransactionForm() {
     console.log("clicked", data);
     const payload = mapTransactionToApiPayload(data);
 
-    mutate(payload);
-    // const parsed = submitTransactionSchema.safeParse(data);
-
-    // if (!parsed.success) {
-    //   return;
-    // }
+    mutate(payload, {
+      onSuccess: () => {
+        reset();
+        handleClose();
+        toast.success("Transaction added successfully");
+      },
+    });
 
     console.log("VALID SUBMISSION:", data);
   };
@@ -45,9 +53,9 @@ export function CryptoTransactionForm() {
     const margin = calculateMargin(xbankasRate, vendorRate);
     console.log("details.margin:", margin);
     setValue("details.margin", margin?.toString() ?? "", {
-    shouldValidate: true,
-    shouldDirty: true,
-  });
+      shouldValidate: true,
+      shouldDirty: true,
+    });
   }, [xbankasRate, vendorRate, setValue]);
 
   return (
@@ -59,12 +67,14 @@ export function CryptoTransactionForm() {
           label="Service Type"
           options={["crypto", "gift-card", "bill-payments"]}
           value={watch("serviceType")}
-          onChange={(value) =>
-            setValue("serviceType", value, {
+          onChange={(value) => {
+            const serviceType = value as ServiceType;
+
+            setValue("serviceType", serviceType, {
               shouldValidate: true,
               shouldDirty: true,
-            })
-          }
+            });
+          }}
           error={errors?.serviceType}
         />
         <SearchSelectFieldLayout

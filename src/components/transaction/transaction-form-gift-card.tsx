@@ -13,13 +13,16 @@ import { useCreateTransaction } from "@/lib/services/transaction.service";
 import { mapTransactionToApiPayload } from "@/lib/mappers/transactionPayload.mapper";
 import { calculateMargin } from "@/lib/utils/calculateMargin";
 import { TransactionFormValues } from "@/lib/schema/transaction.schema";
+import { ServiceType } from "@/lib/schema/service-type.schema";
+import { toast } from "sonner";
 
-export function GiftCardTransactionForm() {
+export function GiftCardTransactionForm({handleClose}: {handleClose: () => void}) {
   const { mutate } = useCreateTransaction();
   const {
     register,
     setValue,
     watch,
+    reset,
     handleSubmit,
     formState: { errors },
   } = useFormContext<TransactionFormValues>();
@@ -28,7 +31,13 @@ export function GiftCardTransactionForm() {
     console.log("clicked", data);
     const payload = mapTransactionToApiPayload(data);
 
-    mutate(payload);
+    mutate(payload, {
+      onSuccess: () => {
+        reset();
+        handleClose()
+        toast.success("Transaction added successfully")
+      },
+    });
   };
 
   const xbankasRate = watch("details.xbankaRate");
@@ -53,12 +62,9 @@ export function GiftCardTransactionForm() {
           options={["crypto", "gift-card", "bill-payments"]}
           value={watch("serviceType")}
           onChange={(value) => {
-            setValue("serviceType", value, {
-              shouldValidate: true,
-              shouldDirty: true,
-            });
+            const serviceType = value as ServiceType;
 
-            setValue("details.serviceType", value, {
+            setValue("serviceType", serviceType, {
               shouldValidate: true,
               shouldDirty: true,
             });
