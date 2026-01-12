@@ -86,7 +86,7 @@ export function TransactionAddSidebar({
                 <SelectFieldLayout
                   id="serviceType"
                   label="Service Type"
-                  options={["crypto", "gift-card", "bill-payments"]}
+                  options={["crypto", "gift-card"]}
                   placeholder="Select type"
                   value={serviceType}
                   onChange={(value) => {

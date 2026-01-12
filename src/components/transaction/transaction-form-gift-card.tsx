@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { SelectFieldLayout } from "../layout/SelectFieldLayout";
@@ -9,15 +9,25 @@ import { useFormContext } from "react-hook-form";
 import FormField from "../layout/FormField";
 import { SearchSelectFieldLayout } from "../layout/SearchableSelectLayout";
 import { GetGiftCards } from "@/lib/data";
-import { useCreateTransaction } from "@/lib/services/transaction.service";
+import {
+  useCreateTransaction,
+  useUploadTransactionAttachment,
+} from "@/lib/services/transaction.service";
 import { mapTransactionToApiPayload } from "@/lib/mappers/transactionPayload.mapper";
 import { calculateMargin } from "@/lib/utils/calculateMargin";
 import { TransactionFormValues } from "@/lib/schema/transaction.schema";
-import { ServiceType } from "@/lib/schema/service-type.schema";
-import { toast } from "sonner";
+import { ServiceType } from "@/lib/schema/service-type.schema"
+import { AttachmentFile, AttachmentUpload } from "../ui/UploadAttachment";
 
-export function GiftCardTransactionForm({handleClose}: {handleClose: () => void}) {
+export function GiftCardTransactionForm({
+  handleClose,
+}: {
+  handleClose: () => void;
+}) {
   const { mutate } = useCreateTransaction();
+  const { mutate: uploadAttachment } = useUploadTransactionAttachment();
+
+  const [attachments, setAttachments] = useState<AttachmentFile[]>([]);
   const {
     register,
     setValue,
@@ -27,15 +37,33 @@ export function GiftCardTransactionForm({handleClose}: {handleClose: () => void}
     formState: { errors },
   } = useFormContext<TransactionFormValues>();
 
+  function handleNumericInput(e: React.ChangeEvent<HTMLInputElement>) {
+    // Allow only digits and optional dot (for decimals)
+    const value = e.target.value.replace(/[^0-9.]/g, "");
+    e.target.value = value;
+  }
+
   const onSubmit = (data: TransactionFormValues) => {
     console.log("clicked", data);
     const payload = mapTransactionToApiPayload(data);
 
     mutate(payload, {
-      onSuccess: () => {
+      onSuccess: (response) => {
+        const transactionId = response?.data.id;
+        attachments.forEach(({ file }) => {
+          const formData = new FormData();
+          formData.append("file", file);
+          formData.append("transaction_id", transactionId);
+
+          attachments.forEach(({ file }) => {
+            uploadAttachment({
+              transactionId,
+              file,
+            });
+          });
+        });
         reset();
-        handleClose()
-        toast.success("Transaction added successfully")
+        handleClose();
       },
     });
   };
@@ -90,6 +118,9 @@ export function GiftCardTransactionForm({handleClose}: {handleClose: () => void}
           placeholder="Enter a card face value"
           register={register}
           error={errors.details?.cardFaceValue}
+          inputProps={{
+            onInput: handleNumericInput,
+          }}
         />
 
         <SearchSelectFieldLayout
@@ -115,6 +146,9 @@ export function GiftCardTransactionForm({handleClose}: {handleClose: () => void}
           placeholder="Enter quantity"
           register={register}
           error={errors.details?.quantity}
+          inputProps={{
+            onInput: handleNumericInput,
+          }}
         />
 
         <SearchSelectFieldLayout
@@ -135,6 +169,9 @@ export function GiftCardTransactionForm({handleClose}: {handleClose: () => void}
           placeholder="Enter ventor rate"
           register={register}
           error={errors.details?.vendorRate}
+          inputProps={{
+            onInput: handleNumericInput,
+          }}
         />
 
         <FormField
@@ -143,6 +180,9 @@ export function GiftCardTransactionForm({handleClose}: {handleClose: () => void}
           placeholder="Enter Xbanka Rate"
           register={register}
           error={errors.details?.vendorRate}
+          inputProps={{
+            onInput: handleNumericInput,
+          }}
         />
 
         <FormField
@@ -163,6 +203,9 @@ export function GiftCardTransactionForm({handleClose}: {handleClose: () => void}
           placeholder="Enter expected payout"
           register={register}
           error={errors.details?.expectedPayout}
+          inputProps={{
+            onInput: handleNumericInput,
+          }}
         />
 
         <FormField
@@ -196,15 +239,7 @@ export function GiftCardTransactionForm({handleClose}: {handleClose: () => void}
       {/* Attachments */}
       <div>
         <Label>Attachments</Label>
-        <div className="mt-2 border-2 border-dashed border-[#E5E7EB] rounded-lg p-8 text-center cursor-pointer hover:bg-gray-50 transition">
-          <Upload className="h-6 w-6 text-gray-400 mx-auto mb-2" />
-          <p className="text-sm text-gray-600">
-            Upload screenshot, receipt, or proof document
-          </p>
-          <p className="text-xs text-gray-400 mt-1">
-            JPG, PNG, OR PDF • Max 5MB
-          </p>
-        </div>
+        <AttachmentUpload value={attachments} onChange={setAttachments} />
       </div>
 
       {/* Submit Button */}

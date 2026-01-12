@@ -37,21 +37,33 @@ export function TransactionsTable({
   };
 
   const { data: transactionData } = useTransactions();
-  const transactions = transactionData?.data?.data ?? [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const transactions = (transactionData as any)?.data?.data ?? [];
   const filteredData = transactions.filter((item: TransactionRecord) => {
     const matchesSearch =
-    item?.customer.first_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item?.id?.toLowerCase().includes(searchQuery.toLowerCase());
-    
+      item?.customer.first_name
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      item?.id?.toLowerCase().includes(searchQuery.toLowerCase());
+
     const matchesType =
-    activeFilter === "all" ||
-    item?.service_type?.toLowerCase() === activeFilter.toLowerCase();
-    
+      activeFilter === "all" ||
+      item?.service_type?.toLowerCase() === activeFilter.toLowerCase();
+
     return matchesSearch && matchesType;
   });
 
   const columns = [
-    { key: "id", header: "Tan ID" },
+    {
+      key: "id",
+      header: "Transaction ID",
+      width: "15%", // ✅ percentage
+      render: (item: TransactionRecord) => (
+        <span className="block truncate max-w-full whitespace-nowrap" title={item.id}>
+          {item.id}
+        </span>
+      ),
+    },
     {
       key: "affiliate_source",
       header: "Customer",
@@ -119,7 +131,8 @@ export function TransactionsTable({
     {
       key: "created_at",
       header: "Date",
-      render: (item: TransactionRecord) => new Date(item.created_at).toLocaleDateString(),
+      render: (item: TransactionRecord) =>
+        new Date(item.created_at).toLocaleDateString(),
     },
   ];
 

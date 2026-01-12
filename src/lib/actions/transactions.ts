@@ -42,6 +42,7 @@ export const getTransactionByIdAction = async (transactionId: string) => {
 /**
  * POST /api/transactions/new
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const createTransactionAction = async (payload: any) => {
   const response = await AxiosInstance.post(
     "/api/transactions/new",

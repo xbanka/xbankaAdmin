@@ -32,7 +32,7 @@ export function CustomerInfoPopup({
       >
         {/* Customer Info */}
         <h1 className="font-[500] text-[14px] leading-[20px] text-[#111827]">
-          {customer.customerName}
+          {customer.customer.first_name} {customer.customer.last_name}
         </h1>
 
         <div className="font-[400] text-[14px] leading-[24px] text-[#4B5563] flex items-center gap-[14px]">

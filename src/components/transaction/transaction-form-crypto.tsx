@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Upload } from "lucide-react";
@@ -11,9 +11,13 @@ import { SearchSelectFieldLayout } from "../layout/SearchableSelectLayout";
 import { calculateMargin } from "@/lib/utils/calculateMargin";
 import { TransactionFormValues } from "@/lib/schema/transaction.schema";
 import { mapTransactionToApiPayload } from "@/lib/mappers/transactionPayload.mapper";
-import { useCreateTransaction } from "@/lib/services/transaction.service";
+import {
+  useCreateTransaction,
+  useUploadTransactionAttachment,
+} from "@/lib/services/transaction.service";
 import { ServiceType } from "@/lib/schema/service-type.schema";
 import { toast } from "sonner";
+import { AttachmentFile, AttachmentUpload } from "../ui/UploadAttachment";
 
 export function CryptoTransactionForm({
   handleClose,
@@ -21,6 +25,9 @@ export function CryptoTransactionForm({
   handleClose: () => void;
 }) {
   const { mutate } = useCreateTransaction();
+  const { mutate: uploadAttachment } = useUploadTransactionAttachment();
+
+  const [attachments, setAttachments] = useState<AttachmentFile[]>([]);
   const {
     register,
     reset,
@@ -30,16 +37,36 @@ export function CryptoTransactionForm({
     formState: { errors },
   } = useFormContext<TransactionFormValues>();
 
+  function handleNumericInput(e: React.ChangeEvent<HTMLInputElement>) {
+    // Allow only digits and optional dot (for decimals)
+    const value = e.target.value.replace(/[^0-9.]/g, "");
+    e.target.value = value;
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onSubmit = (data: any) => {
     console.log("clicked", data);
     const payload = mapTransactionToApiPayload(data);
 
     mutate(payload, {
-      onSuccess: () => {
+      onSuccess: (response) => {
+        const transactionId = response?.data.id;
+        attachments.forEach(({ file }) => {
+          const formData = new FormData();
+          formData.append("file", file);
+          formData.append("transaction_id", transactionId);
+
+          attachments.forEach(({ file }) => {
+            uploadAttachment({
+              transactionId,
+              file,
+            });
+          });
+        });
+
         reset();
+        setAttachments([]);
         handleClose();
-        toast.success("Transaction added successfully");
       },
     });
 
@@ -101,6 +128,9 @@ export function CryptoTransactionForm({
           placeholder="Enter customer amount"
           register={register}
           error={errors.details?.customerAmount}
+          inputProps={{
+            onInput: handleNumericInput,
+          }}
         />
 
         <SearchSelectFieldLayout
@@ -121,6 +151,9 @@ export function CryptoTransactionForm({
           placeholder="Enter vendor's rate"
           register={register}
           error={errors.details?.vendorRate}
+          inputProps={{
+            onInput: handleNumericInput,
+          }}
         />
         <FormField
           id="details.xbankaRate"
@@ -128,6 +161,9 @@ export function CryptoTransactionForm({
           placeholder="Enter xbanka's rate"
           register={register}
           error={errors.details?.xbankaRate}
+          inputProps={{
+            onInput: handleNumericInput,
+          }}
         />
         <FormField
           id="details.margin"
@@ -147,6 +183,9 @@ export function CryptoTransactionForm({
           placeholder="Enter expected payout"
           register={register}
           error={errors.details?.expectedPayout}
+          inputProps={{
+            onInput: handleNumericInput,
+          }}
         />
         <FormField
           id="details.customerAccountWallet"
@@ -184,15 +223,7 @@ export function CryptoTransactionForm({
       {/* Attachments */}
       <div>
         <Label>Attachments</Label>
-        <div className="mt-2 border-2 border-dashed border-[#E5E7EB] rounded-lg p-8 text-center cursor-pointer hover:bg-gray-50 transition">
-          <Upload className="h-6 w-6 text-gray-400 mx-auto mb-2" />
-          <p className="text-sm text-gray-600">
-            Upload screenshot, receipt, or proof document
-          </p>
-          <p className="text-xs text-gray-400 mt-1">
-            JPG, PNG, OR PDF • Max 5MB
-          </p>
-        </div>
+        <AttachmentUpload value={attachments} onChange={setAttachments} />
       </div>
 
       {/* Submit Button */}

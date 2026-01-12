@@ -104,12 +104,11 @@ export function CustomerSearchSidebar({
       {
         id: fullCustomer.id,
         affiliateAttribution: fullCustomer.affiliateAttribution ?? "",
-        assignedRep, // ✅ injected automatically
+        assignedRep,
       },
       { shouldValidate: true }
     );
     setActiveCustomer(selectedCustomer);
-    console.log(customer);
     setSearchQuery("");
   };
 
@@ -122,7 +121,7 @@ export function CustomerSearchSidebar({
     }));
   }, [data]);
 
-  const onSubmit = (data) => {
+  const onSubmit = (data: TransactionFormValues) => {
     console.log("customer data", data);
     if (!activeCustomer) return;
 
@@ -241,10 +240,7 @@ export function CustomerSearchSidebar({
                   />
                 </div>
                 <div className="flex items-center gap-4">
-                  {/* <TransactionCustomerDetailsField
-                  label="Affiliate Attribution"
-                  body={activeCustomer.affiliateAttribution}
-                /> */}
+                 
                   <FormField
                     label="Affiliate Attribution"
                     id="customer.affiliateAttribution"
