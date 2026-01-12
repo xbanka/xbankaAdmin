@@ -10,6 +10,7 @@ import { FilterTabs } from "../ui/FilterTabs";
 import { TransactionsTableProps } from "@/lib/types/transactionTypes";
 import { CustomerInfoPopup } from "./customer-info-popup";
 import { useTransactions } from "@/lib/services/transaction.service";
+import Header from "../ui/Header";
 
 export function TransactionsTable({
   onNewTransaction,
@@ -19,6 +20,8 @@ export function TransactionsTable({
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCustomer, setSelectedCustomer] =
     useState<TransactionRecord | null>(null);
+  const [page, setPage] = useState(1);
+  
   const [popupPosition, setPopupPosition] = useState<{
     top: number;
     left: number;
@@ -36,22 +39,30 @@ export function TransactionsTable({
     });
   };
 
-  const { data: transactionData } = useTransactions();
+  const {
+    data: transactionData,
+    isPending,
+    isError,
+    error,
+  } = useTransactions(page, 10);
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const transactions = (transactionData as any)?.data?.data ?? [];
-  const filteredData = transactions.filter((item: TransactionRecord) => {
-    const matchesSearch =
-      item?.customer.first_name
-        ?.toLowerCase()
-        .includes(searchQuery.toLowerCase()) ||
-      item?.id?.toLowerCase().includes(searchQuery.toLowerCase());
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const transactionsBody = (transactionData as any)?.data;
+  // const filteredData = transactions.filter((item: TransactionRecord) => {
+  //   const matchesSearch =
+  //     item?.customer.first_name
+  //       ?.toLowerCase()
+  //       .includes(searchQuery.toLowerCase()) ||
+  //     item?.id?.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesType =
-      activeFilter === "all" ||
-      item?.service_type?.toLowerCase() === activeFilter.toLowerCase();
+  //   const matchesType =
+  //     activeFilter === "all" ||
+  //     item?.service_type?.toLowerCase() === activeFilter.toLowerCase();
 
-    return matchesSearch && matchesType;
-  });
+  //   return matchesSearch && matchesType;
+  // });
 
   const columns = [
     {
@@ -59,7 +70,10 @@ export function TransactionsTable({
       header: "Transaction ID",
       width: "15%", // ✅ percentage
       render: (item: TransactionRecord) => (
-        <span className="block truncate max-w-full whitespace-nowrap" title={item.id}>
+        <span
+          className="block truncate max-w-full whitespace-nowrap"
+          title={item.id}
+        >
           {item.id}
         </span>
       ),
@@ -140,9 +154,8 @@ export function TransactionsTable({
     <div className="">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-lg font-semibold text-[#111827]">
-          Transaction Management
-        </h1>
+        <Header text="Transactions" />
+
         <div className="flex gap-3">
           <Button size="sm" variant="outline">
             <Upload className="h-4 w-4 mr-2" />
@@ -182,8 +195,14 @@ export function TransactionsTable({
           data={transactions}
           columns={columns}
           rowKey={(item) => item.id}
+          isError={isError}
+          isLoading={isPending}
+          errorMessage={error?.message}
           itemsPerPage={10}
           emptyMessage="No transactions found."
+          totalCount={transactionsBody?.total}
+          currentPage={page}
+          onPageChange={setPage}
         />
       </div>
 

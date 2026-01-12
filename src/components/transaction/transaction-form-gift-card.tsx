@@ -16,8 +16,9 @@ import {
 import { mapTransactionToApiPayload } from "@/lib/mappers/transactionPayload.mapper";
 import { calculateMargin } from "@/lib/utils/calculateMargin";
 import { TransactionFormValues } from "@/lib/schema/transaction.schema";
-import { ServiceType } from "@/lib/schema/service-type.schema"
+import { ServiceType } from "@/lib/schema/service-type.schema";
 import { AttachmentFile, AttachmentUpload } from "../ui/UploadAttachment";
+import { toast } from "sonner";
 
 export function GiftCardTransactionForm({
   handleClose,
@@ -49,17 +50,18 @@ export function GiftCardTransactionForm({
 
     mutate(payload, {
       onSuccess: (response) => {
-        const transactionId = response?.data.id;
-        attachments.forEach(({ file }) => {
-          const formData = new FormData();
-          formData.append("file", file);
-          formData.append("transaction_id", transactionId);
+        const transactionId = response?.data?.transaction?.id;
+        if (!transactionId) {
+          toast.error("Transaction ID missing from response");
+          console.log("Transaction ID missing from response");
+          return;
+        }
+        console.log(transactionId)
 
-          attachments.forEach(({ file }) => {
-            uploadAttachment({
-              transactionId,
-              file,
-            });
+        attachments.forEach(({ file }) => {
+          uploadAttachment({
+            transactionId,
+            file,
           });
         });
         reset();

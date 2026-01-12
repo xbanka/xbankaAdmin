@@ -14,6 +14,8 @@ import { Upload } from "lucide-react";
 export default function CustomerManagement() {
   const [openModal, setOpenModal] = useState(false);
   const [search, setSearch] = useState("");
+    const [page, setPage] = useState(1);
+  
   const { data, isLoading, isError, error } = useGetCustomer(search);
 
   const customers: Customer[] = data?.data ?? [];
@@ -61,6 +63,9 @@ export default function CustomerManagement() {
           isLoading={isLoading}
           isError={isError}
           errorMessage={error?.message ?? "Failed to load customers"}
+          // totalCount={data?.data.total}
+          currentPage={page}
+          onPageChange={setPage}
           emptyMessage="No customers found."
         />
       </div>

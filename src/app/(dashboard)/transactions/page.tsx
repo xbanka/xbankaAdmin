@@ -46,9 +46,6 @@ export default function Home() {
   return (
     <DashboardLayout>
       <div className="w-full">
-        <div className="mb-8">
-          <Header text="Transactions" />
-        </div>
         <TransactionsTable
           onNewTransaction={() => setIsSearchOpen(true)}
           onCustomerDetailsOpen={handleCustomerDetailsOpen}

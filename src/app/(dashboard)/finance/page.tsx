@@ -155,7 +155,10 @@ export default function FinancePage() {
           isLoading={isPending}
           errorMessage={error?.message}
           rowKey={(item) => item.id}
-          itemsPerPage={5}
+          itemsPerPage={10}
+          totalCount={data?.total}
+          currentPage={page}
+          onPageChange={setPage}
           emptyMessage="No payout requests available."
         />
       </div>
