@@ -9,9 +9,9 @@ import { DataTableLayout } from "../DataTableLayout/DataTableLayout";
 import { FilterTabs } from "../ui/FilterTabs";
 import { TransactionsTableProps } from "@/lib/types/transactionTypes";
 import { CustomerInfoPopup } from "./customer-info-popup";
+import { useTransactions } from "@/lib/services/transaction.service";
 
 export function TransactionsTable({
-  data,
   onNewTransaction,
   onCustomerDetailsOpen,
 }: TransactionsTableProps) {
@@ -23,18 +23,6 @@ export function TransactionsTable({
     top: number;
     left: number;
   }>({ top: 0, left: 0 });
-
-  const filteredData = data.filter((item) => {
-    const matchesSearch =
-      item.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.transactionId.toLowerCase().includes(searchQuery.toLowerCase());
-
-    const matchesType =
-      activeFilter === "all" ||
-      item.serviceType.toLowerCase() === activeFilter.toLowerCase();
-
-    return matchesSearch && matchesType;
-  });
 
   const handleCustomerClick = (
     item: TransactionRecord,
@@ -48,10 +36,36 @@ export function TransactionsTable({
     });
   };
 
+  const { data: transactionData } = useTransactions();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const transactions = (transactionData as any)?.data?.data ?? [];
+  const filteredData = transactions.filter((item: TransactionRecord) => {
+    const matchesSearch =
+      item?.customer.first_name
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      item?.id?.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesType =
+      activeFilter === "all" ||
+      item?.service_type?.toLowerCase() === activeFilter.toLowerCase();
+
+    return matchesSearch && matchesType;
+  });
+
   const columns = [
-    { key: "transactionId", header: "Tan ID" },
     {
-      key: "customerName",
+      key: "id",
+      header: "Transaction ID",
+      width: "15%", // ✅ percentage
+      render: (item: TransactionRecord) => (
+        <span className="block truncate max-w-full whitespace-nowrap" title={item.id}>
+          {item.id}
+        </span>
+      ),
+    },
+    {
+      key: "affiliate_source",
       header: "Customer",
       render: (item: TransactionRecord) => (
         <div
@@ -59,14 +73,14 @@ export function TransactionsTable({
           className="relative flex flex-col cursor-pointer hover:text-teal-600 transition"
         >
           <span className="font-medium text-teal-600 hover:underline">
-            {item.customerName}
+            {item.customer.first_name} {item.customer.last_name}
           </span>
-          <span className="text-xs text-gray-500">{item.customerId}</span>
+          <span className="text-xs text-gray-500">{item.customer.email}</span>
         </div>
       ),
     },
     {
-      key: "serviceType",
+      key: "service_type",
       header: "Service Type",
     },
     {
@@ -74,20 +88,20 @@ export function TransactionsTable({
       header: "Transaction Type",
     },
     {
-      key: "amountIn",
+      key: "amount_in",
       header: "Amount In",
     },
     {
-      key: "amountOut",
+      key: "amount_out",
       header: "Amount Out",
     },
     {
-      key: "vendorRate",
+      key: "vendor_rate",
       header: "Vendor Rate",
     },
     {
-      key: "xiibakaRate",
-      header: "Xibaka Rate",
+      key: "xbanka_rate",
+      header: "Xbanka Rate",
     },
     {
       key: "margin",
@@ -114,7 +128,12 @@ export function TransactionsTable({
 
     { key: "assignedRep", header: "Assigned Rep" },
 
-    { key: "dateCreated", header: "Date" },
+    {
+      key: "created_at",
+      header: "Date",
+      render: (item: TransactionRecord) =>
+        new Date(item.created_at).toLocaleDateString(),
+    },
   ];
 
   return (
@@ -158,15 +177,15 @@ export function TransactionsTable({
           </div>
         </div>
       </div>
-
-      {/* Data Table */}
-      <DataTableLayout
-        data={filteredData}
-        columns={columns}
-        rowKey={(item) => item.id}
-        itemsPerPage={10}
-        emptyMessage="No transactions found."
-      />
+      <div className="lg:max-w-[1060px] xl:min-w-full min-h-screen">
+        <DataTableLayout
+          data={transactions}
+          columns={columns}
+          rowKey={(item) => item.id}
+          itemsPerPage={10}
+          emptyMessage="No transactions found."
+        />
+      </div>
 
       <CustomerInfoPopup
         customer={selectedCustomer}

@@ -29,9 +29,9 @@ export default function RootLayout({
 }>) {
   return (
     <QueryProvider>
-    <html lang="en">
+    <html className="overflow-x-hidden" lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-x-hidden`}
       >
         {children}
         <Toaster

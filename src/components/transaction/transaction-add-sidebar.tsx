@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { X, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CryptoTransactionForm } from "./transaction-form-crypto";
 import { GiftCardTransactionForm } from "./transaction-form-gift-card";
 import { BillPaymentTransactionForm } from "./transaction-form-bill-payment";
-import { ActiveCustomer, Customer } from "../../lib/types/transactionTypes";
+import { ActiveCustomer } from "../../lib/types/transactionTypes";
 import { CustomerDetailsDisplay } from "./customers-details-display";
 import { SelectFieldLayout } from "../layout/SelectFieldLayout";
 import { useFormContext } from "react-hook-form";
@@ -26,8 +25,6 @@ export function TransactionAddSidebar({
   customer,
   onBack,
 }: TransactionAddSidebarProps) {
-  const [selectedType, setSelectedType] = useState<TransactionType>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { watch, setValue } = useFormContext();
 
@@ -41,7 +38,7 @@ export function TransactionAddSidebar({
       <div className="flex-1 bg-black/50" onClick={onClose} />
 
       {/* Sidebar */}
-      <div className="max-w-[470px] bg-white shadow-lg flex flex-col overflow-y-auto">
+      <div className="w-[40%] bg-white shadow-lg flex flex-col overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-[#E5E7EB]">
           {serviceType && (
@@ -89,7 +86,7 @@ export function TransactionAddSidebar({
                 <SelectFieldLayout
                   id="serviceType"
                   label="Service Type"
-                  options={["crypto", "gift-card", "bill-payments"]}
+                  options={["crypto", "gift-card"]}
                   placeholder="Select type"
                   value={serviceType}
                   onChange={(value) => {
@@ -99,9 +96,9 @@ export function TransactionAddSidebar({
               </div>
             </div>
           ) : serviceType === "crypto" ? (
-            <CryptoTransactionForm />
+            <CryptoTransactionForm handleClose={onClose} />
           ) : serviceType === "gift-card" ? (
-            <GiftCardTransactionForm />
+            <GiftCardTransactionForm handleClose={onClose} />
           ) : (
             <BillPaymentTransactionForm />
           )}
