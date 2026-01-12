@@ -57,7 +57,12 @@ export function BillPaymentTransactionForm() {
           label="Service Type"
           options={["crypto", "gift-card", "bill-payments"]}
           value={watch("serviceType")}
-          onChange={(value) => setValue("serviceType", value)}
+          onChange={(value) =>
+            setValue("serviceType", value, {
+              shouldValidate: true,
+              shouldDirty: true,
+            })
+          }
           // error={errors.serviceType}
         />
 

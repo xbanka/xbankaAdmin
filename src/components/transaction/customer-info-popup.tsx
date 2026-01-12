@@ -6,14 +6,14 @@ import type { TransactionRecord } from "./transaction-data";
 
 interface CustomerInfoPopupProps {
   customer: TransactionRecord | null;
-   popupPosition: { top: number; left: number }
+  popupPosition: { top: number; left: number };
   onClose: () => void;
   onViewDetails: () => void;
 }
 
 export function CustomerInfoPopup({
   customer,
-    popupPosition,
+  popupPosition,
   onClose,
   onViewDetails,
 }: CustomerInfoPopupProps) {
@@ -31,26 +31,32 @@ export function CustomerInfoPopup({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Customer Info */}
-        <h1>{customer.customerName}</h1>
+        <h1 className="font-[500] text-[14px] leading-[20px] text-[#111827]">
+          {customer.customer.first_name} {customer.customer.last_name}
+        </h1>
 
-        <div>
-            <h1>{customer.id}</h1>
-            <p>{customer.status}</p>
+        <div className="font-[400] text-[14px] leading-[24px] text-[#4B5563] flex items-center gap-[14px]">
+          <h1>{customer.id}</h1>
+          <span className="h-[6px] w-[6px] bg-[#4B5563] rounded-full"></span>
+          <p>{customer.status}</p>
         </div>
 
-        <div>
-            <p>Referred by</p> <h1>{customer.createdAt}</h1>
+        <div className="flex items-center">
+          <span className="font-[400] text-[14px] leading-[24px] text-[#4B5563]">
+            Referred by
+          </span>{" "}
+          <span className="font-[400] text-[14px] leading-[24px] text-[#4B5563] gap-[5px]">{customer.status}</span>
         </div>
 
         {/* Transactions Summary */}
-        <h1 className="">
+        {/* <h1 className="">
           4 transactions done
-        </h1>
+        </h1> */}
 
         {/* View Customer Info Button */}
         <Button
+        size="sm"
           onClick={onViewDetails}
-          className="w-full bg-teal-500 hover:bg-teal-600 text-white text-sm"
         >
           View Customer Info
         </Button>

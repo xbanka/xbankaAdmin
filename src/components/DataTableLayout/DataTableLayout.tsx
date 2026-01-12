@@ -36,7 +36,8 @@ interface DataTableLayoutProps<T> {
   isLoading?: boolean;
   isError?: boolean;
   errorMessage?: string;
-  className?: string
+  className?: string;
+  fixedLayout?: boolean;
 }
 
 export function DataTableLayout<T>({
@@ -51,7 +52,8 @@ export function DataTableLayout<T>({
   isLoading = false,
   isError = false,
   errorMessage = "Failed to load data.",
-  className
+  className,
+  fixedLayout = false,
 }: DataTableLayoutProps<T>) {
   const [localPage, setLocalPage] = useState(1);
   const page = currentPage ?? localPage;
@@ -98,80 +100,95 @@ export function DataTableLayout<T>({
   const visibleColumns = columns.filter((col) => !col.hiddenOnMobile);
 
   return (
-    <div className={cn("w-full max-w-full border border-[#E5E7EB] rounded-[8px] overflow-hidden", className)}>
+    <div
+      className={cn(
+        "w-full max-w-full border border-[#E5E7EB] rounded-[8px] overflow-hidden",
+        className
+      )}
+    >
       {/* DESKTOP TABLE */}
       <div className="hidden md:block w-full overflow-x-auto">
-          <Table className="min-w-max w-full">
-            <TableHeader>
-              <TableRow className="bg-[#FAFAFA]">
-                {columns.map((col) => (
-                  <TableHead
-                    key={col.key as string}
-                    className={`font-medium py-[8px] px-[20px] text-[12px] leading-[16px] text-[#606368] ${
-                      col.className ?? ""
-                    }`}
-                  >
-                    {col.header}
-                  </TableHead>
-                ))}
+        {/* <Table className="min-w-max w-full"> */}
+        <Table
+          className={cn(
+            "min-w-max w-full",
+            fixedLayout ? "table-fixed" : "table-auto",
+            !fixedLayout && "min-w-max"
+          )}
+        >
+          <TableHeader>
+            <TableRow className="bg-[#FAFAFA]">
+              {columns.map((col) => (
+                <TableHead
+                  key={col.key as string}
+                  className={`font-medium py-[8px] px-[20px] text-[12px] leading-[16px] text-[#606368] ${
+                    col.className ?? ""
+                  }`}
+                >
+                  {col.header}
+                </TableHead>
+              ))}
+            </TableRow>
+          </TableHeader>
+
+          <TableBody>
+            {/* Loading State */}
+            {isLoading && (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="text-center py-6 text-gray-500"
+                >
+                  <LoaderSpinner />
+                </TableCell>
               </TableRow>
-            </TableHeader>
+            )}
 
-            <TableBody>
-              {/* Loading State */}
-              {isLoading && (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="text-center py-6 text-gray-500"
-                  >
-                    <LoaderSpinner />
-                  </TableCell>
+            {/* Error State */}
+            {!isLoading && isError && (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="text-center py-6 text-red-500"
+                >
+                  {errorMessage}
+                </TableCell>
+              </TableRow>
+            )}
+
+            {!isLoading && !isError && paginatedData?.length === 0 && (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="text-center text-[#111827] text-[14px] font-[500] leading-[18px] py-6"
+                >
+                  {emptyMessage}
+                </TableCell>
+              </TableRow>
+            )}
+
+            {!isLoading &&
+              !isError &&
+              paginatedData?.map((item) => (
+                <TableRow
+                  key={rowKey(item)}
+                  className="hover:bg-gray-50 text-left text-[#111827] text-[14px] font-[500] leading-[18px]"
+                >
+                  {columns.map((col) => (
+                    <TableCell
+                      className={cn(
+                        "py-[19px] px-[20px] text-left",
+                        col.className
+                      )}
+                      key={col.key as string}
+                    >
+                      {col.render ? col.render(item) : (item as never)[col.key]}
+                    </TableCell>
+                  ))}
                 </TableRow>
-              )}
-
-              {/* Error State */}
-              {!isLoading && isError && (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="text-center py-6 text-red-500"
-                  >
-                    {errorMessage}
-                  </TableCell>
-                </TableRow>
-              )}
-
-              {!isLoading && !isError && paginatedData?.length === 0 && (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="text-center text-[#111827] text-[14px] font-[500] leading-[18px] py-6"
-                  >
-                    {emptyMessage}
-                  </TableCell>
-                </TableRow>
-              )}
-
-              {!isLoading &&
-                !isError &&
-                paginatedData?.map((item) => (
-                  <TableRow
-                    key={rowKey(item)}
-                    className="hover:bg-gray-50 text-left text-[#111827] text-[14px] font-[500] leading-[18px]"
-                  >
-                    {columns.map((col) => (
-                      <TableCell
-                        className={cn("py-[19px] px-[20px] text-left", col.className)}
-                        key={col.key as string}
-                      >
-                        {col.render ? col.render(item) : (item as never)[col.key]}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-            </TableBody>
-          </Table>
+              ))}
+          </TableBody>
+        </Table>
       </div>
 
       {/* MOBILE CARD VIEW */}
@@ -257,25 +274,25 @@ export function DataTableLayout<T>({
           <p className="font-[500] text-[12px] leading-[16px] text-[#606368]">
             Page {page} of {totalPages}
           </p>
-            <div className="flex gap-1">
-              {generatePageButtons().map((p, i) =>
-                p === "..." ? (
-                  <span key={i} className="px-2 text-gray-400">
-                    ...
-                  </span>
-                ) : (
-                  <Button
-                    key={i}
-                    variant={p === page ? "default" : "outline"}
-                    size="sm"
-                    className="w-6 h-6 p-2 rounded-[6px] font-[400] text-[12px] leading-4"
-                    onClick={() => handlePageChange(p as number)}
-                  >
-                    {p}
-                  </Button>
-                )
-              )}
-            </div>
+          <div className="flex gap-1">
+            {generatePageButtons().map((p, i) =>
+              p === "..." ? (
+                <span key={i} className="px-2 text-gray-400">
+                  ...
+                </span>
+              ) : (
+                <Button
+                  key={i}
+                  variant={p === page ? "default" : "outline"}
+                  size="sm"
+                  className="w-6 h-6 p-2 rounded-[6px] font-[400] text-[12px] leading-4"
+                  onClick={() => handlePageChange(p as number)}
+                >
+                  {p}
+                </Button>
+              )
+            )}
+          </div>
           <div className="flex items-center gap-2 overflow-x-auto">
             <Button
               variant="outline"

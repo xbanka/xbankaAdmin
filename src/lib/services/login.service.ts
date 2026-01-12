@@ -16,7 +16,6 @@ export const useLogin = () => {
       login(result.data.access_token);
       const access_token = result.data.access_token;
       localStorage.setItem("accessToken", access_token);
-      // console.log(decodeAccessToken(result.data.access_token));
       router.push("/");
     },
     onError: (err) => {

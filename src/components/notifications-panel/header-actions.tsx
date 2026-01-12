@@ -5,10 +5,7 @@ import { Bell, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { NotificationsPanel } from "./notifications-panel";
@@ -22,6 +19,7 @@ export function HeaderActions() {
   const notificationsRef = useRef<HTMLDivElement>(null);
 
   const setAffiliate = useUserStore((s) => s.setUser);
+    const user = useUserStore((state) => state.user);
   const { data, isLoading } = useQuery<{
     success: boolean;
     data: User;
@@ -91,7 +89,7 @@ export function HeaderActions() {
                 <AvatarFallback>JE</AvatarFallback>
               </Avatar>
               <div className="text-left">
-              <p className="text-sm font-medium leading-none">{data.data.first_name} {data.data.first_name}</p>
+              <p className="text-sm font-medium leading-none">{user?.first_name} {user?.last_name}</p>
               <p className="text-xs text-gray-500 leading-none">{data.data.role}</p>
             </div>
               <ChevronDown className="w-4 h-4 text-gray-500" />

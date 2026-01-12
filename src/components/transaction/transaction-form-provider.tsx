@@ -9,7 +9,11 @@ export function TransactionFormProvider({ children }: {children: ReactNode}) {
   const methods = useForm({
     resolver: zodResolver(transactionSchema),
     defaultValues: {
-      customer: {},
+      customer: {
+        id: "",
+        affiliateAttribution: "",
+        assignedRep: "",
+      },
       serviceType:  undefined,
       details: {},
     },

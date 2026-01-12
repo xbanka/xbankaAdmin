@@ -1,165 +1,61 @@
 export interface TransactionRecord {
   id: string;
-  transactionId: string;
-  customerId: string;
-  customerName: string;
-  serviceType: string;
-  transactionType: string;
-  amountIn: string;
-  amountOut: string;
-  vendorRate: string;
-  xiibakaRate: string;
-  margin: string;
-  status: "completed" | "pending" | "failed";
-  createdAt: string;
+
+  affiliate_source: string;
+
+  amount_in: string;        // "2000.00"
+  amount_out: string;       // "40000.00"
+
+  currency_in: string;      // "Dollar (USD)"
+  currency_out: string;     // "NGN"
+
+  attachment_url: string;
+
+  service_type: "gift_card" | "crypto" | "bill_payments";
+
+  status: "pending" | "completed" | "failed";
+
   vendor: string;
-  assignedRep: string;
-  dateCreated: string;
+
+  created_at: string;       // ISO date string
+
+  customer: {
+    first_name: string;
+    last_name: string;
+    email: string;
+    phone_no: string;
+  };
 }
 
-export const mockTransactions: TransactionRecord[] = [
-  {
-    id: "1",
-    transactionId: "TY-202466894",
-    customerId: "0798023114125",
-    customerName: "John Doe",
-    serviceType: "Crypto",
-    transactionType: "USDT - NGN",
-    amountIn: "1250 USDT",
-    amountOut: "₦1,800,000.00",
-    vendor: "Binance",
-    vendorRate: "1465.5",
-    xiibakaRate: "1468.5",
-    margin: "1.0",
-    assignedRep: "Sarah Johnson",
-    status: "completed",
-    dateCreated: "2025-03-10",
-    createdAt: "2025-03-12",
-  },
-  {
-    id: "2",
-    transactionId: "TY-202466892",
-    customerId: "0794567890123",
-    customerName: "Jane Smith",
-    serviceType: "Gift Card",
-    transactionType: "Amazon",
-    amountIn: "$300.00",
-    amountOut: "₦150,000.00",
-    vendor: "Rayah",
-    vendorRate: "500",
-    xiibakaRate: "1475.5",
-    margin: "1.0",
-    assignedRep: "Michael Adams",
-    status: "completed",
-    dateCreated: "2025-03-11",
-    createdAt: "2025-03-13",
-  },
-  {
-    id: "3",
-    transactionId: "TY-202466896",
-    customerId: "0734567890123",
-    customerName: "Mike Johnson",
-    serviceType: "Bill Payments",
-    transactionType: "Electricity Bill",
-    amountIn: "₦650,000",
-    amountOut: "₦650,000",
-    vendor: "IBEDC",
-    vendorRate: "-",
-    xiibakaRate: "-",
-    margin: "-",
-    assignedRep: "Grace Thompson",
-    status: "pending",
-    dateCreated: "2025-03-12",
-    createdAt: "2025-03-14",
-  },
-  {
-    id: "4",
-    transactionId: "TY-202466893",
-    customerId: "0723456789123",
-    customerName: "Sarah Miller",
-    serviceType: "Crypto",
-    transactionType: "NGN - USDT",
-    amountIn: "₦665,000",
-    amountOut: "2000 USDT",
-    vendor: "Kraken",
-    vendorRate: "200200",
-    xiibakaRate: "200200",
-    margin: "1.0",
-    assignedRep: "Daniel Brooks",
-    status: "completed",
-    dateCreated: "2025-03-13",
-    createdAt: "2025-03-15",
-  },
-  {
-    id: "5",
-    transactionId: "TY-202466895",
-    customerId: "0756789012345",
-    customerName: "David Brown",
-    serviceType: "Bill Payments",
-    transactionType: "Electricity Bill",
-    amountIn: "₦870,000",
-    amountOut: "₦870,000",
-    vendor: "Eko Disco",
-    vendorRate: "-",
-    xiibakaRate: "-",
-    margin: "-",
-    assignedRep: "Olivia Martins",
-    status: "failed",
-    dateCreated: "2025-03-14",
-    createdAt: "2025-03-16",
-  },
-  {
-    id: "6",
-    transactionId: "TY-202466891",
-    customerId: "0712345678901",
-    customerName: "Emma Wilson",
-    serviceType: "Gift Card",
-    transactionType: "Steam",
-    amountIn: "$150",
-    amountOut: "₦150,000.00",
-    vendor: "Direct Vendor",
-    vendorRate: "1000",
-    xiibakaRate: "1000",
-    margin: "1.0",
-    assignedRep: "Nathan Lee",
-    status: "completed",
-    dateCreated: "2025-03-15",
-    createdAt: "2025-03-17",
-  },
-  {
-    id: "7",
-    transactionId: "TY-202466890",
-    customerId: "0798765432101",
-    customerName: "Andrew Davis",
-    serviceType: "Crypto",
-    transactionType: "NGN - USDT",
-    amountIn: "₦665,000",
-    amountOut: "20 USDT",
-    vendor: "Binance",
-    vendorRate: "1465.5",
-    xiibakaRate: "1468.5",
-    margin: "1.0",
-    assignedRep: "Sophia Carter",
-    status: "completed",
-    dateCreated: "2025-03-16",
-    createdAt: "2025-03-18",
-  },
-  {
-    id: "8",
-    transactionId: "TY-202466889",
-    customerId: "0734567890123",
-    customerName: "Chris Garcia",
-    serviceType: "Crypto",
-    transactionType: "NGN - USDT",
-    amountIn: "₦665,000",
-    amountOut: "300 USDT",
-    vendor: "Kraken",
-    vendorRate: "1465.5",
-    xiibakaRate: "1468.5",
-    margin: "1.0",
-    assignedRep: "Isabella Moore",
-    status: "completed",
-    dateCreated: "2025-03-17",
-    createdAt: "2025-03-19",
-  },
-];
+export type CryptoTransactionPayload = {
+  service_type: "crypto";
+  customer_id: string;
+  amount_in: number;
+  vendor?: string;
+  customer_account?: string;
+  xbanka_account?: string;
+  crypto_pair?: string;
+  vendor_rate: number;
+  xbanka_rate: number;
+  affiliate_source?: string;
+};
+
+export type GiftCardTransactionPayload = {
+  service_type: "gift_card";
+  customer_id: string;
+  amount_in: number;
+  vendor?: string;
+  customer_account?: string;
+  gift_card_type?: string;
+  gift_card_code?: string;
+  currency?: string;
+  quantity?: string;
+  vendor_rate: number;
+  xbanka_rate: number;
+  affiliate_source?: string;
+};
+
+export type CreateTransactionPayload =
+  | CryptoTransactionPayload
+  | GiftCardTransactionPayload;
+
