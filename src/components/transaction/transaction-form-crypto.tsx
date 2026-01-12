@@ -50,17 +50,19 @@ export function CryptoTransactionForm({
 
     mutate(payload, {
       onSuccess: (response) => {
-        const transactionId = response?.data.id;
-        attachments.forEach(({ file }) => {
-          const formData = new FormData();
-          formData.append("file", file);
-          formData.append("transaction_id", transactionId);
+        console.log("response",response);
+        const transactionId = response?.data?.transaction?.id;
+        if (!transactionId) {
+          toast.error("Transaction ID missing from response");
+          console.log("Transaction ID missing from response");
+          return;
+        }
+        console.log(transactionId);
 
-          attachments.forEach(({ file }) => {
-            uploadAttachment({
-              transactionId,
-              file,
-            });
+        attachments.forEach(({ file }) => {
+          uploadAttachment({
+            transactionId,
+            file,
           });
         });
 
