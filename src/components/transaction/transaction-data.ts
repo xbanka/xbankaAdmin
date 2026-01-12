@@ -26,3 +26,36 @@ export interface TransactionRecord {
     phone_no: string;
   };
 }
+
+export type CryptoTransactionPayload = {
+  service_type: "crypto";
+  customer_id: string;
+  amount_in: number;
+  vendor?: string;
+  customer_account?: string;
+  xbanka_account?: string;
+  crypto_pair?: string;
+  vendor_rate: number;
+  xbanka_rate: number;
+  affiliate_source?: string;
+};
+
+export type GiftCardTransactionPayload = {
+  service_type: "gift_card";
+  customer_id: string;
+  amount_in: number;
+  vendor?: string;
+  customer_account?: string;
+  gift_card_type?: string;
+  gift_card_code?: string;
+  currency?: string;
+  quantity?: string;
+  vendor_rate: number;
+  xbanka_rate: number;
+  affiliate_source?: string;
+};
+
+export type CreateTransactionPayload =
+  | CryptoTransactionPayload
+  | GiftCardTransactionPayload;
+

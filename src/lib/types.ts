@@ -1,3 +1,5 @@
+import { TransactionRecord } from "@/components/transaction/transaction-data";
+
 type Priority = "low" | "medium" | "high";
 
 interface Assignee {
@@ -80,4 +82,16 @@ export interface FilterTabsProps {
   value: string;
   onChange: (value: string) => void;
   className?: string;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  total?: number;
+  page?: number;
+  pages?: number;
+  limit?: number;
+}
+
+export interface TransactionsApiResponse {
+  data: PaginatedResponse<TransactionRecord>;
 }

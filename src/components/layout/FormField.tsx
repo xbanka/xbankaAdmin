@@ -16,6 +16,7 @@ interface FormFieldProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   error?: FieldError | FieldErrors | undefined;
   readOnly?: boolean;
+  inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
 }
 
 const FormField = ({
@@ -26,6 +27,7 @@ const FormField = ({
   readOnly,
   icon: Icon,
   register,
+  inputProps,
   error,
 }: FormFieldProps) => {
   return (
@@ -44,6 +46,7 @@ const FormField = ({
           } border-gray-200 focus:border-[var(--abstractCyan)]`}
           readOnly={readOnly}
           {...register(id)}
+          {...inputProps}
         />
       </div>
       {/* {error && <p className="text-[10px] text-mainRed">{error.message}</p>} */}
