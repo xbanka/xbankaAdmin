@@ -12,12 +12,12 @@ export const customerBaseSchema = z.object({
   assignedRep: z.string(), // ✅ REQUIRED HERE
 });
 
-export const transactionSchema = z.object({
-  customer: customerBaseSchema.partial().optional(), // ✅ relaxed
-  serviceType: z.enum(["crypto", "gift-card", "bill-payments"]).optional(),
- details: z
-    .object({
-      /* ---- CRYPTO FIELDS ---- */
+export const transactionSchema = z
+  .object({
+    customer: customerBaseSchema.partial().optional(), // ✅ relaxed
+    serviceType: z.enum(["crypto", "gift-card", "bill-payments"]).optional(),
+    details: z.object({
+      /* ---- CRYPTO ---- */
       transactionType: z.string().optional(),
       customerAmount: z.string().optional(),
       vendor: z.string().optional(),
@@ -29,20 +29,65 @@ export const transactionSchema = z.object({
       xbankaAccount: z.string().optional(),
       paymentDate: z.string().optional(),
 
-      /* ---- GIFT CARD FIELDS ---- */
+      /* ---- GIFT CARD ---- */
       cardType: z.string().optional(),
       cardFaceValue: z.string().optional(),
       currency: z.string().optional(),
       quantity: z.string().optional(),
       giftCardCode: z.string().optional(),
+    }),
+  })
+  .superRefine((data, ctx) => {
+    if (data.serviceType === "crypto") {
+      const requiredCryptoFields = [
+        "transactionType",
+        "customerAmount",
+        "vendor",
+        "vendorRate",
+        "xbankaRate",
+        "expectedPayout",
+        "customerAccountWallet",
+        "xbankaAccount",
+        "paymentDate",
+      ] as const;
 
-      /* ---- BILL PAYMENT (later) ---- */
-      // biller: z.string().optional(),
-      // reference: z.string().optional(),
-    })
-    .optional(),
-});
+      requiredCryptoFields.forEach((field) => {
+        if (!data.details?.[field]) {
+          ctx.addIssue({
+            path: ["details", field],
+            message: "This field is required",
+            code: z.ZodIssueCode.custom,
+          });
+        }
+      });
+    }
 
+    if (data.serviceType === "gift-card") {
+      const requiredGiftCardFields = [
+        "cardType",
+        "cardFaceValue",
+        "currency",
+        "quantity",
+        "giftCardCode",
+        "vendor",
+        "vendorRate",
+        "xbankaRate",
+        "expectedPayout",
+        "customerAccountWallet",
+        "paymentDate",
+      ] as const;
+
+      requiredGiftCardFields.forEach((field) => {
+        if (!data.details?.[field]) {
+          ctx.addIssue({
+            path: ["details", field],
+            message: "This field is required",
+            code: z.ZodIssueCode.custom,
+          });
+        }
+      });
+    }
+  });
 
 export type TransactionFormValues = z.infer<typeof transactionSchema>;
 

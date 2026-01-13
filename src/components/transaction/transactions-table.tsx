@@ -11,6 +11,7 @@ import { TransactionsTableProps } from "@/lib/types/transactionTypes";
 import { CustomerInfoPopup } from "./customer-info-popup";
 import { useTransactions } from "@/lib/services/transaction.service";
 import Header from "../ui/Header";
+import { SERVICE_TYPE_FILTER_MAP } from "@/lib/enum/transaction.enum";
 
 export function TransactionsTable({
   onNewTransaction,
@@ -21,11 +22,14 @@ export function TransactionsTable({
   const [selectedCustomer, setSelectedCustomer] =
     useState<TransactionRecord | null>(null);
   const [page, setPage] = useState(1);
-  
+
   const [popupPosition, setPopupPosition] = useState<{
     top: number;
     left: number;
   }>({ top: 0, left: 0 });
+
+  const normalizedFilter = activeFilter.toLowerCase();
+  const apiServiceType = SERVICE_TYPE_FILTER_MAP[normalizedFilter];
 
   const handleCustomerClick = (
     item: TransactionRecord,
@@ -50,19 +54,17 @@ export function TransactionsTable({
   const transactions = (transactionData as any)?.data?.data ?? [];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const transactionsBody = (transactionData as any)?.data;
-  // const filteredData = transactions.filter((item: TransactionRecord) => {
-  //   const matchesSearch =
-  //     item?.customer.first_name
-  //       ?.toLowerCase()
-  //       .includes(searchQuery.toLowerCase()) ||
-  //     item?.id?.toLowerCase().includes(searchQuery.toLowerCase());
+  const filteredData = transactions.filter((item: TransactionRecord) => {
+    const matchesSearch =
+      item?.customer.first_name
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      item?.id?.toLowerCase().includes(searchQuery.toLowerCase());
 
-  //   const matchesType =
-  //     activeFilter === "all" ||
-  //     item?.service_type?.toLowerCase() === activeFilter.toLowerCase();
+    const matchesType = !apiServiceType || item.service_type === apiServiceType;
 
-  //   return matchesSearch && matchesType;
-  // });
+    return matchesSearch && matchesType;
+  });
 
   const columns = [
     {
@@ -98,7 +100,7 @@ export function TransactionsTable({
       header: "Service Type",
     },
     {
-      key: "transactionType",
+      key: "transaction_type",
       header: "Transaction Type",
     },
     {
@@ -192,7 +194,7 @@ export function TransactionsTable({
       </div>
       <div className="lg:max-w-[1060px] xl:min-w-full min-h-screen">
         <DataTableLayout
-          data={transactions}
+          data={filteredData}
           columns={columns}
           rowKey={(item) => item.id}
           isError={isError}
