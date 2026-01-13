@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import { PasswordFieldProps } from "@/lib/component-types/PasswordField";
+import { PasswordFieldProps } from "@/lib/types/PasswordField";
 
 const PasswordField = ({
   id,

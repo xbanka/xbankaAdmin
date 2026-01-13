@@ -29,6 +29,8 @@ export function GiftCardTransactionForm({
   const { mutate: uploadAttachment } = useUploadTransactionAttachment();
 
   const [attachments, setAttachments] = useState<AttachmentFile[]>([]);
+  const hasAttachments = attachments.length > 0;
+  
   const {
     register,
     setValue,
@@ -45,7 +47,10 @@ export function GiftCardTransactionForm({
   }
 
   const onSubmit = (data: TransactionFormValues) => {
-    console.log("clicked", data);
+    if (attachments.length === 0) {
+    toast.error("Please upload at least one file");
+    return;
+  }
     const payload = mapTransactionToApiPayload(data);
 
     mutate(payload, {
@@ -53,10 +58,8 @@ export function GiftCardTransactionForm({
         const transactionId = response?.data?.transaction?.id;
         if (!transactionId) {
           toast.error("Transaction ID missing from response");
-          console.log("Transaction ID missing from response");
           return;
         }
-        console.log(transactionId)
 
         attachments.forEach(({ file }) => {
           uploadAttachment({
@@ -242,10 +245,15 @@ export function GiftCardTransactionForm({
       <div>
         <Label>Attachments</Label>
         <AttachmentUpload value={attachments} onChange={setAttachments} />
+        {/* {!hasAttachments && (
+          <p className="text-[10px] text-mainRed mt-1">
+            At least one attachment is required
+          </p>
+        )} */}
       </div>
 
       {/* Submit Button */}
-      <Button type="submit" className="w-full">
+      <Button type="submit" className="w-full" disabled={!hasAttachments}>
         Submit for Verification
       </Button>
     </form>
