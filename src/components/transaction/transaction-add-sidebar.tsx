@@ -90,7 +90,7 @@ export function TransactionAddSidebar({
                   placeholder="Select type"
                   value={serviceType}
                   onChange={(value) => {
-                    setValue("serviceType", value as TransactionType); // ✅ CHANGE
+                    setValue("serviceType", value as TransactionType);
                   }}
                 />
               </div>
