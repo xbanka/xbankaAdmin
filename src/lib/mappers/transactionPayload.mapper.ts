@@ -34,9 +34,6 @@ export function mapTransactionToApiPayload(data: TransactionFormValues): CreateT
       crypto_pair: details.transactionType,
       vendor_rate: Number(details.vendorRate),
       xbanka_rate: Number(details.xbankaRate),
-      ...(customer.affiliateAttribution && {
-        affiliate_source: customer.affiliateAttribution,
-      }),
     };
     return payload;
   }
@@ -57,10 +54,6 @@ export function mapTransactionToApiPayload(data: TransactionFormValues): CreateT
 
       vendor_rate: Number(details.vendorRate),
       xbanka_rate: Number(details.xbankaRate),
-
-      ...(customer.affiliateAttribution && {
-        affiliate_source: customer.affiliateAttribution,
-      }),
     };
 
     return payload;

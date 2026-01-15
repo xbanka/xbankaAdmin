@@ -70,12 +70,9 @@ export function TransactionsTable({
     {
       key: "id",
       header: "Transaction ID",
-      width: "15%", // ✅ percentage
+      width: "15%",
       render: (item: TransactionRecord) => (
-        <span
-          className="block truncate max-w-full whitespace-nowrap"
-          title={item.id}
-        >
+        <span className="block truncate max-w-full" title={item.id}>
           {item.id}
         </span>
       ),

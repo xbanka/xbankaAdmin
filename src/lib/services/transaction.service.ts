@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { handleApiError } from "../errors/handleApiError";
 import { createTransactionAction, getAllTransactionsAction, getTransactionByIdAction, uploadTransactionAttachmentAction } from "../actions/transactions";
 import { toast } from "sonner";
@@ -34,10 +34,20 @@ export const useTransaction = (transactionId: string) => {
 };
 
 export const useCreateTransaction = () => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (payload: CreateTransactionPayload) => createTransactionAction(payload),
     onSuccess: () => {
       toast.success("Transaction created successfully");
+      // ✅ Invalidate transactions list (all pages & limits)
+      queryClient.invalidateQueries({
+        queryKey: ["transactions"],
+      });
+
+      // ✅ Invalidate individual transaction queries
+      queryClient.invalidateQueries({
+        queryKey: ["transaction"],
+      });
     },
     onError: (err) => {
       handleApiError(err);
