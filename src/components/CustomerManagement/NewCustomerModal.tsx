@@ -35,6 +35,7 @@ const NewCustomerModal = ({ isOpen, onClose }: NewCustomerModalProps) => {
         email: values.email,
         phone_no: values.phoneNumber,
         note: values.note,
+        affiliate_username: values.username,
       },
       {
         onSuccess: () => {
@@ -105,6 +106,14 @@ const NewCustomerModal = ({ isOpen, onClose }: NewCustomerModalProps) => {
             error={errors.phoneNumber}
           />
         </div>
+        <FormField
+            id="username"
+            label="Affiliate Username"
+            icon={User}
+            placeholder="Affiliate username"
+            register={register}
+            error={errors.username}
+          />
       </form>
     </DialogLayout>
   );

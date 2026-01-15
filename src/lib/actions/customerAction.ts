@@ -31,6 +31,7 @@ export const createCustomer = async (payload: {
   email: string;
   phone_no: string;
   note?: string;
+  affiliate_username?: string
 }) => {
   try {
     const response = await AxiosInstance.post(
