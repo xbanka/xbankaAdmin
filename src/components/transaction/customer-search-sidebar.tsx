@@ -73,7 +73,6 @@ export function CustomerSearchSidebar({
         name: customer.first_name,
         email: customer.email,
         phone: customer.phone_no,
-        affiliateAttribution: customer.affiliateAttribution ?? "",
         assignedRep, // ✅ injected automatically
       },
       { shouldValidate: true }
@@ -95,7 +94,7 @@ export function CustomerSearchSidebar({
       phone: fullCustomer.phone_no,
 
       username: fullCustomer.username,
-      affiliate: fullCustomer.affiliateAttribution,
+      affiliate: fullCustomer?.affiliate?.username,
       totalTransactions: fullCustomer.total_transactions,
       joinedAt: fullCustomer.created_at,
     };
@@ -103,7 +102,7 @@ export function CustomerSearchSidebar({
       "customer",
       {
         id: fullCustomer.id,
-        affiliateAttribution: fullCustomer.affiliateAttribution ?? "",
+        affiliateAttribution: fullCustomer?.affiliate?.username ?? "",
         assignedRep,
       },
       { shouldValidate: true }
@@ -245,6 +244,7 @@ export function CustomerSearchSidebar({
                     label="Affiliate Attribution"
                     id="customer.affiliateAttribution"
                     register={register}
+                    readOnly
                     // error={errors.root?.message}
                   />
                   <FormField
