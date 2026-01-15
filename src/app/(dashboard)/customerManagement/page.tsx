@@ -10,15 +10,16 @@ import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import NewCustomerModal from "@/components/CustomerManagement/NewCustomerModal";
 import Header from "@/components/ui/Header";
 import { Upload } from "lucide-react";
+import { CustomerProps } from "@/lib/types/customer";
 
 export default function CustomerManagement() {
   const [openModal, setOpenModal] = useState(false);
   const [search, setSearch] = useState("");
-    const [page, setPage] = useState(1);
-  
+  const [page, setPage] = useState(1);
+
   const { data, isLoading, isError, error } = useGetCustomer(search);
 
-  const customers: Customer[] = data?.data ?? [];
+  const customers: CustomerProps[] = data?.data ?? [];
 
   const handleClose = () => {
     setOpenModal(false);
@@ -29,6 +30,16 @@ export default function CustomerManagement() {
     { key: "last_name", header: "Last Name" },
     { key: "email", header: "Email" },
     { key: "phone_no", header: "Phone Number" },
+    {
+      key: "affiliate",
+      header: "Affiliate",
+      render: (item: CustomerProps) =>
+        item.affiliate?.username ? (
+          <span className="font-medium">{item.affiliate.username}</span>
+        ) : (
+          <span className="text-gray-400">—</span>
+        ),
+    },
   ];
 
   return (
@@ -52,11 +63,16 @@ export default function CustomerManagement() {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-          <Button className="w-full lg:w-[161px]" onClick={() => setOpenModal(true)}>+ Add Customer</Button>
+          <Button
+            className="w-full lg:w-[161px]"
+            onClick={() => setOpenModal(true)}
+          >
+            + Add Customer
+          </Button>
         </div>
 
         {/* Table */}
-        <DataTableLayout<Customer>
+        <DataTableLayout<CustomerProps>
           data={customers}
           columns={columns}
           rowKey={(item) => item.id}
