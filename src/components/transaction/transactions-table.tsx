@@ -68,12 +68,12 @@ export function TransactionsTable({
 
   const columns = [
     {
-      key: "id",
+      key: "txn_id",
       header: "Transaction ID",
       width: "15%",
       render: (item: TransactionRecord) => (
-        <span className="block truncate max-w-full" title={item.id}>
-          {item.id}
+        <span className="block truncate max-w-full" title={item.txn_id}>
+          {item.txn_id}
         </span>
       ),
     },
