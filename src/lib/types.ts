@@ -73,6 +73,16 @@ export interface PayoutData {
   };
 }
 
+export interface PayoutDetailsSidebarProps {
+  isOpen: boolean;
+  onClose: () => void;
+  payout: PayoutData;
+  onDecline: () => void;
+  onProcess: () => void;
+  loading: boolean;
+  error: string;
+}
+
 export interface HeaderProps{
     text: string
 }

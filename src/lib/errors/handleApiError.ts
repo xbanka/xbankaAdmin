@@ -8,5 +8,5 @@ export function handleApiError(error: unknown): ApiError {
     duration: 3000,
   });
 
-  return err;
+  throw err;
 }

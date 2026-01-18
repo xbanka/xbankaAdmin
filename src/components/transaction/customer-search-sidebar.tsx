@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import SidebarHeader from "../Sidebar/sidebar-header";
 import TransactionCustomerDetailsField from "./transaction-customer-details-field";
-import { useGetCustomer } from "@/lib/services/CustomerService";
+import { useGetCustomer } from "@/lib/services/customer.service";
 import { useFormContext } from "react-hook-form";
 import FormField from "../layout/FormField";
 import { ActiveCustomer, Customer } from "../../lib/types/transactionTypes";
