@@ -5,17 +5,7 @@ import { X } from "lucide-react";
 import CustomDetailsName from "./CustomDetailsName";
 import FinanceDetailsHeader from "../layout/Finance/FinanceDetailsHeader";
 import LoaderSpinner from "../ui/loaderSpinner";
-import { PayoutData } from "@/lib/types";
-
-interface PayoutDetailsSidebarProps {
-  isOpen: boolean;
-  onClose: () => void;
-  payout: PayoutData;
-  onDecline: () => void;
-  onProcess: () => void;
-  loading: boolean;
-  error: string;
-}
+import { PayoutDetailsSidebarProps } from "@/lib/types";
 
 export function PayoutDetailsSidebar({
   isOpen,

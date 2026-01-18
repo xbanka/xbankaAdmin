@@ -12,7 +12,7 @@ export const useTransactions = (page = 1, limit = 10) => {
         const response = await getAllTransactionsAction({ page, limit })
         return response
       }catch(err){
-        return handleApiError(err)
+        handleApiError(err)
       }
     },
   });
@@ -26,7 +26,7 @@ export const useTransaction = (transactionId: string) => {
         const response = await getTransactionByIdAction(transactionId)
         return response
       }catch(err){
-        return handleApiError(err)
+        handleApiError(err)
       }
     },
     enabled: !!transactionId,

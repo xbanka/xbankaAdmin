@@ -1,8 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Customer } from "@/lib/types/transactionTypes";
-import { useGetCustomer } from "@/lib/services/CustomerService";
+import { useGetCustomer } from "@/lib/services/customer.service";
 import { Input } from "@/components/ui/input";
 import { DataTableLayout } from "@/components/DataTableLayout/DataTableLayout";
 import { useState } from "react";
@@ -79,7 +78,7 @@ export default function CustomerManagement() {
           isLoading={isLoading}
           isError={isError}
           errorMessage={error?.message ?? "Failed to load customers"}
-          // totalCount={data?.data.total}
+          // totalCount={customerBody.total}
           currentPage={page}
           onPageChange={setPage}
           emptyMessage="No customers found."

@@ -2,11 +2,19 @@
 import { getIndividualPayout, processPayout, rejectPayout } from "@/lib/actions/payout";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { handleApiError } from "../errors/handleApiError";
 
 export const useIndividualPayout = (payoutId: string | null) => {
   return useQuery({
    queryKey: ["individualPayout", payoutId],
-    queryFn: ({ queryKey }) => getIndividualPayout(queryKey[1]!),
+    queryFn: async({ queryKey }) => {
+      try{
+        const response = await getIndividualPayout(queryKey[1]!)
+        return response
+      }catch(error){
+        handleApiError(error)
+      }
+    },
     enabled: !!payoutId,
   });
 };
@@ -29,7 +37,7 @@ export const useProcessPayout = () => {
     },
 
     onError: (error) => {
-      toast.error(error.message);
+      handleApiError(error)
     },
   });
 };
@@ -48,7 +56,7 @@ export const useRejectPayout = () => {
       toast.success("Payout rejected successfully");
     },
     onError: (error) => {
-      toast.error(error.message);
+      handleApiError(error)
     },
   });
 }

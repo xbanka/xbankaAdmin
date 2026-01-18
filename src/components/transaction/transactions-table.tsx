@@ -50,10 +50,8 @@ export function TransactionsTable({
     error,
   } = useTransactions(page, 10);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const transactions = (transactionData as any)?.data?.data ?? [];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const transactionsBody = (transactionData as any)?.data;
+  const transactions = transactionData?.data?.data ?? [];
+  const transactionsBody = transactionData?.data;
   const filteredData = transactions.filter((item: TransactionRecord) => {
     const matchesSearch =
       item?.customer.first_name

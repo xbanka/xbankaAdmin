@@ -2,7 +2,7 @@ import { Mail, Phone, User } from "lucide-react";
 import FormField from "../layout/FormField";
 import { DialogLayout } from "../layout/modalLayout";
 import { Button } from "../ui/button";
-import { useCreateCustomer } from "@/lib/services/CustomerService";
+import { useCreateCustomer } from "@/lib/services/customer.service";
 import { useForm } from "react-hook-form";
 import {
   NewCustomerFormValues,

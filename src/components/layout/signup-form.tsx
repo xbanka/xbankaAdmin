@@ -10,7 +10,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Mail, Lock, User } from "lucide-react";
 import FormField from "./FormField";
 import PasswordField from "../ui/PasswordField";
-import { useSignup } from "@/lib/services/SignupService";
+import { useSignup } from "@/lib/services/signup.service";
 import Image from "next/image";
 import { useState } from "react";
 
