@@ -65,7 +65,6 @@ export function CustomerSearchSidebar({
     const assignedRep = user ? `${user.first_name} ${user.last_name}` : "";
 
     if (!fullCustomer) return;
-    console.log(fullCustomer)
 
     const selectedCustomer = {
       id: fullCustomer.id,
@@ -102,7 +101,6 @@ export function CustomerSearchSidebar({
 
   const onSubmit = (data: TransactionFormValues) => {
     if (!activeCustomer) return;
-    console.log("active custoner", activeCustomer)
     onCustomerSelect(activeCustomer);
   };
 

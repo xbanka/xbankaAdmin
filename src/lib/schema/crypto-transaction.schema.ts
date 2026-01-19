@@ -9,7 +9,7 @@ export const cryptoTransactionSchema = z.object({
 
     transactionType: z.string().min(1, "Transaction type is required"),
 
-    customerAmount: z.string().min(1, "Customer amount is required"),
+    customerAmount: z.coerce.number().positive("Amount must be greater than 0"),
 
     vendor: z.string().min(1, "Vendor is required"),
 
