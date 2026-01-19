@@ -37,7 +37,6 @@ export function KanbanBoard({ columns, onItemClick }: KanbanBoardProps) {
   const [boardColumns] = useState(columns)
 
   const handleClick = (item: KanbanItem) => {
-    console.log("Kabnan item:", item)
     onItemClick?.(item)
   }
 

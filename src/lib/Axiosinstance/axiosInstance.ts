@@ -75,7 +75,6 @@ AxiosInstance.interceptors.response.use(
           {},
           { withCredentials: true }
         ); // backend uses cookie
-        console.log(refreshResponse);
 
         const newAccessToken = refreshResponse.data?.access_token;
         if (newAccessToken) {

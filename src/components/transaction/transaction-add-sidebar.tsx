@@ -31,6 +31,7 @@ export function TransactionAddSidebar({
   const serviceType = watch("serviceType");
 
   if (!isOpen || !customer) return null;
+  console.log(customer)
 
   return (
     <div className="fixed inset-0 z-50 flex">

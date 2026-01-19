@@ -60,7 +60,6 @@ export function CryptoTransactionForm({
           toast.error("Transaction ID missing from response");
           return;
         }
-        console.log(transactionId);
 
         attachments.forEach(({ file }) => {
           uploadAttachment({

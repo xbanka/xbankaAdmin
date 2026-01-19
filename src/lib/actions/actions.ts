@@ -51,7 +51,6 @@ export const logoutAction = async () => {
     {},
     { withCredentials: true }
   );
-  console.log(response);
   return {
     success: true,
     data: response.data, // ✅ only return actual payload

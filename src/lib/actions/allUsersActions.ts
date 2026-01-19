@@ -4,7 +4,6 @@ import AxiosInstance from "../Axiosinstance/axiosInstance";
 export const getAllUsers = async () => {
   try {
     const response = await AxiosInstance.get("/xbankastaff/allUsers", { withCredentials: true });
-    console.log(response)
     return {
       success: true,
       data: response.data, // ✅ only return actual payload
