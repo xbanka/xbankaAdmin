@@ -9,7 +9,6 @@ export const useSignup = () => {
   const mutate = useMutation({
     mutationFn: (data: SignupFormData) => signupAction(data),
     onSuccess: (result) => {
-        console.log("signup", result.data)
         toast.success(result.data.message)
     },
     onError: (err) => {

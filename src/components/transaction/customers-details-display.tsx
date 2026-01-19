@@ -1,6 +1,6 @@
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { ActiveCustomer, Customer } from "../../lib/types/transactionTypes";
-import FinanceDetailsHeader from "../layout/Finance/FinanceDetailsHeader";
+
+import { formatDate } from "@/lib/formatDate";
+import { ActiveCustomer } from "../../lib/types/transactionTypes";
 import CustomDetailsName from "../finance/CustomDetailsName";
 
 interface CustomerDetailsDisplayProps {
@@ -19,19 +19,19 @@ export function CustomerDetailsDisplay({
       <div className="space-y-[8px]">
         <div className="grid grid-cols-3 gap-4 bg-white rounded-[8px] p-3">
           <CustomDetailsName title="Name" body={customer.name} />
-          <CustomDetailsName title="Username" body={customer.name} />
+          <CustomDetailsName title="Username" body={customer.username ? customer.username : "-"} />
           <CustomDetailsName title="Email" body={customer.email} />
           <CustomDetailsName
             title="Total Transactions"
-            body={`₦${customer.phone}%`}
+            body={`${customer.totalTransactions ? customer.totalTransactions : "-"}`}
           />
           <CustomDetailsName
             title="Affiliate"
-            body={customer.phone}
+            body={customer.affiliate ? customer.affiliate : "-"}
           />
           <CustomDetailsName
             title="Joined"
-            body={customer.phone}
+            body={formatDate(customer.joinedAt)}
           />
         </div>
       </div>

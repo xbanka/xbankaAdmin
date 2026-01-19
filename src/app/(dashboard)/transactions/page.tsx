@@ -10,6 +10,7 @@ import {
 } from "@/components/transaction/transaction-data";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { TransactionFormProvider } from "@/components/transaction/transaction-form-provider";
+import { CustomerTransactionsSidebar } from "@/components/transaction/customer-transactions-sidebar";
 
 export default function Home() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);

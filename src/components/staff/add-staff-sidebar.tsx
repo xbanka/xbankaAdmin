@@ -55,7 +55,6 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handlePermissionsSubmit = (data: any) => {
     setStaffData({ ...staffData, ...data })
-    console.log("Staff created with full permissions:", { ...staffData, ...data })
     onClose()
   }
 
