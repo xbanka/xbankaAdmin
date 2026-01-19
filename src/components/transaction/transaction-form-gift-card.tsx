@@ -78,7 +78,6 @@ export function GiftCardTransactionForm({
 
   useEffect(() => {
     const margin = calculateMargin(xbankasRate, vendorRate);
-    console.log("details.margin:", margin);
     setValue("details.margin", margin?.toString() ?? "", {
       shouldValidate: true,
       shouldDirty: true,

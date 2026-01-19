@@ -3,7 +3,6 @@ import AxiosInstance from "../Axiosinstance/axiosInstance";
 export const getNotifications = async () => {
   try {
     const response = await AxiosInstance.get(`/api/erp/notifications`);
-    console.log(response.data)
     return {
       success: true,
       data: response.data, // ✅ only return actual payload

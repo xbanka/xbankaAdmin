@@ -19,7 +19,7 @@ import {
   useIndividualPayout,
   useProcessPayout,
   useRejectPayout,
-} from "@/lib/services/usePayout";
+} from "@/lib/services/payout.service";
 import { usePayoutSidebarStore } from "@/store/usePayoutSidebarStore";
 import { useState } from "react";
 

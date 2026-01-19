@@ -14,20 +14,16 @@ import {
   Home,
   Users,
   CreditCard,
-  HelpCircle,
   Banknote,
   LogOutIcon,
+  Settings,
 } from "lucide-react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Button } from "./ui/button";
 import { DialogLayout } from "./layout/modalLayout";
-import { useUserStore } from "@/store/userStore";
-import { useRouter } from "next/navigation";
-import { useMutation } from "@tanstack/react-query";
-import { logoutAction } from "@/lib/actions/actions";
-import { toast } from "sonner";
+import { useLogout } from "@/lib/services/logout.service";
 // import { rolePermissions } from "@/lib/rolePermissions";
 
 // This is sample data.
@@ -54,54 +50,22 @@ const data = {
       url: "/finance",
       icon: Banknote,
     },
+    // {
+    //   title: "Support Center",
+    //   url: "/support",
+    //   icon: HelpCircle,
+    // },
     {
-      title: "Support Center",
-      url: "/support",
-      icon: HelpCircle,
+      title: "Staff",
+      url: "/staff",
+      icon: Settings,
     },
-    // {
-    //   title: "Refunds & Disputes",
-    //   url: "/refunds",
-    //   icon: AlertTriangle,
-    // },
-    // {
-    //   title: "Content Pipeline",
-    //   url: "/content",
-    //   icon: FileText,
-    // },
-    // {
-    //   title: "Knowledge Base",
-    //   url: "/knowledge",
-    //   icon: BookOpen,
-    // },
-    // {
-    //   title: "Tasks & Workflow",
-    //   url: "/tasks",
-    //   icon: CheckSquare,
-    // },
-    // {
-    //   title: "Audit & Performance",
-    //   url: "/audit",
-    //   icon: BarChart3,
-    // },
-    // {
-    //   title: "Inventory & Assets",
-    //   url: "/inventory",
-    //   icon: Package,
-    // },
-    // {
-    //   title: "Admin Panel",
-    //   url: "/admin",
-    //   icon: Settings,
-    // },
   ],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [open, setOpen] = React.useState(false);
   const pathname = usePathname();
-  const clearUser = useUserStore((s) => s.clearUser);
-  const router = useRouter();
   // const user = useUserStore((s) => s.user);
 
   // const allowedRoutes: string[] =
@@ -109,22 +73,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   //   ? [...rolePermissions[user.role as keyof typeof rolePermissions]]
   //   : [];
 
-  const { mutate, isPending } = useMutation({
-    mutationFn: () => logoutAction(),
-    onSuccess: (result) => {
-      clearUser();
-      localStorage.removeItem("accessToken");
-      router.push("/signin");
-      toast.success(result.data.message);
-      setOpen(false);
-    },
-    onError: (err) => {
-      toast.error(err.message);
-    },
-  });
+  const { mutate, isPending } = useLogout();
 
   const handleLogout = () => {
-    mutate();
+    mutate(undefined, {
+      onSuccess: () => {
+        setOpen(false);
+      },
+    });
   };
 
   return (
@@ -191,12 +147,23 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <>
               {/* Cancel just closes the dialog */}
               <DialogLayout.Close asChild>
-                <Button onClick={() => setOpen(false)} className="flex-1" variant="outline">Cancel</Button>
+                <Button
+                  onClick={() => setOpen(false)}
+                  className="flex-1"
+                  variant="outline"
+                >
+                  Cancel
+                </Button>
               </DialogLayout.Close>
 
               {/* Logout button calls handler */}
-              <Button className="flex-1" disabled={isPending} variant="destructive" onClick={handleLogout}>
-                { isPending ? "Logging out..." : "Logout"}
+              <Button
+                className="flex-1"
+                disabled={isPending}
+                variant="destructive"
+                onClick={handleLogout}
+              >
+                {isPending ? "Logging out..." : "Logout"}
               </Button>
             </>
           }

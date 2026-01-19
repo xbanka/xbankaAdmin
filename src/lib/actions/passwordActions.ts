@@ -38,7 +38,6 @@ export const passwordResetErp = async (data : passwordResetErpProps) => {
         new_password: data.password,
         confirm_password: data.confirm,
     });
-    console.log(response.data);
     return {
       success: true,
       data: response.data, // ✅ only return actual payload

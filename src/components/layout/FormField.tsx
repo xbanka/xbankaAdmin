@@ -17,6 +17,8 @@ interface FormFieldProps {
   error?: FieldError | FieldErrors | undefined;
   readOnly?: boolean;
   inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  value?: string;
 }
 
 const FormField = ({
@@ -29,6 +31,8 @@ const FormField = ({
   register,
   inputProps,
   error,
+  onChange,
+  value
 }: FormFieldProps) => {
   return (
     <div className="space-y-2 w-full">
@@ -45,7 +49,9 @@ const FormField = ({
             Icon ? "pl-10" : "px-3"
           } border-gray-200 focus:border-[var(--abstractCyan)]`}
           readOnly={readOnly}
-          {...register(id)}
+          onChange={onChange}
+          value={value}
+          {...(register ? register(id) : {})}
           {...inputProps}
         />
       </div>

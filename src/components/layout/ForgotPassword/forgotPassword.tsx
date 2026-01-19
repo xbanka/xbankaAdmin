@@ -43,7 +43,6 @@ const ForgotPassword = () => {
       toast.success(result.data.message);
     },
     onError: (err) => {
-      console.log("Signup failed:", err);
       toast.error(err.message);
     },
   });

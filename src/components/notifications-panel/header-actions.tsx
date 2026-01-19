@@ -9,25 +9,17 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { NotificationsPanel } from "./notifications-panel";
-import { useQuery } from "@tanstack/react-query";
-import { User, useUserStore } from "@/store/userStore";
-import { getCurrentAffiliate } from "@/lib/actions/userAction";
+import { useUserStore } from "@/store/userStore";
 import { Skeleton } from "../ui/skeleton";
+import { useProfile } from "@/lib/services/profile.service";
 
 export function HeaderActions() {
   const [showNotifications, setShowNotifications] = useState(false);
   const notificationsRef = useRef<HTMLDivElement>(null);
 
   const setAffiliate = useUserStore((s) => s.setUser);
-    const user = useUserStore((state) => state.user);
-  const { data, isLoading } = useQuery<{
-    success: boolean;
-    data: User;
-    status: number;
-  }>({
-    queryKey: ["userProfile"],
-    queryFn: () => getCurrentAffiliate(),
-  });
+  const user = useUserStore((state) => state.user);
+  const { data, isLoading } = useProfile()
 
   useEffect(() => {
     if (data) {
@@ -89,9 +81,13 @@ export function HeaderActions() {
                 <AvatarFallback>JE</AvatarFallback>
               </Avatar>
               <div className="text-left">
-              <p className="text-sm font-medium leading-none">{user?.first_name} {user?.last_name}</p>
-              <p className="text-xs text-gray-500 leading-none">{data.data.role}</p>
-            </div>
+                <p className="text-sm font-medium leading-none">
+                  {user?.first_name} {user?.last_name}
+                </p>
+                <p className="text-xs text-gray-500 leading-none">
+                  {data.data.role}
+                </p>
+              </div>
               <ChevronDown className="w-4 h-4 text-gray-500" />
             </Button>
           </DropdownMenuTrigger>

@@ -3,21 +3,21 @@ export interface TransactionRecord {
 
   affiliate_source: string;
 
-  amount_in: string;        // "2000.00"
-  amount_out: string;       // "40000.00"
+  amount_in: string; // "2000.00"
+  amount_out: string; // "40000.00"
 
-  currency_in: string;      // "Dollar (USD)"
-  currency_out: string;     // "NGN"
+  currency_in: string; // "Dollar (USD)"
+  currency_out: string; // "NGN"
 
   attachment_url: string;
 
   service_type: "gift_card" | "crypto" | "bill_payments";
 
-  status: "pending" | "completed" | "failed";
+  status: string | "pending" | "completed" | "failed";
 
   vendor: string;
 
-  created_at: string;       // ISO date string
+  created_at: string; // ISO date string
 
   customer: {
     first_name: string;
@@ -25,6 +25,11 @@ export interface TransactionRecord {
     email: string;
     phone_no: string;
   };
+
+  txn_id: string;
+
+  vendor_rate: number;
+  xbanka_rate: number;
 }
 
 export type CryptoTransactionPayload = {
@@ -58,4 +63,3 @@ export type GiftCardTransactionPayload = {
 export type CreateTransactionPayload =
   | CryptoTransactionPayload
   | GiftCardTransactionPayload;
-
