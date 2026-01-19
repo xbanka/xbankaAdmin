@@ -8,7 +8,5 @@ export const calculateMargin = (
   if (Number.isNaN(xbanka) || Number.isNaN(vendor)) {
     return 0;
   }
-
-  console.log(Number((xbanka - vendor).toFixed(2)))
   return Number((xbanka - vendor).toFixed(2));
 };

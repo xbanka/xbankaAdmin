@@ -10,6 +10,7 @@ import {
 } from "@/components/transaction/transaction-data";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { TransactionFormProvider } from "@/components/transaction/transaction-form-provider";
+import { CustomerTransactionsSidebar } from "@/components/transaction/customer-transactions-sidebar";
 
 export default function Home() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -30,6 +31,11 @@ export default function Home() {
     setIsAddOpen(false);
     setSelectedCustomer(null);
   };
+
+  const handleCloseSearchSidebar = () => {
+    setIsSearchOpen(false)
+    setSelectedCustomer(null);
+  }
 
   const handleBackToSearch = () => {
     setIsAddOpen(false);
@@ -54,7 +60,7 @@ export default function Home() {
         {/* Customer Search Sidebar */}
         <CustomerSearchSidebar
           isOpen={isSearchOpen}
-          onClose={() => setIsSearchOpen(false)}
+          onClose={handleCloseSearchSidebar}
           onCustomerSelect={handleCustomerSelect}
         />
 

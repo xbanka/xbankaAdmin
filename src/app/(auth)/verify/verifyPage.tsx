@@ -16,7 +16,6 @@ const VerifyPage = ({ token }: { token?: string }) => {
 
   useEffect(() => {
     if (token) {
-        console.log("verify token", token)
       mutate(token);
     }
   }, [mutate, token]);

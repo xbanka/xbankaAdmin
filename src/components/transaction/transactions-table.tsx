@@ -50,10 +50,8 @@ export function TransactionsTable({
     error,
   } = useTransactions(page, 10);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const transactions = (transactionData as any)?.data?.data ?? [];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const transactionsBody = (transactionData as any)?.data;
+  const transactions = transactionData?.data?.data ?? [];
+  const transactionsBody = transactionData?.data;
   const filteredData = transactions.filter((item: TransactionRecord) => {
     const matchesSearch =
       item?.customer.first_name
@@ -68,12 +66,12 @@ export function TransactionsTable({
 
   const columns = [
     {
-      key: "id",
+      key: "txn_id",
       header: "Transaction ID",
       width: "15%",
       render: (item: TransactionRecord) => (
-        <span className="block truncate max-w-full" title={item.id}>
-          {item.id}
+        <span className="block truncate max-w-full" title={item.txn_id}>
+          {item.txn_id}
         </span>
       ),
     },

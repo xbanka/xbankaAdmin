@@ -19,3 +19,21 @@ export interface CustomerProps {
     created_at: string;
   };
 }
+
+export interface CustomerSearchSidebarProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onCustomerSelect: (customer: SelectedCustomer) => void;
+  isLoading?: boolean;
+}
+
+export interface SelectedCustomer {
+   affiliate: string;
+  email: string;
+  id: string;
+  joinedAt: string;
+  name: string;
+  phone: string;
+  totalTransactions: string;
+  username: string;
+}

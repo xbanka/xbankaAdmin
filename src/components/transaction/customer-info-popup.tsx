@@ -36,16 +36,16 @@ export function CustomerInfoPopup({
         </h1>
 
         <div className="font-[400] text-[14px] leading-[24px] text-[#4B5563] flex items-center gap-[14px]">
-          <h1>{customer.id}</h1>
+          <h1>{customer.txn_id}</h1>
           <span className="h-[6px] w-[6px] bg-[#4B5563] rounded-full"></span>
-          <p>{customer.status}</p>
+          <p>{customer.customer.email}</p>
         </div>
 
-        <div className="flex items-center">
+        <div className="flex items-center gap-[10px]">
           <span className="font-[400] text-[14px] leading-[24px] text-[#4B5563]">
             Referred by
           </span>{" "}
-          <span className="font-[400] text-[14px] leading-[24px] text-[#4B5563] gap-[5px]">{customer.status}</span>
+          <span className="font-[400] text-[14px] leading-[24px] text-[#4B5563] gap-[5px]">{customer.affiliate_source}</span>
         </div>
 
         {/* Transactions Summary */}

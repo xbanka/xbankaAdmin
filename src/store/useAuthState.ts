@@ -33,7 +33,6 @@ export const useAuthStore = create<AuthState>()(
       login: (token: string) => {
         try {
           const decoded = decodeAccessToken(token);
-          console.log("decoded", decoded)
           set({ user: decoded, accessToken: token });
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (err) {

@@ -6,34 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import SidebarHeader from "../Sidebar/sidebar-header";
 import TransactionCustomerDetailsField from "./transaction-customer-details-field";
-import { useGetCustomer } from "@/lib/services/CustomerService";
+import { useGetCustomer } from "@/lib/services/customer.service";
 import { useFormContext } from "react-hook-form";
 import FormField from "../layout/FormField";
 import { ActiveCustomer, Customer } from "../../lib/types/transactionTypes";
 import { TransactionFormValues } from "@/lib/schema/transaction.schema";
 import { useUserStore } from "@/store/userStore";
-
-interface CustomerSearchSidebarProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onCustomerSelect: (customer: ActiveCustomer) => void;
-  isLoading?: boolean;
-}
-
-// lib/types/selectedCustomer.ts
-export interface SelectedCustomer {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-
-  username?: string;
-  affiliate?: string;
-  totalTransactions?: number;
-  joinedAt?: string;
-
-  // anything else you know you will need later
-}
+import { CustomerSearchSidebarProps } from "@/lib/types/customer";
 
 export function CustomerSearchSidebar({
   isOpen,
@@ -87,7 +66,7 @@ export function CustomerSearchSidebar({
 
     if (!fullCustomer) return;
 
-    const selectedCustomer: SelectedCustomer = {
+    const selectedCustomer = {
       id: fullCustomer.id,
       name: `${fullCustomer.first_name} ${fullCustomer.last_name}`,
       email: fullCustomer.email,
@@ -121,9 +100,7 @@ export function CustomerSearchSidebar({
   }, [data]);
 
   const onSubmit = (data: TransactionFormValues) => {
-    console.log("customer data", data);
     if (!activeCustomer) return;
-
     onCustomerSelect(activeCustomer);
   };
 
