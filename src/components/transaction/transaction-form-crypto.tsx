@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Upload } from "lucide-react";
 import { SelectFieldLayout } from "../layout/SelectFieldLayout";
-import { useFormContext } from "react-hook-form";
+import { Controller, useController, useFormContext } from "react-hook-form";
 import FormField from "../layout/FormField";
 import { SearchSelectFieldLayout } from "../layout/SearchableSelectLayout";
 import { calculateMargin } from "@/lib/utils/calculateMargin";
@@ -18,6 +18,8 @@ import {
 import { ServiceType } from "@/lib/schema/service-type.schema";
 import { toast } from "sonner";
 import { AttachmentFile, AttachmentUpload } from "../ui/UploadAttachment";
+import { formatNumber, parseNumber } from "@/lib/utils/formatNumber";
+import { getTodayDate } from "@/lib/utils/todayDate";
 
 export function CryptoTransactionForm({
   handleClose,
@@ -36,11 +38,41 @@ export function CryptoTransactionForm({
     watch,
     handleSubmit,
     formState: { errors },
+    control,
   } = useFormContext<TransactionFormValues>();
+
+  const {
+    field: customerAmountField,
+    fieldState: { error },
+  } = useController({
+    name: "details.customerAmount",
+    control,
+  });
+
+  const rawValue = customerAmountField.value ?? "";
 
   function handleNumericInput(e: React.ChangeEvent<HTMLInputElement>) {
     // Allow only digits and optional dot (for decimals)
-    const value = e.target.value.replace(/[^0-9.]/g, "");
+    let value = e.target.value;
+
+    // Allow digits + one dot
+    value = value.replace(/[^0-9.]/g, "");
+
+    // Prevent multiple dots
+    const parts = value.split(".");
+    if (parts.length > 2) {
+      value = parts[0] + "." + parts.slice(1).join("");
+    }
+
+    // Limit decimals to 2
+    if (parts[1]?.length > 2) {
+      value = `${parts[0]}.${parts[1].slice(0, 2)}`;
+    }
+
+    // Limit total digits (excluding dot)
+    const digitsOnly = value.replace(".", "");
+    if (digitsOnly.length > 12) return;
+
     e.target.value = value;
   }
 
@@ -73,20 +105,60 @@ export function CryptoTransactionForm({
         handleClose();
       },
     });
-
   };
 
   const xbankasRate = watch("details.xbankaRate");
   const vendorRate = watch("details.vendorRate");
+  const transactionType = watch("details.transactionType");
+  const customerAmount = watch("details.customerAmount");
+  const today = getTodayDate();
+
+  useEffect(() => {
+    if (!transactionType || !customerAmount || !xbankasRate) {
+      setValue("details.expectedPayout", "");
+      return;
+    }
+
+    const amount = Number(customerAmount);
+    const rate = Number(parseNumber(xbankasRate));
+
+    if (isNaN(amount) || isNaN(rate) || rate === 0) return;
+
+    let payout: number;
+
+    switch (transactionType) {
+      case "USDT-NGN":
+        payout = amount * rate;
+        break;
+      case "NGN-USDT":
+        payout = amount / rate;
+        break;
+      default:
+        return;
+    }
+
+    setValue("details.expectedPayout", formatNumber(payout), {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+  }, [transactionType, customerAmount, xbankasRate, setValue]);
 
   useEffect(() => {
     const margin = calculateMargin(xbankasRate, vendorRate);
-    console.log("details.margin:", margin);
     setValue("details.margin", margin?.toString() ?? "", {
       shouldValidate: true,
       shouldDirty: true,
     });
   }, [xbankasRate, vendorRate, setValue]);
+
+  useEffect(() => {
+    setValue("details.paymentDate", today, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+  }, [setValue, today]);
+
+  const paymentDate = watch("details.paymentDate");
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
@@ -126,14 +198,30 @@ export function CryptoTransactionForm({
 
       {/* Customer Amount & Vendor */}
       <div className="grid grid-cols-2 gap-4">
-        <FormField
-          id="details.customerAmount"
-          label="Customer Amount"
-          placeholder="Enter customer amount"
-          register={register}
-          error={errors.details?.customerAmount}
-          inputProps={{
-            onInput: handleNumericInput,
+        <Controller
+          name="details.customerAmount"
+          control={control}
+          render={({ field }) => {
+            const displayValue =
+              typeof field.value === "number"
+                ? field.value.toLocaleString()
+                : "";
+            return (
+              <FormField
+                id="details.customerAmount"
+                label="Customer Amount"
+                placeholder="Enter customer amount"
+                type="text"
+                // register={register}
+                error={errors.details?.customerAmount}
+                value={displayValue}
+                onChange={(e) => {
+                  const raw = e.target.value.replace(/,/g, "");
+                  if (!/^\d*$/.test(raw)) return;
+                  field.onChange(raw === "" ? 0 : Number(raw));
+                }}
+              />
+            );
           }}
         />
 
@@ -186,9 +274,20 @@ export function CryptoTransactionForm({
           label="Expected Payout"
           placeholder="Enter expected payout"
           register={register}
+          readOnly
           error={errors.details?.expectedPayout}
           inputProps={{
             onInput: handleNumericInput,
+            onBlur: (e) => {
+              const raw = parseNumber(e.target.value);
+              setValue("details.expectedPayout", formatNumber(raw), {
+                shouldDirty: true,
+                shouldValidate: true,
+              });
+            },
+            onFocus: (e) => {
+              e.target.value = parseNumber(e.target.value);
+            },
           }}
         />
         <FormField
@@ -200,7 +299,7 @@ export function CryptoTransactionForm({
         />
       </div>
 
-      {/* Xibaka Account & Payment Date */}
+      {/* Xbanka Account & Payment Date */}
       <div className="grid grid-cols-2 gap-4">
         <SearchSelectFieldLayout
           id="details.xbankaAccount"
@@ -220,6 +319,8 @@ export function CryptoTransactionForm({
           label="Payment Date"
           type="date"
           register={register}
+          value={paymentDate}
+          readOnly
           error={errors.details?.paymentDate}
         />
       </div>

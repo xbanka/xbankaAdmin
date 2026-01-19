@@ -32,6 +32,11 @@ export default function Home() {
     setSelectedCustomer(null);
   };
 
+  const handleCloseSearchSidebar = () => {
+    setIsSearchOpen(false)
+    setSelectedCustomer(null);
+  }
+
   const handleBackToSearch = () => {
     setIsAddOpen(false);
     setIsSearchOpen(true);
@@ -55,7 +60,7 @@ export default function Home() {
         {/* Customer Search Sidebar */}
         <CustomerSearchSidebar
           isOpen={isSearchOpen}
-          onClose={() => setIsSearchOpen(false)}
+          onClose={handleCloseSearchSidebar}
           onCustomerSelect={handleCustomerSelect}
         />
 

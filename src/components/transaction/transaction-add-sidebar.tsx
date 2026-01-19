@@ -25,18 +25,21 @@ export function TransactionAddSidebar({
   customer,
   onBack,
 }: TransactionAddSidebarProps) {
-
-  const { watch, setValue } = useFormContext();
+  const { watch, setValue, reset } = useFormContext();
 
   const serviceType = watch("serviceType");
 
   if (!isOpen || !customer) return null;
-  console.log(customer)
+
+  const handleCloseSidebar = () => {
+    reset(); // 🔴 THIS IS THE KEY
+    onClose();
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex">
       {/* Overlay */}
-      <div className="flex-1 bg-black/50" onClick={onClose} />
+      <div className="flex-1 bg-black/50" onClick={handleCloseSidebar} />
 
       {/* Sidebar */}
       <div className="w-[40%] bg-white shadow-lg flex flex-col overflow-y-auto">
@@ -62,7 +65,7 @@ export function TransactionAddSidebar({
               : "New Transaction"}
           </h2>
           <button
-            onClick={onClose}
+            onClick={handleCloseSidebar}
             className="text-gray-400 hover:text-gray-600"
           >
             <X className="h-5 w-5" />
@@ -97,9 +100,9 @@ export function TransactionAddSidebar({
               </div>
             </div>
           ) : serviceType === "crypto" ? (
-            <CryptoTransactionForm handleClose={onClose} />
+            <CryptoTransactionForm handleClose={handleCloseSidebar} />
           ) : serviceType === "gift-card" ? (
-            <GiftCardTransactionForm handleClose={onClose} />
+            <GiftCardTransactionForm handleClose={handleCloseSidebar} />
           ) : (
             <BillPaymentTransactionForm />
           )}
@@ -109,7 +112,7 @@ export function TransactionAddSidebar({
         {!serviceType && (
           <div className="p-6 border-t border-[#E5E7EB]">
             <Button
-              onClick={onClose}
+              onClick={handleCloseSidebar}
               variant="outline"
               className="w-full bg-transparent"
             >

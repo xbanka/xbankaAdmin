@@ -35,7 +35,6 @@ export function TransactionsTable({
     item: TransactionRecord,
     e: React.MouseEvent
   ) => {
-    console.log("item", item)
     setSelectedCustomer(item);
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     setPopupPosition({

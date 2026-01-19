@@ -19,7 +19,7 @@ export const transactionSchema = z
     details: z.object({
       /* ---- CRYPTO ---- */
       transactionType: z.string().optional(),
-      customerAmount: z.string().optional(),
+      customerAmount: z.coerce.number().optional(),
       vendor: z.string().optional(),
       vendorRate: z.string().optional(),
       xbankaRate: z.string().optional(),
