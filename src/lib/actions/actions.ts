@@ -2,6 +2,7 @@
 // import Cookies from "js-cookie";
 import { AffiliateSignUpTypes, loginTypes } from "./actionTypes";
 import AxiosInstance from "../Axiosinstance/axiosInstance";
+import { SuperAdminSignupPayload } from "../types/superAdminTypes";
 
 export const signupAction = async (data: AffiliateSignUpTypes) => {
   const response = await AxiosInstance.post("/api/auth/erp/register", {
@@ -11,6 +12,21 @@ export const signupAction = async (data: AffiliateSignUpTypes) => {
     password: data.password,
     confirm_password: data.confirmPassword,
   });
+  return {
+    success: true,
+    data: response.data,
+    status: response.status,
+  };
+};
+
+export const superAdminSignup = async (
+  payload: SuperAdminSignupPayload
+) => {
+  const response = await AxiosInstance.post(
+    "/api/auth/super-admin/signup",
+    payload
+  );
+
   return {
     success: true,
     data: response.data,

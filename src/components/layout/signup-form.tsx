@@ -13,27 +13,7 @@ import PasswordField from "../ui/PasswordField";
 import { useSignup } from "@/lib/services/signup.service";
 import Image from "next/image";
 import { useState } from "react";
-
-const signupSchema = z
-  .object({
-    firstName: z.string().min(2, "First name must be at least 2 characters"),
-    lastName: z.string().min(2, "Last name must be at least 2 characters"),
-    email: z.string().email("Please enter a valid email address"),
-    password: z
-      .string()
-      .min(8, "Password must be at least 8 characters")
-      .regex(
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-        "Password must contain at least one uppercase letter, one lowercase letter, and one number"
-      ),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
-
-export type SignupFormData = z.infer<typeof signupSchema>;
+import { SignupFormData, signupSchema } from "@/lib/schema/signup.schema";
 
 export default function SignupForm() {
   const [showSuccess, setShowSuccess] = useState(false);
