@@ -28,12 +28,12 @@ const VerifyPage = ({ token }: { token?: string }) => {
               <Mail className="w-5 h-5 text-[var(--abstractCyan)]" />
             </div>
             <h2 className="text-[20px] font-bold text-gray-900">
-              Your Email has been verified
+              Account Successfully Created
             </h2>
             <p className="text-gray-600 text-[16px]">You can now log in to your account.</p>
             <Link href="/signin">
               <Button
-                className="w-full h-12 text-gray-900 font-semibold"
+                className="w-full"
                 style={{
                   backgroundColor: "var(--abstractCyan)",
                   borderColor: "var(--abstractCyan)",
@@ -61,7 +61,7 @@ const VerifyPage = ({ token }: { token?: string }) => {
             {error.message || "Invalid or expired token."}
           </p>
           <Link href="/signup">
-            <Button className="w-full h-12 font-semibold">
+            <Button className="w-full">
               Back to Signup
             </Button>
           </Link>

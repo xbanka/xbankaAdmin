@@ -13,27 +13,7 @@ import PasswordField from "../ui/PasswordField";
 import { useSignup } from "@/lib/services/signup.service";
 import Image from "next/image";
 import { useState } from "react";
-
-const signupSchema = z
-  .object({
-    firstName: z.string().min(2, "First name must be at least 2 characters"),
-    lastName: z.string().min(2, "Last name must be at least 2 characters"),
-    email: z.string().email("Please enter a valid email address"),
-    password: z
-      .string()
-      .min(8, "Password must be at least 8 characters")
-      .regex(
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-        "Password must contain at least one uppercase letter, one lowercase letter, and one number"
-      ),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
-
-export type SignupFormData = z.infer<typeof signupSchema>;
+import { SignupFormData, signupSchema } from "@/lib/schema/signup.schema";
 
 export default function SignupForm() {
   const [showSuccess, setShowSuccess] = useState(false);
@@ -60,18 +40,18 @@ export default function SignupForm() {
 
   if (showSuccess && isSuccess && data?.success) {
     return (
-      <Card className="w-full max-w-sm mx-auto">
-        <CardContent>
+      <Card className="w-full max-w-sm mx-auto p-[40px] rounded-[20px]">
+        <CardContent className="p-0">
           <div className="text-center space-y-3">
             <div className="w-10 h-10 bg-[var(--customCyan)] rounded-full flex items-center justify-center mx-auto">
               <Mail className="w-5 h-5 text-[var(--abstractCyan)]" />
             </div>
-            <h2 className="text-[20px] font-bold text-gray-900">
+            <h2 className="text-[20px] font-bold text-[#1B1D20]">
               Check Your Email
             </h2>
-            <p className="text-gray-600 text-[16px]">
+            <p className="text-[#4B5563] font-[400] text-[16px]">
               We&apos;ve sent a verification link to your email address. Please
-              check your inbox and click the link to verify your account.
+              check your inbox or spam to verify your account.
             </p>
             <Link href="">
               <Button
@@ -90,14 +70,6 @@ export default function SignupForm() {
 
   return (
     <div>
-      <div className="relative h-[100px] mx-auto w-[200px]">
-        <Image
-          src="/xBankaLogo.svg"
-          alt="xbanka"
-          className="object-cover"
-          fill
-        />
-      </div>
       <div className="px-[25px] md:px-0">
         <Card className="w-full max-w-sm mx-auto">
           <CardHeader>
