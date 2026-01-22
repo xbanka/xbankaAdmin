@@ -21,32 +21,38 @@ export function CollapsiblePermissionSection({
     if (!contentRef.current) return;
 
     const updateCount = () => {
-      const checked = contentRef.current?.querySelectorAll(
-        '[data-state="checked"]'
-      ).length;
-      setCheckedCount(checked);
+      const count =
+        contentRef.current?.querySelectorAll(
+          '[role="checkbox"][data-state="checked"]'
+        ).length ?? 0;
+
+      setCheckedCount(count);
     };
 
     updateCount();
 
-    contentRef.current.addEventListener("click", updateCount);
-    return () => {
-      contentRef.current?.removeEventListener("click", updateCount);
-    };
+    const observer = new MutationObserver(updateCount);
+
+    observer.observe(contentRef.current, {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["data-state"],
+    });
+
+    return () => observer.disconnect();
   }, []);
 
   return (
-    <div className="">
+    <div>
       <button
         type="button"
         onClick={() => setIsExpanded((prev) => !prev)}
-        className="w-full px-3 py-2 flex items-center rounded-t-[8px] justify-between hover:bg-gray-50 transition-colors bg-[#F9F9F9] border border-[#E9EBEE]"
+        className="w-full px-3 py-2 flex items-center rounded-t-[8px] justify-between hover:bg-gray-50 transition-colors bg-[#F9F9F9] border border-[#E9EBEE] cursor-pointer"
       >
-        {/* ⬇️ replaced div as requested */}
         <div className="flex items-center gap-2">
           <SidebarDetailedHeader text={title} />
-          <span className="bg-teal-500 text-white text-xs px-2 py-0.5 rounded-full font-medium">
-            {checkedCount}
+          <span className="border py-1 px-2 border-[#B7DBFF] bg-[#F0F7FF] text-[#004C99] text-xs rounded-full font-medium">
+            {checkedCount} selected
           </span>
         </div>
 
@@ -58,7 +64,10 @@ export function CollapsiblePermissionSection({
       </button>
 
       {isExpanded && (
-        <div ref={contentRef} className="px-3 py-2 rounded-b-[8px] border-x border-b border-[#E9EBEE]">
+        <div
+          ref={contentRef}
+          className="px-3 py-2 rounded-b-[8px] border-x border-b border-[#E9EBEE]"
+        >
           {children}
         </div>
       )}

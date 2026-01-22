@@ -40,18 +40,18 @@ export default function SignupForm() {
 
   if (showSuccess && isSuccess && data?.success) {
     return (
-      <Card className="w-full max-w-sm mx-auto">
-        <CardContent>
+      <Card className="w-full max-w-sm mx-auto p-[40px] rounded-[20px]">
+        <CardContent className="p-0">
           <div className="text-center space-y-3">
             <div className="w-10 h-10 bg-[var(--customCyan)] rounded-full flex items-center justify-center mx-auto">
               <Mail className="w-5 h-5 text-[var(--abstractCyan)]" />
             </div>
-            <h2 className="text-[20px] font-bold text-gray-900">
+            <h2 className="text-[20px] font-bold text-[#1B1D20]">
               Check Your Email
             </h2>
-            <p className="text-gray-600 text-[16px]">
+            <p className="text-[#4B5563] font-[400] text-[16px]">
               We&apos;ve sent a verification link to your email address. Please
-              check your inbox and click the link to verify your account.
+              check your inbox or spam to verify your account.
             </p>
             <Link href="">
               <Button
@@ -70,14 +70,6 @@ export default function SignupForm() {
 
   return (
     <div>
-      <div className="relative h-[100px] mx-auto w-[200px]">
-        <Image
-          src="/xBankaLogo.svg"
-          alt="xbanka"
-          className="object-cover"
-          fill
-        />
-      </div>
       <div className="px-[25px] md:px-0">
         <Card className="w-full max-w-sm mx-auto">
           <CardHeader>

@@ -1,8 +1,8 @@
-import { SignupFormData } from "@/components/layout/signup-form";
 import { signupAction } from "@/lib/actions/actions";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { handleApiError } from "../errors/handleApiError";
+import { SignupFormData } from "../schema/signup.schema";
 
 export const useSignup = () => {
 //   const router = useRouter();
