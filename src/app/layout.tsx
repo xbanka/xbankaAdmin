@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   title: "Xbanka",
   description: "Xbanka internal ERP",
   icons: {
-    icon: "/xBankaLogo.svg",
+    icon: "/xbanka.jpg",
   },
 };
 

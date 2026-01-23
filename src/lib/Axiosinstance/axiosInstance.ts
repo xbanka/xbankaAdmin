@@ -1,5 +1,4 @@
 import axios from "axios";
-import { toast } from "sonner";
 
 const AxiosInstance = axios.create({
   baseURL: "https://api.xbankang.com/",
@@ -9,33 +8,6 @@ const AxiosInstance = axios.create({
   timeout: 10000,
   withCredentials: true,
 });
-
-/* ------------------------------
-   Refresh Token Locking
--------------------------------- */
-let isRefreshing = false;
-let failedQueue: {
-  resolve: (token: string) => void;
-  reject: (error: unknown) => void;
-}[] = [];
-
-const processQueue = (error: unknown, token: string | null = null) => {
-  failedQueue.forEach(({ resolve, reject }) => {
-    if (error) {
-      reject(error);
-    } else if (token) {
-      resolve(token);
-    }
-  });
-  failedQueue = [];
-};
-
-const logout = () => {
-  localStorage.removeItem("accessToken");
-  if (typeof window !== "undefined") {
-    window.location.replace("/signin");
-  }
-};
 
 AxiosInstance.interceptors.request.use(
   (config) => {
@@ -53,91 +25,91 @@ AxiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-
-    const status = error.response?.status;
-    const detail = error.response?.data?.detail;
-
-    /* ---- Hard logout conditions (NO RETRY EVER) ---- */
     if (
-      status === 401 &&
-      (
-        originalRequest?.url?.includes("/api/auth/erp/refresh") ||
-        detail === "Refresh token missing" ||
-        detail === "Invalid user type"
-      )
+      error.response?.status === 401 &&
+      originalRequest?.url?.includes("/api/auth/erp/refresh")
     ) {
-      logout();
-      return Promise.reject(error);
-    }
+      localStorage.removeItem("accessToken");
 
-    /* ---- Ignore auth routes ---- */
-    if (
-      originalRequest?.url?.includes("/api/auth/erp/login") ||
-      originalRequest?.url?.includes("/api/auth/erp/register") ||
-      originalRequest?.url?.includes("/api/auth/erp/verify")
-    ) {
-      return Promise.reject(error);
-    }
-
-    /* ---- Single refresh attempt ---- */
-    if (status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-
-      if (isRefreshing) {
-        // Wait for the ongoing refresh
-        return new Promise((resolve, reject) => {
-          failedQueue.push({
-            resolve: (token: string) => {
-              originalRequest.headers.Authorization = `Bearer ${token}`;
-              resolve(AxiosInstance(originalRequest));
-            },
-            reject,
-          });
-        });
+      if (typeof window !== "undefined") {
+        window.location.href = "/signin";
       }
 
-      isRefreshing = true;
+      return Promise.reject(error);
+    }
+    if (
+      error.response?.status === 401 &&
+      error.response?.data?.detail === "Refresh token missing"
+    ) {
+      localStorage.removeItem("accessToken");
+
+      if (typeof window !== "undefined") {
+        window.location.href = "/signin";
+      }
+
+      return Promise.reject(error);
+    }
+    if (
+      error.response?.status === 401 &&
+      error.response?.data?.detail === "Invalid user type"
+    ) {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("accessToken");
+        window.location.href = "/signin";
+      }
+      return Promise.reject(error);
+    }
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !originalRequest.url.includes("/api/auth/erp/login") &&
+      !originalRequest.url.includes("/api/auth/erp/register") &&
+      !originalRequest.url.includes("/api/auth/erp/verify")
+    ) {
+      originalRequest._retry = true;
 
       try {
         const refreshResponse = await AxiosInstance.post(
           "/api/auth/erp/refresh",
-          {}
-        );
+          {},
+          { withCredentials: true }
+        ); // backend uses cookie
 
         const newAccessToken = refreshResponse.data?.access_token;
-        if (!newAccessToken) {
-          throw new Error("No access token returned");
+        if (newAccessToken) {
+          localStorage.setItem("accessToken", newAccessToken);
+          // originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+          originalRequest.headers = {
+            ...(originalRequest.headers || {}),
+            Authorization: `Bearer ${newAccessToken}`,
+          };
         }
-
-        localStorage.setItem("accessToken", newAccessToken);
-        processQueue(null, newAccessToken);
-
-        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         return AxiosInstance(originalRequest);
       } catch (refreshError) {
-        processQueue(refreshError, null);
-        logout();
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("accessToken");
+          window.location.href = "/signin";
+        }
         return Promise.reject(refreshError);
-      } finally {
-        isRefreshing = false;
       }
     }
-
-    /* ---- Normalized error ---- */
     const apiMessage =
       error.response?.data?.message ||
       error.response?.data?.error ||
       error.response?.data?.detail ||
       error.response?.data?.errors?.[0] ||
       error.message ||
-      "Something went wrong";
+      "Something went wrong" ||
+      String(error);
 
-    return Promise.reject({
+    const customError = {
       success: false,
-      status: status || 500,
+      status: error.response?.status || 500,
       message: apiMessage,
-      raw: error,
-    });
+      raw: error, // keep raw error if you need debugging
+    };
+
+    return Promise.reject(customError);
   }
 );
 

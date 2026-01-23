@@ -11,9 +11,11 @@ import { SignupFormData, signupSchema } from "@/lib/schema/signup.schema";
 import { Alert, AlertDescription } from "../ui/alert";
 import { useSuperAdminSignup } from "@/lib/services/auth.service";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 
 export default function CreateAccountPage() {
   const [showSuccess, setShowSuccess] = useState(false);
+  const router = useRouter()
   const {
     register,
     handleSubmit,
@@ -89,7 +91,7 @@ export default function CreateAccountPage() {
             </div>
           </div>
 
-          <Button className="w-full">Go to Dashboard</Button>
+          <Button onClick={() => router.push("")} className="w-full">Go to sign in page</Button>
         </Card>
       </div>
     );
