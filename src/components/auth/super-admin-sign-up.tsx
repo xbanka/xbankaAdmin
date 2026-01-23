@@ -91,7 +91,7 @@ export default function CreateAccountPage() {
             </div>
           </div>
 
-          <Button onClick={() => router.push("")} className="w-full">Go to sign in page</Button>
+          <Button onClick={() => router.push("/signin")} className="w-full">Go to sign in page</Button>
         </Card>
       </div>
     );
