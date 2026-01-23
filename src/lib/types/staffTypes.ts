@@ -7,3 +7,10 @@ export interface StaffPayload {
   role: Role
   permissions: Permission[]
 }
+
+export interface InviteStaffState {
+  first_name: string;
+  last_name: string;
+  email: string;
+  role: Role;
+}
