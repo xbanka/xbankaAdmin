@@ -11,12 +11,13 @@ import { Mail, Lock, User } from "lucide-react";
 import FormField from "./FormField";
 import PasswordField from "../ui/PasswordField";
 import { useSignup } from "@/lib/services/signup.service";
-import Image from "next/image";
 import { useState } from "react";
 import { SignupFormData, signupSchema } from "@/lib/schema/signup.schema";
+import { useRouter } from "next/navigation";
 
 export default function SignupForm() {
   const [showSuccess, setShowSuccess] = useState(false);
+  const router = useRouter()
 
   const {
     register,
@@ -47,17 +48,16 @@ export default function SignupForm() {
               <Mail className="w-5 h-5 text-[var(--abstractCyan)]" />
             </div>
             <h2 className="text-[20px] font-bold text-[#1B1D20]">
-              Check Your Email
+              Go to sign in page
             </h2>
             <p className="text-[#4B5563] font-[400] text-[16px]">
-              We&apos;ve sent a verification link to your email address. Please
-              check your inbox or spam to verify your account.
+              Your account has been created successfully
             </p>
             <Link href="">
               <Button
                 className="w-full"
                 size="sm"
-                onClick={() => setShowSuccess(false)}
+                onClick={() => router.push("/signin")}
               >
                 Ok
               </Button>
