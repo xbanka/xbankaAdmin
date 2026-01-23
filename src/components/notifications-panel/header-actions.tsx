@@ -85,7 +85,7 @@ export function HeaderActions() {
                   {user?.first_name} {user?.last_name}
                 </p>
                 <p className="text-xs text-gray-500 leading-none">
-                  {data.data.role}
+                  {data.data.role?.name}
                 </p>
               </div>
               <ChevronDown className="w-4 h-4 text-gray-500" />
