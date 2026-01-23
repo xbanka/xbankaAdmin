@@ -7,6 +7,7 @@ import { DataTableLayout } from "@/components/DataTableLayout/DataTableLayout"
 import { FilterTabs } from "@/components/ui/FilterTabs"
 import { AddStaffSidebar } from "@/components/staff/add-staff-sidebar"
 import { DashboardLayout } from "@/components/layout/dashboard-layout"
+import { useGetStaff } from "@/lib/services/staff.service"
 
 interface StaffMember {
   id: string
@@ -45,6 +46,9 @@ const mockStaff: StaffMember[] = [
 export default function StaffPage() {
   const [filter, setFilter] = useState("all")
   const [isAddStaffOpen, setIsAddStaffOpen] = useState(false)
+
+  const role = "Admin"
+  const { data, error, isLoading } = useGetStaff(role)
 
   const filteredStaff = filter === "all" ? mockStaff : mockStaff.filter((staff) => staff.status === filter)
 
