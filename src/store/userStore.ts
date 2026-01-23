@@ -1,13 +1,20 @@
-
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+
+export interface permission {
+  name: string;
+}
 
 export interface User {
   id: string;
   first_name: string;
   last_name: string;
   email: string;
-  role: string;
+  role: {
+    id: string;
+    name: string;
+    permissions: permission[];
+  };
   created_at: "string";
 }
 
@@ -23,9 +30,7 @@ export const useUserStore = create<UserStore>()(
       user: null,
       setUser: (data) =>
         set((state) => ({
-          user: state.user
-            ? { ...state.user, ...data }
-            : (data as User),
+          user: state.user ? { ...state.user, ...data } : (data as User),
         })),
       clearUser: () => set({ user: null }),
     }),
