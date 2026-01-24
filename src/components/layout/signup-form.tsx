@@ -13,11 +13,9 @@ import PasswordField from "../ui/PasswordField";
 import { useSignup } from "@/lib/services/signup.service";
 import { useState } from "react";
 import { SignupFormData, signupSchema } from "@/lib/schema/signup.schema";
-import { useRouter } from "next/navigation";
 
 export default function SignupForm() {
   const [showSuccess, setShowSuccess] = useState(false);
-  const router = useRouter()
 
   const {
     register,
@@ -53,11 +51,10 @@ export default function SignupForm() {
             <p className="text-[#4B5563] font-[400] text-[16px]">
               Your account has been created successfully
             </p>
-            <Link href="">
+            <Link href="/signin">
               <Button
                 className="w-full"
                 size="sm"
-                onClick={() => router.push("/signin")}
               >
                 Ok
               </Button>
