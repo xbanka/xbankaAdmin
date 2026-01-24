@@ -1,3 +1,4 @@
+import { Role } from "@/lib/enum/roles&permission.enum";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -12,7 +13,7 @@ export interface User {
   email: string;
   role: {
     id: string;
-    name: string;
+    name: Role;
     permissions: permission[];
   };
   created_at: "string";

@@ -14,3 +14,22 @@ export interface InviteStaffState {
   email: string;
   role: Role;
 }
+
+export type StaffPermission = {
+  name: string;
+};
+
+export type StaffRole = {
+  id: string;
+  name: string;
+  permissions: Permission[];
+};
+
+export type StaffUser = {
+  id: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  created_at: string; // ISO date string
+  role: StaffRole;
+};
