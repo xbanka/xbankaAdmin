@@ -42,7 +42,7 @@ export function TransactionAddSidebar({
       <div className="flex-1 bg-black/50" onClick={handleCloseSidebar} />
 
       {/* Sidebar */}
-      <div className="w-[40%] bg-white shadow-lg flex flex-col overflow-y-auto">
+      <div className="w-full md:w-[40%] bg-white shadow-lg flex flex-col overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-[#E5E7EB]">
           {serviceType && (

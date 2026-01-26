@@ -119,7 +119,7 @@ export function CustomerSearchSidebar({
       <div className="flex-1 bg-black/50" onClick={onClose} />
 
       {/* Sidebar */}
-      <div className="w-[37%] bg-white shadow-lg flex flex-col h-full">
+      <div className="w-full md:w-[37%] bg-white shadow-lg flex flex-col h-full">
         {/* Header */}
         <SidebarHeader header="New Transaction" onClose={onClose} />
 
