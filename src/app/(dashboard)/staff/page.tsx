@@ -18,7 +18,6 @@ export default function StaffPage() {
   const role = "Admin";
   // const { data, error, isLoading } = useGetStaff(role)
   const { data, isError, error, isPending } = useGetAllStaff();
-  console.log(data);
 
   // const filteredStaff =
   //   filter === "all"
