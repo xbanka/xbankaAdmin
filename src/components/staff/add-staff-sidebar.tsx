@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Mail, User, Hash } from "lucide-react";
+import { Mail, User } from "lucide-react";
 import { SelectFieldLayout } from "../layout/SelectFieldLayout";
 import FormField from "../layout/FormField";
-import CheckboxField from "../ui/CheckboxField";
+import { CheckboxField } from "../ui/CheckboxField";
 import { CollapsiblePermissionSection } from "./collapsible-permission-section";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -19,6 +19,8 @@ import {
 import { useInviteStaff } from "@/lib/services/staff.service";
 import { Role, ROLE_PERMISSIONS } from "@/lib/enum/roles&permission.enum";
 import { InviteStaffState } from "@/lib/types/staffTypes";
+import { PERMISSION_CATEGORIES, ROLE_CONFIG } from "@/lib/rolePermissions";
+import { Checkbox } from "../ui/checkbox";
 
 interface AddStaffSidebarProps {
   isOpen: boolean;
@@ -28,6 +30,8 @@ interface AddStaffSidebarProps {
 export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
   const [step, setStep] = useState(1);
   const [staffData, setStaffData] = useState<InviteStaffState | null>(null);
+  const [selectedRole, setSelectedRole] = useState<Role | "">("");
+  const { mutate: inviteStaff, isPending } = useInviteStaff();
 
   const handleClose = () => {
     setStep(1);
@@ -43,73 +47,99 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
     handleSubmit: handleSubmitStep1,
     formState: { errors: errorsStep1 },
     reset: reset1,
-  } = useForm<stepOneFormData>({
-    resolver: zodResolver(StepOneStaffSchema),
-  });
-  const { mutate: inviteStaff, isPending } = useInviteStaff();
+  } = useForm();
 
-  // Step 2: Assign Role
+  // Step 2: Assign Role & Permissions (combined)
   const {
     register: registerStep2,
     handleSubmit: handleSubmitStep2,
     setValue: setValueStep2,
+    getValues: getValuesStep2,
+    watch: watchStep2,
     formState: { errors: errorsStep2 },
     reset: reset2,
-    watch,
-  } = useForm<stepTwoFormData>({
-    resolver: zodResolver(StepTwoStaffSchema),
-  });
-
-  // Step 3: Assign Permissions
-  const {
-    register: registerStep3,
-    handleSubmit: handleSubmitStep3,
-    getValues: getValuesStep3,
-    formState: { errors: errorsStep3 },
-    reset: reset3,
   } = useForm();
 
-  const handleInviteSubmit = (data: stepOneFormData) => {
-    const [first_name, ...rest] = data.fullName.trim().split(" ");
-    const last_name = rest.join(" ");
+  // Step 3: Assign Permissions
+  // const {
+  //   register: registerStep3,
+  //   handleSubmit: handleSubmitStep3,
+  //   getValues: getValuesStep3,
+  //   formState: { errors: errorsStep3 },
+  //   reset: reset3,
+  // } = useForm();
 
-    setStaffData({
-      first_name,
-      last_name,
-      email: data.email,
-      role: Role.VIEWER,
-    });
+  const roleValue = watchStep2("role") as Role | undefined;
 
-    setStep(2);
-  };
-
-  const handleRoleSubmit = (data: stepTwoFormData) => {
-    setStaffData((prev) =>
-      prev
-        ? {
-            ...prev,
-            role: data.role as Role,
-          }
-        : null
-    );
-
+  const handleRoleAndPermissionsSubmit = (data: any) => {
+    setStaffData({ ...staffData, ...data });
     setStep(3);
   };
 
-  const handlePermissionsSubmit = () => {
-    if (!staffData) return;
+  // Compute which permissions are auto-checked, disabled, etc.
+  const permissionState = useMemo(() => {
+    if (!roleValue)
+      return {
+        defaultPerms: [],
+        optionalPerms: [],
+        neverAllowedPerms: [],
+        allPermissions: [],
+      };
+
+    const roleConfig = ROLE_CONFIG[roleValue];
+    const categoryPerms: Record<string, string[]> = {};
+
+    Object.entries(PERMISSION_CATEGORIES).forEach(([category, perms]) => {
+      categoryPerms[category] = perms;
+    });
+
+    return {
+      defaultPerms: roleConfig.defaultPermissions,
+      optionalPerms: roleConfig.optionalPermissions,
+      neverAllowedPerms: roleConfig.neverAllowedPermissions,
+      allPermissions: [
+        ...roleConfig.defaultPermissions,
+        ...roleConfig.optionalPermissions,
+      ],
+      categoryPerms,
+    };
+  }, [roleValue]);
+
+  const handleInviteSubmit = (data: stepTwoFormData) => {
+    setStaffData({ ...staffData, ...data });
+    setStep(2);
+  };
+
+  const handleRoleSubmit = (data: any) => {
+    const selectedPermissions = Object.keys(data).filter(
+      (key) =>
+        data[key] === true && permissionState.allPermissions.includes(key)
+    );
 
     const payload = {
       ...staffData,
-      permissions: ROLE_PERMISSIONS[staffData.role],
+      ...data,
+      permissions: selectedPermissions,
     };
 
-    inviteStaff(payload, {
-      onSuccess: () => {
-        handleClose();
-      },
-    });
+    inviteStaff(payload);
+    onClose();
   };
+
+  // const handlePermissionsSubmit = (data: stepTwoFormData) => {
+  //   const selectedPermissions = Object.keys(data).filter(
+  //     (key) =>
+  //       data[key] === true && permissionState.allPermissions.includes(key)
+  //   );
+
+  //   setStaffData({ ...staffData, ...data, permissions: selectedPermissions });
+  //   console.log("Staff created with full data:", {
+  //     ...staffData,
+  //     ...data,
+  //     permissions: selectedPermissions,
+  //   });
+  //   onClose();
+  // };
 
   const handleBack = () => {
     setStep(step - 1);
@@ -202,18 +232,62 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
                 id="role"
                 label="Enter Job Role"
                 placeholder="Select job role"
-                options={[
-                  "Admin",
-                  "Manager",
-                  "Operations",
-                  "Customer Rep",
-                  "Compliance",
-                  "Viewer",
-                ]}
-                value={watch("role")}
+                options={Object.keys(ROLE_CONFIG) as Role[]}
+                value={watchStep2("role")}
                 onChange={(value) => setValueStep2("role", value)}
                 error={errorsStep2.role}
               />
+              {roleValue && (
+                <div className="mt-6 pt-6 border-t space-y-3">
+                  <h3 className="text-sm font-semibold text-gray-900">
+                    Permissions
+                  </h3>
+                  {Object.entries(PERMISSION_CATEGORIES).map(
+                    ([category, permissions]) => {
+                      const allowedPermissions = permissions.filter((perm) =>
+                        permissionState.allPermissions.includes(perm)
+                      );
+
+                      if (!allowedPermissions.length) return null;
+
+                      return (
+                        <CollapsiblePermissionSection
+                          key={category}
+                          title={category}
+                        >
+                          <div className="flex gap-[32px] flex-wrap">
+                            {allowedPermissions.map((permId) => {
+                              const isDefault =
+                                permissionState.defaultPerms.includes(permId);
+                              const isNeverAllowed =
+                                permissionState.neverAllowedPerms.includes(
+                                  permId
+                                );
+
+                              const label =
+                                permId
+                                  .split("_")[1]
+                                  ?.replace(/([A-Z])/g, " $1")
+                                  .trim() ?? permId;
+
+                              return (
+                                <CheckboxField
+                                  key={permId}
+                                  id={permId}
+                                  label={label}
+                                  register={registerStep2}
+                                  defaultChecked={isDefault}
+                                  disabled={isDefault || isNeverAllowed}
+                                />
+                              );
+                            })}
+                          </div>
+                        </CollapsiblePermissionSection>
+                      );
+                    }
+                  )}
+                </div>
+              )}
 
               <div className="flex gap-3 pt-4">
                 <Button
@@ -224,14 +298,14 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
                 >
                   Back
                 </Button>
-                <Button type="submit" className="flex-1">
+                <Button disabled={!roleValue} type="submit" className="flex-1">
                   Continue
                 </Button>
               </div>
             </form>
           )}
 
-          {step === 3 && (
+          {/* {step === 3 && (
             <form
               onSubmit={handleSubmitStep3(handlePermissionsSubmit)}
               className="space-y-6"
@@ -266,6 +340,28 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
                       label="Settle Transactions"
                       register={registerStep3}
                     />
+                    <CheckboxField
+                      id="transactions_flagTransactions"
+                      label="Flag Transactions"
+                      register={registerStep3}
+                    />
+                  </div>
+                  <div className="space-y-3">
+                    <CheckboxField
+                      id="transactions_freezeTransactions"
+                      label="Freeze Transactions"
+                      register={registerStep3}
+                    />
+                    <CheckboxField
+                      id="transactions_recommendReverseTransactions"
+                      label="Recommend transaction reversal"
+                      register={registerStep3}
+                    />
+                    <CheckboxField
+                      id="transactions_viewAssignedTransactions"
+                      label="View assigned transactions"
+                      register={registerStep3}
+                    />
                   </div>
                 </div>
               </CollapsiblePermissionSection>
@@ -296,6 +392,18 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
                       register={registerStep3}
                     />
                   </div>
+                  <div className="space-y-3">
+                    <CheckboxField
+                      id="customers_viewAssignedCustomers"
+                      label="View assigned customers"
+                      register={registerStep3}
+                    />
+                    <CheckboxField
+                      id="customers_updateLimitedCustomersInformation"
+                      label="Update limited customer information"
+                      register={registerStep3}
+                    />
+                  </div>
                 </div>
               </CollapsiblePermissionSection>
 
@@ -312,6 +420,11 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
                       label="Reject Payments"
                       register={registerStep3}
                     />
+                    <CheckboxField
+                      id="finance_holdPayments"
+                      label="Hold Payments"
+                      register={registerStep3}
+                    />
                   </div>
                   <div className="space-y-3">
                     <CheckboxField
@@ -322,6 +435,28 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
                     <CheckboxField
                       id="finance_flagPayments"
                       label="Flag Payments"
+                      register={registerStep3}
+                    />
+                    <CheckboxField
+                      id="finance_releasePayments"
+                      label="Release Payments"
+                      register={registerStep3}
+                    />
+                  </div>
+                  <div className="space-y-3">
+                    <CheckboxField
+                      id="finance_exportReports"
+                      label="Export finance reports"
+                      register={registerStep3}
+                    />
+                    <CheckboxField
+                      id="finance_retryFailedPayments"
+                      label="Retry failed payments"
+                      register={registerStep3}
+                    />
+                    <CheckboxField
+                      id="finance_retryFailedPayments"
+                      label="Reverse failed settlements"
                       register={registerStep3}
                     />
                   </div>
@@ -374,39 +509,149 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
                 </div>
               </CollapsiblePermissionSection>
 
-              <CollapsiblePermissionSection title="System & Settings">
+              <CollapsiblePermissionSection title="Affiliate Payments">
                 <div className="flex gap-[32px]">
                   <div className="space-y-3">
                     <CheckboxField
-                      id="systemSettings_viewSettings"
-                      label=" View system settings"
+                      id="affiliate_viewAffiliatePayouts"
+                      label="View affiliate payouts"
                       register={registerStep3}
                     />
                     <CheckboxField
-                      id="systemSettings_manageRoles"
-                      label="Manage roles"
-                      register={registerStep3}
-                    />
-                    <CheckboxField
-                      id="systemSettings_viewAuditLog"
-                      label=" View audit log"
+                      id="affiliate_approveAffiliatePayouts"
+                      label="Approve affiliate payouts"
                       register={registerStep3}
                     />
                   </div>
                   <div className="space-y-3">
                     <CheckboxField
-                      id="systemSettings_editSettings"
-                      label="Edit system settings"
+                      id="affiliate_holdAffiliatePayouts"
+                      label="Hold affiliate payouts"
                       register={registerStep3}
                     />
                     <CheckboxField
-                      id="systemSettings_managePermissionTemplates"
-                      label="Manage permission templates"
+                      id="affiliate_adjustAffiliatePayouts"
+                      label="Adjust affiliate balances"
+                      register={registerStep3}
+                    />
+                  </div>
+                </div>
+              </CollapsiblePermissionSection>
+              <CollapsiblePermissionSection title="Kyc">
+                <div className="flex gap-[32px]">
+                  <div className="space-y-3">
+                    <CheckboxField
+                      id="kyc_viewKycData"
+                      label=" View kyc data"
                       register={registerStep3}
                     />
                     <CheckboxField
-                      id="systemSettings_exportAuditLog"
-                      label="Export audit log"
+                      id="kyc_updateKycStatus"
+                      label="Update kyc status"
+                      register={registerStep3}
+                    />
+                    <CheckboxField
+                      id="kyc_rejectKyc"
+                      label="Reject kyc"
+                      register={registerStep3}
+                    />
+                  </div>
+                  <div className="space-y-3">
+                    <CheckboxField
+                      id="kyc_approveKyc"
+                      label="Approve kyc"
+                      register={registerStep3}
+                    />
+                    <CheckboxField
+                      id="kyc_deleteKyc"
+                      label="Delete kyc"
+                      register={registerStep3}
+                    />
+                    <CheckboxField
+                      id="kyc_viewKycStatus"
+                      label="View KYC status"
+                      register={registerStep3}
+                    />
+                  </div>
+                  <div className="space-y-3">
+                    <CheckboxField
+                      id="kyc_uploadKyc"
+                      label="Upload kyc documents"
+                      register={registerStep3}
+                    />
+                    <CheckboxField
+                      id="kyc_flagKyc"
+                      label="Flag kyc"
+                      register={registerStep3}
+                    />
+                  </div>
+                </div>
+              </CollapsiblePermissionSection>
+              <CollapsiblePermissionSection title="Tasks">
+                <div className="flex gap-[32px]">
+                  <div className="space-y-3">
+                    <CheckboxField
+                      id="tasks_viewTasks"
+                      label="View tasks"
+                      register={registerStep3}
+                    />
+                    <CheckboxField
+                      id="tasks_createTasks"
+                      label="Create tasks"
+                      register={registerStep3}
+                    />
+                    <CheckboxField
+                      id="tasks_viewTasksAnalytics"
+                      label="View task analytics"
+                      register={registerStep3}
+                    />
+                    <CheckboxField
+                      id="tasks_createComplianceTasks"
+                      label="Create compliance tasks"
+                      register={registerStep3}
+                    />
+                  </div>
+                  <div className="space-y-3">
+                    <CheckboxField
+                      id="tasks_assignTasks"
+                      label="Assign tasks"
+                      register={registerStep3}
+                    />
+                    <CheckboxField
+                      id="tasks_updateTasks"
+                      label="Update tasks"
+                      register={registerStep3}
+                    />
+                    <CheckboxField
+                      id="tasks_commentTasks"
+                      label="Comment on tasks"
+                      register={registerStep3}
+                    />
+                    <CheckboxField
+                      id="tasks_viewAssignedTasks"
+                      label="View assigned tasks"
+                      register={registerStep3}
+                    />
+                  </div>
+                  <div className="space-y-3">
+                    <CheckboxField
+                      id="tasks_viewTasks"
+                      label="View tasks progress"
+                      register={registerStep3}
+                    />
+                    <CheckboxField
+                      id="tasks_deleteTasks"
+                      label="Delete tasks"
+                      register={registerStep3}
+                    />
+                    <CheckboxField
+                      id="tasks_attachTasksDocument"
+                      label="Attach document to tasks"
+                      register={registerStep3}
+                    />
+                    <CheckboxField
+                      id="tasks_updateStatusTasks"
+                      label="Update task status"
                       register={registerStep3}
                     />
                   </div>
@@ -423,6 +668,11 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
                     <CheckboxField
                       id="readOnly_exportReadOnlyReports"
                       label="Export read only reports"
+                      register={registerStep3}
+                    />
+                    <CheckboxField
+                      id="readOnly_viewFinanceSummary"
+                      label="View finance summaries (read-only)"
                       register={registerStep3}
                     />
                   </div>
@@ -453,7 +703,7 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
                 </Button>
               </div>
             </form>
-          )}
+          )} */}
         </div>
       </div>
     </div>
