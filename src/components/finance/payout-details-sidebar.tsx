@@ -149,7 +149,7 @@ export function PayoutDetailsSidebar({
 
           {/* Footer - Action buttons */}
           {showContent && (
-            <div className="sticky bottom-0 bg-white border-t border-gray-200 py-[16px] px-[20px] flex gap-4">
+            <div className="sticky bottom-0 bg-white border-t border-gray-200 py-[16px] px-[20px] flex flex-col md:flex-row gap-4">
               <Button
               variant={payout.status === "rejected" ? "outline" : "default"}
                 disabled={payout.status === "rejected"}

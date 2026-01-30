@@ -23,6 +23,18 @@ export const getAllTransactionsAction = async ({
   };
 };
 
+export const getAllTransactionsByCustomer = async (customer_id: string) => {
+  const response = await AxiosInstance.get(`/api/transactions/customer/${customer_id}`,
+   { withCredentials: true},
+  );
+
+  return {
+    success: true,
+    data: response.data,
+    status: response.status,
+  };
+};
+
 /**
  * GET /api/transactions/{transaction_id}
  */
