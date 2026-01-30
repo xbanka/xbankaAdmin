@@ -9,7 +9,6 @@ import { SelectFieldLayout } from "../layout/SelectFieldLayout";
 import FormField from "../layout/FormField";
 import { CheckboxField } from "../ui/CheckboxField";
 import { CollapsiblePermissionSection } from "./collapsible-permission-section";
-import { zodResolver } from "@hookform/resolvers/zod";
 import {
   stepOneFormData,
   StepOneStaffSchema,
@@ -17,11 +16,14 @@ import {
   StepTwoStaffSchema,
 } from "@/lib/schema/add-staff.schema";
 import { useInviteStaff } from "@/lib/services/staff.service";
-import { Role, ROLE_PERMISSIONS } from "@/lib/enum/roles&permission.enum";
-import { InviteStaffState } from "@/lib/types/staffTypes";
-import { PERMISSION_CATEGORIES, ROLE_CONFIG } from "@/lib/rolePermissions";
-import { Checkbox } from "../ui/checkbox";
-
+import { InviteStaffDraft } from "@/lib/types/staffTypes";
+import {
+  Permission,
+  PERMISSION_CATEGORIES,
+  Role,
+  ROLE_CONFIG,
+} from "@/lib/rolePermissions";
+import { zodResolver } from "@hookform/resolvers/zod";
 interface AddStaffSidebarProps {
   isOpen: boolean;
   onClose: () => void;
@@ -29,8 +31,7 @@ interface AddStaffSidebarProps {
 
 export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
   const [step, setStep] = useState(1);
-  const [staffData, setStaffData] = useState<InviteStaffState | null>(null);
-  const [selectedRole, setSelectedRole] = useState<Role | "">("");
+  const [staffData, setStaffData] = useState<InviteStaffDraft>({});
   const { mutate: inviteStaff, isPending } = useInviteStaff();
 
   const handleClose = () => {
@@ -38,7 +39,6 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
     onClose();
     reset1();
     reset2();
-    reset3();
   };
 
   // Step 1: Invite Employee
@@ -47,51 +47,38 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
     handleSubmit: handleSubmitStep1,
     formState: { errors: errorsStep1 },
     reset: reset1,
-  } = useForm();
+  } = useForm<stepOneFormData>({
+    resolver: zodResolver(StepOneStaffSchema),
+  });
 
   // Step 2: Assign Role & Permissions (combined)
   const {
     register: registerStep2,
     handleSubmit: handleSubmitStep2,
     setValue: setValueStep2,
-    getValues: getValuesStep2,
     watch: watchStep2,
-    formState: { errors: errorsStep2 },
     reset: reset2,
-  } = useForm();
-
-  // Step 3: Assign Permissions
-  // const {
-  //   register: registerStep3,
-  //   handleSubmit: handleSubmitStep3,
-  //   getValues: getValuesStep3,
-  //   formState: { errors: errorsStep3 },
-  //   reset: reset3,
-  // } = useForm();
+  } = useForm<stepTwoFormData>({
+    resolver: zodResolver(StepTwoStaffSchema),
+  });
 
   const roleValue = watchStep2("role") as Role | undefined;
-
-  const handleRoleAndPermissionsSubmit = (data: any) => {
-    setStaffData({ ...staffData, ...data });
-    setStep(3);
-  };
 
   // Compute which permissions are auto-checked, disabled, etc.
   const permissionState = useMemo(() => {
     if (!roleValue)
       return {
-        defaultPerms: [],
-        optionalPerms: [],
-        neverAllowedPerms: [],
-        allPermissions: [],
+        defaultPerms: [] as Permission[],
+        optionalPerms: [] as Permission[],
+        neverAllowedPerms: [] as Permission[],
+        allPermissions: [] as Permission[],
+        categoryPerms: {} as Record<string, readonly Permission[]>,
       };
 
     const roleConfig = ROLE_CONFIG[roleValue];
-    const categoryPerms: Record<string, string[]> = {};
 
-    Object.entries(PERMISSION_CATEGORIES).forEach(([category, perms]) => {
-      categoryPerms[category] = perms;
-    });
+    const categoryPerms: Record<string, readonly Permission[]> =
+      PERMISSION_CATEGORIES;
 
     return {
       defaultPerms: roleConfig.defaultPermissions,
@@ -105,15 +92,25 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
     };
   }, [roleValue]);
 
-  const handleInviteSubmit = (data: stepTwoFormData) => {
-    setStaffData({ ...staffData, ...data });
+  const handleInviteSubmit = (data: stepOneFormData) => {
+    const [first_name, ...rest] = data.fullName.trim().split(" ");
+    const last_name = rest.join(" ");
+
+    setStaffData({
+      first_name,
+      last_name,
+      email: data.email,
+    });
+
     setStep(2);
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleRoleSubmit = (data: any) => {
     const selectedPermissions = Object.keys(data).filter(
-      (key) =>
-        data[key] === true && permissionState.allPermissions.includes(key)
+      (key): key is Permission =>
+        data[key] === true &&
+        permissionState.allPermissions.includes(key as Permission)
     );
 
     const payload = {
@@ -122,24 +119,12 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
       permissions: selectedPermissions,
     };
 
-    inviteStaff(payload);
-    onClose();
+    inviteStaff(payload, {
+      onSuccess: () => {
+        onClose();
+      },
+    });
   };
-
-  // const handlePermissionsSubmit = (data: stepTwoFormData) => {
-  //   const selectedPermissions = Object.keys(data).filter(
-  //     (key) =>
-  //       data[key] === true && permissionState.allPermissions.includes(key)
-  //   );
-
-  //   setStaffData({ ...staffData, ...data, permissions: selectedPermissions });
-  //   console.log("Staff created with full data:", {
-  //     ...staffData,
-  //     ...data,
-  //     permissions: selectedPermissions,
-  //   });
-  //   onClose();
-  // };
 
   const handleBack = () => {
     setStep(step - 1);
@@ -151,12 +136,13 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
     <div className="fixed inset-0 z-50 flex">
       <div className="flex-1 bg-black/50" onClick={handleClose} />
       <div className="bg-white w-full max-w-[550px] h-full overflow-y-auto shadow-lg">
-        <div className="p-6 border-b flex items-center justify-between sticky top-0 bg-white">
-          <h2 className="text-lg font-semibold text-gray-900">
-            {step === 1 && "Invite Employee"}
-            {step === 2 && "Assign Role"}
-            {step === 3 && "Assign Permissions"}
-          </h2>
+        <div className="p-6 border-b z-50 flex items-center justify-between sticky top-0 bg-white">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">Assign Role</h2>
+            <span className="text-sm text-gray-600 mb-6">
+              We&apos;ll email instructions & a link to create account
+            </span>
+          </div>
           <button
             onClick={handleClose}
             className="text-gray-500 hover:text-gray-700"
@@ -171,10 +157,6 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
               onSubmit={handleSubmitStep1(handleInviteSubmit)}
               className="space-y-4"
             >
-              <p className="text-sm text-gray-600 mb-6">
-                We&apos;ll email instructions & a link to create account
-              </p>
-
               <FormField
                 id="fullName"
                 label="Full name"
@@ -193,15 +175,6 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
                 register={registerStep1}
                 error={errorsStep1.email}
               />
-
-              {/* <FormField
-                id="staffId"
-                label="Staff ID"
-                placeholder="e.g. SR-1234560"
-                icon={Hash}
-                register={registerStep1}
-                error={errorsStep1.staffId}
-              /> */}
 
               <div className="flex gap-3 pt-4">
                 <Button
@@ -224,10 +197,6 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
               onSubmit={handleSubmitStep2(handleRoleSubmit)}
               className="space-y-4"
             >
-              <p className="text-sm text-gray-600 mb-6">
-                We&apos;ll email instructions & a link to create account
-              </p>
-
               <SelectFieldLayout
                 id="role"
                 label="Enter Job Role"
@@ -235,7 +204,7 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
                 options={Object.keys(ROLE_CONFIG) as Role[]}
                 value={watchStep2("role")}
                 onChange={(value) => setValueStep2("role", value)}
-                error={errorsStep2.role}
+                // error={errorsStep2.role}
               />
               {roleValue && (
                 <div className="mt-6 pt-6 border-t space-y-3">
@@ -298,8 +267,12 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
                 >
                   Back
                 </Button>
-                <Button disabled={!roleValue} type="submit" className="flex-1">
-                  Continue
+                <Button
+                  disabled={!roleValue || isPending}
+                  type="submit"
+                  className="flex-1"
+                >
+                  Send Invite
                 </Button>
               </div>
             </form>
