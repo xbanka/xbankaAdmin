@@ -15,6 +15,8 @@ export interface InviteStaffState {
   role: Role;
 }
 
+export type InviteStaffDraft = Partial<InviteStaffState>;
+
 export type StaffPermission = {
   name: string;
 };

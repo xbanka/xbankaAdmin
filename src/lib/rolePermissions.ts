@@ -38,16 +38,20 @@ export const rolePermissions = {
 
 export type Role = "Admin" | "Manager" | "Finance" | "Operations" | "Compliance" | "Customer Representative" | "Staff" | "Viewer"
 
+export type Permission =
+  typeof PERMISSION_CATEGORIES[keyof typeof PERMISSION_CATEGORIES][number];
+
 export const ROLE_CONFIG: Record<Role, {
-  defaultPermissions: string[]
-  optionalPermissions: string[]
-  neverAllowedPermissions: string[]
+  defaultPermissions: Permission[]
+  optionalPermissions: Permission[]
+  neverAllowedPermissions: Permission[]
 }> = {
   Admin: {
     defaultPermissions: [
       "transactions_viewTransactions",
       "transactions_verifyTransactions",
       "customers_viewCustomers",
+      "customers_editDetails",
       "kyc_viewKycData",
       "kyc_updateKycStatus",
       "tasks_viewTasks",
@@ -270,6 +274,8 @@ export const ROLE_CONFIG: Record<Role, {
 export const PERMISSION_CATEGORIES = {
   Transactions: [
     "transactions_viewTransactions",
+    "transactions_viewAssignedTransactions",
+    "transactions_viewLimitedTransactions",
     "transactions_createTransactions",
     "transactions_verifyTransactions",
     "transactions_updateStatus",
@@ -279,29 +285,9 @@ export const PERMISSION_CATEGORIES = {
     "transactions_flagTransactions",
     "transactions_freezeTransactions",
     "transactions_mergeTransactions",
-    "transactions_viewAssignedTransactions",
-    "transactions_viewLimitedTransactions",
     "transactions_recommendReversal"
   ],
-  Customers: [
-    "customers_viewCustomers",
-    "customers_manageCustomers",
-    "customers_updateCustomerInfo",
-    "customers_viewAssignedCustomers",
-    "customers_editDetails"
-  ],
-  KYC: [
-    "kyc_viewKycStatus",
-    "kyc_viewKycData",
-    "kyc_updateKycStatus",
-    "kyc_approveKyc",
-    "kyc_rejectKyc",
-    "kyc_flagKyc",
-    "kyc_uploadDocuments",
-    "kyc_viewKycDocuments",
-    "kyc_flagKycReview",
-    "kyc_touchKyc"
-  ],
+
   Finance: [
     "finance_viewPayments",
     "finance_approvePayments",
@@ -309,65 +295,96 @@ export const PERMISSION_CATEGORIES = {
     "finance_holdPayments",
     "finance_releasePayments",
     "finance_flagPayments",
-    "finance_adjustBalances",
-    "finance_bypassApprovals",
     "finance_retryPayments",
     "finance_reverseSettlements",
+    "finance_adjustBalances",
     "finance_viewProfit",
-    "finance_viewSummaries"
+    "finance_viewSummaries",
+    "finance_bypassApprovals"
   ],
+
   Affiliate: [
     "affiliate_viewPayouts",
     "affiliate_approvePayouts",
     "affiliate_holdPayouts",
     "affiliate_adjustBalances"
   ],
+
+  Customers: [
+    "customers_viewCustomers",
+    "customers_manageCustomers",
+    "customers_viewAssignedCustomers",
+    "customers_updateCustomerInfo",
+    "customers_editDetails"
+  ],
+
+  KYC: [
+    "kyc_viewKycStatus",
+    "kyc_viewKycData",
+    "kyc_viewKycDocuments",
+    "kyc_updateKycStatus",
+    "kyc_uploadDocuments",
+    "kyc_approveKyc",
+    "kyc_rejectKyc",
+    "kyc_flagKyc",
+    "kyc_flagKycReview",
+    "kyc_touchKyc"
+  ],
+
   Tasks: [
     "tasks_viewTasks",
-    "tasks_createTasks",
-    "tasks_assignTasks",
-    "tasks_updateTaskStatus",
+    "tasks_viewAssignedTasks",
     "tasks_viewTaskProgress",
     "tasks_viewTaskAnalytics",
-    "tasks_deleteTasks",
+    "tasks_viewBoardReadOnly",
+    "tasks_createTasks",
+    "tasks_createComplianceTasks",
+    "tasks_assignTasks",
+    "tasks_updateTaskStatus",
     "tasks_editDetails",
     "tasks_commentTasks",
     "tasks_attachDocuments",
-    "tasks_viewAssignedTasks",
-    "tasks_viewBoardReadOnly",
-    "tasks_createComplianceTasks"
+    "tasks_deleteTasks"
   ],
-  Staff: [
+
+  "Staff & Access": [
     "staff_viewStaffList",
     "staff_addStaff",
     "staff_assignRoles",
+    "staff_assignTasks",
     "staff_editPermissions",
-    "staff_suspendActivate",
-    "staff_createSuperAdmin",
     "staff_manageRoles",
-    "staff_assignTasks"
+    "staff_suspendActivate",
+    "staff_createSuperAdmin"
   ],
+
   Audit: [
     "audit_viewAuditLogs",
     "audit_exportAuditLogs",
     "audit_bypassLogging"
   ],
+
   Reports: [
-    "reports_exportOperational",
     "reports_viewReadOnly",
     "reports_exportReadOnly",
+    "reports_exportOperational",
     "reports_exportFinance"
   ],
+
   Reconciliation: [
     "reconciliation_viewRecords"
   ],
-  SystemSettings: [
-    "systemSettings_editSettings"
-  ],
+
   Dashboards: [
     "dashboards_viewReadOnly"
   ],
+
+  SystemSettings: [
+    "systemSettings_editSettings"
+  ],
+
   Other: [
     "records_deleteRecords"
   ]
-}
+} as const;
+

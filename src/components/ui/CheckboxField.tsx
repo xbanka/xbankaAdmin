@@ -4,6 +4,7 @@ import { Label } from "./label";
 type CheckboxFieldProps = {
   id: string;
   label: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   register: any;
   disabled?: boolean;
   defaultChecked?: boolean;
