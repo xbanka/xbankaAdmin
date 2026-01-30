@@ -11,6 +11,7 @@ import {
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { TransactionFormProvider } from "@/components/transaction/transaction-form-provider";
 import { CustomerTransactionsSidebar } from "@/components/transaction/customer-transactions-sidebar";
+import { useGetTransactionByCustomer } from "@/lib/services/transaction.service";
 
 export default function Home() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -20,6 +21,9 @@ export default function Home() {
   const [isCustomerDetailsOpen, setIsCustomerDetailsOpen] = useState(false);
   const [selectedTransactionCustomer, setSelectedTransactionCustomer] =
     useState<TransactionRecord | null>(null);
+
+  const { data, isPending, error } = useGetTransactionByCustomer(selectedTransactionCustomer?.id ?? "")
+  console.log("all customer transaction", data)
 
   const handleCustomerSelect = (customer: ActiveCustomer) => {
     setSelectedCustomer(customer);

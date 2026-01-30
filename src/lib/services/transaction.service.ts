@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { handleApiError } from "../errors/handleApiError";
-import { createTransactionAction, getAllTransactionsAction, getTransactionByIdAction, uploadTransactionAttachmentAction } from "../actions/transactions";
+import { createTransactionAction, getAllTransactionsAction, getAllTransactionsByCustomer, getTransactionByIdAction, uploadTransactionAttachmentAction } from "../actions/transactions";
 import { toast } from "sonner";
 import { CreateTransactionPayload } from "@/components/transaction/transaction-data";
 
@@ -30,6 +30,20 @@ export const useTransaction = (transactionId: string) => {
       }
     },
     enabled: !!transactionId,
+  });
+};
+export const useGetTransactionByCustomer = (customer_id: string) => {
+  return useQuery({
+    queryKey: ["transaction", customer_id],
+    queryFn: async() => {
+      try{
+        const response = await getAllTransactionsByCustomer(customer_id)
+        return response
+      }catch(err){
+        handleApiError(err)
+      }
+    },
+    enabled: !!customer_id,
   });
 };
 
