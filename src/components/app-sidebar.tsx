@@ -25,7 +25,7 @@ import { Button } from "./ui/button";
 import { DialogLayout } from "./layout/modalLayout";
 import { useLogout } from "@/lib/services/logout.service";
 import { useUserStore } from "@/store/userStore";
-import { Permission, ROLE_PERMISSIONS } from "@/lib/enum/roles&permission.enum";
+import { Permission } from "@/lib/enum/roles&permission.enum";
 import { canAccessRoute } from "@/lib/canAccessRoute";
 import { ROUTE_PERMISSIONS } from "@/lib/routePermission";
 // import { rolePermissions } from "@/lib/rolePermissions";
