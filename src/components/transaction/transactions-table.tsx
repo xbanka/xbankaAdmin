@@ -13,7 +13,10 @@ import { useTransactions } from "@/lib/services/transaction.service";
 import Header from "../ui/Header";
 import { SERVICE_TYPE_FILTER_MAP } from "@/lib/enum/transaction.enum";
 import { useUserStore } from "@/store/userStore";
-import { normalizePermissionsFromApi } from "@/lib/rolePermissions";
+import {
+  hasPermission,
+  normalizePermissionsFromApi,
+} from "@/lib/rolePermissions";
 
 export function TransactionsTable({
   onNewTransaction,
@@ -25,7 +28,9 @@ export function TransactionsTable({
     useState<TransactionRecord | null>(null);
   const [page, setPage] = useState(1);
   const user = useUserStore((state) => state.user);
-  const apiPermissionSet = normalizePermissionsFromApi(user?.role.permissions ?? []);
+  const apiPermissionSet = normalizePermissionsFromApi(
+    user?.role.permissions ?? []
+  );
 
   const [popupPosition, setPopupPosition] = useState<{
     top: number;
@@ -162,9 +167,11 @@ export function TransactionsTable({
             <Upload className="h-4 w-4 mr-2" />
             Export
           </Button>
-          <Button size="sm" className="" onClick={onNewTransaction}>
-            + New Transaction
-          </Button>
+          {hasPermission(apiPermissionSet, "transactions:create") && (
+            <Button size="sm" className="" onClick={onNewTransaction}>
+              + New Transaction
+            </Button>
+          )}
         </div>
       </div>
 
