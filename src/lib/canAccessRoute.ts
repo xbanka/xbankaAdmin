@@ -6,7 +6,7 @@ export function canAccessRoute(
   routePermissions: readonly Permission[]
 ) {
   // Dashboard or public route
-  if (routePermissions.length === 0) return true;
+  if (routePermissions?.length === 0) return true;
 
-  return routePermissions.some((p) => userPermissions.includes(p));
+  return routePermissions?.some((p) => userPermissions.includes(p));
 }

@@ -13,6 +13,7 @@ import { useTransactions } from "@/lib/services/transaction.service";
 import Header from "../ui/Header";
 import { SERVICE_TYPE_FILTER_MAP } from "@/lib/enum/transaction.enum";
 import { useUserStore } from "@/store/userStore";
+import { normalizePermissionsFromApi } from "@/lib/rolePermissions";
 
 export function TransactionsTable({
   onNewTransaction,
@@ -24,6 +25,7 @@ export function TransactionsTable({
     useState<TransactionRecord | null>(null);
   const [page, setPage] = useState(1);
   const user = useUserStore((state) => state.user);
+  const apiPermissionSet = normalizePermissionsFromApi(user?.role.permissions ?? []);
 
   const [popupPosition, setPopupPosition] = useState<{
     top: number;
