@@ -1,18 +1,16 @@
-import { Permission, Role } from "../enum/roles&permission.enum"
+import { Permission, Role } from "../enum/roles&permission.enum";
+import { ApiPermission } from "../rolePermissions";
 
 export interface StaffPayload {
-  first_name: string
-  last_name: string
-  email: string
-  role: Role
-  permissions: Permission[]
+  email: string;
+  role: Role;
+  permissions: ApiPermission[];
 }
 
 export interface InviteStaffState {
-  first_name: string;
-  last_name: string;
   email: string;
   role: Role;
+  permissions: ApiPermission[];
 }
 
 export type InviteStaffDraft = Partial<InviteStaffState>;

@@ -8,6 +8,7 @@ type CheckboxFieldProps = {
   register: any;
   disabled?: boolean;
   defaultChecked?: boolean;
+  isDefault?: boolean;
 };
 
 export const CheckboxField = ({
@@ -16,6 +17,7 @@ export const CheckboxField = ({
   id,
   disabled,
   defaultChecked,
+  isDefault,
 }: CheckboxFieldProps) => {
   return (
     <label className="flex items-center gap-3 cursor-pointer">
@@ -23,6 +25,10 @@ export const CheckboxField = ({
         id={id}
         disabled={disabled}
         defaultChecked={defaultChecked}
+        checked={isDefault ? true : undefined}
+        onClick={(e) => {
+          if (isDefault) e.preventDefault();
+        }}
         className="cursor-pointer"
         {...register(id)}
       />
@@ -38,4 +44,3 @@ export const CheckboxField = ({
     </label>
   );
 };
-

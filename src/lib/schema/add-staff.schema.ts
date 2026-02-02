@@ -1,8 +1,8 @@
 import z from "zod";
+import { Role } from "../enum/roles&permission.enum";
 
 export const StepOneStaffSchema = z
   .object({
-    fullName: z.string().min(2, "Full name must be at least 2 characters"),
     email: z.string().email("Please enter a valid email address"),
   })
 
@@ -10,8 +10,9 @@ export type stepOneFormData = z.infer<typeof StepOneStaffSchema>;
 
 export const StepTwoStaffSchema = z
   .object({
-    role: z.string().min(2, "A role must be selected"),
+    role: z.nativeEnum(Role),
   })
+  .passthrough(); 
 
 export type stepTwoFormData = z.infer<typeof StepTwoStaffSchema>;
 
