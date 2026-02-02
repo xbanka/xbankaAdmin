@@ -8,9 +8,13 @@ export const ROUTE_PERMISSIONS = {
     Permission.VIEW_TRANSACTIONS,
   ],
 
-  "/customerManagement": [
+  "/customer-management": [
     Permission.VIEW_CUSTOMERS,
   ],
+
+  // "/customer-support": [
+  //   Permission.VIEW_CUSTOMERS,
+  // ],
 
   "/finance": [
     Permission.VIEW_PAYMENTS,
