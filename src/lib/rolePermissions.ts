@@ -1,3 +1,5 @@
+import { Role } from "./enum/roles&permission.enum";
+
 // rolePermissions.ts
 export const rolePermissions = {
   SUPER_ADMIN: [
@@ -18,10 +20,7 @@ export const rolePermissions = {
     "/transactions",
     "/admin",
   ],
-  SEO_WRITER: [
-    "/content",
-    "/tasks",
-  ],
+  SEO_WRITER: ["/content", "/tasks"],
   ADMIN: [
     "/dashboard",
     "/customerManagement",
@@ -36,16 +35,21 @@ export const rolePermissions = {
   ],
 } as const;
 
-export type Role = "Admin" | "Manager" | "Finance" | "Operations" | "Compliance" | "Customer Representative" | "Staff" | "Viewer"
-
 export type Permission =
-  typeof PERMISSION_CATEGORIES[keyof typeof PERMISSION_CATEGORIES][number];
+  (typeof PERMISSION_CATEGORIES)[keyof typeof PERMISSION_CATEGORIES][number];
 
-export const ROLE_CONFIG: Record<Role, {
-  defaultPermissions: Permission[]
-  optionalPermissions: Permission[]
-  neverAllowedPermissions: Permission[]
-}> = {
+export type ApiPermission =
+  (typeof UI_TO_API_PERMISSION_MAP)[keyof typeof UI_TO_API_PERMISSION_MAP];
+
+
+export const ROLE_CONFIG: Record<
+  Role,
+  {
+    defaultPermissions: Permission[];
+    optionalPermissions: Permission[];
+    neverAllowedPermissions: Permission[];
+  }
+> = {
   Admin: {
     defaultPermissions: [
       "transactions_viewTransactions",
@@ -64,14 +68,14 @@ export const ROLE_CONFIG: Record<Role, {
       "staff_assignRoles",
       "staff_editPermissions",
       "staff_suspendActivate",
-      "audit_viewAuditLogs"
+      "audit_viewAuditLogs",
     ],
     optionalPermissions: [
       "kyc_approveKyc",
       "kyc_rejectKyc",
       "tasks_deleteTasks",
       "reports_exportOperational",
-      "reconciliation_viewRecords"
+      "reconciliation_viewRecords",
     ],
     neverAllowedPermissions: [
       "finance_approvePayments",
@@ -82,8 +86,8 @@ export const ROLE_CONFIG: Record<Role, {
       "systemSettings_editSettings",
       "audit_exportAuditLogs",
       "staff_createSuperAdmin",
-      "finance_bypassApprovals"
-    ]
+      "finance_bypassApprovals",
+    ],
   },
   Manager: {
     defaultPermissions: [
@@ -93,12 +97,12 @@ export const ROLE_CONFIG: Record<Role, {
       "tasks_viewTasks",
       "tasks_assignTasks",
       "tasks_updateTaskStatus",
-      "tasks_viewTaskAnalytics"
+      "tasks_viewTaskAnalytics",
     ],
     optionalPermissions: [
       "transactions_verifyTransactions",
       "kyc_viewKycDocuments",
-      "tasks_commentTasks"
+      "tasks_commentTasks",
     ],
     neverAllowedPermissions: [
       "finance_approvePayments",
@@ -110,8 +114,8 @@ export const ROLE_CONFIG: Record<Role, {
       "staff_editPermissions",
       "finance_viewProfit",
       "systemSettings_editSettings",
-      "audit_viewAuditLogs"
-    ]
+      "audit_viewAuditLogs",
+    ],
   },
   Finance: {
     defaultPermissions: [
@@ -128,13 +132,13 @@ export const ROLE_CONFIG: Record<Role, {
       "reconciliation_viewRecords",
       "kyc_viewKycStatus",
       "tasks_viewTasks",
-      "tasks_commentTasks"
+      "tasks_commentTasks",
     ],
     optionalPermissions: [
       "finance_retryPayments",
       "finance_reverseSettlements",
       "affiliate_adjustBalances",
-      "reports_exportFinance"
+      "reports_exportFinance",
     ],
     neverAllowedPermissions: [
       "transactions_createTransactions",
@@ -143,8 +147,8 @@ export const ROLE_CONFIG: Record<Role, {
       "staff_editPermissions",
       "systemSettings_editSettings",
       "records_deleteRecords",
-      "audit_bypassLogging"
-    ]
+      "audit_bypassLogging",
+    ],
   },
   Operations: {
     defaultPermissions: [
@@ -159,12 +163,12 @@ export const ROLE_CONFIG: Record<Role, {
       "tasks_viewTasks",
       "tasks_updateTaskStatus",
       "tasks_commentTasks",
-      "tasks_attachDocuments"
+      "tasks_attachDocuments",
     ],
     optionalPermissions: [
       "transactions_mergeTransactions",
       "tasks_createTasks",
-      "tasks_editDetails"
+      "tasks_editDetails",
     ],
     neverAllowedPermissions: [
       "kyc_approveKyc",
@@ -176,8 +180,8 @@ export const ROLE_CONFIG: Record<Role, {
       "staff_manageRoles",
       "staff_editPermissions",
       "systemSettings_editSettings",
-      "finance_adjustBalances"
-    ]
+      "finance_adjustBalances",
+    ],
   },
   Compliance: {
     defaultPermissions: [
@@ -191,21 +195,21 @@ export const ROLE_CONFIG: Record<Role, {
       "tasks_viewTasks",
       "tasks_commentTasks",
       "tasks_createComplianceTasks",
-      "audit_viewAuditLogs"
+      "audit_viewAuditLogs",
     ],
     optionalPermissions: [
       "finance_viewSummaries",
-      "transactions_recommendReversal"
+      "transactions_recommendReversal",
     ],
     neverAllowedPermissions: [
       "transactions_createTransactions",
       "transactions_settleTransactions",
       "finance_approvePayments",
       "staff_manageRoles",
-      "systemSettings_editSettings"
-    ]
+      "systemSettings_editSettings",
+    ],
   },
-  "Customer Representative": {
+  "Customer Rep": {
     defaultPermissions: [
       "transactions_createTransactions",
       "transactions_viewAssignedTransactions",
@@ -215,7 +219,7 @@ export const ROLE_CONFIG: Record<Role, {
       "kyc_viewKycStatus",
       "tasks_viewAssignedTasks",
       "tasks_updateTaskStatus",
-      "tasks_commentTasks"
+      "tasks_commentTasks",
     ],
     optionalPermissions: [],
     neverAllowedPermissions: [
@@ -229,18 +233,16 @@ export const ROLE_CONFIG: Record<Role, {
       "finance_viewPayments",
       "staff_assignTasks",
       "staff_manageRoles",
-      "systemSettings_editSettings"
-    ]
+      "systemSettings_editSettings",
+    ],
   },
   Staff: {
     defaultPermissions: [
       "tasks_viewAssignedTasks",
       "tasks_updateTaskStatus",
-      "transactions_viewLimitedTransactions"
+      "transactions_viewLimitedTransactions",
     ],
-    optionalPermissions: [
-      "tasks_commentTasks"
-    ],
+    optionalPermissions: ["tasks_commentTasks"],
     neverAllowedPermissions: [
       "transactions_createTransactions",
       "kyc_touchKyc",
@@ -248,28 +250,26 @@ export const ROLE_CONFIG: Record<Role, {
       "finance_viewPayments",
       "staff_manageRoles",
       "staff_editPermissions",
-      "systemSettings_editSettings"
-    ]
+      "systemSettings_editSettings",
+    ],
   },
   Viewer: {
     defaultPermissions: [
       "dashboards_viewReadOnly",
       "reports_viewReadOnly",
-      "tasks_viewBoardReadOnly"
+      "tasks_viewBoardReadOnly",
     ],
-    optionalPermissions: [
-      "reports_exportReadOnly"
-    ],
+    optionalPermissions: ["reports_exportReadOnly"],
     neverAllowedPermissions: [
       "transactions_createTransactions",
       "transactions_updateStatus",
       "finance_approvePayments",
       "kyc_viewKycDocuments",
       "staff_manageRoles",
-      "systemSettings_editSettings"
-    ]
-  }
-}
+      "systemSettings_editSettings",
+    ],
+  },
+};
 
 export const PERMISSION_CATEGORIES = {
   Transactions: [
@@ -285,7 +285,7 @@ export const PERMISSION_CATEGORIES = {
     "transactions_flagTransactions",
     "transactions_freezeTransactions",
     "transactions_mergeTransactions",
-    "transactions_recommendReversal"
+    "transactions_recommendReversal",
   ],
 
   Finance: [
@@ -300,14 +300,14 @@ export const PERMISSION_CATEGORIES = {
     "finance_adjustBalances",
     "finance_viewProfit",
     "finance_viewSummaries",
-    "finance_bypassApprovals"
+    "finance_bypassApprovals",
   ],
 
   Affiliate: [
     "affiliate_viewPayouts",
     "affiliate_approvePayouts",
     "affiliate_holdPayouts",
-    "affiliate_adjustBalances"
+    "affiliate_adjustBalances",
   ],
 
   Customers: [
@@ -315,7 +315,7 @@ export const PERMISSION_CATEGORIES = {
     "customers_manageCustomers",
     "customers_viewAssignedCustomers",
     "customers_updateCustomerInfo",
-    "customers_editDetails"
+    "customers_editDetails",
   ],
 
   KYC: [
@@ -328,7 +328,7 @@ export const PERMISSION_CATEGORIES = {
     "kyc_rejectKyc",
     "kyc_flagKyc",
     "kyc_flagKycReview",
-    "kyc_touchKyc"
+    "kyc_touchKyc",
   ],
 
   Tasks: [
@@ -344,7 +344,7 @@ export const PERMISSION_CATEGORIES = {
     "tasks_editDetails",
     "tasks_commentTasks",
     "tasks_attachDocuments",
-    "tasks_deleteTasks"
+    "tasks_deleteTasks",
   ],
 
   "Staff & Access": [
@@ -355,36 +355,147 @@ export const PERMISSION_CATEGORIES = {
     "staff_editPermissions",
     "staff_manageRoles",
     "staff_suspendActivate",
-    "staff_createSuperAdmin"
+    "staff_createSuperAdmin",
   ],
 
   Audit: [
     "audit_viewAuditLogs",
     "audit_exportAuditLogs",
-    "audit_bypassLogging"
+    "audit_bypassLogging",
   ],
 
   Reports: [
     "reports_viewReadOnly",
     "reports_exportReadOnly",
     "reports_exportOperational",
-    "reports_exportFinance"
+    "reports_exportFinance",
   ],
 
-  Reconciliation: [
-    "reconciliation_viewRecords"
-  ],
+  Reconciliation: ["reconciliation_viewRecords"],
 
-  Dashboards: [
-    "dashboards_viewReadOnly"
-  ],
+  Dashboards: ["dashboards_viewReadOnly"],
 
-  SystemSettings: [
-    "systemSettings_editSettings"
-  ],
+  SystemSettings: ["systemSettings_editSettings"],
 
-  Other: [
-    "records_deleteRecords"
-  ]
+  Other: ["records_deleteRecords"],
 } as const;
 
+export const getRolePermissionDefaults = (role: Role) => {
+  const config = ROLE_CONFIG[role];
+
+  const values: Record<string, boolean> = {};
+
+  config.defaultPermissions.forEach((p) => {
+    values[p] = true; // 👈 checked
+  });
+
+  config.optionalPermissions.forEach((p) => {
+    values[p] = false; // 👈 unchecked
+  });
+
+  return values;
+};
+
+export const UI_TO_API_PERMISSION_MAP: Record<Permission, string> = {
+  // Transactions
+  transactions_viewTransactions: "transactions:view",
+  transactions_createTransactions: "transactions:create",
+  transactions_verifyTransactions: "transactions:verify",
+  transactions_settleTransactions: "transactions:settle",
+  transactions_flagTransactions: "transactions:flag",
+  transactions_freezeTransactions: "transactions:freeze",
+  transactions_updateStatus: "transactions:update_status",
+  transactions_markCompleted: "transactions:mark_complete",
+  transactions_mergeTransactions: "transactions:merge",
+  transactions_recommendReversal: "transactions:recommend_reversal",
+  transactions_executeSettlements: "transactions:execute",
+  transactions_viewAssignedTransactions: "transactions:view_assigned",
+  transactions_viewLimitedTransactions: "transactions:view_limited",
+
+  // Customers
+  customers_viewCustomers: "customers:view",
+  customers_manageCustomers: "customers:manage",
+  customers_viewAssignedCustomers: "customers:view_assigned",
+  customers_editDetails: "customers:edit",
+  customers_updateCustomerInfo: "customers:update",
+
+  // Finance
+  finance_viewPayments: "finance:view_payments",
+  finance_approvePayments: "finance:approve_payments",
+  finance_rejectPayments: "finance:reject_payments",
+  finance_flagPayments: "finance:flag_payments",
+  finance_holdPayments: "finance:hold_payments",
+  finance_releasePayments: "finance:release_payments",
+  finance_retryPayments: "finance:retry_payments",
+  finance_reverseSettlements: "finance:reverse_settlements",
+  finance_viewSummaries: "finance:view_summaries",
+  finance_viewProfit: "finance:view_profit",
+  reports_exportFinance: "finance:export_reports",
+  finance_bypassApprovals: "finance:bypass_approvals",
+
+  // Affiliate (adjust balance moved here ✔)
+  affiliate_viewPayouts: "affiliate:view_payouts",
+  affiliate_approvePayouts: "affiliate:approve_payouts",
+  affiliate_holdPayouts: "affiliate:hold_payouts",
+  affiliate_adjustBalances: "affiliate:adjust_balance",
+
+  // Staff
+  staff_viewStaffList: "staff:view_list",
+  staff_addStaff: "staff:add",
+  staff_editPermissions: "staff:edit_permissions",
+  staff_manageRoles: "staff:edit_roles",
+  staff_suspendActivate: "staff:suspend_activate",
+  // "staff_assignRoles",
+  // "staff_assignTasks"
+  // "staff_createSuperAdmin",
+  // Tasks
+  tasks_viewTasks: "tasks:view",
+  tasks_createTasks: "tasks:create",
+  tasks_assignTasks: "tasks:assign",
+  tasks_updateTaskStatus: "tasks:update_status",
+  tasks_viewTaskProgress: "tasks:view_progress",
+  tasks_viewTaskAnalytics: "tasks:view_analytics",
+  tasks_commentTasks: "tasks:comment",
+  tasks_attachDocuments: "tasks:attach_documents",
+  tasks_createComplianceTasks: "tasks:create_compliance",
+  tasks_editDetails: "tasks:edit_details",
+  tasks_deleteTasks: "task:delete",
+  tasks_viewAssignedTasks: "tasks:view_assigned",
+
+  // KYC
+  kyc_viewKycData: "kyc:view_data",
+  kyc_viewKycStatus: "kyc:view_status",
+  kyc_updateKycStatus: "kyc:update_status",
+  kyc_uploadDocuments: "kyc:upload_documents",
+  kyc_approveKyc: "kyc:approve",
+  kyc_rejectKyc: "kyc:reject",
+  kyc_flagKyc: "kyc:flag",
+  kyc_viewKycDocuments: "kyc:view",
+  kyc_touchKyc: "kyc:touch",
+
+  // Audit
+  audit_viewAuditLogs: "audit:view_logs",
+  audit_exportAuditLogs: "audit:export_logs",
+  audit_bypassLogging: "audit:bypass_logging",
+
+  // Reports
+  reports_viewReadOnly: "reports:view",
+  reports_exportReadOnly: "Reports:export",
+  reports_exportOperational: "reports:export_operational",
+
+  // Reconciliation
+  reconciliation_viewRecords: "reconciliation:view",
+
+  // Dashboard
+  dashboards_viewReadOnly: "dashboard:view",
+
+  // System
+  systemSettings_editSettings: "system:edit_settings",
+  finance_adjustBalances: "",
+  kyc_flagKycReview: "",
+  tasks_viewBoardReadOnly: "",
+  staff_assignRoles: "",
+  staff_assignTasks: "",
+  staff_createSuperAdmin: "",
+  records_deleteRecords: ""
+};
