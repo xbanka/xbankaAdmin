@@ -1,3 +1,4 @@
+import { permission } from "@/store/userStore";
 import { Role } from "./enum/roles&permission.enum";
 
 // rolePermissions.ts
@@ -65,7 +66,6 @@ export const ROLE_CONFIG: Record<
       "tasks_viewTaskProgress",
       "staff_viewStaffList",
       "staff_addStaff",
-      "staff_assignRoles",
       "staff_editPermissions",
       "staff_suspendActivate",
       "audit_viewAuditLogs",
@@ -82,7 +82,6 @@ export const ROLE_CONFIG: Record<
       "finance_holdPayments",
       "finance_releasePayments",
       "transactions_settleTransactions",
-      "finance_adjustBalances",
       "systemSettings_editSettings",
       "audit_exportAuditLogs",
       "staff_createSuperAdmin",
@@ -110,7 +109,6 @@ export const ROLE_CONFIG: Record<
       "finance_releasePayments",
       "transactions_createTransactions",
       "transactions_settleTransactions",
-      "staff_manageRoles",
       "staff_editPermissions",
       "finance_viewProfit",
       "systemSettings_editSettings",
@@ -143,7 +141,6 @@ export const ROLE_CONFIG: Record<
     neverAllowedPermissions: [
       "transactions_createTransactions",
       "transactions_settleTransactions",
-      "staff_manageRoles",
       "staff_editPermissions",
       "systemSettings_editSettings",
       "records_deleteRecords",
@@ -159,7 +156,6 @@ export const ROLE_CONFIG: Record<
       "customers_viewCustomers",
       "kyc_viewKycData",
       "kyc_uploadDocuments",
-      "kyc_flagKycReview",
       "tasks_viewTasks",
       "tasks_updateTaskStatus",
       "tasks_commentTasks",
@@ -177,10 +173,8 @@ export const ROLE_CONFIG: Record<
       "finance_holdPayments",
       "finance_releasePayments",
       "finance_viewProfit",
-      "staff_manageRoles",
       "staff_editPermissions",
-      "systemSettings_editSettings",
-      "finance_adjustBalances",
+      "systemSettings_editSettings"
     ],
   },
   Compliance: {
@@ -205,7 +199,6 @@ export const ROLE_CONFIG: Record<
       "transactions_createTransactions",
       "transactions_settleTransactions",
       "finance_approvePayments",
-      "staff_manageRoles",
       "systemSettings_editSettings",
     ],
   },
@@ -231,8 +224,6 @@ export const ROLE_CONFIG: Record<
       "finance_releasePayments",
       "transactions_settleTransactions",
       "finance_viewPayments",
-      "staff_assignTasks",
-      "staff_manageRoles",
       "systemSettings_editSettings",
     ],
   },
@@ -245,10 +236,8 @@ export const ROLE_CONFIG: Record<
     optionalPermissions: ["tasks_commentTasks"],
     neverAllowedPermissions: [
       "transactions_createTransactions",
-      "kyc_touchKyc",
       "finance_approvePayments",
       "finance_viewPayments",
-      "staff_manageRoles",
       "staff_editPermissions",
       "systemSettings_editSettings",
     ],
@@ -265,7 +254,6 @@ export const ROLE_CONFIG: Record<
       "transactions_updateStatus",
       "finance_approvePayments",
       "kyc_viewKycDocuments",
-      "staff_manageRoles",
       "systemSettings_editSettings",
     ],
   },
@@ -297,7 +285,6 @@ export const PERMISSION_CATEGORIES = {
     "finance_flagPayments",
     "finance_retryPayments",
     "finance_reverseSettlements",
-    "finance_adjustBalances",
     "finance_viewProfit",
     "finance_viewSummaries",
     "finance_bypassApprovals",
@@ -327,8 +314,6 @@ export const PERMISSION_CATEGORIES = {
     "kyc_approveKyc",
     "kyc_rejectKyc",
     "kyc_flagKyc",
-    "kyc_flagKycReview",
-    "kyc_touchKyc",
   ],
 
   Tasks: [
@@ -350,10 +335,7 @@ export const PERMISSION_CATEGORIES = {
   "Staff & Access": [
     "staff_viewStaffList",
     "staff_addStaff",
-    "staff_assignRoles",
-    "staff_assignTasks",
     "staff_editPermissions",
-    "staff_manageRoles",
     "staff_suspendActivate",
     "staff_createSuperAdmin",
   ],
@@ -432,7 +414,6 @@ export const UI_TO_API_PERMISSION_MAP: Record<Permission, string> = {
   finance_viewProfit: "finance:view_profit",
   reports_exportFinance: "finance:export_reports",
   finance_bypassApprovals: "finance:bypass_approvals",
-  finance_adjustBalances: "finance:adjust_balance",
 
   // Affiliate (adjust balance moved here ✔)
   affiliate_viewPayouts: "affiliate:view_payouts",
@@ -444,11 +425,8 @@ export const UI_TO_API_PERMISSION_MAP: Record<Permission, string> = {
   staff_viewStaffList: "staff:view_list",
   staff_addStaff: "staff:add",
   staff_editPermissions: "staff:edit_permissions",
-  staff_manageRoles: "staff:edit_roles",
   staff_suspendActivate: "staff:suspend_activate",
-  // "staff_assignRoles",
-  // "staff_assignTasks"
-  // "staff_createSuperAdmin",
+
   // Tasks
   tasks_viewTasks: "tasks:view",
   tasks_createTasks: "tasks:create",
@@ -473,7 +451,6 @@ export const UI_TO_API_PERMISSION_MAP: Record<Permission, string> = {
   kyc_rejectKyc: "kyc:reject",
   kyc_flagKyc: "kyc:flag",
   kyc_viewKycDocuments: "kyc:view",
-  kyc_touchKyc: "kyc:touch",
 
   // Audit
   audit_viewAuditLogs: "audit:view_logs",
@@ -495,16 +472,13 @@ export const UI_TO_API_PERMISSION_MAP: Record<Permission, string> = {
 
   // System
   systemSettings_editSettings: "system:edit_settings",
-  kyc_flagKycReview: "",
   
-  staff_assignRoles: "",
-  staff_assignTasks: "",
   staff_createSuperAdmin: "",
  
 };
 
 export const normalizePermissionsFromApi = (
-  perms: { name: string }[]
+  perms: permission[]
 ): Set<string> => {
   return new Set(perms.map((p) => p.name));
 };
