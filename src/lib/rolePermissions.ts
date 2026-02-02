@@ -432,6 +432,7 @@ export const UI_TO_API_PERMISSION_MAP: Record<Permission, string> = {
   finance_viewProfit: "finance:view_profit",
   reports_exportFinance: "finance:export_reports",
   finance_bypassApprovals: "finance:bypass_approvals",
+  finance_adjustBalances: "finance:adjust_balance",
 
   // Affiliate (adjust balance moved here ✔)
   affiliate_viewPayouts: "affiliate:view_payouts",
@@ -461,6 +462,7 @@ export const UI_TO_API_PERMISSION_MAP: Record<Permission, string> = {
   tasks_editDetails: "tasks:edit_details",
   tasks_deleteTasks: "task:delete",
   tasks_viewAssignedTasks: "tasks:view_assigned",
+  tasks_viewBoardReadOnly: "tasks:view_board",
 
   // KYC
   kyc_viewKycData: "kyc:view_data",
@@ -489,13 +491,28 @@ export const UI_TO_API_PERMISSION_MAP: Record<Permission, string> = {
   // Dashboard
   dashboards_viewReadOnly: "dashboard:view",
 
+  records_deleteRecords: "records:delete",
+
   // System
   systemSettings_editSettings: "system:edit_settings",
-  finance_adjustBalances: "",
   kyc_flagKycReview: "",
-  tasks_viewBoardReadOnly: "",
+  
   staff_assignRoles: "",
   staff_assignTasks: "",
   staff_createSuperAdmin: "",
-  records_deleteRecords: ""
+ 
 };
+
+export const normalizePermissionsFromApi = (
+  perms: { name: string }[]
+): Set<string> => {
+  return new Set(perms.map((p) => p.name));
+};
+
+export const hasPermission = (
+  permissionSet: Set<string>,
+  required: string
+): boolean => {
+  return permissionSet.has(required);
+};
+
