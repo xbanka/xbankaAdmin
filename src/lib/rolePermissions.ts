@@ -489,4 +489,3 @@ export const hasPermission = (
 ): boolean => {
   return permissionSet.has(required);
 };
-
