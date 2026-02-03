@@ -21,3 +21,4 @@ export const GetGiftCards = [
   "Carrefour Gift Card",
   "Zalando Gift Card"
 ]
+
