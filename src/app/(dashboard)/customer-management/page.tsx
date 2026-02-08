@@ -10,11 +10,18 @@ import NewCustomerModal from "@/components/CustomerManagement/NewCustomerModal";
 import Header from "@/components/ui/Header";
 import { Upload } from "lucide-react";
 import { CustomerProps } from "@/lib/types/customer";
+import CustomerActionMenu from "@/components/CustomerManagement/CustomerActionMenu";
+import EditCustomerModal from "@/components/CustomerManagement/EditCustomerModal";
+import DeleteCustomerModal from "@/components/CustomerManagement/DeleteCustomerModal";
 
 export default function CustomerManagement() {
   const [openModal, setOpenModal] = useState(false);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [selectedCustomer, setSelectedCustomer] =
+    useState<CustomerProps | null>(null);
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   const { data, isLoading, isError, error } = useGetCustomer(search);
 
@@ -38,6 +45,23 @@ export default function CustomerManagement() {
         ) : (
           <span className="text-gray-400">—</span>
         ),
+    },
+    {
+      key: "actions",
+      header: "",
+      render: (item: CustomerProps) => (
+        <CustomerActionMenu
+          customer={item}
+          onEdit={() => {
+            setSelectedCustomer(item);
+            setEditOpen(true);
+          }}
+          onDelete={() => {
+            setSelectedCustomer(item);
+            setDeleteOpen(true);
+          }}
+        />
+      ),
     },
   ];
 
@@ -85,6 +109,17 @@ export default function CustomerManagement() {
         />
       </div>
       <NewCustomerModal isOpen={openModal} onClose={handleClose} />
+      <EditCustomerModal
+        isOpen={editOpen}
+        onClose={() => setEditOpen(false)}
+        customer={selectedCustomer}
+      />
+
+      <DeleteCustomerModal
+        isOpen={deleteOpen}
+        onClose={() => setDeleteOpen(false)}
+        customer={selectedCustomer}
+      />
     </DashboardLayout>
   );
 }

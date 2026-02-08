@@ -126,7 +126,7 @@ export function DashboardLayout({
           </Breadcrumb>
           <HeaderActions />
         </header>
-        <div className="flex-1 p-4 bg-off-white overflow-hidden bg-off-white min-h-screen">
+        <div className="w-full p-4 bg-off-white overflow-hidden bg-off-white min-h-screen">
           {/* Handle loading */}
           {isPending && (
             <div className="flex flex-1 items-center justify-center text-gray-500">
