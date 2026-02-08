@@ -37,7 +37,6 @@ interface DataTableLayoutProps<T> {
   isError?: boolean;
   errorMessage?: string;
   className?: string;
-  fixedLayout?: boolean;
 }
 
 export function DataTableLayout<T>({
@@ -53,7 +52,6 @@ export function DataTableLayout<T>({
   isError = false,
   errorMessage = "Failed to load data.",
   className,
-  fixedLayout = false,
 }: DataTableLayoutProps<T>) {
   const [localPage, setLocalPage] = useState(1);
   const page = currentPage ?? localPage;
@@ -111,9 +109,7 @@ export function DataTableLayout<T>({
         {/* <Table className="min-w-max w-full"> */}
         <Table
           className={cn(
-            "min-w-max w-full",
-            fixedLayout ? "table-fixed" : "table-auto",
-            !fixedLayout && "min-w-max"
+            "w-full",
           )}
         >
           <TableHeader>
