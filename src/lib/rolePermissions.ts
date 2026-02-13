@@ -303,6 +303,7 @@ export const PERMISSION_CATEGORIES = {
     "customers_viewAssignedCustomers",
     "customers_updateCustomerInfo",
     "customers_editDetails",
+    "customers_addCustomer",
   ],
 
   KYC: [
@@ -400,6 +401,7 @@ export const UI_TO_API_PERMISSION_MAP: Record<Permission, string> = {
   customers_viewAssignedCustomers: "customers:view_assigned",
   customers_editDetails: "customers:edit",
   customers_updateCustomerInfo: "customers:update",
+  customers_addCustomer: "customers:add",
 
   // Finance
   finance_viewPayments: "finance:view_payments",

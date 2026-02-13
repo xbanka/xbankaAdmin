@@ -22,6 +22,7 @@ interface DialogLayoutProps {
   children?: React.ReactNode;
   footer?: React.ReactNode;
   className?: string;
+  showCloseButton?: false
 }
 
 function DialogLayoutRoot({
@@ -32,12 +33,14 @@ function DialogLayoutRoot({
   children,
   footer,
   className,
+  showCloseButton = false
 }: DialogLayoutProps) {
   return (
     <Dialog
       open={open}
     >
       <DialogContent
+      showCloseButton={showCloseButton}
         className={cn(className)}
       >
         {(title || description) && (

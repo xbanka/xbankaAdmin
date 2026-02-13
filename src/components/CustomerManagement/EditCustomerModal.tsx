@@ -21,8 +21,6 @@ export default function EditCustomerModal({
   onClose,
   customer,
 }: EditCustomerModalProps) {
-    console.log("customer", customer)
-    console.log("isOpen", isOpen)
   const [isPending, setIsPending] = useState(false)
   const { register, handleSubmit, formState: { errors }, reset } = useForm<NewCustomerFormValues>({
     resolver: zodResolver(newCustomerSchema),

@@ -33,3 +33,9 @@ export type StaffUser = {
   created_at: string; // ISO date string
   role: StaffRole;
 };
+
+export interface DeleteStaffModalProps {
+  isOpen: boolean
+  onClose: () => void
+  staff: StaffUser | null
+}
