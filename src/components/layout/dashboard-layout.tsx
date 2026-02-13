@@ -98,8 +98,8 @@ export function DashboardLayout({
     });
   };
   return (
-    <div className="w-full ">
-      <SidebarInset className="max-w-full overflow-x-hidden">
+    <div className="w-full flex-1 min-w-0">
+      <SidebarInset className="max-w-full flex-1 min-w-0">
         <header className="relative flex h-16 shrink-0 items-center gap-2 border-b px-4 bg-white">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />
@@ -126,7 +126,7 @@ export function DashboardLayout({
           </Breadcrumb>
           <HeaderActions />
         </header>
-        <div className="flex-1 p-4 bg-off-white overflow-hidden bg-off-white min-h-screen">
+        <div className="w-full p-4 bg-off-white min-w-0 min-h-screen">
           {/* Handle loading */}
           {isPending && (
             <div className="flex flex-1 items-center justify-center text-gray-500">
@@ -143,7 +143,7 @@ export function DashboardLayout({
 
           {/* Render children only if no error and not loading */}
           {!isPending && !error && (
-            <div className="block w-full max-w-full">{children}</div>
+            <div className="block w-full max-w-full min-w-0">{children}</div>
           )}
           {payout && (
             <PayoutDetailsSidebar

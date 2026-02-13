@@ -34,3 +34,33 @@ export const createCustomer = async (payload: {
     status: response.status,
   };
 };
+
+export const DeleteCustomer = async (customer_id: string) => {
+  const response = await AxiosInstance.delete(
+    `/api/customers/${customer_id}`,
+    {
+      withCredentials: true,
+    }
+  );
+
+  return {
+    success: true,
+    data: response.data,
+    status: response.status,
+  };
+};
+
+export const EditCustomer = async (customer_id: string) => {
+  const response = await AxiosInstance.post(
+    `/api/customers/${customer_id}`,
+    {
+      withCredentials: true,
+    }
+  );
+
+  return {
+    success: true,
+    data: response.data,
+    status: response.status,
+  };
+};

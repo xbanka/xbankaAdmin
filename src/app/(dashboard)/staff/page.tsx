@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, MoreVertical } from "lucide-react";
+import { Plus } from "lucide-react";
 import { DataTableLayout } from "@/components/DataTableLayout/DataTableLayout";
 import { FilterTabs } from "@/components/ui/FilterTabs";
 import { AddStaffSidebar } from "@/components/staff/add-staff-sidebar";
@@ -10,6 +10,8 @@ import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { useGetAllStaff } from "@/lib/services/staff.service";
 import { StaffUser } from "@/lib/types/staffTypes";
 import { formatDate } from "@/lib/formatDate";
+import StaffActionMenu from "@/components/staff/staff-action-menu";
+import DeleteStaffModal from "@/components/staff/delete-staff-modal";
 
 export default function StaffPage() {
   const [filter, setFilter] = useState("all");
@@ -18,12 +20,17 @@ export default function StaffPage() {
   const role = "Admin";
   // const { data, error, isLoading } = useGetStaff(role)
   const { data, isError, error, isPending } = useGetAllStaff();
+  // const { data, isError, error, isPending } = useDeleteStaff();
 
   // const filteredStaff =
   //   filter === "all"
   //     ? data?.data?.staff
   //     : data?.data?.staff.filter((staff: StaffUser) => staff.status === filter);
   const filteredStaff = data?.data?.staff ?? []
+   const [selectedCustomer, setSelectedCustomer] =
+      useState<StaffUser | null>(null);
+    const [editOpen, setEditOpen] = useState(false);
+    const [deleteOpen, setDeleteOpen] = useState(false);
 
   const columns = [
     {
@@ -70,14 +77,22 @@ export default function StaffPage() {
     //   header: "Last Login",
     // },
     {
-      key: "actions" as const,
-      header: "Actions",
-      render: () => (
-        <button className="text-gray-500 hover:text-gray-700">
-          <MoreVertical className="w-4 h-4" />
-        </button>
-      ),
-    },
+          key: "actions",
+          header: "",
+          render: (item: StaffUser) => (
+            <StaffActionMenu
+              staff={item}
+              onEdit={() => {
+                setSelectedCustomer(item);
+                setEditOpen(true);
+              }}
+              onDelete={() => {
+                setSelectedCustomer(item);
+                setDeleteOpen(true);
+              }}
+            />
+          ),
+        },
   ];
 
   return (
@@ -116,6 +131,17 @@ export default function StaffPage() {
         isOpen={isAddStaffOpen}
         onClose={() => setIsAddStaffOpen(false)}
       />
+      {/* <EditCustomerModal
+              isOpen={editOpen}
+              onClose={() => setEditOpen(false)}
+              customer={selectedCustomer}
+            /> */}
+      
+            <DeleteStaffModal
+              isOpen={deleteOpen}
+              onClose={() => setDeleteOpen(false)}
+              staff={selectedCustomer}
+            />
     </DashboardLayout>
   );
 }

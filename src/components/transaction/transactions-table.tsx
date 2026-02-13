@@ -77,7 +77,7 @@ export function TransactionsTable({
     {
       key: "txn_id",
       header: "Transaction ID",
-      width: "15%",
+      className: "md:w-[140px]",
       render: (item: TransactionRecord) => (
         <span className="block truncate max-w-full" title={item.txn_id}>
           {item.txn_id}
@@ -87,6 +87,7 @@ export function TransactionsTable({
     {
       key: "affiliate_source",
       header: "Customer",
+      className: "md:w-[140px]",
       render: (item: TransactionRecord) => (
         <div
           onClick={(e) => handleCustomerClick(item, e)}
@@ -102,30 +103,37 @@ export function TransactionsTable({
     {
       key: "service_type",
       header: "Service Type",
+      className: "md:w-[140px]",
     },
     {
       key: "transaction_type",
       header: "Transaction Type",
+      className: "md:w-[140px]",
     },
     {
       key: "amount_in",
       header: "Amount In",
+      className: "md:w-[140px]",
     },
     {
       key: "amount_out",
       header: "Amount Out",
+      className: "md:w-[140px]",
     },
     {
       key: "vendor_rate",
       header: "Vendor Rate",
+      className: "md:w-[140px]",
     },
     {
       key: "xbanka_rate",
       header: "Xbanka Rate",
+      className: "md:w-[140px]",
     },
     {
       key: "margin",
       header: "Margin",
+      className: "md:w-[140px]",
     },
     // {
     //   key: "status",
@@ -144,13 +152,14 @@ export function TransactionsTable({
     //     </span>
     //   ),
     // },
-    { key: "vendor", header: "Vendor" },
+    { key: "vendor", header: "Vendor", className: "md:w-[140px]", },
 
-    { key: "assignedRep", header: "Assigned Rep" },
+    { key: "assignedRep", header: "Assigned Rep", className: "md:w-[140px]", },
 
     {
       key: "created_at",
       header: "Date",
+      className: "md:w-[140px]",
       render: (item: TransactionRecord) =>
         new Date(item.created_at).toLocaleDateString(),
     },
@@ -198,7 +207,7 @@ export function TransactionsTable({
           </div>
         </div>
       </div>
-      <div className="lg:max-w-[1060px] xl:min-w-full min-h-screen">
+      <div className="w-full md:max-w-[700px] lg:min-w-[100%] xl:min-w-full min-h-screen">
         <DataTableLayout
           data={filteredData}
           columns={columns}
