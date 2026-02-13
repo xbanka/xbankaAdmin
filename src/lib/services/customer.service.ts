@@ -1,4 +1,4 @@
-import { createCustomer, getCustomers } from "@/lib/actions/customerAction";
+import { createCustomer, DeleteCustomer, getCustomers } from "@/lib/actions/customerAction";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useDebounce } from "../../hooks/useDebounce";
 import { toast } from "sonner";
@@ -29,6 +29,40 @@ export const useCreateCustomer = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["customers"] });
       toast.success("Customer added successfully");
+    },
+
+    onError: (error) => {
+      handleApiError(error);
+    },
+  });
+};
+
+export const useEditCustomer = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: createCustomer,
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["customers"] });
+      toast.success("Customer added successfully");
+    },
+
+    onError: (error) => {
+      handleApiError(error);
+    },
+  });
+};
+
+export const useDeleteCustomer = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: DeleteCustomer,
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["customers"] });
+      toast.success("Customer deleted successfully");
     },
 
     onError: (error) => {
