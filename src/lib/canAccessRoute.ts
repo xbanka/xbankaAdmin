@@ -1,12 +1,12 @@
-import { Permission } from "./enum/roles&permission.enum";
-
+import { ApiPermission } from "./permissions";
 
 export function canAccessRoute(
-  userPermissions: Permission[],
-  routePermissions: readonly Permission[]
-) {
-  // Dashboard or public route
-  if (routePermissions?.length === 0) return true;
+  userPermissions: ApiPermission[],
+  routePermissions: ApiPermission[]
+): boolean {
+  if (!routePermissions.length) return true;
 
-  return routePermissions?.some((p) => userPermissions.includes(p));
+  return routePermissions.some((permission) =>
+    userPermissions.includes(permission)
+  );
 }
