@@ -1,14 +1,5 @@
 // roles.ts
-export enum Role {
-  ADMIN = "Admin",
-  MANAGER = "Manager",
-  FINANCE = "Finance",
-  OPERATIONS = "Operations",
-  COMPLIANCE = "Compliance",
-  CUSTOMER_REP = "Customer Rep",
-  STAFF = "Staff",
-  VIEWER = "Viewer",
-}
+
 
 // permissions.ts
 export enum Permission {
@@ -78,64 +69,3 @@ export enum Permission {
   /* ===================== SYSTEM ===================== */
   VIEW_SYSTEM_SETTINGS = "system:view_settings",
 }
-
-export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
-  [Role.ADMIN]: Object.values(Permission),
-
-  [Role.MANAGER]: [
-    Permission.VIEW_TRANSACTIONS,
-    Permission.CREATE_TRANSACTIONS,
-    Permission.VERIFY_TRANSACTIONS,
-    Permission.SETTLE_TRANSACTIONS,
-    Permission.VIEW_CUSTOMERS,
-    Permission.MANAGE_CUSTOMERS,
-    Permission.VIEW_PAYMENTS,
-    Permission.APPROVE_PAYMENTS,
-    Permission.VIEW_STAFF_LIST,
-    Permission.EDIT_STAFF_ROLES,
-    Permission.VIEW_SYSTEM_SETTINGS,
-  ],
-
-  [Role.FINANCE]: [
-    Permission.VIEW_PAYMENTS,
-    Permission.APPROVE_PAYMENTS,
-    Permission.REJECT_PAYMENTS,
-    Permission.HOLD_PAYMENTS,
-    Permission.RELEASE_PAYMENTS,
-    // Permission.VIEW_SUMMARIES,
-  ],
-
-  [Role.OPERATIONS]: [
-    Permission.VIEW_TRANSACTIONS,
-    Permission.CREATE_TRANSACTIONS,
-    Permission.VERIFY_TRANSACTIONS,
-    // Permission.UPDATE_TRANSACTION_STATUS,
-  ],
-
-  [Role.CUSTOMER_REP]: [
-    Permission.VIEW_CUSTOMERS,
-    Permission.MANAGE_CUSTOMERS,
-    Permission.VIEW_TRANSACTIONS,
-  ],
-
-  [Role.COMPLIANCE]: [
-    Permission.VIEW_TRANSACTIONS,
-    Permission.VERIFY_TRANSACTIONS,
-    Permission.FLAG_TRANSACTIONS,
-    Permission.VIEW_KYC,
-    // Permission.UPDATE_KYC_STATUS,
-  ],
-
-  [Role.STAFF]: [
-    Permission.VIEW_TASKS,
-    Permission.ASSIGN_TASKS,
-    Permission.UPDATE_TASK_STATUS,
-  ],
-
-  [Role.VIEWER]: [
-    Permission.VIEW_TRANSACTIONS,
-    Permission.VIEW_CUSTOMERS,
-    Permission.VIEW_PAYMENTS,
-  ],
-};
-
