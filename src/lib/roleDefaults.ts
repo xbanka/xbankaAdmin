@@ -1,5 +1,3 @@
-import { ApiPermission } from "./permissions";
-
 import { API_PERMISSIONS } from "./permissions";
 import { Role } from "./rolePermissions";
 

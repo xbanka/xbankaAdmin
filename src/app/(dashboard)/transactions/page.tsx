@@ -52,30 +52,33 @@ export default function Home() {
 
   return (
     <DashboardLayout>
-      <div className="w-full">
-        <TransactionsTable
-          onNewTransaction={() => setIsSearchOpen(true)}
-          onCustomerDetailsOpen={handleCustomerDetailsOpen}
-        />
+      <div className="p-4">
+        
+        <div className="w-full">
+          <TransactionsTable
+            onNewTransaction={() => setIsSearchOpen(true)}
+            onCustomerDetailsOpen={handleCustomerDetailsOpen}
+          />
+        </div>
+
+        <TransactionFormProvider>
+          {/* Customer Search Sidebar */}
+          <CustomerSearchSidebar
+            isOpen={isSearchOpen}
+            onClose={handleCloseSearchSidebar}
+            onCustomerSelect={handleCustomerSelect}
+          />
+
+          {/* Transaction Add Sidebar */}
+
+          <TransactionAddSidebar
+            isOpen={isAddOpen}
+            onClose={handleCloseAdd}
+            customer={selectedCustomer}
+            onBack={handleBackToSearch}
+          />
+        </TransactionFormProvider>
       </div>
-
-      <TransactionFormProvider>
-        {/* Customer Search Sidebar */}
-        <CustomerSearchSidebar
-          isOpen={isSearchOpen}
-          onClose={handleCloseSearchSidebar}
-          onCustomerSelect={handleCustomerSelect}
-        />
-
-        {/* Transaction Add Sidebar */}
-
-        <TransactionAddSidebar
-          isOpen={isAddOpen}
-          onClose={handleCloseAdd}
-          customer={selectedCustomer}
-          onBack={handleBackToSearch}
-        />
-      </TransactionFormProvider>
       {/* <CustomerTransactionsSidebar
         isOpen={isCustomerDetailsOpen}
         onClose={() => setIsCustomerDetailsOpen(false)}
