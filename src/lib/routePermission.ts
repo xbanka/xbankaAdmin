@@ -1,26 +1,26 @@
-import { Permission } from "./enum/roles&permission.enum";
+import { API_PERMISSIONS, ApiPermission } from "./permissions";
 
 
-export const ROUTE_PERMISSIONS = {
+export const ROUTE_PERMISSIONS: Record<string, ApiPermission[]> = {
   "/": [], // Dashboard → accessible if logged in
 
   "/transactions": [
-    Permission.VIEW_TRANSACTIONS,
+    API_PERMISSIONS.transactions_viewTransactions,
   ],
 
   "/customer-management": [
-    Permission.VIEW_CUSTOMERS,
+    API_PERMISSIONS.customers_viewCustomers,
   ],
 
   "/customer-support": [
-    Permission.VIEW_CUSTOMERS,
+    API_PERMISSIONS.customers_viewCustomers,
   ],
 
   "/finance": [
-    Permission.VIEW_PAYMENTS,
+    API_PERMISSIONS.finance_viewPayments,
   ],
 
   "/staff": [
-    Permission.VIEW_STAFF_LIST,
+    API_PERMISSIONS.staff_viewStaffList,
   ],
 } as const;

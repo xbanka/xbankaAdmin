@@ -67,59 +67,61 @@ export default function CustomerManagement() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-4">
-        <div className="flex items-center justify-between mb-[24px]">
-          <Header text="Customer Overview" />
+      <div className="p-4">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between mb-[24px]">
+            <Header text="Customer Overview" />
 
-          <Button size="sm" variant={"outline"}>
-            <Upload />
-            Export
-          </Button>
-        </div>
-        {/* Search */}
-        <div className="flex flex-col gap-2 lg:flex-row items-start justify-between">
-          <div className="flex gap-2 w-full lg:w-[200px]">
-            <Input
-              placeholder="Search customers..."
-              value={search}
-              className=""
-              onChange={(e) => setSearch(e.target.value)}
-            />
+            <Button size="sm" variant={"outline"}>
+              <Upload />
+              Export
+            </Button>
           </div>
-          <Button
-            className="w-full lg:w-[161px]"
-            onClick={() => setOpenModal(true)}
-          >
-            + Add Customer
-          </Button>
-        </div>
+          {/* Search */}
+          <div className="flex flex-col gap-2 lg:flex-row items-start justify-between">
+            <div className="flex gap-2 w-full lg:w-[200px]">
+              <Input
+                placeholder="Search customers..."
+                value={search}
+                className=""
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+            <Button
+              className="w-full lg:w-[161px]"
+              onClick={() => setOpenModal(true)}
+            >
+              + Add Customer
+            </Button>
+          </div>
 
-        {/* Table */}
-        <DataTableLayout<CustomerProps>
-          data={customers}
-          columns={columns}
-          rowKey={(item) => item.id}
-          isLoading={isLoading}
-          isError={isError}
-          errorMessage={error?.message ?? "Failed to load customers"}
-          // totalCount={customerBody.total}
-          currentPage={page}
-          onPageChange={setPage}
-          emptyMessage="No customers found."
+          {/* Table */}
+          <DataTableLayout<CustomerProps>
+            data={customers}
+            columns={columns}
+            rowKey={(item) => item.id}
+            isLoading={isLoading}
+            isError={isError}
+            errorMessage={error?.message ?? "Failed to load customers"}
+            // totalCount={customerBody.total}
+            currentPage={page}
+            onPageChange={setPage}
+            emptyMessage="No customers found."
+          />
+        </div>
+        <NewCustomerModal isOpen={openModal} onClose={handleClose} />
+        <EditCustomerModal
+          isOpen={editOpen}
+          onClose={() => setEditOpen(false)}
+          customer={selectedCustomer}
+        />
+
+        <DeleteCustomerModal
+          isOpen={deleteOpen}
+          onClose={() => setDeleteOpen(false)}
+          customer={selectedCustomer}
         />
       </div>
-      <NewCustomerModal isOpen={openModal} onClose={handleClose} />
-      <EditCustomerModal
-        isOpen={editOpen}
-        onClose={() => setEditOpen(false)}
-        customer={selectedCustomer}
-      />
-
-      <DeleteCustomerModal
-        isOpen={deleteOpen}
-        onClose={() => setDeleteOpen(false)}
-        customer={selectedCustomer}
-      />
     </DashboardLayout>
   );
 }
