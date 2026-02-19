@@ -120,7 +120,7 @@ export default function FinancePage() {
       // error={""}
       breadcrumbs={[{ label: "Finance" }]}
     >
-      <div className="w-full max-w-full overflow-x-hidden">
+      <div className="w-full p-4 max-w-full overflow-x-hidden">
         <div className="flex items-center justify-between mb-[24px]">
           <Header text="Finance Overview" />
 

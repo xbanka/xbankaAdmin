@@ -22,13 +22,17 @@ import {
 } from "@/lib/services/payout.service";
 import { usePayoutSidebarStore } from "@/store/usePayoutSidebarStore";
 import { useState } from "react";
+import { LucideIcon } from "lucide-react";
 
 interface DashboardLayoutProps {
   children?: React.ReactNode;
   breadcrumbs?: Array<{ label: string; href?: string }>;
+  href?: string;
   title?: string;
   isPending?: boolean;
   error?: string | null;
+  icon?: LucideIcon;
+  id?: string | number;
 }
 
 export function DashboardLayout({
@@ -36,6 +40,9 @@ export function DashboardLayout({
   breadcrumbs = [],
   isPending,
   error,
+  icon: Icon,
+  id,
+  href
 }: DashboardLayoutProps) {
   const [openModal, setOpenModal] = useState(false);
   const [rejectModal, setRejectModal] = useState(false);
@@ -104,29 +111,42 @@ export function DashboardLayout({
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />
           <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/">Dashboard</BreadcrumbLink>
+            {Icon ? (
+              <BreadcrumbItem className="flex items-center gap-2 mb-4">
+                <BreadcrumbLink href={href} className="flex items-center">
+                  <Icon className="w-5 h-5 cursor-pointer text-gray-600" />
+                  {id && (
+                    <h2 className="text-lg font-semibold text-gray-900">
+                      {id}
+                    </h2>
+                  )}
+                </BreadcrumbLink>
               </BreadcrumbItem>
-              {breadcrumbs.map((crumb, index) => (
-                <div key={index} className="flex items-center">
-                  <BreadcrumbSeparator />
-                  <BreadcrumbItem>
-                    {crumb.href ? (
-                      <BreadcrumbLink href={crumb.href}>
-                        {crumb.label}
-                      </BreadcrumbLink>
-                    ) : (
-                      <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
-                    )}
-                  </BreadcrumbItem>
-                </div>
-              ))}
-            </BreadcrumbList>
+            ) : (
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/">Dashboard</BreadcrumbLink>
+                </BreadcrumbItem>
+                {breadcrumbs.map((crumb, index) => (
+                  <div key={index} className="flex items-center">
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem>
+                      {crumb.href ? (
+                        <BreadcrumbLink href={crumb.href}>
+                          {crumb.label}
+                        </BreadcrumbLink>
+                      ) : (
+                        <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
+                      )}
+                    </BreadcrumbItem>
+                  </div>
+                ))}
+              </BreadcrumbList>
+            )}
           </Breadcrumb>
           <HeaderActions />
         </header>
-        <div className="w-full p-4 bg-off-white min-w-0 min-h-screen">
+        <div className="w-full bg-off-white min-w-0 min-h-screen">
           {/* Handle loading */}
           {isPending && (
             <div className="flex flex-1 items-center justify-center text-gray-500">

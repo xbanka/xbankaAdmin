@@ -1,5 +1,5 @@
 import z from "zod";
-import { Role } from "../enum/roles&permission.enum";
+import { Role } from "../rolePermissions";
 
 export const StepOneStaffSchema = z
   .object({

@@ -17,17 +17,16 @@ import {
   StepTwoStaffSchema,
 } from "@/lib/schema/add-staff.schema";
 import { useInviteStaff } from "@/lib/services/staff.service";
-import { InviteStaffDraft, StaffPayload } from "@/lib/types/staffTypes";
+import { InviteStaffDraft } from "@/lib/types/staffTypes";
 import {
-  ApiPermission,
   getRolePermissionDefaults,
   Permission,
   PERMISSION_CATEGORIES,
+  Role,
   ROLE_CONFIG,
   UI_TO_API_PERMISSION_MAP,
 } from "@/lib/rolePermissions";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Role } from "@/lib/enum/roles&permission.enum";
 interface AddStaffSidebarProps {
   isOpen: boolean;
   onClose: () => void;
@@ -38,7 +37,7 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
   const [staffData, setStaffData] = useState<InviteStaffDraft>({});
   const { mutate: inviteStaff, isPending } = useInviteStaff();
   const [selectedRole, setSelectedRole] = useState<Role | undefined>();
-
+  
   const handleClose = () => {
     setStep(1);
     onClose();
@@ -55,20 +54,23 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
   } = useForm<stepOneFormData>({
     resolver: zodResolver(StepOneStaffSchema),
   });
-
+  const roleValue = selectedRole;
+  
   // Step 2: Assign Role & Permissions (combined)
   const {
-    register: registerStep2,
+    control,
     handleSubmit: handleSubmitStep2,
     setValue: setValueStep2,
     watch: watchStep2,
     reset: reset2,
   } = useForm<stepTwoFormData>({
     resolver: zodResolver(StepTwoStaffSchema),
+    defaultValues: roleValue
+    ? getRolePermissionDefaults(roleValue)
+    : {},
     shouldUnregister: false,
   });
-
-  const roleValue = selectedRole;
+  
 
   // Compute which permissions are auto-checked, disabled, etc.
   const permissionState = useMemo(() => {
@@ -111,22 +113,23 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
     if (!staffData.email) {
       throw new Error("Email must exist before submitting role");
     }
-    const uiPermissions = Object.keys(data).filter(
-      (key) =>
-        data[key as keyof stepTwoFormData] === true &&
-        permissionState.allPermissions.includes(key as Permission)
-    ) as Permission[];
 
-    const apiPermissions = uiPermissions
-      .map((perm) => UI_TO_API_PERMISSION_MAP[perm])
-      .filter((p): p is ApiPermission => Boolean(p));
+    type UiPermissionKey = keyof typeof UI_TO_API_PERMISSION_MAP;
+    const selectedPermissions = Object.keys(data).filter(
+      (key) => data[key] === true
+    ) as UiPermissionKey[];
 
-    const payload: StaffPayload = {
+    const apiPermissions = selectedPermissions.map(
+      (perm) => UI_TO_API_PERMISSION_MAP[perm]
+    );
+
+    console.log("Raw data", data)
+
+    const payload = {
       email: staffData.email,
       role: data.role,
       permissions: apiPermissions,
     };
-
     inviteStaff(payload, {
       onSuccess: () => {
         onClose();
@@ -257,7 +260,7 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
                                   key={permId}
                                   id={permId}
                                   label={label}
-                                  register={registerStep2}
+                                  control={control}
                                   disabled={isNeverAllowed}
                                   isDefault={isDefault} // 👈 THIS fixes everything
                                 />

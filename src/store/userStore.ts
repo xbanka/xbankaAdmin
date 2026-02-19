@@ -1,10 +1,7 @@
-import { Role } from "@/lib/enum/roles&permission.enum";
+import { ApiPermission } from "@/lib/permissions";
+import { Role } from "@/lib/rolePermissions";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-
-export interface permission {
-  name: string;
-}
 
 export interface User {
   id: string;
@@ -14,7 +11,7 @@ export interface User {
   role: {
     id: string;
     name: Role;
-    permissions: permission[];
+    allowed_permissions: ApiPermission[];
   };
   created_at: "string";
 }

@@ -15,7 +15,7 @@ import { SERVICE_TYPE_FILTER_MAP } from "@/lib/enum/transaction.enum";
 import { useUserStore } from "@/store/userStore";
 import {
   hasPermission,
-  normalizePermissionsFromApi,
+  normalizePermissionsFromApi
 } from "@/lib/rolePermissions";
 
 export function TransactionsTable({
@@ -29,7 +29,7 @@ export function TransactionsTable({
   const [page, setPage] = useState(1);
   const user = useUserStore((state) => state.user);
   const apiPermissionSet = normalizePermissionsFromApi(
-    user?.role.permissions ?? []
+    user?.role.allowed_permissions ?? []
   );
 
   const [popupPosition, setPopupPosition] = useState<{

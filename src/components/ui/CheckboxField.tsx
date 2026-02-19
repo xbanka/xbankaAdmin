@@ -1,46 +1,47 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "./label";
+import { Controller } from "react-hook-form";
 
 type CheckboxFieldProps = {
   id: string;
   label: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  register: any;
+  // register: any;
   disabled?: boolean;
-  defaultChecked?: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  control?: any;
   isDefault?: boolean;
 };
 
 export const CheckboxField = ({
   label,
-  register,
   id,
+  control,
   disabled,
-  defaultChecked,
   isDefault,
 }: CheckboxFieldProps) => {
   return (
-    <label className="flex items-center gap-3 cursor-pointer">
-      <Checkbox
-        id={id}
-        disabled={disabled}
-        defaultChecked={defaultChecked}
-        checked={isDefault ? true : undefined}
-        onClick={(e) => {
-          if (isDefault) e.preventDefault();
-        }}
-        className="cursor-pointer"
-        {...register(id)}
-      />
-      <Label htmlFor={id} className="text-[#4B5563]">
-        {label}
-        {defaultChecked && (
-          <span className="text-xs text-gray-400 ml-1">(default)</span>
-        )}
-        {disabled && !defaultChecked && (
-          <span className="text-xs text-red-500 ml-1">(restricted)</span>
-        )}
-      </Label>
-    </label>
+    <Controller
+      name={id}
+      control={control}
+      render={({ field }) => (
+        <label className="flex items-center gap-3 cursor-pointer">
+          <Checkbox
+            checked={field.value}
+            onCheckedChange={field.onChange}
+            disabled={disabled || isDefault}
+          />
+          <Label className="text-[#4B5563]">
+            {label}
+            {isDefault && (
+              <span className="text-xs text-gray-400 ml-1">(default)</span>
+            )}
+            {disabled && !isDefault && (
+              <span className="text-xs text-red-500 ml-1">(restricted)</span>
+            )}
+          </Label>
+        </label>
+      )}
+    />
   );
 };
