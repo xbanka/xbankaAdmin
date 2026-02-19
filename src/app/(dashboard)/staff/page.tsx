@@ -97,51 +97,53 @@ export default function StaffPage() {
 
   return (
     <DashboardLayout>
-      <div className="w-full mx-auto">
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Staff</h1>
+      <div className="p-4">
+        <div className="w-full mx-auto">
+          <div className="mb-8 flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Staff</h1>
+            </div>
+            <Button onClick={() => setIsAddStaffOpen(true)}>
+              <Plus className="w-4 h-4" />
+              Add Staff
+            </Button>
           </div>
-          <Button onClick={() => setIsAddStaffOpen(true)}>
-            <Plus className="w-4 h-4" />
-            Add Staff
-          </Button>
-        </div>
 
-        <div className="mb-6">
-          <FilterTabs
-            filters={["All", "Active", "Inactive"]}
-            value={filter}
-            onChange={setFilter}
+          <div className="mb-6">
+            <FilterTabs
+              filters={["All", "Active", "Inactive"]}
+              value={filter}
+              onChange={setFilter}
+            />
+          </div>
+
+          <DataTableLayout
+            data={filteredStaff}
+            columns={columns}
+            isError={isError}
+            isLoading={isPending}
+            errorMessage={error?.message}
+            rowKey={(staff) => staff?.id}
+            emptyMessage="No staff members found"
           />
         </div>
 
-        <DataTableLayout
-          data={filteredStaff}
-          columns={columns}
-          isError={isError}
-          isLoading={isPending}
-          errorMessage={error?.message}
-          rowKey={(staff) => staff?.id}
-          emptyMessage="No staff members found"
+        <AddStaffSidebar
+          isOpen={isAddStaffOpen}
+          onClose={() => setIsAddStaffOpen(false)}
         />
+        {/* <EditCustomerModal
+                isOpen={editOpen}
+                onClose={() => setEditOpen(false)}
+                customer={selectedCustomer}
+              /> */}
+        
+              <DeleteStaffModal
+                isOpen={deleteOpen}
+                onClose={() => setDeleteOpen(false)}
+                staff={selectedCustomer}
+              />
       </div>
-
-      <AddStaffSidebar
-        isOpen={isAddStaffOpen}
-        onClose={() => setIsAddStaffOpen(false)}
-      />
-      {/* <EditCustomerModal
-              isOpen={editOpen}
-              onClose={() => setEditOpen(false)}
-              customer={selectedCustomer}
-            /> */}
-      
-            <DeleteStaffModal
-              isOpen={deleteOpen}
-              onClose={() => setDeleteOpen(false)}
-              staff={selectedCustomer}
-            />
     </DashboardLayout>
   );
 }

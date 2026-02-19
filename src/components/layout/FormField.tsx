@@ -1,6 +1,6 @@
 import { LucideIcon } from "lucide-react";
 import React from "react";
-import { FieldError, FieldErrors, FieldErrorsImpl, Merge } from "react-hook-form";
+import { FieldError, FieldErrors } from "react-hook-form";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 
