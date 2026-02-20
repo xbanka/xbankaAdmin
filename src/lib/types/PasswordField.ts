@@ -10,4 +10,5 @@ export interface PasswordFieldProps {
   register?: any;
   error?: FieldError;
   disabled?: boolean;
+  autoComplete?: string
 }

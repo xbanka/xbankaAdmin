@@ -97,7 +97,7 @@ export default function SignupForm() {
                 <FormField
                   id="email"
                   label="Email Address"
-                  type="text" // <-- prevents native popup, uses Zod validation
+                  type="text" 
                   placeholder="john@example.com"
                   icon={Mail}
                   register={register}
@@ -107,6 +107,7 @@ export default function SignupForm() {
                 <PasswordField
                   id="password"
                   label="Password"
+                  autoComplete="new-password"
                   placeholder="Enter your password"
                   icon={Lock}
                   register={register}
@@ -116,6 +117,7 @@ export default function SignupForm() {
                 <PasswordField
                   id="confirmPassword"
                   label="Confirm Password"
+                  autoComplete="new-password"
                   placeholder="Enter your password"
                   icon={Lock}
                   register={register}
