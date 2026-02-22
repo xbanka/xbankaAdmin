@@ -129,7 +129,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               );
             })}
 
-          <SidebarMenuItem className="px-2 mt-[240px]">
+          <SidebarMenuItem className="px-2 mt-[70px]">
             <SidebarMenuButton
               className="py-5 px-5 cursor-pointer"
               asChild

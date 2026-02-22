@@ -1,4 +1,4 @@
-import AuthGuardDashboard from '@/components/layout/AuthGuard'
+import AuthGuardDashboard from '@/components/auth/AuthGuard'
 import SidebarLayout from '@/components/layout/SidebarLayout'
 import React from 'react'
 

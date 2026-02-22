@@ -6,8 +6,8 @@ import { useForm } from "react-hook-form";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Mail, User } from "lucide-react";
-import { SelectFieldLayout } from "../layout/SelectFieldLayout";
-import FormField from "../layout/FormField";
+import { SelectFieldLayout } from "../forms/SelectFieldLayout";
+import FormField from "../forms/FormField";
 import { CheckboxField } from "../ui/CheckboxField";
 import { CollapsiblePermissionSection } from "./collapsible-permission-section";
 import {

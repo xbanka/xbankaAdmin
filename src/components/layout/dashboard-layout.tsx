@@ -68,7 +68,7 @@ export function DashboardLayout({
     useRejectPayout();
 
   const handleProcessPayout = () => {
-    closeDetailsSidebar(); // close first sidebar
+    closeDetailsSidebar();
     openConfirmSidebar();
   };
 
@@ -77,7 +77,7 @@ export function DashboardLayout({
   };
 
   const handleDeclinePayout = () => {
-    closeDetailsSidebar(); // IMPORTANT
+    closeDetailsSidebar();
     setRejectModal(true);
   };
 

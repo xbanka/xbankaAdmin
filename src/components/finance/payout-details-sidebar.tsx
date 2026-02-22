@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import CustomDetailsName from "./CustomDetailsName";
-import FinanceDetailsHeader from "../layout/Finance/FinanceDetailsHeader";
+import FinanceDetailsHeader from "./FinanceDetailsHeader";
 import LoaderSpinner from "../ui/loaderSpinner";
 import { PayoutDetailsSidebarProps } from "@/lib/types";
 

@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import React from "react";
-import FormField from "../FormField";
+import FormField from "../forms/FormField";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";

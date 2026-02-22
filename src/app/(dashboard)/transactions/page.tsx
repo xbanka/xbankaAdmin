@@ -22,7 +22,6 @@ export default function Home() {
     useState<TransactionRecord | null>(null);
 
   const { data, isPending, error } = useGetTransactionByCustomer(selectedTransactionCustomer?.id ?? "")
-  console.log("all customer transaction", data)
 
   const handleCustomerSelect = (customer: ActiveCustomer) => {
     setSelectedCustomer(customer);
