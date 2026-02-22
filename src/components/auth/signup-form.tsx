@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Mail, Lock, User } from "lucide-react";
-import FormField from "./FormField";
+import FormField from "../forms/FormField";
 import PasswordField from "../ui/PasswordField";
 import { useSignup } from "@/lib/services/signup.service";
 import { useState } from "react";

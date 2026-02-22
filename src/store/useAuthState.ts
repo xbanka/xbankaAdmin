@@ -5,6 +5,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { JwtPayload } from "jwt-decode";
 import { decodeAccessToken } from "@/lib/decodeToken";
+import { authToken } from "@/lib/authToken";
 
 interface DecodedToken extends JwtPayload {
   sub?: string;
@@ -41,8 +42,8 @@ export const useAuthStore = create<AuthState>()(
       },
       clearUser: () => set({ user: null }),
       logout: () => {
-        localStorage.removeItem("accessToken"); // ✅ clear from localStorage
-        set({ user: null, accessToken: null }); // ✅ clear store
+        authToken.remove();
+        set({ user: null, accessToken: null });
       },
     }),
     {
