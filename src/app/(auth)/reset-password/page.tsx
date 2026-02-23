@@ -1,4 +1,4 @@
-import ResetPasswordPage from '@/components/ResetPassword/ResetPassword'
+import ResetPasswordPage from '@/components/auth/ResetPassword'
 import React from 'react'
 
 const page = async ({

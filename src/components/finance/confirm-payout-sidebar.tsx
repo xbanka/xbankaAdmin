@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import FinanceDetailsHeader from "../layout/Finance/FinanceDetailsHeader";
+import FinanceDetailsHeader from "./FinanceDetailsHeader";
 import LoaderSpinner from "../ui/loaderSpinner";
 import SidebarHeader from "../Sidebar/sidebar-header";
 import { PayoutData } from "@/lib/types";
