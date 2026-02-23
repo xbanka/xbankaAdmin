@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Upload } from "lucide-react";
-import { SelectFieldLayout } from "../layout/SelectFieldLayout";
+import { SelectFieldLayout } from "../forms/SelectFieldLayout";
 import { TransactionType } from "../../lib/types/transactionTypes";
 import { SERVICE_TYPE_LABELS } from "@/lib/utils/helper";
 import {
@@ -16,8 +16,8 @@ import {
 } from "@/lib/schema/bill-payment-transaction.schema";
 import { useForm, useFormContext } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import FormField from "../layout/FormField";
-import { SearchSelectFieldLayout } from "../layout/SearchableSelectLayout";
+import FormField from "../forms/FormField";
+import { SearchSelectFieldLayout } from "../forms/SearchableSelectLayout";
 
 export function BillPaymentTransactionForm() {
   //  const {

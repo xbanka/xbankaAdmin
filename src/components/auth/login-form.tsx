@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Mail, Lock } from "lucide-react";
-import FormField from "./FormField";
+import FormField from "../forms/FormField";
 import PasswordField from "../ui/PasswordField";
 import Image from "next/image";
 import { LoginFormData, loginSchema } from "@/lib/schema/login.schema";

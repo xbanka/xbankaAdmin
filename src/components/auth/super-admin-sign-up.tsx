@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, Lock, LockIcon, Mail, User, Users } from "lucide-react";
-import FormField from "@/components/layout/FormField";
+import FormField from "@/components/forms/FormField";
 import PasswordField from "@/components/ui/PasswordField";
 import { SignupFormData, signupSchema } from "@/lib/schema/signup.schema";
 import { Alert, AlertDescription } from "../ui/alert";
