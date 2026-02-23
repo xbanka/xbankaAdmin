@@ -5,9 +5,7 @@ import React from 'react'
 const DashboardLayout = ({children}: { children: React.ReactNode}) => {
   return (
     <div>
-      <AuthGuardDashboard>
         <SidebarLayout>{children}</SidebarLayout>
-      </AuthGuardDashboard>
     </div>
   )
 }

@@ -17,7 +17,7 @@ const AuthGuardDashboard = ({ children }: DashboardPageTypes) => {
       <div className="flex items-center justify-center left-0 right-0 absolute top-1/2 -translate-y-1/2">
         <LoaderSpinner />
       </div>
-    ); // wait until Zustand loads
+    );
   }
 
   if (!isAuthenticated) {

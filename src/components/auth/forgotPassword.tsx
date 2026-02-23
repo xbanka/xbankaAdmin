@@ -15,12 +15,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Mail } from "lucide-react";
 import z from "zod";
-import { forgotPasswordErp } from "@/lib/actions/passwordActions";
-import { useMutation } from "@tanstack/react-query";
-import { forgotPasswordTypes } from "@/lib/actions/actionTypes";
-import { toast } from "sonner";
 import Image from "next/image";
 import Link from "next/link";
+import { useForgotPassword } from "@/lib/services/login.service";
 
 const forgotPasswordSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -37,15 +34,7 @@ const ForgotPassword = () => {
     resolver: zodResolver(forgotPasswordSchema),
   });
 
-  const { error, mutate, isPending } = useMutation({
-    mutationFn: (data: forgotPasswordTypes) => forgotPasswordErp(data),
-    onSuccess: (result) => {
-      toast.success(result.data.message);
-    },
-    onError: (err) => {
-      toast.error(err.message);
-    },
-  });
+  const { error, mutate, isPending } = useForgotPassword()
 
   const onSubmit = async (data: forgotPasswordData) => {
     mutate(data);
