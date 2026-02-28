@@ -113,16 +113,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               const isActive = pathname === item.url;
 
               return (
-                <SidebarMenuItem className="px-2" key={item.title}>
+                <SidebarMenuItem className="pr-2" key={item.title}>
                   <SidebarMenuButton
-                    className="py-5 px-5"
+                    className="py-5 px-5 rounded-tl-none rounded-bl-none rounded-tr-[36px] rounded-br-[36px] cursor-pointer"
                     asChild
                     isActive={isActive}
                     tooltip={item.title}
                   >
                     <Link href={item.url}>
-                      {item.icon && <item.icon className="w-4 h-4" />}
-                      <span>{item.title}</span>
+                      {item.icon && <item.icon className={`w-4 h-4 ${isActive ? "text-[#FFFFFF]" : "text-[#4B5563]"}`} />}
+                      <span className={`${isActive ? "text-[#FFFFFF]" : "text-[#4B5563]"}`}>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -131,13 +131,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
           <SidebarMenuItem className="px-2 mt-[70px]">
             <SidebarMenuButton
-              className="py-5 px-5 cursor-pointer"
+              className="py-5 px-5 rounded-tl-none rounded-bl-none rounded-tr-[36px] rounded-br-[36px] cursor-pointer"
               asChild
               onClick={() => setOpen(true)}
             >
               <a className="flex items-center">
-                <LogOutIcon />
-                <span>Log out</span>
+                <LogOutIcon className="text-[#4B5563]" />
+                <span className="text-[#4B5563]">Log out</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>

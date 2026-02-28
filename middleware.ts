@@ -20,7 +20,6 @@ const PUBLIC_ROUTES = [
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Ignore Next.js internals and static assets
   if (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/api") ||
@@ -39,10 +38,6 @@ export function middleware(request: NextRequest) {
     (route) => pathname === route || pathname.startsWith(`${route}/`)
   );
 
-  /**
-   * If user is NOT authenticated and trying to access protected route
-   * → redirect to signin
-   */
   if (isProtectedRoute && !token) {
     const signinUrl = new URL("/signin", request.url);
     return NextResponse.redirect(signinUrl);
