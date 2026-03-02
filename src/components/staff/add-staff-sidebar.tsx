@@ -166,7 +166,7 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
           {step === 1 && (
             <form
               onSubmit={handleSubmitStep1(handleInviteSubmit)}
-              className="space-y-4"
+              className="space-y-4 flex flex-col min-h-[700px] justify-between"
             >
               <FormField
                 id="email"
@@ -187,7 +187,7 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
                 >
                   Cancel
                 </Button>
-                <Button type="submit" className="flex-1">
+                <Button type="submit" className="flex-3">
                   Continue
                 </Button>
               </div>
@@ -286,7 +286,7 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
                 <Button
                   disabled={!roleValue || isPending}
                   type="submit"
-                  className="flex-1"
+                  className="flex-3"
                 >
                   Send Invite
                 </Button>
