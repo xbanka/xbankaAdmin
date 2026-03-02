@@ -15,7 +15,7 @@ import { SERVICE_TYPE_FILTER_MAP } from "@/lib/enum/transaction.enum";
 import { useUserStore } from "@/store/userStore";
 import {
   hasPermission,
-  normalizePermissionsFromApi
+  normalizePermissionsFromApi,
 } from "@/lib/rolePermissions";
 
 export function TransactionsTable({
@@ -29,7 +29,7 @@ export function TransactionsTable({
   const [page, setPage] = useState(1);
   const user = useUserStore((state) => state.user);
   const apiPermissionSet = normalizePermissionsFromApi(
-    user?.role.allowed_permissions ?? []
+    user?.role.allowed_permissions ?? [],
   );
 
   const [popupPosition, setPopupPosition] = useState<{
@@ -42,7 +42,7 @@ export function TransactionsTable({
 
   const handleCustomerClick = (
     item: TransactionRecord,
-    e: React.MouseEvent
+    e: React.MouseEvent,
   ) => {
     setSelectedCustomer(item);
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
@@ -79,7 +79,10 @@ export function TransactionsTable({
       header: "Transaction ID",
       className: "md:w-[140px]",
       render: (item: TransactionRecord) => (
-        <span className="block truncate max-w-full" title={item.txn_id}>
+        <span
+          className="block text-abstractCyan truncate max-w-full"
+          title={item.txn_id}
+        >
           {item.txn_id}
         </span>
       ),
@@ -152,9 +155,9 @@ export function TransactionsTable({
     //     </span>
     //   ),
     // },
-    { key: "vendor", header: "Vendor", className: "md:w-[140px]", },
+    { key: "vendor", header: "Vendor", className: "md:w-[140px]" },
 
-    { key: "assignedRep", header: "Assigned Rep", className: "md:w-[140px]", },
+    { key: "assignedRep", header: "Assigned Rep", className: "md:w-[140px]" },
 
     {
       key: "created_at",
@@ -169,15 +172,23 @@ export function TransactionsTable({
     <div className="">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <Header text="Transactions" />
+        <Header text="Transaction Management" />
 
         <div className="flex gap-3">
-          <Button size="sm" variant="outline">
+          <Button
+            size="sm"
+            variant="outline"
+            className="text-[#111827] py-2 px-3"
+          >
             <Upload className="h-4 w-4 mr-2" />
             Export
           </Button>
           {hasPermission(apiPermissionSet, "transactions:create") && (
-            <Button size="sm" className="" onClick={onNewTransaction}>
+            <Button
+              size="sm"
+              className="text-white py-2 px-3"
+              onClick={onNewTransaction}
+            >
               + New Transaction
             </Button>
           )}
