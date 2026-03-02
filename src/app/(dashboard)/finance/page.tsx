@@ -13,6 +13,8 @@ import { PayoutData } from "@/lib/types";
 import Header from "@/components/ui/Header";
 import { FilterTabs } from "@/components/ui/FilterTabs";
 import { getStatusStyles } from "@/lib/utils/statusStyles";
+import { SelectFieldLayout } from "@/components/forms/SelectFieldLayout";
+import { formatDate } from "@/lib/formatDate";
 
 export default function FinancePage() {
   const [activeFilter, setActiveFilter] = useState("all");
@@ -20,6 +22,7 @@ export default function FinancePage() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [transactionTypeFilter, setTransactionTypeFilter] = useState("all");
   const [page, setPage] = useState(1);
+  const [selectedDateRange, setSelectedDateRange] = useState("");
 
   const { data, isPending, isError, error } = useQuery({
     queryKey: ["payouts", page, activeFilter],
@@ -32,6 +35,10 @@ export default function FinancePage() {
   });
 
   const { openDetailsSidebar } = usePayoutSidebarStore();
+
+  const uniqueDates = Array.from(
+    new Set((data?.data || []).map((item: PayoutData) => formatDate(item.paid_at)))
+  );
 
   const handleSelectPayout = (payout: PayoutData) => {
     openDetailsSidebar(payout.id);
@@ -96,7 +103,7 @@ export default function FinancePage() {
       key: "requestedDate",
       header: "Requested Date",
       render: (item: PayoutData) => (
-        <span>{new Date(item.paid_at).toLocaleDateString()}</span>
+        <span>{formatDate(item.paid_at)}</span>
       ),
     },
     // { key: "requestedDate", header: "Reviewer" },
@@ -123,8 +130,7 @@ export default function FinancePage() {
       <div className="w-full p-4 max-w-full overflow-x-hidden">
         <div className="flex items-center justify-between mb-[24px]">
           <Header text="Finance Overview" />
-
-          <Button size="sm" variant={"outline"}>
+          <Button className="text-[#111827]" size="sm" variant={"outline"}>
             <Upload />
             Export
           </Button>
@@ -146,6 +152,15 @@ export default function FinancePage() {
                 className="py-[10px] px-[12px] pl-10 w-full md:w-64"
               />
             </div>
+            <SelectFieldLayout
+              id="dateCreated"
+              options={uniqueDates as string[]}
+              placeholder="Select date"
+              value={selectedDateRange}
+              onChange={setSelectedDateRange}
+              className="w-full md:w-48"
+              selectClassName="border border-gray-300"
+            />
           </div>
         </div>
         <DataTableLayout

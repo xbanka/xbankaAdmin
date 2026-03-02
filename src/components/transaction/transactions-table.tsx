@@ -17,6 +17,17 @@ import {
   hasPermission,
   normalizePermissionsFromApi
 } from "@/lib/rolePermissions";
+import { SelectFieldLayout } from "../forms/SelectFieldLayout";
+import { formatDate } from "@/lib/formatDate";
+
+const TRANSACTION_TYPES = [
+  "USDT-NGN",
+  "NGN-ETH",
+  "BTC-NGN",
+  "ETH-NGN",
+  "NGN-USDT",
+  "NGN-BTC",
+];
 
 export function TransactionsTable({
   onNewTransaction,
@@ -31,6 +42,8 @@ export function TransactionsTable({
   const apiPermissionSet = normalizePermissionsFromApi(
     user?.role.allowed_permissions ?? []
   );
+  const [selectedTransactionType, setSelectedTransactionType] = useState<string>("")
+  const [selectedDateRange, setSelectedDateRange] = useState<string>("")
 
   const [popupPosition, setPopupPosition] = useState<{
     top: number;
@@ -72,6 +85,27 @@ export function TransactionsTable({
 
     return matchesSearch && matchesType;
   });
+
+  // Get unique formatted dates for date filter (deduplicated by formatted label)
+  const uniqueDates = Array.from(
+    new Set(filteredData.map((item: TransactionRecord) => formatDate(item.created_at)))
+  ).sort().reverse();
+
+  // Calculate date range label
+  const getDateRangeLabel = (dateStr: string) => {
+    if (!dateStr) return ""
+    const date = new Date(dateStr)
+    const today = new Date()
+    const yesterday = new Date(today)
+    yesterday.setDate(yesterday.getDate() - 1)
+
+    const isToday = date.toDateString() === today.toDateString()
+    const isYesterday = date.toDateString() === yesterday.toDateString()
+
+    if (isToday) return `Today (${dateStr})`
+    if (isYesterday) return `Yesterday (${dateStr})`
+    return dateStr
+  }
 
   const columns = [
     {
@@ -161,7 +195,7 @@ export function TransactionsTable({
       header: "Date",
       className: "md:w-[140px]",
       render: (item: TransactionRecord) =>
-        new Date(item.created_at).toLocaleDateString(),
+        formatDate(item.created_at),
     },
   ];
 
@@ -205,6 +239,26 @@ export function TransactionsTable({
               className="pl-10"
             />
           </div>
+          <SelectFieldLayout
+          id="transactionType"
+          options={TRANSACTION_TYPES}
+          placeholder="Select transaction type"
+          value={selectedTransactionType}
+          onChange={setSelectedTransactionType}
+          className="w-full md:w-64"
+          selectClassName="border border-gray-300"
+        />
+
+        <SelectFieldLayout
+          id="dateCreated"
+          // eslint-ignore-next-line react-hooks/rules-of-hooks
+          options={uniqueDates as string[]}
+          placeholder="Select date"
+          value={selectedDateRange}
+          onChange={setSelectedDateRange}
+          className="w-full md:w-48"
+          selectClassName="border border-gray-300"
+        />
         </div>
       </div>
       <div className="w-full md:max-w-[700px] lg:min-w-[100%] xl:min-w-full min-h-screen">
