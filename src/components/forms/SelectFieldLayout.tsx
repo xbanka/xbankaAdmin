@@ -17,7 +17,7 @@ interface SelectFieldProps {
   options: string[];
   placeholder?: string;
   onChange?: (value: string) => void;
-  className?: string
+  className?: string;
   error?: FieldError;
   selectClassName?: string;
   value?: string | null;
@@ -33,11 +33,11 @@ export const SelectFieldLayout = ({
   className,
   error,
   selectClassName,
-  value
+  value,
 }: SelectFieldProps) => {
   return (
     <div className={cn("space-y-2", className)}>
-      { label && <Label htmlFor={id}>{label}</Label>}
+      {label && <Label htmlFor={id}>{label}</Label>}
       <div className="relative w-full">
         {Icon && (
           <Icon className="absolute left-3 top-4 h-4 w-4 text-gray-400" />
@@ -45,8 +45,8 @@ export const SelectFieldLayout = ({
         <Select value={value ?? ""} onValueChange={onChange}>
           <SelectTrigger
             className={cn(
-              selectClassName,
               `${Icon ? "pl-10 pr-6" : "px-6"} py-2 h-12 w-full border-[#2DD4BF] data-[placeholder]:border-border focus-visible:border-[#2DD4BF] focus-visible:ring-[#2DD4BF]/50`,
+              selectClassName,
             )}
           >
             <SelectValue placeholder={placeholder} />
@@ -63,4 +63,4 @@ export const SelectFieldLayout = ({
       {error && <p className="text-[10px] text-mainRed">{error.message}</p>}
     </div>
   );
-}
+};

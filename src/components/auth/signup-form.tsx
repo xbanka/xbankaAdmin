@@ -68,9 +68,10 @@ export default function SignupForm() {
   return (
     <div>
       <div className="px-[25px] md:px-0">
-        <Card className="w-full max-w-sm mx-auto">
+        <Card className="w-full max-w-[600px] mx-auto">
           <CardHeader>
-            <CardTitle>Signup to your account</CardTitle>
+            <CardTitle className="font-[700] text-[36px] leading-[44px] text-[#1B1D20] text-center">Complete Sign Up</CardTitle>
+            <CardTitle className="font-[400] text-[14px] leading-[24px] text-[#1B1D20] text-center">Enter name and password to complete sign up process</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <form onSubmit={handleSubmit(onSubmit)}>
@@ -78,16 +79,14 @@ export default function SignupForm() {
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
                     id="firstName"
-                    label="First Name"
-                    placeholder="John"
+                    placeholder="First Name"
                     icon={User}
                     register={register}
                     error={errors.firstName}
                   />
                   <FormField
                     id="lastName"
-                    label="Last Name"
-                    placeholder="Doe"
+                    placeholder="Last Name"
                     icon={User}
                     register={register}
                     error={errors.lastName}
@@ -96,9 +95,8 @@ export default function SignupForm() {
 
                 <FormField
                   id="email"
-                  label="Email Address"
                   type="text" 
-                  placeholder="john@example.com"
+                  placeholder="Work Email address"
                   icon={Mail}
                   register={register}
                   error={errors.email}
@@ -106,9 +104,8 @@ export default function SignupForm() {
 
                 <PasswordField
                   id="password"
-                  label="Password"
                   autoComplete="new-password"
-                  placeholder="Enter your password"
+                  placeholder="Password"
                   icon={Lock}
                   register={register}
                   error={errors.password}
@@ -116,9 +113,8 @@ export default function SignupForm() {
 
                 <PasswordField
                   id="confirmPassword"
-                  label="Confirm Password"
                   autoComplete="new-password"
-                  placeholder="Enter your password"
+                  placeholder="Password"
                   icon={Lock}
                   register={register}
                   error={errors.confirmPassword}
@@ -132,7 +128,7 @@ export default function SignupForm() {
                 <Button
                   type="submit"
                   disabled={isPending}
-                  className="w-full transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                  className="w-full text-[#FFFFFF] transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                   style={{
                     backgroundColor: "var(--abstractCyan)",
                     borderColor: "var(--abstractCyan)",
