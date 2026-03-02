@@ -45,7 +45,7 @@ export const SelectFieldLayout = ({
         <Select value={value ?? ""} onValueChange={onChange}>
           <SelectTrigger
             className={cn(
-              `${Icon ? "pl-10 pr-6" : "px-6"} py-2 h-12 w-full border-[#E5E7EB] focus:border-[var(--abstractCyan)] focus:ring-[var(--abstractCyan)]`,
+              `${Icon ? "pl-10 pr-6" : "px-6"} py-2 h-12 w-full border-[#2DD4BF] data-[placeholder]:border-border focus-visible:border-[#2DD4BF] focus-visible:ring-[#2DD4BF]/50`,
               selectClassName,
             )}
           >

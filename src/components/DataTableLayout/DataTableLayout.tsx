@@ -100,14 +100,14 @@ export function DataTableLayout<T>({
   return (
     <div
       className={cn(
-        "w-full max-w-full border border-[#E5E7EB] rounded-[8px]",
+        "w-full max-w-full border border-border rounded-[8px]",
         className
       )}
     >
-      <div className="hidden md:block w-full">
-        <div className="relative w-full overflow-x-auto">
+      <div className="hidden md:block w-full rounded-[8px]">
+        <div className="relative w-full overflow-x-auto rounded-[8px]">
           <div className=" min-w-full">
-            <Table className={cn("w-full table-fixed")}>
+            <Table className={cn("w-full table-fixed", isLoading || isError ? "pointer-events-none" : "")}>
               <TableHeader>
                 <TableRow className="bg-[#FAFAFA]">
                   {columns.map((col) => (
@@ -279,9 +279,9 @@ export function DataTableLayout<T>({
               ) : (
                 <Button
                   key={i}
-                  variant={p === page ? "default" : "outline"}
+                  variant={p === page ? "pagination" : "outline"}
                   size="sm"
-                  className="w-6 h-6 p-2 rounded-[6px] font-[400] text-[12px] leading-4"
+                  className={`${ p !== page && "border-none"} "w-6 h-6 p-2 rounded-[6px] font-[400] text-[12px] leading-4" `}
                   onClick={() => handlePageChange(p as number)}
                 >
                   {p}
@@ -291,7 +291,7 @@ export function DataTableLayout<T>({
           </div>
           <div className="flex items-center gap-2 overflow-x-auto">
             <Button
-              variant="outline"
+              variant={page === totalPages ? "outline" : "ghost"}
               className="border border-[#E5E3E3]"
               size="sm"
               onClick={() => handlePageChange(page - 1)}
@@ -300,7 +300,7 @@ export function DataTableLayout<T>({
               <ChevronLeft />
             </Button>
             <Button
-              variant="outline"
+              variant={page === totalPages ? "outline" : "ghost"}
               className="border border-[#E5E3E3]"
               size="sm"
               onClick={() => handlePageChange(page + 1)}
