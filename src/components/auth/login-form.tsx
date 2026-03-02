@@ -3,12 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Mail, Lock } from "lucide-react";
@@ -19,7 +14,6 @@ import { LoginFormData, loginSchema } from "@/lib/schema/login.schema";
 import { useLogin } from "@/lib/services/login.service";
 
 export default function LoginForm() {
-
   const {
     register,
     handleSubmit,
@@ -28,7 +22,7 @@ export default function LoginForm() {
     resolver: zodResolver(loginSchema),
   });
 
-  const { error, mutate, isPending } = useLogin()
+  const { error, mutate, isPending } = useLogin();
 
   const onSubmit = async (data: LoginFormData) => {
     mutate(data);
@@ -45,17 +39,18 @@ export default function LoginForm() {
         />
       </div>
       <div className="px-[25px] md:px-0">
-        <Card className="w-full max-w-sm mx-auto">
+        <Card className="w-full max-w-[500px] mx-auto">
           <CardHeader>
-            <CardTitle>Welcome Back, Login to your account</CardTitle>
+            <CardTitle className="font-[700] text-[36px] leading-[44px] text-[#1B1D20] text-center">
+              Sign Into Your Account
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="flex flex-col gap-6">
                 <FormField
                   id="email"
-                  label="Email Address"
-                  type="text" // <-- prevents native popup, uses Zod validation
+                  type="text"
                   placeholder="john@example.com"
                   icon={Mail}
                   register={register}
@@ -63,7 +58,6 @@ export default function LoginForm() {
                 />
                 <PasswordField
                   id="password"
-                  label="Password"
                   placeholder="Enter your password"
                   icon={Lock}
                   register={register}
@@ -87,7 +81,7 @@ export default function LoginForm() {
                 <Button
                   type="submit"
                   disabled={isPending}
-                  className="w-full"
+                  className="w-full text-[#FFFFFF] transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                   style={{
                     backgroundColor: "var(--abstractCyan)",
                     borderColor: "var(--abstractCyan)",

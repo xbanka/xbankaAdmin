@@ -84,7 +84,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   return (
     <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader className="">
+      <SidebarHeader className="bg-[#FFFFFF]">
         <div className="flex items-center justify-center">
           <Image
             className="group-data-[collapsible=icon]:hidden"
@@ -102,12 +102,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           />
         </div>
       </SidebarHeader>
-      <SidebarContent className="">
+      <SidebarContent className="bg-[#FFFFFF]">
         {/* We create a SidebarGroup for each parent. */}
         <SidebarMenu className="h-screen">
           {data.navMain
             .filter((item) =>
-              canAccessRoute(userPermissions, ROUTE_PERMISSIONS[item.url] ?? [])
+              canAccessRoute(
+                userPermissions,
+                ROUTE_PERMISSIONS[item.url] ?? [],
+              ),
             )
             .map((item) => {
               const isActive = pathname === item.url;
@@ -121,8 +124,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     tooltip={item.title}
                   >
                     <Link href={item.url}>
-                      {item.icon && <item.icon className={`w-4 h-4 ${isActive ? "text-[#FFFFFF]" : "text-[#4B5563]"}`} />}
-                      <span className={`${isActive ? "text-[#FFFFFF]" : "text-[#4B5563]"}`}>{item.title}</span>
+                      {item.icon && (
+                        <item.icon
+                          className={`w-4 h-4 ${isActive ? "text-[#FFFFFF]" : "text-[#4B5563]"}`}
+                        />
+                      )}
+                      <span
+                        className={`${isActive ? "text-[#FFFFFF]" : "text-[#4B5563]"}`}
+                      >
+                        {item.title}
+                      </span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
