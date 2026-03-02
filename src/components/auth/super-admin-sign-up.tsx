@@ -25,7 +25,7 @@ export default function CreateAccountPage() {
     reset,
   } = useForm({
     resolver: zodResolver(signupSchema),
-    mode: "onChange", // ✅ validate as user types
+    mode: "onChange",
     reValidateMode: "onChange",
   });
 
@@ -41,7 +41,7 @@ export default function CreateAccountPage() {
     };
     mutate(payload, {
       onSuccess: () => {
-        reset(), setShowSuccess(true);
+        (reset(), setShowSuccess(true));
       },
     });
   };
@@ -49,10 +49,10 @@ export default function CreateAccountPage() {
   if (showSuccess && isSuccess && data?.success) {
     return (
       <div className="bg-[#F9F9F9] flex items-center justify-center pb-4 px-4">
-        <Card className="w-full max-w-md text-center space-y-[24px] border-[#E9EBEE] border p-10 rounded-[20px]">
+        <Card className="w-full max-w-[600px] text-center space-y-[24px] border-[#E9EBEE] border p-10 rounded-[20px]">
           <div className="space-y-[38px]">
             <div className="flex justify-center">
-              <div className="bg-green-500 rounded-full p-3">
+              <div className="bg-[#37703F] rounded-full p-2">
                 <svg
                   className="w-8 h-8 text-white"
                   fill="currentColor"
@@ -66,7 +66,7 @@ export default function CreateAccountPage() {
                 </svg>
               </div>
             </div>
-            <h2 className="font-[700] text-[20px] text-center leading-[44px]">
+            <h2 className="font-[700] text-[36px] text-center leading-[44px]">
               Welcome to Xbanka ERP
             </h2>
           </div>
@@ -92,7 +92,9 @@ export default function CreateAccountPage() {
             </div>
           </div>
           <Link href="/signin">
-            <Button className="w-full">Go to sign in page</Button>
+            <Button className="w-full text-[#FFFFFF] p-[10px]">
+              Go to sign in page
+            </Button>
           </Link>
         </Card>
       </div>
@@ -101,9 +103,9 @@ export default function CreateAccountPage() {
 
   return (
     <div className="bg-[#F9F9F9] flex items-center justify-center pb-4 px-4">
-      <Card className="w-full max-w-sm mx-auto">
+      <Card className="w-full max-w-[600px] mx-auto">
         <CardHeader>
-          <CardTitle className="font-[700] text-[20px] text-center leading-[44px]">
+          <CardTitle className="font-[700] text-[36px] text-center leading-[44px] text-[#1B1D20]">
             Initialize Xbanka ERP
           </CardTitle>
         </CardHeader>
@@ -165,7 +167,7 @@ export default function CreateAccountPage() {
               <Button
                 type="submit"
                 disabled={isPending}
-                className="w-full transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                className="w-full transition-all text-[#FFFFFF] duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 style={{
                   backgroundColor: "var(--abstractCyan)",
                   borderColor: "var(--abstractCyan)",

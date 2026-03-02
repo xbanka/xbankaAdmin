@@ -10,9 +10,7 @@ export function FilterTabs({
   className = "",
 }: FilterTabsProps) {
   return (
-    <div
-      className={`flex justify-center md:justify-start gap-1 ${className}`}
-    >
+    <div className={`flex justify-center md:justify-start gap-1 ${className}`}>
       {filters.map((filter) => {
         const normalized = filter.toLowerCase();
         const isActive = value === normalized;
@@ -25,7 +23,7 @@ export function FilterTabs({
             onClick={() => onChange(normalized)}
             className={
               isActive
-                ? "bg-abstractCyan border border-abstractCyan text-[#111827] p-2 font-[500] text-[14px] leading-[18px]"
+                ? "bg-[#DDFFFB] border border-[#68F4E3] text-[#111827] p-2 font-[500] text-[14px] leading-[18px]"
                 : "font-[500] text-[14px] leading-[18px] text-[#111827] p-2"
             }
           >
