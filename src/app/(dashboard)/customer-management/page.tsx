@@ -66,13 +66,15 @@ export default function CustomerManagement() {
   ];
 
   return (
-    <DashboardLayout>
+    <DashboardLayout
+    breadcrumbs={[{ label: "Customer Management" }]}
+    >
       <div className="p-4">
         <div className="space-y-4">
           <div className="flex items-center justify-between mb-[24px]">
             <Header text="Customer Overview" />
 
-            <Button size="sm" variant={"outline"}>
+            <Button className="text-[#111827]" size="sm" variant={"outline"}>
               <Upload />
               Export
             </Button>
@@ -88,7 +90,7 @@ export default function CustomerManagement() {
               />
             </div>
             <Button
-              className="w-full lg:w-[161px]"
+              className="w-full lg:w-[161px] text-[#FFFFFF]"
               onClick={() => setOpenModal(true)}
             >
               + Add Customer

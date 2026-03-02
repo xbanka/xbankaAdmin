@@ -50,7 +50,9 @@ export default function Home() {
   };
 
   return (
-    <DashboardLayout>
+    <DashboardLayout
+    breadcrumbs={[{ label: "Transactions" }]}
+    >
       <div className="p-4">
         
         <div className="w-full">

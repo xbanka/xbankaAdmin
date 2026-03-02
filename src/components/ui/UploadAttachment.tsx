@@ -56,10 +56,10 @@ export function AttachmentUpload({
       {/* Upload box */}
       <div
         onClick={() => inputRef.current?.click()}
-        className="border-2 border-dashed border-[#E5E7EB] rounded-lg p-8 text-center cursor-pointer hover:bg-gray-50 transition"
+        className="border-2 border-dashed border-[#E5E7EB] rounded-lg py-4 px-[48px] text-center cursor-pointer hover:bg-gray-50 transition"
       >
         <Upload className="h-6 w-6 text-gray-400 mx-auto mb-2" />
-        <p className="text-sm text-gray-600">
+        <p className="text-[12px] font-[400] leading-[16px] text-gray-600">
           Upload screenshot, receipt, or proof document
         </p>
         <p className="text-xs text-gray-400 mt-1">
@@ -82,7 +82,7 @@ export function AttachmentUpload({
           {value.map((item, index) => (
             <div
               key={index}
-              className="flex items-center justify-between border rounded-md p-2"
+              className="flex items-center justify-between border rounded-md py-2 px-4 border-border bg-[#F9FAFB]"
             >
               <div className="flex items-center gap-3">
                 {item.previewUrl ? (
@@ -96,8 +96,8 @@ export function AttachmentUpload({
                 )}
 
                 <div className="text-sm">
-                  <p className="font-medium">{item.file.name}</p>
-                  <p className="text-xs text-gray-500">
+                  <p className="font-medium text-[14px] leading-[20px]">{item.file.name}</p>
+                  <p className="text-xs text-[#585859] font-[500] leading-[16px]">
                     {(item.file.size / 1024 / 1024).toFixed(2)} MB
                   </p>
                 </div>
@@ -106,7 +106,7 @@ export function AttachmentUpload({
               <button
                 type="button"
                 onClick={() => removeFile(index)}
-                className="text-red-500 hover:text-red-700"
+                className="text-[#991B1B] hover:text-[#991B1B] cursor-pointer"
               >
                 <Trash2 className="h-4 w-4" />
               </button>
