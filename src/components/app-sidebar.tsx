@@ -52,11 +52,11 @@ const data = {
       url: "/finance",
       icon: Banknote,
     },
-    {
-      title: "Support Center",
-      url: "/customer-support",
-      icon: HelpCircle,
-    },
+    // {
+    //   title: "Support Center",
+    //   url: "/customer-support",
+    //   icon: HelpCircle,
+    // },
     {
       title: "Staff",
       url: "/staff",
