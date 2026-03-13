@@ -3,9 +3,10 @@
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import CustomDetailsName from "./CustomDetailsName";
-import FinanceDetailsHeader from "../layout/Finance/FinanceDetailsHeader";
+import FinanceDetailsHeader from "./FinanceDetailsHeader";
 import LoaderSpinner from "../ui/loaderSpinner";
 import { PayoutDetailsSidebarProps } from "@/lib/types";
+import { formatDate } from "@/lib/formatDate";
 
 export function PayoutDetailsSidebar({
   isOpen,
@@ -30,7 +31,7 @@ export function PayoutDetailsSidebar({
 
       {/* Sidebar - slides from right */}
       <div
-        className={`fixed bg-white right-0 top-0 h-screen w-full overflow-x-hidden max-w-[470px] shadow-lg z-50 transform flex flex-col justify-between items-start transition-transform duration-300 overflow-y-auto ${
+        className={`fixed bg-white right-0 top-0 h-screen overflow-x-hidden w-full md:w-[37%] shadow-lg z-50 transform flex flex-col justify-between items-start transition-transform duration-300 overflow-y-auto ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -93,7 +94,7 @@ export function PayoutDetailsSidebar({
                     />
                     <CustomDetailsName
                       title="Joined"
-                      body={`₦${payout.amount.toLocaleString()}`}
+                      body={formatDate(payout.affiliate.created_at)}
                     />
                   </div>
                 </div>
@@ -106,7 +107,7 @@ export function PayoutDetailsSidebar({
                   <h1 className="font-[500] text-[14px] leading-[20px]">
                     Request Details
                   </h1>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-start justify-between">
                     <FinanceDetailsHeader
                       title="Amount"
                       content={
@@ -151,11 +152,11 @@ export function PayoutDetailsSidebar({
           {showContent && (
             <div className="sticky bottom-0 bg-white border-t border-gray-200 py-[16px] px-[20px] flex flex-col md:flex-row gap-4">
               <Button
-              variant={payout.status === "rejected" ? "outline" : "default"}
+              variant={payout.status === "rejected" ? "outline" : "secondary"}
                 disabled={payout.status === "rejected"}
                 className={
                   payout.status === "rejected"
-                    ? "cursor-not-allowed flex-1 bg-transparent border border-destructive text-destructive font-[500] text-[14px] leading-[18px]"
+                    ? "cursor-not-allowed flex-1 bg-transparent border !border-[#FFB3AF] !text-destructive font-[500] text-[14px] leading-[18px]"
                     : "flex-1"
                 }
                 onClick={onDecline}

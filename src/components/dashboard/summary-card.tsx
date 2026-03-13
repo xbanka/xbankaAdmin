@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
-import { SummaryCardProps } from "./layoutTypes"
+import { SummaryCardProps } from "../layout/layoutTypes"
 
 export function SummaryCard({ title, value, icon: Icon, trend, className }: SummaryCardProps) {
   return (

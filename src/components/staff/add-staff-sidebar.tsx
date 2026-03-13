@@ -6,8 +6,8 @@ import { useForm } from "react-hook-form";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Mail, User } from "lucide-react";
-import { SelectFieldLayout } from "../layout/SelectFieldLayout";
-import FormField from "../layout/FormField";
+import { SelectFieldLayout } from "../forms/SelectFieldLayout";
+import FormField from "../forms/FormField";
 import { CheckboxField } from "../ui/CheckboxField";
 import { CollapsiblePermissionSection } from "./collapsible-permission-section";
 import {
@@ -17,17 +17,16 @@ import {
   StepTwoStaffSchema,
 } from "@/lib/schema/add-staff.schema";
 import { useInviteStaff } from "@/lib/services/staff.service";
-import { InviteStaffDraft, StaffPayload } from "@/lib/types/staffTypes";
+import { InviteStaffDraft } from "@/lib/types/staffTypes";
 import {
-  ApiPermission,
   getRolePermissionDefaults,
   Permission,
   PERMISSION_CATEGORIES,
+  Role,
   ROLE_CONFIG,
   UI_TO_API_PERMISSION_MAP,
 } from "@/lib/rolePermissions";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Role } from "@/lib/enum/roles&permission.enum";
 interface AddStaffSidebarProps {
   isOpen: boolean;
   onClose: () => void;
@@ -38,7 +37,7 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
   const [staffData, setStaffData] = useState<InviteStaffDraft>({});
   const { mutate: inviteStaff, isPending } = useInviteStaff();
   const [selectedRole, setSelectedRole] = useState<Role | undefined>();
-
+  
   const handleClose = () => {
     setStep(1);
     onClose();
@@ -55,20 +54,23 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
   } = useForm<stepOneFormData>({
     resolver: zodResolver(StepOneStaffSchema),
   });
-
+  const roleValue = selectedRole;
+  
   // Step 2: Assign Role & Permissions (combined)
   const {
-    register: registerStep2,
+    control,
     handleSubmit: handleSubmitStep2,
     setValue: setValueStep2,
     watch: watchStep2,
     reset: reset2,
   } = useForm<stepTwoFormData>({
     resolver: zodResolver(StepTwoStaffSchema),
+    defaultValues: roleValue
+    ? getRolePermissionDefaults(roleValue)
+    : {},
     shouldUnregister: false,
   });
-
-  const roleValue = selectedRole;
+  
 
   // Compute which permissions are auto-checked, disabled, etc.
   const permissionState = useMemo(() => {
@@ -111,22 +113,23 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
     if (!staffData.email) {
       throw new Error("Email must exist before submitting role");
     }
-    const uiPermissions = Object.keys(data).filter(
-      (key) =>
-        data[key as keyof stepTwoFormData] === true &&
-        permissionState.allPermissions.includes(key as Permission)
-    ) as Permission[];
 
-    const apiPermissions = uiPermissions
-  .map((perm) => UI_TO_API_PERMISSION_MAP[perm])
-  .filter((p): p is ApiPermission => Boolean(p));
+    type UiPermissionKey = keyof typeof UI_TO_API_PERMISSION_MAP;
+    const selectedPermissions = Object.keys(data).filter(
+      (key) => data[key] === true
+    ) as UiPermissionKey[];
 
-    const payload: StaffPayload = {
+    const apiPermissions = selectedPermissions.map(
+      (perm) => UI_TO_API_PERMISSION_MAP[perm]
+    );
+
+    console.log("Raw data", data)
+
+    const payload = {
       email: staffData.email,
       role: data.role,
       permissions: apiPermissions,
     };
-
     inviteStaff(payload, {
       onSuccess: () => {
         onClose();
@@ -163,7 +166,7 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
           {step === 1 && (
             <form
               onSubmit={handleSubmitStep1(handleInviteSubmit)}
-              className="space-y-4"
+              className="space-y-4 flex flex-col min-h-[700px] justify-between"
             >
               <FormField
                 id="email"
@@ -184,7 +187,7 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
                 >
                   Cancel
                 </Button>
-                <Button type="submit" className="flex-1">
+                <Button type="submit" className="flex-3">
                   Continue
                 </Button>
               </div>
@@ -242,18 +245,22 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
                                   permId
                                 );
 
-                              const label =
+                              const rawLabel =
                                 permId
                                   .split("_")[1]
                                   ?.replace(/([A-Z])/g, " $1")
                                   .trim() ?? permId;
+
+                              const label =
+                                rawLabel.charAt(0).toUpperCase() +
+                                rawLabel.slice(1);
 
                               return (
                                 <CheckboxField
                                   key={permId}
                                   id={permId}
                                   label={label}
-                                  register={registerStep2}
+                                  control={control}
                                   disabled={isNeverAllowed}
                                   isDefault={isDefault} // 👈 THIS fixes everything
                                 />
@@ -279,413 +286,13 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
                 <Button
                   disabled={!roleValue || isPending}
                   type="submit"
-                  className="flex-1"
+                  className="flex-3"
                 >
                   Send Invite
                 </Button>
               </div>
             </form>
           )}
-
-          {/* {step === 3 && (
-            <form
-              onSubmit={handleSubmitStep3(handlePermissionsSubmit)}
-              className="space-y-6"
-            >
-              <CollapsiblePermissionSection title="Transactions">
-                <div className="flex gap-[32px]">
-                  <div className="space-y-3">
-                    <CheckboxField
-                      id="transactions_viewTransactions"
-                      label="View Transactions"
-                      register={registerStep3}
-                    />
-                    <CheckboxField
-                      id="transactions_verifyTransactions"
-                      label="Verify Transactions"
-                      register={registerStep3}
-                    />
-                    <CheckboxField
-                      id="transactions_refundTransactions"
-                      label="Refund Transactions"
-                      register={registerStep3}
-                    />
-                  </div>
-                  <div className="space-y-3">
-                    <CheckboxField
-                      id="transactions_createTransactions"
-                      label="Create Transactions"
-                      register={registerStep3}
-                    />
-                    <CheckboxField
-                      id="transactions_settleTransactions"
-                      label="Settle Transactions"
-                      register={registerStep3}
-                    />
-                    <CheckboxField
-                      id="transactions_flagTransactions"
-                      label="Flag Transactions"
-                      register={registerStep3}
-                    />
-                  </div>
-                  <div className="space-y-3">
-                    <CheckboxField
-                      id="transactions_freezeTransactions"
-                      label="Freeze Transactions"
-                      register={registerStep3}
-                    />
-                    <CheckboxField
-                      id="transactions_recommendReverseTransactions"
-                      label="Recommend transaction reversal"
-                      register={registerStep3}
-                    />
-                    <CheckboxField
-                      id="transactions_viewAssignedTransactions"
-                      label="View assigned transactions"
-                      register={registerStep3}
-                    />
-                  </div>
-                </div>
-              </CollapsiblePermissionSection>
-
-              <CollapsiblePermissionSection title="Customers">
-                <div className="flex gap-[32px]">
-                  <div className="space-y-3">
-                    <CheckboxField
-                      id="customers_viewCustomers"
-                      label="View Customers"
-                      register={registerStep3}
-                    />
-                    <CheckboxField
-                      id="customers_manageKyc"
-                      label="Manage KYC"
-                      register={registerStep3}
-                    />
-                  </div>
-                  <div className="space-y-3">
-                    <CheckboxField
-                      id="customers_manageCustomers"
-                      label="Manage Customers"
-                      register={registerStep3}
-                    />
-                    <CheckboxField
-                      id="customers_flagCustomers"
-                      label="Flag Customers"
-                      register={registerStep3}
-                    />
-                  </div>
-                  <div className="space-y-3">
-                    <CheckboxField
-                      id="customers_viewAssignedCustomers"
-                      label="View assigned customers"
-                      register={registerStep3}
-                    />
-                    <CheckboxField
-                      id="customers_updateLimitedCustomersInformation"
-                      label="Update limited customer information"
-                      register={registerStep3}
-                    />
-                  </div>
-                </div>
-              </CollapsiblePermissionSection>
-
-              <CollapsiblePermissionSection title="Finance">
-                <div className="flex gap-[32px]">
-                  <div className="space-y-3">
-                    <CheckboxField
-                      id="finance_viewPayments"
-                      label="View Payments"
-                      register={registerStep3}
-                    />
-                    <CheckboxField
-                      id="finance_rejectPayments"
-                      label="Reject Payments"
-                      register={registerStep3}
-                    />
-                    <CheckboxField
-                      id="finance_holdPayments"
-                      label="Hold Payments"
-                      register={registerStep3}
-                    />
-                  </div>
-                  <div className="space-y-3">
-                    <CheckboxField
-                      id="finance_approvePayments"
-                      label="Approve Payments"
-                      register={registerStep3}
-                    />
-                    <CheckboxField
-                      id="finance_flagPayments"
-                      label="Flag Payments"
-                      register={registerStep3}
-                    />
-                    <CheckboxField
-                      id="finance_releasePayments"
-                      label="Release Payments"
-                      register={registerStep3}
-                    />
-                  </div>
-                  <div className="space-y-3">
-                    <CheckboxField
-                      id="finance_exportReports"
-                      label="Export finance reports"
-                      register={registerStep3}
-                    />
-                    <CheckboxField
-                      id="finance_retryFailedPayments"
-                      label="Retry failed payments"
-                      register={registerStep3}
-                    />
-                    <CheckboxField
-                      id="finance_retryFailedPayments"
-                      label="Reverse failed settlements"
-                      register={registerStep3}
-                    />
-                  </div>
-                </div>
-              </CollapsiblePermissionSection>
-
-              <CollapsiblePermissionSection title="Staff & Access Mgt">
-                <div className="flex gap-[32px]">
-                  <div className="space-y-3">
-                    <CheckboxField
-                      id="staffAccess_viewStaffList"
-                      label="View staff list"
-                      register={registerStep3}
-                    />
-                    <CheckboxField
-                      id="staffAccess_editPermissions"
-                      label="Edit staff permissions"
-                      register={registerStep3}
-                    />
-                    <CheckboxField
-                      id="staffAccess_resetPassword"
-                      label="Reset password"
-                      register={registerStep3}
-                    />
-                  </div>
-                  <div className="space-y-3">
-                    <CheckboxField
-                      id="staffAccess_addStaffList"
-                      label="Add staff list"
-                      register={registerStep3}
-                    />
-                    <CheckboxField
-                      id="staffAccess_Suspend/ActivatePermissions"
-                      label="Suspend/Activate"
-                      register={registerStep3}
-                    />
-                    <CheckboxField
-                      id="staffAccess_resendInvites"
-                      label="Resend Invites"
-                      register={registerStep3}
-                    />
-                  </div>
-                  <div>
-                    <CheckboxField
-                      id="staffAccess_editStaffList"
-                      label="Edit staff roles"
-                      register={registerStep3}
-                    />
-                  </div>
-                </div>
-              </CollapsiblePermissionSection>
-
-              <CollapsiblePermissionSection title="Affiliate Payments">
-                <div className="flex gap-[32px]">
-                  <div className="space-y-3">
-                    <CheckboxField
-                      id="affiliate_viewAffiliatePayouts"
-                      label="View affiliate payouts"
-                      register={registerStep3}
-                    />
-                    <CheckboxField
-                      id="affiliate_approveAffiliatePayouts"
-                      label="Approve affiliate payouts"
-                      register={registerStep3}
-                    />
-                  </div>
-                  <div className="space-y-3">
-                    <CheckboxField
-                      id="affiliate_holdAffiliatePayouts"
-                      label="Hold affiliate payouts"
-                      register={registerStep3}
-                    />
-                    <CheckboxField
-                      id="affiliate_adjustAffiliatePayouts"
-                      label="Adjust affiliate balances"
-                      register={registerStep3}
-                    />
-                  </div>
-                </div>
-              </CollapsiblePermissionSection>
-              <CollapsiblePermissionSection title="Kyc">
-                <div className="flex gap-[32px]">
-                  <div className="space-y-3">
-                    <CheckboxField
-                      id="kyc_viewKycData"
-                      label=" View kyc data"
-                      register={registerStep3}
-                    />
-                    <CheckboxField
-                      id="kyc_updateKycStatus"
-                      label="Update kyc status"
-                      register={registerStep3}
-                    />
-                    <CheckboxField
-                      id="kyc_rejectKyc"
-                      label="Reject kyc"
-                      register={registerStep3}
-                    />
-                  </div>
-                  <div className="space-y-3">
-                    <CheckboxField
-                      id="kyc_approveKyc"
-                      label="Approve kyc"
-                      register={registerStep3}
-                    />
-                    <CheckboxField
-                      id="kyc_deleteKyc"
-                      label="Delete kyc"
-                      register={registerStep3}
-                    />
-                    <CheckboxField
-                      id="kyc_viewKycStatus"
-                      label="View KYC status"
-                      register={registerStep3}
-                    />
-                  </div>
-                  <div className="space-y-3">
-                    <CheckboxField
-                      id="kyc_uploadKyc"
-                      label="Upload kyc documents"
-                      register={registerStep3}
-                    />
-                    <CheckboxField
-                      id="kyc_flagKyc"
-                      label="Flag kyc"
-                      register={registerStep3}
-                    />
-                  </div>
-                </div>
-              </CollapsiblePermissionSection>
-              <CollapsiblePermissionSection title="Tasks">
-                <div className="flex gap-[32px]">
-                  <div className="space-y-3">
-                    <CheckboxField
-                      id="tasks_viewTasks"
-                      label="View tasks"
-                      register={registerStep3}
-                    />
-                    <CheckboxField
-                      id="tasks_createTasks"
-                      label="Create tasks"
-                      register={registerStep3}
-                    />
-                    <CheckboxField
-                      id="tasks_viewTasksAnalytics"
-                      label="View task analytics"
-                      register={registerStep3}
-                    />
-                    <CheckboxField
-                      id="tasks_createComplianceTasks"
-                      label="Create compliance tasks"
-                      register={registerStep3}
-                    />
-                  </div>
-                  <div className="space-y-3">
-                    <CheckboxField
-                      id="tasks_assignTasks"
-                      label="Assign tasks"
-                      register={registerStep3}
-                    />
-                    <CheckboxField
-                      id="tasks_updateTasks"
-                      label="Update tasks"
-                      register={registerStep3}
-                    />
-                    <CheckboxField
-                      id="tasks_commentTasks"
-                      label="Comment on tasks"
-                      register={registerStep3}
-                    />
-                    <CheckboxField
-                      id="tasks_viewAssignedTasks"
-                      label="View assigned tasks"
-                      register={registerStep3}
-                    />
-                  </div>
-                  <div className="space-y-3">
-                    <CheckboxField
-                      id="tasks_viewTasks"
-                      label="View tasks progress"
-                      register={registerStep3}
-                    />
-                    <CheckboxField
-                      id="tasks_deleteTasks"
-                      label="Delete tasks"
-                      register={registerStep3}
-                    />
-                    <CheckboxField
-                      id="tasks_attachTasksDocument"
-                      label="Attach document to tasks"
-                      register={registerStep3}
-                    />
-                    <CheckboxField
-                      id="tasks_updateStatusTasks"
-                      label="Update task status"
-                      register={registerStep3}
-                    />
-                  </div>
-                </div>
-              </CollapsiblePermissionSection>
-              <CollapsiblePermissionSection title="Read Only">
-                <div className="flex gap-[32px]">
-                  <div className="space-y-3">
-                    <CheckboxField
-                      id="readOnly_readOnlyAccess"
-                      label="Read only access"
-                      register={registerStep3}
-                    />
-                    <CheckboxField
-                      id="readOnly_exportReadOnlyReports"
-                      label="Export read only reports"
-                      register={registerStep3}
-                    />
-                    <CheckboxField
-                      id="readOnly_viewFinanceSummary"
-                      label="View finance summaries (read-only)"
-                      register={registerStep3}
-                    />
-                  </div>
-                  <div className="space-y-3">
-                    <CheckboxField
-                      id="readOnly_viewLogs"
-                      label="View logs (read only)"
-                      register={registerStep3}
-                    />
-                  </div>
-                </div>
-              </CollapsiblePermissionSection>
-
-              <div className="flex gap-3 pt-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleBack}
-                  className="flex-1 bg-transparent"
-                >
-                  Back
-                </Button>
-                <Button
-                  type="submit"
-                  className="flex-1 bg-teal-500 hover:bg-teal-600 text-white"
-                >
-                  Send Invite
-                </Button>
-              </div>
-            </form>
-          )} */}
         </div>
       </div>
     </div>

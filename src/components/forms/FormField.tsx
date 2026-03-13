@@ -1,12 +1,12 @@
 import { LucideIcon } from "lucide-react";
 import React from "react";
-import { FieldError, FieldErrors, FieldErrorsImpl, Merge } from "react-hook-form";
+import { FieldError, FieldErrors } from "react-hook-form";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 
 interface FormFieldProps {
   id: string;
-  label: string;
+  label?: string;
   type?: string;
   placeholder?: string;
   icon?: LucideIcon;
@@ -36,7 +36,7 @@ const FormField = ({
 }: FormFieldProps) => {
   return (
     <div className="space-y-2 w-full">
-      <Label htmlFor={id}>{label}</Label>
+      {label && <Label htmlFor={id}>{label}</Label>}
       <div className="relative">
         {Icon && (
           <Icon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground" />
@@ -47,7 +47,7 @@ const FormField = ({
           placeholder={placeholder}
           className={`${
             Icon ? "pl-10" : "px-3"
-          } border-gray-200 focus:border-[var(--abstractCyan)]`}
+          } focus:border-[var(--abstractCyan)]`}
           readOnly={readOnly}
           onChange={onChange}
           value={value}

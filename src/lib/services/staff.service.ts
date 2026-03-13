@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { handleApiError } from "../errors/handleApiError"
-import { getAllStaff, getStaff, inviteStaff } from "../actions/staff"
+import { deleteStaff, getAllStaff, getStaff, inviteStaff } from "../actions/staff"
 import { toast } from "sonner"
 import { StaffPayload } from "../types/staffTypes"
 
@@ -40,6 +40,23 @@ export const useInviteStaff = () => {
       toast.success("Staff invited successfully");
       queryClient.invalidateQueries({
         queryKey: ["getStaff"],
+      });
+
+    },
+    onError: (err) => {
+      handleApiError(err);
+    },
+  });
+}
+
+export const useDeleteStaff = () => {
+    const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: string) => deleteStaff(payload),
+    onSuccess: () => {
+      toast.success("Staff deleted successfully");
+      queryClient.invalidateQueries({
+        queryKey: ["getAllStaff"],
       });
 
     },

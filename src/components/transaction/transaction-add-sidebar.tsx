@@ -7,7 +7,7 @@ import { GiftCardTransactionForm } from "./transaction-form-gift-card";
 import { BillPaymentTransactionForm } from "./transaction-form-bill-payment";
 import { ActiveCustomer } from "../../lib/types/transactionTypes";
 import { CustomerDetailsDisplay } from "./customers-details-display";
-import { SelectFieldLayout } from "../layout/SelectFieldLayout";
+import { SelectFieldLayout } from "../forms/SelectFieldLayout";
 import { useFormContext } from "react-hook-form";
 
 type TransactionType = "crypto" | "gift-card" | "bill-payments" | null;

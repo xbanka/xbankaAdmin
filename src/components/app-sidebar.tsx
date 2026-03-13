@@ -26,12 +26,9 @@ import { Button } from "./ui/button";
 import { DialogLayout } from "./layout/modalLayout";
 import { useLogout } from "@/lib/services/logout.service";
 import { useUserStore } from "@/store/userStore";
-import { Permission } from "@/lib/enum/roles&permission.enum";
 import { canAccessRoute } from "@/lib/canAccessRoute";
 import { ROUTE_PERMISSIONS } from "@/lib/routePermission";
-// import { rolePermissions } from "@/lib/rolePermissions";
 
-// This is sample data.
 const data = {
   versions: ["1.0.1", "1.1.0-alpha", "2.0.0-beta1"],
   navMain: [
@@ -64,7 +61,7 @@ const data = {
       title: "Staff",
       url: "/staff",
       icon: Settings,
-    }
+    },
   ],
 };
 
@@ -73,10 +70,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
   const user = useUserStore((s) => s.user);
 
-  const userPermissions: Permission[] =
-  user?.role?.permissions?.map(
-    (p) => p.name as Permission
-  ) ?? [];
+  const userPermissions = user?.role?.allowed_permissions ?? [];
 
   const { mutate, isPending } = useLogout();
 
@@ -90,7 +84,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   return (
     <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader className="">
+      <SidebarHeader className="bg-[#FFFFFF]">
         <div className="flex items-center justify-center">
           <Image
             className="group-data-[collapsible=icon]:hidden"
@@ -108,65 +102,53 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           />
         </div>
       </SidebarHeader>
-      <SidebarContent className="">
+      <SidebarContent className="bg-[#FFFFFF]">
         {/* We create a SidebarGroup for each parent. */}
         <SidebarMenu className="h-screen">
-          {/* {data.navMain
-            // .filter((item) => allowedRoutes.includes(item.url)) // ✅ filter
-            .map((item) => {
-              const isActive = pathname === item.url;
-              return (
-                <SidebarMenuItem className="px-2" key={item.title}>
-                  <SidebarMenuButton
-                    className="py-5 px-5"
-                    asChild
-                    isActive={isActive}
-                    tooltip={item.title}
-                  >
-                    <Link href={item.url}>
-                      {item.icon && <item.icon className="w-4 h-4" />}
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              );
-            })} */}
           {data.navMain
             .filter((item) =>
               canAccessRoute(
                 userPermissions,
-                ROUTE_PERMISSIONS[item.url as keyof typeof ROUTE_PERMISSIONS]
-              )
+                ROUTE_PERMISSIONS[item.url] ?? [],
+              ),
             )
             .map((item) => {
               const isActive = pathname === item.url;
 
               return (
-                <SidebarMenuItem className="px-2" key={item.title}>
+                <SidebarMenuItem className="pr-2" key={item.title}>
                   <SidebarMenuButton
-                    className="py-5 px-5"
+                    className="py-5 px-5 rounded-tl-none rounded-bl-none rounded-tr-[36px] rounded-br-[36px] cursor-pointer"
                     asChild
                     isActive={isActive}
                     tooltip={item.title}
                   >
                     <Link href={item.url}>
-                      {item.icon && <item.icon className="w-4 h-4" />}
-                      <span>{item.title}</span>
+                      {item.icon && (
+                        <item.icon
+                          className={`w-4 h-4 ${isActive ? "text-[#FFFFFF]" : "text-[#4B5563]"}`}
+                        />
+                      )}
+                      <span
+                        className={`${isActive ? "text-[#FFFFFF]" : "text-[#4B5563]"}`}
+                      >
+                        {item.title}
+                      </span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               );
             })}
 
-          <SidebarMenuItem className="px-2 mt-[240px]">
+          <SidebarMenuItem className="px-2 mt-[70px]">
             <SidebarMenuButton
-              className="py-5 px-5 cursor-pointer"
+              className="py-5 px-5 rounded-tl-none rounded-bl-none rounded-tr-[36px] rounded-br-[36px] cursor-pointer"
               asChild
               onClick={() => setOpen(true)}
             >
               <a className="flex items-center">
-                <LogOutIcon />
-                <span>Log out</span>
+                <LogOutIcon className="text-[#4B5563]" />
+                <span className="text-[#4B5563]">Log out</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
