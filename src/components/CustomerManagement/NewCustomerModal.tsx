@@ -1,5 +1,5 @@
 import { Mail, Phone, User } from "lucide-react";
-import FormField from "../layout/FormField";
+import FormField from "../forms/FormField";
 import { DialogLayout } from "../layout/modalLayout";
 import { Button } from "../ui/button";
 import { useCreateCustomer } from "@/lib/services/customer.service";

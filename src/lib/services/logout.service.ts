@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { useUserStore } from "@/store/userStore";
 import { useRouter } from "next/navigation";
 import { handleApiError } from "../errors/handleApiError";
+import { authToken } from "../authToken";
 
 
 export const useLogout = () => {
@@ -13,7 +14,7 @@ export const useLogout = () => {
     mutationFn: () => logoutAction(),
     onSuccess: (result) => {
       clearUser();
-      localStorage.removeItem("accessToken");
+      authToken.remove();
       router.push("/signin");
       toast.success(result.data.message)
     },

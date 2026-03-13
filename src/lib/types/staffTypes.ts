@@ -1,5 +1,4 @@
-import { Permission, Role } from "../enum/roles&permission.enum";
-import { ApiPermission } from "../rolePermissions";
+import { ApiPermission, Role } from "../rolePermissions";
 
 export interface StaffPayload {
   email: string;
@@ -22,7 +21,7 @@ export type StaffPermission = {
 export type StaffRole = {
   id: string;
   name: string;
-  permissions: Permission[];
+  permissions: ApiPermission[];
 };
 
 export type StaffUser = {
@@ -33,3 +32,9 @@ export type StaffUser = {
   created_at: string; // ISO date string
   role: StaffRole;
 };
+
+export interface DeleteStaffModalProps {
+  isOpen: boolean
+  onClose: () => void
+  staff: StaffUser | null
+}

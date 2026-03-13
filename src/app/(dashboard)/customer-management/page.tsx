@@ -10,11 +10,18 @@ import NewCustomerModal from "@/components/CustomerManagement/NewCustomerModal";
 import Header from "@/components/ui/Header";
 import { Upload } from "lucide-react";
 import { CustomerProps } from "@/lib/types/customer";
+import CustomerActionMenu from "@/components/CustomerManagement/CustomerActionMenu";
+import EditCustomerModal from "@/components/CustomerManagement/EditCustomerModal";
+import DeleteCustomerModal from "@/components/CustomerManagement/DeleteCustomerModal";
 
 export default function CustomerManagement() {
   const [openModal, setOpenModal] = useState(false);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [selectedCustomer, setSelectedCustomer] =
+    useState<CustomerProps | null>(null);
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   const { data, isLoading, isError, error } = useGetCustomer(search);
 
@@ -39,52 +46,84 @@ export default function CustomerManagement() {
           <span className="text-gray-400">—</span>
         ),
     },
+    {
+      key: "actions",
+      header: "",
+      render: (item: CustomerProps) => (
+        <CustomerActionMenu
+          customer={item}
+          onEdit={() => {
+            setSelectedCustomer(item);
+            setEditOpen(true);
+          }}
+          onDelete={() => {
+            setSelectedCustomer(item);
+            setDeleteOpen(true);
+          }}
+        />
+      ),
+    },
   ];
 
   return (
-    <DashboardLayout>
-      <div className="space-y-4">
-        <div className="flex items-center justify-between mb-[24px]">
-          <Header text="Customer Overview" />
+    <DashboardLayout
+    breadcrumbs={[{ label: "Customer Management" }]}
+    >
+      <div className="p-4">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between mb-[24px]">
+            <Header text="Customer Overview" />
 
-          <Button size="sm" variant={"outline"}>
-            <Upload />
-            Export
-          </Button>
-        </div>
-        {/* Search */}
-        <div className="flex flex-col gap-2 lg:flex-row items-start justify-between">
-          <div className="flex gap-2 w-full lg:w-[200px]">
-            <Input
-              placeholder="Search customers..."
-              value={search}
-              className=""
-              onChange={(e) => setSearch(e.target.value)}
-            />
+            <Button className="text-[#111827]" size="sm" variant={"outline"}>
+              <Upload />
+              Export
+            </Button>
           </div>
-          <Button
-            className="w-full lg:w-[161px]"
-            onClick={() => setOpenModal(true)}
-          >
-            + Add Customer
-          </Button>
-        </div>
+          {/* Search */}
+          <div className="flex flex-col gap-2 lg:flex-row items-start justify-between">
+            <div className="flex gap-2 w-full lg:w-[200px]">
+              <Input
+                placeholder="Search customers..."
+                value={search}
+                className=""
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+            <Button
+              className="w-full lg:w-[161px] text-[#FFFFFF]"
+              onClick={() => setOpenModal(true)}
+            >
+              + Add Customer
+            </Button>
+          </div>
 
-        {/* Table */}
-        <DataTableLayout<CustomerProps>
-          data={customers}
-          columns={columns}
-          rowKey={(item) => item.id}
-          isLoading={isLoading}
-          isError={isError}
-          errorMessage={error?.message ?? "Failed to load customers"}
-          // totalCount={customerBody.total}
-          currentPage={page}
-          onPageChange={setPage}
-          emptyMessage="No customers found."
+          {/* Table */}
+          <DataTableLayout<CustomerProps>
+            data={customers}
+            columns={columns}
+            rowKey={(item) => item.id}
+            isLoading={isLoading}
+            isError={isError}
+            errorMessage={error?.message ?? "Failed to load customers"}
+            // totalCount={customerBody.total}
+            currentPage={page}
+            onPageChange={setPage}
+            emptyMessage="No customers found."
+          />
+        </div>
+        <NewCustomerModal isOpen={openModal} onClose={handleClose} />
+        <EditCustomerModal
+          isOpen={editOpen}
+          onClose={() => setEditOpen(false)}
+          customer={selectedCustomer}
+        />
+
+        <DeleteCustomerModal
+          isOpen={deleteOpen}
+          onClose={() => setDeleteOpen(false)}
+          customer={selectedCustomer}
         />
       </div>
-      <NewCustomerModal isOpen={openModal} onClose={handleClose} />
     </DashboardLayout>
   );
 }

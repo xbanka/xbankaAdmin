@@ -56,7 +56,7 @@
   --background: #ffffff;
   --foreground: #1e1e1e;
   --customCyan: #cff7f2;
-  --abstractCyan: #00edd0;
+  --abstractCyan: #0C9A8E;
   --mainGreen: #14ae5c;
   --mainRed: #c00f0c;
   --lightCyan: #e3fffb;
@@ -75,9 +75,9 @@
   --muted-foreground: oklch(0.556 0 0);
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
+  --destructive: #C00400;
+  --border: #E5E7EB;
+  --input: #DADDE2;
   --ring: oklch(0.708 0 0);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
@@ -131,6 +131,10 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+  }
+  html,
+  body {
+    overflow-x: hidden;
   }
   body {
     @apply bg-background text-foreground;

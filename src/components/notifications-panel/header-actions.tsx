@@ -27,23 +27,6 @@ export function HeaderActions() {
     }
   }, [data]);
 
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        notificationsRef.current &&
-        !notificationsRef.current.contains(event.target as Node)
-      ) {
-        setShowNotifications(false);
-      }
-    }
-
-    if (showNotifications) {
-      document.addEventListener("mousedown", handleClickOutside);
-      return () =>
-        document.removeEventListener("mousedown", handleClickOutside);
-    }
-  }, [showNotifications]);
-
   return (
     <div className="flex absolute right-2 items-center gap-4">
       {/* Notifications Bell */}

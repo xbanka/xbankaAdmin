@@ -3,11 +3,11 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { SelectFieldLayout } from "../layout/SelectFieldLayout";
+import { SelectFieldLayout } from "../forms/SelectFieldLayout";
 import { Upload } from "lucide-react";
 import { useFormContext } from "react-hook-form";
-import FormField from "../layout/FormField";
-import { SearchSelectFieldLayout } from "../layout/SearchableSelectLayout";
+import FormField from "../forms/FormField";
+import { SearchSelectFieldLayout } from "../forms/SearchableSelectLayout";
 import { GetGiftCards } from "@/lib/data";
 import {
   useCreateTransaction,
@@ -242,7 +242,8 @@ export function GiftCardTransactionForm({
 
       {/* Attachments */}
       <div>
-        <Label>Attachments</Label>
+        <Label className="text-[14px] font-[500] leading-[20px]">Attachments</Label>
+        <Label className="text-[#606368] mb-[8px]">Include receipt of transaction</Label>
         <AttachmentUpload value={attachments} onChange={setAttachments} />
         {/* {!hasAttachments && (
           <p className="text-[10px] text-mainRed mt-1">
@@ -252,9 +253,14 @@ export function GiftCardTransactionForm({
       </div>
 
       {/* Submit Button */}
+      <div className="flex gap-4">
+      <Button onClick={() => handleClose()} variant={"outline"} className="w-full flex-1">
+        cancel
+      </Button>
       <Button type="submit" className="w-full" disabled={!hasAttachments}>
         Submit for Verification
       </Button>
+      </div>
     </form>
   );
 }

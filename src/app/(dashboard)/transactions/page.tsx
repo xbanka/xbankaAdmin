@@ -10,7 +10,6 @@ import {
 } from "@/components/transaction/transaction-data";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { TransactionFormProvider } from "@/components/transaction/transaction-form-provider";
-import { CustomerTransactionsSidebar } from "@/components/transaction/customer-transactions-sidebar";
 import { useGetTransactionByCustomer } from "@/lib/services/transaction.service";
 
 export default function Home() {
@@ -23,7 +22,6 @@ export default function Home() {
     useState<TransactionRecord | null>(null);
 
   const { data, isPending, error } = useGetTransactionByCustomer(selectedTransactionCustomer?.id ?? "")
-  console.log("all customer transaction", data)
 
   const handleCustomerSelect = (customer: ActiveCustomer) => {
     setSelectedCustomer(customer);
@@ -52,31 +50,36 @@ export default function Home() {
   };
 
   return (
-    <DashboardLayout>
-      <div className="w-full">
-        <TransactionsTable
-          onNewTransaction={() => setIsSearchOpen(true)}
-          onCustomerDetailsOpen={handleCustomerDetailsOpen}
-        />
+    <DashboardLayout
+    breadcrumbs={[{ label: "Transactions" }]}
+    >
+      <div className="p-4">
+        
+        <div className="w-full">
+          <TransactionsTable
+            onNewTransaction={() => setIsSearchOpen(true)}
+            onCustomerDetailsOpen={handleCustomerDetailsOpen}
+          />
+        </div>
+
+        <TransactionFormProvider>
+          {/* Customer Search Sidebar */}
+          <CustomerSearchSidebar
+            isOpen={isSearchOpen}
+            onClose={handleCloseSearchSidebar}
+            onCustomerSelect={handleCustomerSelect}
+          />
+
+          {/* Transaction Add Sidebar */}
+
+          <TransactionAddSidebar
+            isOpen={isAddOpen}
+            onClose={handleCloseAdd}
+            customer={selectedCustomer}
+            onBack={handleBackToSearch}
+          />
+        </TransactionFormProvider>
       </div>
-
-      <TransactionFormProvider>
-        {/* Customer Search Sidebar */}
-        <CustomerSearchSidebar
-          isOpen={isSearchOpen}
-          onClose={handleCloseSearchSidebar}
-          onCustomerSelect={handleCustomerSelect}
-        />
-
-        {/* Transaction Add Sidebar */}
-
-        <TransactionAddSidebar
-          isOpen={isAddOpen}
-          onClose={handleCloseAdd}
-          customer={selectedCustomer}
-          onBack={handleBackToSearch}
-        />
-      </TransactionFormProvider>
       {/* <CustomerTransactionsSidebar
         isOpen={isCustomerDetailsOpen}
         onClose={() => setIsCustomerDetailsOpen(false)}

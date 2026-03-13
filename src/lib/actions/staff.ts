@@ -29,3 +29,14 @@ export const inviteStaff = async (payload: StaffPayload) => {
     status: response.status,
   };
 };
+
+export const deleteStaff = async (staff_id: string) => {
+  const response = await AxiosInstance.delete(`/api/staff/${staff_id}`, {
+    withCredentials: true,
+  });
+  return {
+    success: true,
+    data: response.data,
+    status: response.status,
+  };
+};

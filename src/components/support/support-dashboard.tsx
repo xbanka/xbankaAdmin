@@ -252,91 +252,94 @@ export function SupportDashboard({ onSelectChat }: SupportDashboardProps) {
     <DashboardLayout
       isPending={false}
       // error={""}
-      breadcrumbs={[{ label: "Support" }]}>
-      <div className="bg-white border-b border-gray-200">
-        <div className="">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                Support Center
-              </h1>
-            </div>
-            <div className="flex items-center gap-4">
-              <Button>
-                <Plus className="w-4 h-4 mr-2" />
-                New Ticket
-              </Button>
-            </div>
-          </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <ChatSummaryCard
-              header="Total Chats Today"
-              icon={MessageCircle}
-              footer="↑ 12% vs last week"
-              totalChats={stats.totalChats}
-            />
-
-            <ChatSummaryCard
-              header="Total Tickets Today"
-              icon={Ticket}
-              footer="↑ 10% vs last week"
-              totalChats={stats.totalTickets}
-            />
-
-            <Card className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600 mb-2">
-                    Open Tickets by Priority
-                  </p>
-                  <div className="flex gap-2 mt-2">
-                    <span className="text-sm">
-                      <span className="text-red-600">High</span>{" "}
-                      <span className="font-bold text-gray-900">14</span>
-                    </span>
-                    <span className="text-sm">
-                      <span className="text-yellow-600">Medium</span>{" "}
-                      <span className="font-bold text-gray-900">14</span>
-                    </span>
-                  </div>
-                </div>
-                <Clock className="w-8 h-8 text-yellow-500" />
+      breadcrumbs={[{ label: "Support" }]}
+    >
+      <div className="p-4">
+        <div className="bg-white border-b border-gray-200">
+          <div className="">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">
+                  Support Center
+                </h1>
               </div>
-            </Card>
+              <div className="flex items-center gap-4">
+                <Button>
+                  <Plus className="w-4 h-4 mr-2" />
+                  New Ticket
+                </Button>
+              </div>
+            </div>
 
-            <ChatSummaryCard
-              header="Avg Response Rate"
-              icon={TrendingUp}
-              footer="↑ 12% vs last week"
-              totalChats={stats.avgResponseRate}
-            />
-          </div>
+            {/* Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+              <ChatSummaryCard
+                header="Total Chats Today"
+                icon={MessageCircle}
+                footer="↑ 12% vs last week"
+                totalChats={stats.totalChats}
+              />
 
-          {/* Filters and Search */}
-          <div className="flex flex-wrap gap-2 mb-6 ">
-            <FilterTabs
-              filters={["all", "assigned", "unassigned"]}
-              value={filterTab}
-              onChange={setFilterTab}
-            />
+              <ChatSummaryCard
+                header="Total Tickets Today"
+                icon={Ticket}
+                footer="↑ 10% vs last week"
+                totalChats={stats.totalTickets}
+              />
+
+              <Card className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600 mb-2">
+                      Open Tickets by Priority
+                    </p>
+                    <div className="flex gap-2 mt-2">
+                      <span className="text-sm">
+                        <span className="text-red-600">High</span>{" "}
+                        <span className="font-bold text-gray-900">14</span>
+                      </span>
+                      <span className="text-sm">
+                        <span className="text-yellow-600">Medium</span>{" "}
+                        <span className="font-bold text-gray-900">14</span>
+                      </span>
+                    </div>
+                  </div>
+                  <Clock className="w-8 h-8 text-yellow-500" />
+                </div>
+              </Card>
+
+              <ChatSummaryCard
+                header="Avg Response Rate"
+                icon={TrendingUp}
+                footer="↑ 12% vs last week"
+                totalChats={stats.avgResponseRate}
+              />
+            </div>
+
+            {/* Filters and Search */}
+            <div className="flex flex-wrap gap-2 mb-6 ">
+              <FilterTabs
+                filters={["all", "assigned", "unassigned"]}
+                value={filterTab}
+                onChange={setFilterTab}
+              />
+            </div>
+            {/* {tab.charAt(0).toUpperCase() + tab.slice(1)} */}
           </div>
-          {/* {tab.charAt(0).toUpperCase() + tab.slice(1)} */}
         </div>
-      </div>
 
-      {/* Chats Table */}
-      <div className="">
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <DataTableLayout
-            data={filteredChats}
-            columns={tableColumns}
-            rowKey={(chat) => chat.id}
-            emptyMessage="No support chats found."
-            itemsPerPage={10}
-            totalCount={filteredChats.length}
-          />
+        {/* Chats Table */}
+        <div className="">
+          <div className="bg-white rounded-lg shadow overflow-hidden">
+            <DataTableLayout
+              data={filteredChats}
+              columns={tableColumns}
+              rowKey={(chat) => chat.id}
+              emptyMessage="No support chats found."
+              itemsPerPage={10}
+              totalCount={filteredChats.length}
+            />
+          </div>
         </div>
       </div>
     </DashboardLayout>

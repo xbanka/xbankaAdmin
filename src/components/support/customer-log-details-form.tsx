@@ -49,16 +49,15 @@ export function CustomerLogDetailsForm({ onClose, onSave }: CustomerLogDetailsFo
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end z-50">
-      <div className="bg-white w-full max-w-md rounded-t-2xl shadow-lg max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">Customer Log Details</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+    <div className="flex flex-col h-full overflow-hidden">
+      <div className="sticky top-0 bg-white p-4 border-b border-gray-200 flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-gray-900">Customer Log Details</h2>
+        <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <X className="w-5 h-5" />
+        </button>
+      </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-5">
+      <form onSubmit={handleSubmit(onSubmit)} className="flex-1 overflow-y-auto p-4 space-y-5">
           {/* Customer Name */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Customer name</label>
@@ -175,7 +174,7 @@ export function CustomerLogDetailsForm({ onClose, onSave }: CustomerLogDetailsFo
           </div>
 
           {/* Buttons */}
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-3 pt-4 sticky bottom-0 bg-white">
             <Button type="button" onClick={onClose} variant="outline" className="flex-1 bg-transparent">
               Cancel
             </Button>
@@ -184,7 +183,6 @@ export function CustomerLogDetailsForm({ onClose, onSave }: CustomerLogDetailsFo
             </Button>
           </div>
         </form>
-      </div>
     </div>
   )
 }

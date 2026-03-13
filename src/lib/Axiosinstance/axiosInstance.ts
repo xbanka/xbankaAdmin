@@ -1,4 +1,5 @@
 import axios from "axios";
+import { authToken } from "../authToken";
 
 const AxiosInstance = axios.create({
   baseURL: "https://api.xbankang.com/",
@@ -11,7 +12,7 @@ const AxiosInstance = axios.create({
 
 AxiosInstance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("accessToken");
+    const token = authToken.get();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -29,7 +30,7 @@ AxiosInstance.interceptors.response.use(
       error.response?.status === 401 &&
       originalRequest?.url?.includes("/api/auth/erp/refresh")
     ) {
-      localStorage.removeItem("accessToken");
+      authToken.remove();
 
       if (typeof window !== "undefined") {
         window.location.href = "/signin";
@@ -41,7 +42,7 @@ AxiosInstance.interceptors.response.use(
       error.response?.status === 401 &&
       error.response?.data?.detail === "Refresh token missing"
     ) {
-      localStorage.removeItem("accessToken");
+      authToken.remove();
 
       if (typeof window !== "undefined") {
         window.location.href = "/signin";
@@ -54,7 +55,7 @@ AxiosInstance.interceptors.response.use(
       error.response?.data?.detail === "Invalid user type"
     ) {
       if (typeof window !== "undefined") {
-        localStorage.removeItem("accessToken");
+        authToken.remove();
         window.location.href = "/signin";
       }
       return Promise.reject(error);
@@ -73,11 +74,11 @@ AxiosInstance.interceptors.response.use(
           "/api/auth/erp/refresh",
           {},
           { withCredentials: true }
-        ); // backend uses cookie
+        );
 
         const newAccessToken = refreshResponse.data?.access_token;
         if (newAccessToken) {
-          localStorage.setItem("accessToken", newAccessToken);
+          authToken.set(newAccessToken);
           // originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
           originalRequest.headers = {
             ...(originalRequest.headers || {}),
@@ -87,7 +88,7 @@ AxiosInstance.interceptors.response.use(
         return AxiosInstance(originalRequest);
       } catch (refreshError) {
         if (typeof window !== "undefined") {
-          localStorage.removeItem("accessToken");
+          authToken.remove();
           window.location.href = "/signin";
         }
         return Promise.reject(refreshError);

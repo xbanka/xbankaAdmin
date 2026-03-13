@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { SummaryCard } from "@/components/layout/summary-card"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import {
@@ -19,6 +18,7 @@ import {
   Eye,
   Send,
 } from "lucide-react"
+import { SummaryCard } from "./summary-card"
 
 const allMetrics = [
   // Transaction Metrics

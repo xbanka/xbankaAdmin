@@ -9,8 +9,11 @@ export default function SupportPage() {
   const [selectedChat, setSelectedChat] = useState<SupportChat | null>(null)
 
   if (selectedChat) {
-    return <ChatInterface chat={selectedChat} onBack={() => setSelectedChat(null)} />
+    return(
+        <ChatInterface chat={selectedChat} onBack={() => setSelectedChat(null)} />
+    )
   }
 
   return <SupportDashboard onSelectChat={setSelectedChat} />
+
 }

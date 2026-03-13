@@ -1,5 +1,14 @@
-import { permission } from "@/store/userStore";
-import { Role } from "./enum/roles&permission.enum";
+export enum Role {
+  Super_ADMIN = "Super Admin",
+  ADMIN = "Admin",
+  MANAGER = "Manager",
+  FINANCE = "Finance",
+  OPERATIONS = "Operations",
+  COMPLIANCE = "Compliance",
+  CUSTOMER_REP = "Customer Rep",
+  STAFF = "Staff",
+  VIEWER = "Viewer",
+}
 
 // rolePermissions.ts
 export const rolePermissions = {
@@ -36,12 +45,16 @@ export const rolePermissions = {
   ],
 } as const;
 
+export type ApiPermission = string;
+
+export type UiPermission =
+  (typeof PERMISSION_CATEGORIES)[keyof typeof PERMISSION_CATEGORIES][number];
+
 export type Permission =
   (typeof PERMISSION_CATEGORIES)[keyof typeof PERMISSION_CATEGORIES][number];
 
-export type ApiPermission =
-  (typeof UI_TO_API_PERMISSION_MAP)[keyof typeof UI_TO_API_PERMISSION_MAP];
-
+// export type ApiPermission =
+//   (typeof UI_TO_API_PERMISSION_MAP)[keyof typeof UI_TO_API_PERMISSION_MAP];
 
 export const ROLE_CONFIG: Record<
   Role,
@@ -51,6 +64,89 @@ export const ROLE_CONFIG: Record<
     neverAllowedPermissions: Permission[];
   }
 > = {
+  "Super Admin": {
+    defaultPermissions: [
+      "transactions_viewTransactions",
+      "transactions_viewAssignedTransactions",
+      "transactions_viewLimitedTransactions",
+      "transactions_createTransactions",
+      "transactions_verifyTransactions",
+      "transactions_updateStatus",
+      "transactions_settleTransactions",
+      "transactions_executeSettlements",
+      "transactions_markCompleted",
+      "transactions_flagTransactions",
+      "transactions_freezeTransactions",
+      "transactions_mergeTransactions",
+      "transactions_recommendReversal",
+      "transactions_refund",
+      "transactions_edit",
+      "finance_viewPayments",
+      "finance_approvePayments",
+      "finance_rejectPayments",
+      "finance_holdPayments",
+      "finance_releasePayments",
+      "finance_flagPayments",
+      "finance_retryPayments",
+      "finance_reverseSettlements",
+      "finance_viewProfit",
+      "finance_viewSummaries",
+      "finance_bypassApprovals",
+      "finance_adjustBalance",
+      "affiliate_viewPayouts",
+      "affiliate_approvePayouts",
+      "affiliate_holdPayouts",
+      "affiliate_adjustBalances",
+      "customers_viewCustomers",
+      "customers_manageCustomers",
+      "customers_viewAssignedCustomers",
+      "customers_updateCustomerInfo",
+      "customers_editDetails",
+      "customers_addCustomer",
+      "kyc_viewKycStatus",
+      "kyc_viewKycData",
+      "kyc_viewKycDocuments",
+      "kyc_updateKycStatus",
+      "kyc_uploadDocuments",
+      "kyc_approveKyc",
+      "kyc_rejectKyc",
+      "kyc_flagKyc",
+      "tasks_viewTasks",
+      "tasks_viewAssignedTasks",
+      "tasks_viewTaskProgress",
+      "tasks_viewTaskAnalytics",
+      "tasks_viewBoardReadOnly",
+      "tasks_createTasks",
+      "tasks_createComplianceTasks",
+      "tasks_assignTasks",
+      "tasks_updateTaskStatus",
+      "tasks_editDetails",
+      "tasks_commentTasks",
+      "tasks_attachDocuments",
+      "tasks_deleteTasks",
+      "staff_viewStaffList",
+      "staff_addStaff",
+      "staff_editPermissions",
+      "staff_suspendActivate",
+      "staff_createSuperAdmin",
+      "staff_editRoles",
+      "staff_resetPassword",
+      "audit_viewAuditLogs",
+      "audit_exportAuditLogs",
+      "audit_bypassLogging",
+      "reports_viewReadOnly",
+      "reports_exportReadOnly",
+      "reports_exportOperational",
+      "reports_exportFinance",
+      "reconciliation_viewRecords",
+      "dashboards_viewReadOnly",
+      "systemSettings_editSettings",
+      "system_viewSettings",
+      "records_deleteRecords",
+    ],
+    optionalPermissions: [],
+    neverAllowedPermissions: [],
+  },
   Admin: {
     defaultPermissions: [
       "transactions_viewTransactions",
@@ -174,7 +270,7 @@ export const ROLE_CONFIG: Record<
       "finance_releasePayments",
       "finance_viewProfit",
       "staff_editPermissions",
-      "systemSettings_editSettings"
+      "systemSettings_editSettings",
     ],
   },
   Compliance: {
@@ -274,6 +370,8 @@ export const PERMISSION_CATEGORIES = {
     "transactions_freezeTransactions",
     "transactions_mergeTransactions",
     "transactions_recommendReversal",
+    "transactions_refund",
+    "transactions_edit",
   ],
 
   Finance: [
@@ -288,6 +386,7 @@ export const PERMISSION_CATEGORIES = {
     "finance_viewProfit",
     "finance_viewSummaries",
     "finance_bypassApprovals",
+    "finance_adjustBalance",
   ],
 
   Affiliate: [
@@ -303,6 +402,7 @@ export const PERMISSION_CATEGORIES = {
     "customers_viewAssignedCustomers",
     "customers_updateCustomerInfo",
     "customers_editDetails",
+    "customers_addCustomer",
   ],
 
   KYC: [
@@ -338,6 +438,8 @@ export const PERMISSION_CATEGORIES = {
     "staff_editPermissions",
     "staff_suspendActivate",
     "staff_createSuperAdmin",
+    "staff_editRoles",
+    "staff_resetPassword",
   ],
 
   Audit: [
@@ -357,26 +459,33 @@ export const PERMISSION_CATEGORIES = {
 
   Dashboards: ["dashboards_viewReadOnly"],
 
-  SystemSettings: ["systemSettings_editSettings"],
+  SystemSettings: ["systemSettings_editSettings", "system_viewSettings"],
 
   Other: ["records_deleteRecords"],
 } as const;
 
-export const getRolePermissionDefaults = (role: Role) => {
+export function getRolePermissionDefaults(role: Role) {
+  if (!role) return {};
+  
   const config = ROLE_CONFIG[role];
 
-  const values: Record<string, boolean> = {};
+  if (!config) {
+    console.error("Invalid role passed to getRolePermissionDefaults:", role);
+    return {};
+  }
 
-  config.defaultPermissions.forEach((p) => {
-    values[p] = true; // 👈 checked
+  const defaults: Record<string, boolean> = {};
+
+  config.defaultPermissions.forEach((perm) => {
+    defaults[perm] = true;
   });
 
-  config.optionalPermissions.forEach((p) => {
-    values[p] = false; // 👈 unchecked
+  config.optionalPermissions.forEach((perm) => {
+    defaults[perm] = false;
   });
 
-  return values;
-};
+  return defaults;
+}
 
 export const UI_TO_API_PERMISSION_MAP: Record<Permission, string> = {
   // Transactions
@@ -393,6 +502,8 @@ export const UI_TO_API_PERMISSION_MAP: Record<Permission, string> = {
   transactions_executeSettlements: "transactions:execute",
   transactions_viewAssignedTransactions: "transactions:view_assigned",
   transactions_viewLimitedTransactions: "transactions:view_limited",
+  transactions_refund: "transactions:refund",
+  transactions_edit: "transactions:edit",
 
   // Customers
   customers_viewCustomers: "customers:view",
@@ -400,6 +511,7 @@ export const UI_TO_API_PERMISSION_MAP: Record<Permission, string> = {
   customers_viewAssignedCustomers: "customers:view_assigned",
   customers_editDetails: "customers:edit",
   customers_updateCustomerInfo: "customers:update",
+  customers_addCustomer: "customers:add",
 
   // Finance
   finance_viewPayments: "finance:view_payments",
@@ -414,6 +526,7 @@ export const UI_TO_API_PERMISSION_MAP: Record<Permission, string> = {
   finance_viewProfit: "finance:view_profit",
   reports_exportFinance: "finance:export_reports",
   finance_bypassApprovals: "finance:bypass_approvals",
+  finance_adjustBalance: "finance:adjust_balance",
 
   // Affiliate (adjust balance moved here ✔)
   affiliate_viewPayouts: "affiliate:view_payouts",
@@ -426,6 +539,8 @@ export const UI_TO_API_PERMISSION_MAP: Record<Permission, string> = {
   staff_addStaff: "staff:add",
   staff_editPermissions: "staff:edit_permissions",
   staff_suspendActivate: "staff:suspend_activate",
+  staff_editRoles: "staff:edit_roles",
+  staff_resetPassword: "staff:reset_password",
 
   // Tasks
   tasks_viewTasks: "tasks:view",
@@ -472,15 +587,13 @@ export const UI_TO_API_PERMISSION_MAP: Record<Permission, string> = {
 
   // System
   systemSettings_editSettings: "system:edit_settings",
-  
+  system_viewSettings: "system:view_settings",
+
   staff_createSuperAdmin: "",
- 
 };
 
-export const normalizePermissionsFromApi = (
-  perms: permission[]
-): Set<string> => {
-  return new Set(perms.map((p) => p.name));
+export const normalizePermissionsFromApi = (perms: string[]): Set<string> => {
+  return new Set(perms);
 };
 
 export const hasPermission = (

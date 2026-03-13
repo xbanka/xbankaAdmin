@@ -17,6 +17,17 @@ import {
   hasPermission,
   normalizePermissionsFromApi,
 } from "@/lib/rolePermissions";
+import { SelectFieldLayout } from "../forms/SelectFieldLayout";
+import { formatDate } from "@/lib/formatDate";
+
+const TRANSACTION_TYPES = [
+  "USDT-NGN",
+  "NGN-ETH",
+  "BTC-NGN",
+  "ETH-NGN",
+  "NGN-USDT",
+  "NGN-BTC",
+];
 
 export function TransactionsTable({
   onNewTransaction,
@@ -29,8 +40,10 @@ export function TransactionsTable({
   const [page, setPage] = useState(1);
   const user = useUserStore((state) => state.user);
   const apiPermissionSet = normalizePermissionsFromApi(
-    user?.role.permissions ?? []
+    user?.role.allowed_permissions ?? [],
   );
+  const [selectedTransactionType, setSelectedTransactionType] = useState<string>("")
+  const [selectedDateRange, setSelectedDateRange] = useState<string>("")
 
   const [popupPosition, setPopupPosition] = useState<{
     top: number;
@@ -42,7 +55,7 @@ export function TransactionsTable({
 
   const handleCustomerClick = (
     item: TransactionRecord,
-    e: React.MouseEvent
+    e: React.MouseEvent,
   ) => {
     setSelectedCustomer(item);
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
@@ -73,13 +86,37 @@ export function TransactionsTable({
     return matchesSearch && matchesType;
   });
 
+  // Get unique formatted dates for date filter (deduplicated by formatted label)
+  const uniqueDates = Array.from(
+    new Set(filteredData.map((item: TransactionRecord) => formatDate(item.created_at)))
+  ).sort().reverse();
+
+  // Calculate date range label
+  const getDateRangeLabel = (dateStr: string) => {
+    if (!dateStr) return ""
+    const date = new Date(dateStr)
+    const today = new Date()
+    const yesterday = new Date(today)
+    yesterday.setDate(yesterday.getDate() - 1)
+
+    const isToday = date.toDateString() === today.toDateString()
+    const isYesterday = date.toDateString() === yesterday.toDateString()
+
+    if (isToday) return `Today (${dateStr})`
+    if (isYesterday) return `Yesterday (${dateStr})`
+    return dateStr
+  }
+
   const columns = [
     {
       key: "txn_id",
       header: "Transaction ID",
-      width: "15%",
+      className: "md:w-[140px]",
       render: (item: TransactionRecord) => (
-        <span className="block truncate max-w-full" title={item.txn_id}>
+        <span
+          className="block text-abstractCyan truncate max-w-full"
+          title={item.txn_id}
+        >
           {item.txn_id}
         </span>
       ),
@@ -87,6 +124,7 @@ export function TransactionsTable({
     {
       key: "affiliate_source",
       header: "Customer",
+      className: "md:w-[140px]",
       render: (item: TransactionRecord) => (
         <div
           onClick={(e) => handleCustomerClick(item, e)}
@@ -102,30 +140,37 @@ export function TransactionsTable({
     {
       key: "service_type",
       header: "Service Type",
+      className: "md:w-[140px]",
     },
     {
       key: "transaction_type",
       header: "Transaction Type",
+      className: "md:w-[140px]",
     },
     {
       key: "amount_in",
       header: "Amount In",
+      className: "md:w-[140px]",
     },
     {
       key: "amount_out",
       header: "Amount Out",
+      className: "md:w-[140px]",
     },
     {
       key: "vendor_rate",
       header: "Vendor Rate",
+      className: "md:w-[140px]",
     },
     {
       key: "xbanka_rate",
       header: "Xbanka Rate",
+      className: "md:w-[140px]",
     },
     {
       key: "margin",
       header: "Margin",
+      className: "md:w-[140px]",
     },
     // {
     //   key: "status",
@@ -144,15 +189,16 @@ export function TransactionsTable({
     //     </span>
     //   ),
     // },
-    { key: "vendor", header: "Vendor" },
+    { key: "vendor", header: "Vendor", className: "md:w-[140px]" },
 
-    { key: "assignedRep", header: "Assigned Rep" },
+    { key: "assignedRep", header: "Assigned Rep", className: "md:w-[140px]" },
 
     {
       key: "created_at",
       header: "Date",
+      className: "md:w-[140px]",
       render: (item: TransactionRecord) =>
-        new Date(item.created_at).toLocaleDateString(),
+        formatDate(item.created_at),
     },
   ];
 
@@ -160,15 +206,23 @@ export function TransactionsTable({
     <div className="">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <Header text="Transactions" />
+        <Header text="Transaction Management" />
 
         <div className="flex gap-3">
-          <Button size="sm" variant="outline">
+          <Button
+            size="sm"
+            variant="outline"
+            className="text-[#111827] py-2 px-3"
+          >
             <Upload className="h-4 w-4 mr-2" />
             Export
           </Button>
           {hasPermission(apiPermissionSet, "transactions:create") && (
-            <Button size="sm" className="" onClick={onNewTransaction}>
+            <Button
+              size="sm"
+              className="text-white py-2 px-3"
+              onClick={onNewTransaction}
+            >
               + New Transaction
             </Button>
           )}
@@ -196,9 +250,29 @@ export function TransactionsTable({
               className="pl-10"
             />
           </div>
+          <SelectFieldLayout
+          id="transactionType"
+          options={TRANSACTION_TYPES}
+          placeholder="Select transaction type"
+          value={selectedTransactionType}
+          onChange={setSelectedTransactionType}
+          className="w-full md:w-64"
+          selectClassName="border border-gray-300"
+        />
+
+        <SelectFieldLayout
+          id="dateCreated"
+          // eslint-ignore-next-line react-hooks/rules-of-hooks
+          options={uniqueDates as string[]}
+          placeholder="Select date"
+          value={selectedDateRange}
+          onChange={setSelectedDateRange}
+          className="w-full md:w-48"
+          selectClassName="border border-gray-300"
+        />
         </div>
       </div>
-      <div className="lg:max-w-[1060px] xl:min-w-full min-h-screen">
+      <div className="w-full md:max-w-[700px] lg:min-w-[100%] xl:min-w-full min-h-screen">
         <DataTableLayout
           data={filteredData}
           columns={columns}

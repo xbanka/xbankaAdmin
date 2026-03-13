@@ -14,6 +14,7 @@ const PasswordField = ({
   register,
   error,
   disabled,
+  autoComplete
 }: PasswordFieldProps) => {
   const [show, setShow] = useState(false);
 
@@ -25,6 +26,7 @@ const PasswordField = ({
         <Input
           id={id}
           type={show ? "text" : "password"}
+          autoComplete={autoComplete}
           placeholder={placeholder}
           disabled={disabled}
           className={`${Icon ? "pl-10 pr-10" : "px-3 pr-10"}`}
