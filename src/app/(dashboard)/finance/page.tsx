@@ -37,7 +37,9 @@ export default function FinancePage() {
   const { openDetailsSidebar } = usePayoutSidebarStore();
 
   const uniqueDates = Array.from(
-    new Set((data?.data || []).map((item: PayoutData) => formatDate(item.paid_at)))
+    new Set(
+      (data?.data || []).map((item: PayoutData) => formatDate(item.paid_at)),
+    ),
   );
 
   const handleSelectPayout = (payout: PayoutData) => {
@@ -92,7 +94,7 @@ export default function FinancePage() {
       render: (item: PayoutData) => (
         <span
           className={`capitalize px-3 py-2 rounded-[36px] text-xs font-medium ${getStatusStyles(
-            item.status
+            item.status,
           )}`}
         >
           {item.status}
@@ -102,9 +104,7 @@ export default function FinancePage() {
     {
       key: "requestedDate",
       header: "Requested Date",
-      render: (item: PayoutData) => (
-        <span>{formatDate(item.paid_at)}</span>
-      ),
+      render: (item: PayoutData) => <span>{formatDate(item.paid_at)}</span>,
     },
     // { key: "requestedDate", header: "Reviewer" },
     {
