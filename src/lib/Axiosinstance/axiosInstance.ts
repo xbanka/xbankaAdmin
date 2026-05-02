@@ -94,21 +94,48 @@ AxiosInstance.interceptors.response.use(
         return Promise.reject(refreshError);
       }
     }
-    const apiMessage =
-      error.response?.data?.message ||
-      error.response?.data?.error ||
-      error.response?.data?.detail ||
-      error.response?.data?.errors?.[0] ||
-      error.message ||
-      "Something went wrong" ||
-      String(error);
+
+    // NETWORK / TIMEOUT HANDLING
+    let apiMessage = "Something went wrong";
+    let status = error.response?.status || 500;
+
+    if (error.code === "ECONNABORTED") {
+      apiMessage = "Network timeout. Please check your connection.";
+      status = 408;
+    } else if (!error.response) {
+      apiMessage = "Network error. Please check your internet connection.";
+      status = 503;
+    } else {
+      apiMessage =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        error.response?.data?.detail ||
+        error.response?.data?.errors?.[0] ||
+        error.message ||
+        "Something went wrong";
+    }
 
     const customError = {
       success: false,
-      status: error.response?.status || 500,
+      status,
       message: apiMessage,
-      raw: error, // keep raw error if you need debugging
+      raw: error,
     };
+    // const apiMessage =
+    //   error.response?.data?.message ||
+    //   error.response?.data?.error ||
+    //   error.response?.data?.detail ||
+    //   error.response?.data?.errors?.[0] ||
+    //   error.message ||
+    //   "Something went wrong" ||
+    //   String(error);
+
+    // const customError = {
+    //   success: false,
+    //   status: error.response?.status || 500,
+    //   message: apiMessage,
+    //   raw: error, // keep raw error if you need debugging
+    // };
 
     return Promise.reject(customError);
   }
