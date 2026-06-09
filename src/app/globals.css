@@ -55,6 +55,14 @@
   --radius: 0.625rem;
   --background: #ffffff;
   --foreground: #1e1e1e;
+  --text-primary: #1B1D20;
+  --text-secondary: #4B5563;
+  --card-secondary: #F9F9F9;
+  --card-primary: #FFFFFF;
+  --error-text: #E50500;
+  --button-primary-bg: #0C9A8E;
+  --button-primary-border: #5EEAD4;
+  --card-border-secondary: #E9EBEE;
   --customCyan: #cff7f2;
   --abstractCyan: #0C9A8E;
   --mainGreen: #14ae5c;
