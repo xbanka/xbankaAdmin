@@ -6,13 +6,13 @@ import { Input } from "@/components/ui/input";
 import { DataTableLayout } from "@/components/DataTableLayout/DataTableLayout";
 import { useState } from "react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
-import NewCustomerModal from "@/components/CustomerManagement/NewCustomerModal";
+import NewCustomerModal from "@/components/customer-management/NewCustomerModal";
 import Header from "@/components/ui/Header";
 import { Upload } from "lucide-react";
 import { CustomerProps } from "@/lib/types/customer";
-import CustomerActionMenu from "@/components/CustomerManagement/CustomerActionMenu";
-import EditCustomerModal from "@/components/CustomerManagement/EditCustomerModal";
-import DeleteCustomerModal from "@/components/CustomerManagement/DeleteCustomerModal";
+import CustomerActionMenu from "@/components/customer-management/CustomerActionMenu";
+import EditCustomerModal from "@/components/customer-management/EditCustomerModal";
+import DeleteCustomerModal from "@/components/customer-management/DeleteCustomerModal";
 
 export default function CustomerManagement() {
   const [openModal, setOpenModal] = useState(false);

@@ -13,3 +13,7 @@ export function formatNumber(value: string | number) {
 export function parseNumber(value: string) {
   return value.replace(/,/g, "");
 }
+
+export function fmt(n: number) {
+  return "₦" + Math.round(n).toLocaleString();
+}
