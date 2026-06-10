@@ -18,6 +18,7 @@ import {
   LogOutIcon,
   Settings,
   HelpCircle,
+  PercentSquare,
 } from "lucide-react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -38,7 +39,7 @@ const data = {
       icon: Home,
     },
     {
-      title: "Customer Management",
+      title: "Customer Mgt",
       url: "/customer-management",
       icon: Users,
     },
@@ -48,9 +49,14 @@ const data = {
       icon: CreditCard,
     },
     {
-      title: "Finance",
+      title: "Finance Mgt",
       url: "/finance",
       icon: Banknote,
+    },
+    {
+      title: "Rate Management",
+      url: "/rate-management",
+      icon: PercentSquare,
     },
     {
       title: "Support Center",
