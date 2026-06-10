@@ -9,6 +9,7 @@ import { EditSpreadModalProps } from "./types";
 import { PreviewRow } from "./preview-row";
 import { fmt } from "@/lib/utils/formatNumber";
 import { ModalHeader } from "../ui/modal-header";
+import { Label } from "../ui/label";
 
 export function EditSpreadModal({
   asset,
@@ -33,43 +34,22 @@ export function EditSpreadModal({
   const customerSellRate = OBLEX_SELL_RATE - sellAmt;
 
   return (
-    <Modal onClose={onClose} className="max-w-[700px] px-0 pb-0">
+    <Modal onClose={onClose} className="max-w-[700px] px-0 pb-0 border-none">
       {/* Header */}
-      <div className="flex items-start justify-between px-7 pt-6 pb-0">
-        <div className="flex items-center gap-3">
-          <div
-            className="w-9 h-9 rounded-full flex items-center justify-center text-white text-[13px] font-bold flex-shrink-0"
-            style={{ background: color }}
-          >
-            {initial}
-          </div>
-          <div>
-            <h2 className="text-[16px] font-bold text-[#111827]">
-              Edit Spread — {asset} ({symbol})
-            </h2>
-            <p className="text-[12px] text-[#9CA3AF] mt-0.5">
-              Changes take effect immediately across all active customer quotes.
-            </p>
-          </div>
-        </div>
-        <ModalHeader title={`Edit Spread — ${asset} (${symbol})`} subtitle="" onClose={onClose} />
-        <button
-          onClick={onClose}
-          className="w-7 h-7 rounded-full bg-[#F3F4F6] flex items-center justify-center text-[#6B7280] hover:bg-[#E5E7EB] transition-colors"
-        >
-          <X size={15} />
-        </button>
-      </div>
+      <ModalHeader
+        title={`Edit Spread — ${asset} (${symbol})`}
+        subtitle="Changes take effect immediately across all active customer quotes."
+        onClose={onClose}
+        className="border-b border-card-border-secondary bg-card-primary rounded-tl-2xl rounded-tr-2xl"
+      />
 
       {/* Body */}
-      <div className="grid grid-cols-2 gap-0 px-7 pt-5">
+      <div className="grid grid-cols-2 bg-card-primary">
         {/* Left: inputs */}
-        <div className="pr-5">
+        <div className="bg-card-primary p-6">
           {/* Buy Spread */}
-          <div className="mb-4">
-            <label className="block text-[12px] font-medium text-[#374151] mb-1.5">
-              Buy Spread
-            </label>
+          <div className="mb-4 space-y-2">
+            <Label>Buy Spread</Label>
             <div className="flex items-center border border-[#E5E7EB] rounded-lg overflow-hidden focus-within:border-[#0D9488] focus-within:ring-[3px] focus-within:ring-[#0D9488]/10 transition-all">
               <input
                 type="number"
@@ -81,16 +61,14 @@ export function EditSpreadModal({
                 %
               </span>
             </div>
-            <p className="text-[11px] text-[#9CA3AF] mt-1">
-              Added above Oblex buy rate when customers buy crypto.
+            <p className="text-[12px] font-normal text-text-secondary">
+              Added above Obiex buy rate when customers buy crypto.
             </p>
           </div>
 
           {/* Sell Spread */}
-          <div className="mb-4">
-            <label className="block text-[12px] font-medium text-[#374151] mb-1.5">
-              Sell Spread
-            </label>
+          <div className="mb-4 space-y-2">
+            <Label>Sell Spread</Label>
             <div className="flex items-center border border-[#E5E7EB] rounded-lg overflow-hidden focus-within:border-[#0D9488] focus-within:ring-[3px] focus-within:ring-[#0D9488]/10 transition-all">
               <input
                 type="number"
@@ -102,7 +80,7 @@ export function EditSpreadModal({
                 %
               </span>
             </div>
-            <p className="text-[11px] text-[#9CA3AF] mt-1">
+            <p className="text-[12px] font-normal text-text-secondary mt-1">
               Added above Oblex buy rate when customers buy crypto.
             </p>
           </div>
@@ -110,7 +88,7 @@ export function EditSpreadModal({
           {/* Toggle */}
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-[13px] font-medium text-[#374151]">
+              <div className="text-[14px] leading-[20px] font-medium text-text-primary">
                 Spread Active
               </div>
               <div className="text-[11px] text-[#9CA3AF]">
@@ -138,14 +116,14 @@ export function EditSpreadModal({
         </div>
 
         {/* Right: preview */}
-        <div className="bg-[#F9FAFB] rounded-xl p-4 ml-3">
-          <div className="text-[13px] font-semibold text-[#374151] mb-3">
+        <div className="bg-card-secondary border border-card-border-secondary p-6">
+          <div className="text-[16px] font-medium text-text-primary mb-4">
             Customer Rate Preview
           </div>
 
           {/* Buy section */}
-          <div className="mb-3">
-            <div className="text-[11px] font-semibold text-[#9CA3AF] uppercase tracking-wide mb-2">
+          <div className="mb-4 bg-card-primary p-3 border-l-3 rounded-[12px] border-success-border">
+            <div className="text-[14px] font-medium leading-[20px] text-text-primary uppercase tracking-wide mb-2">
               Buy spread
             </div>
             <PreviewRow label="Oblex Buy Rate" value={fmt(OBLEX_BUY_RATE)} />
@@ -168,10 +146,8 @@ export function EditSpreadModal({
             </div>
           </div>
 
-          <hr className="border-[#E5E7EB] my-3" />
-
           {/* Sell section */}
-          <div className="mb-3">
+          <div className="mb-4 bg-card-primary p-3 border-l-3 rounded-[12px] border-error-border">
             <div className="text-[11px] font-semibold text-[#9CA3AF] uppercase tracking-wide mb-2">
               Sell spread
             </div>
@@ -195,8 +171,6 @@ export function EditSpreadModal({
             </div>
           </div>
 
-          <hr className="border-[#E5E7EB] my-3" />
-
           <div className="flex items-start gap-1">
             <Info size={13} className="text-[#9CA3AF] flex-shrink-0 mt-0.5" />
             <p className="text-[11px] text-[#9CA3AF]">
@@ -206,22 +180,24 @@ export function EditSpreadModal({
         </div>
       </div>
 
-      {/* Warning bar */}
-      <div className="flex items-center gap-2 px-7 py-2.5 bg-[#FEF9EC] border-t border-[#FCD34D] mt-4">
-        <AlertTriangle size={15} className="text-[#D97706] flex-shrink-0" />
-        <p className="text-[11px] text-[#92400E]">
-          Saving this change will update the active spread rule for {asset}.
-        </p>
-      </div>
+      <div className="flex items-center p-6 bg-card-secondary rounded-bl-2xl rounded-br-2xl border-t border-card-border-secondary justify-between">
+        {/* Warning bar */}
+        <div className="flex items-center gap-2">
+          <AlertTriangle size={15} className="text-[#D97706] flex-shrink-0" />
+          <p className="text-[11px] text-[#92400E]">
+            Saving this change will update the active spread rule for {asset}.
+          </p>
+        </div>
 
-      {/* Footer */}
-      <div className="flex items-center justify-end gap-2.5 px-7 py-4 border-t border-[#E5E7EB]">
-        <Button variant="outline" onClick={onClose}>
-          Cancel
-        </Button>
-        <Button onClick={() => onSave(buySpread, sellSpread)}>
-          Update Spread
-        </Button>
+        {/* Footer */}
+        <div className="flex items-center gap-4">
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button onClick={() => onSave(buySpread, sellSpread)}>
+            Update Spread
+          </Button>
+        </div>
       </div>
     </Modal>
   );

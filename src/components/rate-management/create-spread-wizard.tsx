@@ -47,17 +47,8 @@ export function CreateSpreadWizard({ onClose }: { onClose: () => void }) {
   };
  
   return (
-    <Modal onClose={onClose} className="max-w-[800px] px-0 pb-0 rounded-[16px]">
+    <div >
       {/* Wizard Header */}
-      <div className="flex items-center justify-between px-6 py-3.5 border-b border-[#E5E7EB]">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 bg-[#0D9488] rounded-md flex items-center justify-center text-white text-[12px] font-black">X</div>
-          <span className="text-[15px] font-bold text-[#0D9488]">xbanka</span>
-        </div>
-        <span className="text-[13px] text-[#6B7280] font-medium">Rate configuration setup</span>
-        <div className="w-24" />
-      </div>
- 
       {/* Steps */}
       <div className="flex items-center justify-center gap-1 py-5 px-6">
         {STEP_LABELS.map((label, i) => {
@@ -149,6 +140,6 @@ export function CreateSpreadWizard({ onClose }: { onClose: () => void }) {
           )}
         </div>
       </div>
-    </Modal>
+    </div>
   );
 }

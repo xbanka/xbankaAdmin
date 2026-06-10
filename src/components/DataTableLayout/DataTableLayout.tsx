@@ -109,7 +109,7 @@ export function DataTableLayout<T>({
           <div className=" min-w-full">
             <Table className={cn("w-full table-fixed", isLoading || isError ? "pointer-events-none" : "")}>
               <TableHeader>
-                <TableRow className="bg-[#FAFAFA]">
+                <TableRow className="bg-card-secondary">
                   {columns.map((col) => (
                     <TableHead
                       key={col.key as string}

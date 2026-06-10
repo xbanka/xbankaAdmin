@@ -1,6 +1,13 @@
 "use client";
 
-import { Bell, Calendar, ChevronDown, Pencil, Plus, Search, SlidersHorizontal, Trash2 } from "lucide-react";
+import {
+  Calendar,
+  Pencil,
+  Plus,
+  Search,
+  SlidersHorizontal,
+  Trash2,
+} from "lucide-react";
 import { DataTableLayout } from "../DataTableLayout/DataTableLayout";
 import { CreateSpreadWizard } from "./create-spread-wizard";
 import { EditSpreadModal } from "./edit-spread-modal";
@@ -9,12 +16,15 @@ import { MOCK_DATA, NAV_ITEMS } from "./mock";
 import { cn } from "@/lib/utils";
 import { SpreadRow } from "./types";
 import { useState } from "react";
+import { DashboardLayout } from "../layout/dashboard-layout";
 
 export default function RateManagement() {
-  const [activeTab, setActiveTab] = useState<"schedule" | "history">("schedule");
+  const [activeTab, setActiveTab] = useState<"schedule" | "history">(
+    "schedule",
+  );
   const [editRow, setEditRow] = useState<SpreadRow | null>(null);
-  const [showWizard, setShowWizard] = useState(false);
- 
+  const [view, setView] = useState<"list" | "wizard">("list");
+
   const columns = [
     {
       key: "asset",
@@ -28,7 +38,9 @@ export default function RateManagement() {
             {row.initial}
           </div>
           <div>
-            <div className="font-semibold text-[13px] text-[#111827]">{row.asset}</div>
+            <div className="font-semibold text-[13px] text-[#111827]">
+              {row.asset}
+            </div>
             <div className="text-[11px] text-[#9CA3AF]">{row.symbol}</div>
           </div>
         </div>
@@ -43,11 +55,16 @@ export default function RateManagement() {
         <span
           className={cn(
             "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-medium",
-            row.status === "Active" ? "bg-[#ECFDF5] text-[#059669]" : "bg-[#F3F4F6] text-[#6B7280]"
+            row.status === "Active"
+              ? "bg-[#ECFDF5] text-[#059669]"
+              : "bg-[#F3F4F6] text-[#6B7280]",
           )}
         >
           <span
-            className={cn("w-1.5 h-1.5 rounded-full", row.status === "Active" ? "bg-[#059669]" : "bg-[#9CA3AF]")}
+            className={cn(
+              "w-1.5 h-1.5 rounded-full",
+              row.status === "Active" ? "bg-[#059669]" : "bg-[#9CA3AF]",
+            )}
           />
           {row.status}
         </span>
@@ -82,94 +99,91 @@ export default function RateManagement() {
       ),
     },
   ];
- 
+
   return (
-    <div className="flex min-h-screen bg-[#F9FAFB]">
-    
-      {/* Main */}
-      <div className="flex-1 flex flex-col min-h-screen">
-        {/* Topbar */}
-        <header className="flex items-center justify-between px-6 py-3.5 bg-white border-b border-[#E5E7EB]">
-          <h1 className="text-[16px] font-semibold text-[#111827]">Rate Management</h1>
-          <div className="flex items-center gap-3">
-            <Bell size={18} className="text-[#6B7280]" />
-            <div className="w-8 h-8 rounded-full bg-[#0D9488] flex items-center justify-center text-white text-[12px] font-semibold">
-              JE
-            </div>
-            <div>
-              <div className="text-[13px] font-medium text-[#111827]">Joseph Eyebiokin</div>
-              <div className="text-[11px] text-[#9CA3AF]">Admin</div>
-            </div>
-            <ChevronDown size={16} className="text-[#9CA3AF]" />
-          </div>
-        </header>
- 
-        {/* Content */}
-        <main className="flex-1 px-6 py-5">
-          {/* Tabs */}
-          <div className="flex border-b border-[#E5E7EB] mb-5">
-            {(["schedule", "history"] as const).map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={cn(
-                  "px-4 py-2 text-[13px] font-medium border-b-2 -mb-px transition-colors",
-                  activeTab === tab
-                    ? "text-[#0D9488] border-[#0D9488]"
-                    : "text-[#6B7280] border-transparent hover:text-[#111827]"
-                )}
-              >
-                {tab === "schedule" ? "Spread Schedule" : "Spread History"}
-              </button>
-            ))}
-          </div>
- 
-          {/* Toolbar */}
-          <div className="flex items-center gap-2.5 mb-4">
-            <div className="flex items-center gap-1.5 border border-[#E5E7EB] rounded-lg px-3 py-2 text-[13px] text-[#9CA3AF] bg-white w-44">
-              <Search size={14} /> Search
-            </div>
-            <button className="flex items-center gap-1.5 border border-[#E5E7EB] rounded-lg px-3 py-2 text-[13px] text-[#6B7280] bg-white">
-              <Calendar size={14} /> Date Submitted
-            </button>
-            <button className="flex items-center gap-1.5 border border-[#E5E7EB] rounded-lg px-3 py-2 text-[13px] text-[#6B7280] bg-white">
-              <SlidersHorizontal size={14} /> Advanced filter
-            </button>
-            <Button className="ml-auto" onClick={() => setShowWizard(true)}>
-              <Plus size={14} /> Add Spread
-            </Button>
-          </div>
- 
-          <DataTableLayout
-            data={MOCK_DATA}
-            columns={columns}
-            rowKey={(row) => row.id}
-            itemsPerPage={10}
-            totalCount={300}
-            emptyMessage="No spreads configured yet."
+    <DashboardLayout
+      isPending={false}
+      // error={""}
+      breadcrumbs={[{ label: "Support" }]}
+      title="Rate Management"
+    >
+      <div className="flex min-h-screen bg-card-primary">
+        {/* Main */}
+        <div className="flex-1 flex flex-col min-h-screen">
+          {/* Topbar */}
+
+          {/* Content */}
+          {view === "list" ? (
+            <main className="flex-1 px-8">
+              {/* Tabs */}
+              <div className="flex justify-between items-center border-b border-card-border-secondary w-full mb-8">
+                <div className="flex">
+                  {(["schedule", "history"] as const).map((tab) => (
+                    <button
+                      key={tab}
+                      onClick={() => setActiveTab(tab)}
+                      className={cn(
+                        "px-4 py-4.5 text-[14px] font-medium border-b-2 -mb-px transition-colors cursor-pointer",
+                        activeTab === tab
+                          ? "text-text-primary border-[#0D9488]"
+                          : "text-text-secondary border-transparent hover:text-text-primary",
+                      )}
+                    >
+                      {tab === "schedule"
+                        ? "Spread Schedule"
+                        : "Spread History"}
+                    </button>
+                  ))}
+                </div>
+                <Button onClick={() => setView('wizard')}>Add Spread</Button>
+              </div>
+
+              {/* Toolbar */}
+              <div className="flex items-center gap-2.5 mb-6">
+                <div className="flex items-center gap-1.5 border border-[#E5E7EB] rounded-lg px-3 py-2 text-[13px] text-[#9CA3AF] bg-white w-44">
+                  <Search size={14} /> Search
+                </div>
+                <button className="flex items-center gap-1.5 border border-[#E5E7EB] rounded-lg px-3 py-2 text-[13px] text-[#6B7280] bg-white">
+                  <Calendar size={14} /> Date Submitted
+                </button>
+                <button className="flex items-center gap-1.5 border border-[#E5E7EB] rounded-lg px-3 py-2 text-[13px] text-[#6B7280] bg-white">
+                  <SlidersHorizontal size={14} /> Advanced filter
+                </button>
+              </div>
+
+              <DataTableLayout
+                data={MOCK_DATA}
+                columns={columns}
+                rowKey={(row) => row.id}
+                itemsPerPage={10}
+                totalCount={300}
+                emptyMessage="No spreads configured yet."
+              />
+            </main>
+          ) : (
+            <CreateSpreadWizard onClose={() => setView("list")} />
+          )}
+        </div>
+
+        {/* Edit Modal */}
+        {editRow && (
+          <EditSpreadModal
+            asset={editRow.asset}
+            symbol={editRow.symbol}
+            color={editRow.color}
+            initial={editRow.initial}
+            defaultBuySpread={parseFloat(editRow.buySpread) || 2.5}
+            defaultSellSpread={parseFloat(editRow.sellSpread) || 1.5}
+            onClose={() => setEditRow(null)}
+            onSave={(buy, sell) => {
+              console.log("Saved:", buy, sell);
+              setEditRow(null);
+            }}
           />
-        </main>
+        )}
+
+        {/* Create Wizard */}
       </div>
- 
-      {/* Edit Modal */}
-      {editRow && (
-        <EditSpreadModal
-          asset={editRow.asset}
-          symbol={editRow.symbol}
-          color={editRow.color}
-          initial={editRow.initial}
-          defaultBuySpread={parseFloat(editRow.buySpread) || 2.5}
-          defaultSellSpread={parseFloat(editRow.sellSpread) || 1.5}
-          onClose={() => setEditRow(null)}
-          onSave={(buy, sell) => {
-            console.log("Saved:", buy, sell);
-            setEditRow(null);
-          }}
-        />
-      )}
- 
-      {/* Create Wizard */}
-      {showWizard && <CreateSpreadWizard onClose={() => setShowWizard(false)} />}
-    </div>
+    </DashboardLayout>
   );
 }
