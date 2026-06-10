@@ -1,0 +1,34 @@
+import { ArrowLeftRight, Bitcoin, Building2, Headset, LayoutDashboard, Percent, TrendingUp, UserCircle, Users } from "lucide-react";
+import { Asset, Segment, SpreadRow } from "./types";
+
+export const STEP_LABELS = ["Segment", "Segment Spreads", "Assign Assets", "Review & Activate"];
+ 
+export const INITIAL_SEGMENTS: Segment[] = [
+  { id: "stable", name: "Stable coins", description: "Low-volatility assets used for stable pricing", icon: Building2, examples: ["USDT", "USDC"], selected: true },
+  { id: "major", name: "Major coins", description: "High-volume assets with stronger liquidity", icon: TrendingUp, examples: ["BTC", "ETH"], selected: true },
+  { id: "alt", name: "Alt coins", description: "Other supported crypto assets with higher volatility", icon: Bitcoin, examples: ["SOL", "BNB", "XRP"], selected: true },
+];
+ 
+export const INITIAL_ASSETS: Asset[] = [
+  { id: "btc", name: "Bitcoin", symbol: "BTC", color: "#F7931A", initial: "₿", currentSegment: "Major coin", buyRate: 150_000_000, sellRate: 149_500_000, status: "Active", assignedSegment: "Major coin", checked: true },
+  { id: "eth", name: "Ethereum", symbol: "ETH", color: "#627EEA", initial: "Ξ", currentSegment: "Major coin", buyRate: 150_000_000, sellRate: 149_500_000, status: "Active", assignedSegment: "Major coin", checked: true },
+  { id: "usdt", name: "Tether", symbol: "USDT", color: "#26A17B", initial: "T", currentSegment: "Stablecoin", buyRate: 150_000_000, sellRate: 149_500_000, status: "Active", assignedSegment: "Stablecoin", checked: true },
+  { id: "usdc", name: "USD Coin", symbol: "USDC", color: "#2775CA", initial: "$", currentSegment: "Stablecoin", buyRate: 150_000_000, sellRate: 149_500_000, status: "Inactive", assignedSegment: "Stablecoin", checked: false },
+];
+
+export const MOCK_DATA: SpreadRow[] = [
+  { id: "1", asset: "Bitcoin", symbol: "BTC", color: "#F7931A", initial: "₿", buySpread: "2.50%", sellSpread: "2.25%", status: "Active", requestedBy: "Admin User", requestedAt: "Oct 24, 2023 14:30" },
+  { id: "2", asset: "Ethereum", symbol: "ETH", color: "#627EEA", initial: "Ξ", buySpread: "2.00%", sellSpread: "1.75%", status: "Active", requestedBy: "Admin User", requestedAt: "Oct 24, 2023 14:30" },
+  { id: "3", asset: "Tether", symbol: "USDT", color: "#26A17B", initial: "T", buySpread: "0.50%", sellSpread: "0.50%", status: "Active", requestedBy: "Admin User", requestedAt: "Oct 24, 2023 14:30" },
+  { id: "4", asset: "USD Coin", symbol: "USDC", color: "#2775CA", initial: "$", buySpread: "—", sellSpread: "—", status: "Inactive", requestedBy: "Admin User", requestedAt: "Oct 24, 2023 14:30" },
+];
+ 
+export const NAV_ITEMS = [
+  { icon: LayoutDashboard, label: "Dashboard" },
+  { icon: Users, label: "Customer Mgt" },
+  { icon: ArrowLeftRight, label: "Transactions" },
+  { icon: UserCircle, label: "Staff" },
+  { icon: TrendingUp, label: "Finance Mgt" },
+  { icon: Percent, label: "Rate Management", active: true },
+  { icon: Headset, label: "Support Center" },
+];
