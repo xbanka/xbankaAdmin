@@ -47,77 +47,79 @@ export function CreateSpreadWizard({ onClose }: { onClose: () => void }) {
   };
  
   return (
-    <div >
+    <div className="flex flex-col h-full bg-card-secondary">
       {/* Wizard Header */}
       {/* Steps */}
-      <div className="flex items-center justify-center gap-1 py-5 px-6">
-        {STEP_LABELS.map((label, i) => {
-          const num = i + 1;
-          const done = step > num;
-          const current = step === num;
-          return (
-            <div key={label} className="flex items-center gap-1">
-              <div className="flex flex-col items-center gap-1.5">
-                <div
-                  className={cn(
-                    "w-7 h-7 rounded-full flex items-center justify-center text-[12px] font-semibold",
-                    done || current ? "bg-[#0D9488] text-white" : "bg-[#F3F4F6] text-[#9CA3AF]"
-                  )}
-                >
-                  {done ? <Check size={13} /> : "%"}
+      <div>
+        <div className="flex items-center justify-center gap-1 py-5 px-6">
+          {STEP_LABELS.map((label, i) => {
+            const num = i + 1;
+            const done = step > num;
+            const current = step === num;
+            return (
+              <div key={label} className="flex items-center gap-1">
+                <div className="flex flex-col items-center gap-1.5">
+                  <div
+                    className={cn(
+                      "w-7 h-7 rounded-full flex items-center justify-center text-[12px] font-semibold",
+                      done || current ? "bg-[#0D9488] text-white" : "bg-[#F3F4F6] text-[#9CA3AF]"
+                    )}
+                  >
+                    {done ? <Check size={13} /> : "%"}
+                  </div>
+                  <div
+                    className={cn(
+                      "text-[11px] font-medium whitespace-nowrap",
+                      done || current ? "text-[#0D9488]" : "text-[#9CA3AF]"
+                    )}
+                  >
+                    {label}
+                  </div>
                 </div>
-                <div
-                  className={cn(
-                    "text-[11px] font-medium whitespace-nowrap",
-                    done || current ? "text-[#0D9488]" : "text-[#9CA3AF]"
-                  )}
-                >
-                  {label}
-                </div>
+                {i < STEP_LABELS.length - 1 && (
+                  <div
+                    className={cn("w-14 h-[1.5px] mb-5 mx-1", done ? "bg-[#0D9488]" : "bg-[#E5E7EB]")}
+                  />
+                )}
               </div>
-              {i < STEP_LABELS.length - 1 && (
-                <div
-                  className={cn("w-14 h-[1.5px] mb-5 mx-1", done ? "bg-[#0D9488]" : "bg-[#E5E7EB]")}
-                />
-              )}
-            </div>
-          );
-        })}
-      </div>
- 
-      {/* Step Content */}
-      <div className="px-6 pb-2">
-        {step === 1 && (
-          <StepSegment
-            segments={segments}
-            onToggle={toggleSegment}
-            selectedCount={selectedCount}
-            estimatedAssets={estimatedAssets}
-          />
-        )}
-        {step === 2 && (
-          <StepSetSpread
-            segments={segments.filter((s) => s.selected)}
-            spreads={spreads}
-            onUpdateSpread={updateSpread}
-            onToggleSpread={toggleSpread}
-            setupNote={setupNote}
-            onSetupNote={setSetupNote}
-          />
-        )}
-        {step === 3 && (
-          <StepAssignAssets
-            assets={assets}
-            segments={segments.filter((s) => s.selected)}
-            onToggleAsset={toggleAsset}
-            onUpdateSegment={updateAssetSegment}
-          />
-        )}
-        {step === 4 && <StepReview segments={segments} spreads={spreads} assets={assets} />}
+            );
+          })}
+        </div>
+  
+        {/* Step Content */}
+        <div className="px-6 pb-2">
+          {step === 1 && (
+            <StepSegment
+              segments={segments}
+              onToggle={toggleSegment}
+              selectedCount={selectedCount}
+              estimatedAssets={estimatedAssets}
+            />
+          )}
+          {step === 2 && (
+            <StepSetSpread
+              segments={segments.filter((s) => s.selected)}
+              spreads={spreads}
+              onUpdateSpread={updateSpread}
+              onToggleSpread={toggleSpread}
+              setupNote={setupNote}
+              onSetupNote={setSetupNote}
+            />
+          )}
+          {step === 3 && (
+            <StepAssignAssets
+              assets={assets}
+              segments={segments.filter((s) => s.selected)}
+              onToggleAsset={toggleAsset}
+              onUpdateSegment={updateAssetSegment}
+            />
+          )}
+          {step === 4 && <StepReview segments={segments} spreads={spreads} assets={assets} />}
+        </div>
       </div>
  
       {/* Footer */}
-      <div className="flex items-center justify-between px-6 py-4 border-t border-[#E5E7EB] mt-4">
+      <div className="mt-auto flex items-center justify-between px-6 py-4 border-t border-background-alt-neutral-grey">
         <Button variant="outline" onClick={onClose}>
           Cancel
         </Button>

@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 import { SpreadRow } from "./types";
 import { useState } from "react";
 import { DashboardLayout } from "../layout/dashboard-layout";
+import { EmptySpreadSchedule } from "./empty-spread-schedule";
 
 export default function RateManagement() {
   const [activeTab, setActiveTab] = useState<"schedule" | "history">(
@@ -24,6 +25,7 @@ export default function RateManagement() {
   );
   const [editRow, setEditRow] = useState<SpreadRow | null>(null);
   const [view, setView] = useState<"list" | "wizard">("list");
+  const emptyData: any[] = [];
 
   const columns = [
     {
@@ -104,7 +106,7 @@ export default function RateManagement() {
     <DashboardLayout
       isPending={false}
       // error={""}
-      breadcrumbs={[{ label: "Support" }]}
+      breadcrumbs={[{ label: "Rate Management" }]}
       title="Rate Management"
     >
       <div className="flex min-h-screen bg-card-primary">
@@ -114,52 +116,56 @@ export default function RateManagement() {
 
           {/* Content */}
           {view === "list" ? (
-            <main className="flex-1 px-8">
-              {/* Tabs */}
-              <div className="flex justify-between items-center border-b border-card-border-secondary w-full mb-8">
-                <div className="flex">
-                  {(["schedule", "history"] as const).map((tab) => (
-                    <button
-                      key={tab}
-                      onClick={() => setActiveTab(tab)}
-                      className={cn(
-                        "px-4 py-4.5 text-[14px] font-medium border-b-2 -mb-px transition-colors cursor-pointer",
-                        activeTab === tab
-                          ? "text-text-primary border-[#0D9488]"
-                          : "text-text-secondary border-transparent hover:text-text-primary",
-                      )}
-                    >
-                      {tab === "schedule"
-                        ? "Spread Schedule"
-                        : "Spread History"}
-                    </button>
-                  ))}
+            emptyData.length === 0 ? (
+              <EmptySpreadSchedule onClick={() => setView("wizard")} />
+            ) : (
+              <main className="flex-1 px-8">
+                {/* Tabs */}
+                <div className="flex justify-between items-center border-b border-card-border-secondary w-full mb-8">
+                  <div className="flex">
+                    {(["schedule", "history"] as const).map((tab) => (
+                      <button
+                        key={tab}
+                        onClick={() => setActiveTab(tab)}
+                        className={cn(
+                          "px-4 py-4.5 text-[14px] font-medium border-b-2 -mb-px transition-colors cursor-pointer",
+                          activeTab === tab
+                            ? "text-text-primary border-[#0D9488]"
+                            : "text-text-secondary border-transparent hover:text-text-primary",
+                        )}
+                      >
+                        {tab === "schedule"
+                          ? "Spread Schedule"
+                          : "Spread History"}
+                      </button>
+                    ))}
+                  </div>
+                  <Button onClick={() => setView("wizard")}>Add Spread</Button>
                 </div>
-                <Button onClick={() => setView('wizard')}>Add Spread</Button>
-              </div>
 
-              {/* Toolbar */}
-              <div className="flex items-center gap-2.5 mb-6">
-                <div className="flex items-center gap-1.5 border border-[#E5E7EB] rounded-lg px-3 py-2 text-[13px] text-[#9CA3AF] bg-white w-44">
-                  <Search size={14} /> Search
+                {/* Toolbar */}
+                <div className="flex items-center gap-2.5 mb-6">
+                  <div className="flex items-center gap-1.5 border border-[#E5E7EB] rounded-lg px-3 py-2 text-[13px] text-[#9CA3AF] bg-white w-44">
+                    <Search size={14} /> Search
+                  </div>
+                  <button className="flex items-center gap-1.5 border border-[#E5E7EB] rounded-lg px-3 py-2 text-[13px] text-[#6B7280] bg-white">
+                    <Calendar size={14} /> Date Submitted
+                  </button>
+                  <button className="flex items-center gap-1.5 border border-[#E5E7EB] rounded-lg px-3 py-2 text-[13px] text-[#6B7280] bg-white">
+                    <SlidersHorizontal size={14} /> Advanced filter
+                  </button>
                 </div>
-                <button className="flex items-center gap-1.5 border border-[#E5E7EB] rounded-lg px-3 py-2 text-[13px] text-[#6B7280] bg-white">
-                  <Calendar size={14} /> Date Submitted
-                </button>
-                <button className="flex items-center gap-1.5 border border-[#E5E7EB] rounded-lg px-3 py-2 text-[13px] text-[#6B7280] bg-white">
-                  <SlidersHorizontal size={14} /> Advanced filter
-                </button>
-              </div>
 
-              <DataTableLayout
-                data={MOCK_DATA}
-                columns={columns}
-                rowKey={(row) => row.id}
-                itemsPerPage={10}
-                totalCount={300}
-                emptyMessage="No spreads configured yet."
-              />
-            </main>
+                <DataTableLayout
+                  data={emptyData}
+                  columns={columns}
+                  rowKey={(row) => row.id}
+                  itemsPerPage={10}
+                  totalCount={300}
+                  emptyMessage="No spreads configured yet."
+                />
+              </main>
+            )
           ) : (
             <CreateSpreadWizard onClose={() => setView("list")} />
           )}
