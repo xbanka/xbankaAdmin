@@ -42,19 +42,14 @@ export function StepSegment({
                 >
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <div className="w-8 h-8 rounded-[8px] p-2 bg-text-teal-light flex items-center justify-center text-[#0D9488]">
+                      <div className="w-8 h-8 border border-teal-border rounded-[8px] p-2 bg-teal-light flex items-center justify-center text-[#0F766E]">
                         <Icon size={16} />
                       </div>
                       {seg.selected && (
-                        <div className=" w-5 h-5 rounded bg-[#0D9488] flex items-center justify-center">
+                        <div className="w-5 h-5 rounded bg-[#0D9488] flex items-center justify-center">
                           <Check size={12} className="text-white" />
                         </div>
                       )}
-                      {/* {seg.selected && (
-                        <div className="absolute top-2.5 right-2.5 w-5 h-5 rounded bg-[#0D9488] flex items-center justify-center">
-                          <Check size={12} className="text-white" />
-                        </div>
-                      )} */}
                     </div>
                     <div>
                       <h4 className="text-[14px] leading-5.5 font-medium text-[#1F1F1F]">
@@ -66,35 +61,44 @@ export function StepSegment({
                     </div>
                   </div>
                   <div className="pt-2 border-t border-border-default">
-                    <div className="text-[11px] text-[#9CA3AF]">
+                    <div className="text-[12px] font-normal text-[#5C544A]">
                       Example Assets
                     </div>
-                    <div className="text-[12px] text-[#374151] mt-0.5">
-                      {seg.examples.join(" ")}
+                    <div className="text-[12px] text-[#374151] mt-1 flex items-center gap-2">
+                      {seg.examples?.map((item) => (
+                        <div
+                          key={item}
+                          className="rounded-[4px] border px-2 bg-card-secondary border-card-border-secondary"
+                        >
+                          {item}
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
               );
             })}
           </div>
-          <div className="border min-h-[242px] max-w-[300px] border-[#E5E7EB] rounded-xl p-4 bg-[#FAFAFA] h-fit">
-            <div className="text-[12px] font-semibold text-[#374151] mb-3">
+          <div className="border min-h-[242px] max-w-[300px] border-card-border-secondary bg-card-primary rounded-[12px] px-5 pt-6 pb-[34px] space-y-2 h-fit">
+            <div className="text-[16px] font-medium text-text-primary">
               Setup summary
             </div>
-            <div className="flex justify-between text-[13px] mb-2">
-              <span className="text-[#6B7280]">Selected segment</span>
-              <span className="font-semibold">{selectedCount}</span>
+            <div>
+              <div className="flex justify-between text-[13px] py-3 border-b border-card-border-secondary">
+                <span className="font-normal text-[12px] text-text-secondary">Selected segment</span>
+                <span className="font-medium text-[14px] text-text-primary">{selectedCount}</span>
+              </div>
+              <div className="flex justify-between text-[13px] py-3">
+                <span className="font-normal text-[12px] text-text-secondary">Estimated assets</span>
+                <span className="font-medium text-[14px] text-text-primary">{estimatedAssets}</span>
+              </div>
             </div>
-            <div className="flex justify-between text-[13px] mb-3">
-              <span className="text-[#6B7280]">Estimated assets</span>
-              <span className="font-semibold">{estimatedAssets}</span>
-            </div>
-            <div className="flex items-start gap-1.5 bg-[#FEF9EC] rounded-lg p-2.5">
+            <div className="flex items-start gap-1.5 bg-teal-light rounded-[8px] py-1 px-2">
               <AlertTriangle
-                size={14}
-                className="text-[#D97706] flex-shrink-0 mt-0.5"
+                size={16}
+                className="text-teal-text flex-shrink-0 mt-0.5"
               />
-              <p className="text-[11px] text-[#92400E]">
+              <p className="text-[12px] text-teal-text font-normal">
                 Saving this change will update the active spread rule for
                 Bitcoin.
               </p>

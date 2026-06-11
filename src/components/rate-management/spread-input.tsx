@@ -9,15 +9,17 @@ export function SpreadInput({
 }) {
   return (
     <div>
-      <label className="block text-[11px] text-[#6B7280] mb-1.5">{label}</label>
-      <div className="flex items-center border border-[#E5E7EB] rounded-lg overflow-hidden focus-within:border-[#0D9488] focus-within:ring-[3px] focus-within:ring-[#0D9488]/10 transition-all">
+      <label className="block text-[12px] font-normal text-[#111827] mb-2">{label}</label>
+      <div className="flex items-center bg-card-primary border border-card-border-secondary rounded-[8px] overflow-hidden focus-within:border-[#0D9488] focus-within:ring-[3px] focus-within:ring-[#0D9488]/10 transition-all">
         <input
           type="number"
           value={value}
           onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
-          className="flex-1 border-none outline-none px-3 py-2 text-[13px] font-medium bg-transparent"
+          className="flex-1 outline-none px-3 py-2.5 text-[13px] font-medium bg-card-primary"
         />
-        <span className="px-2.5 py-2 text-[#9CA3AF] text-[13px] border-l border-[#E5E7EB]">%</span>
+        <span className="px-2.5 py-2 text-[#9CA3AF] text-[13px]">
+          %
+        </span>
       </div>
     </div>
   );

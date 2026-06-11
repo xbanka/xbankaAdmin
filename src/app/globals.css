@@ -5,14 +5,16 @@
 
 @theme inline {
   --color-background: var(--background);
+  --color-background-alt-neutral-grey: var(--background-alt-neutral-grey);
   --color-foreground: var(--foreground);
   --color-text-primary: var(--text-primary);
   --color-text-secondary: var(--text-secondary);
   --color-secondary-text: var(--secondary-text);
   --color-input-border-focus: var(--input-border-focus);
   --color-text-teal: var(--text-teal);
-  --color-text-teal-light: var(--text-teal-light);
-  --color-text-teal-border: var(--text-teal-border);
+  --color-teal-light: var(--teal-light);
+  --color-teal-text: var(--teal-text);
+  --color-teal-border: var(--teal-border);
   --color-text-primary-font-color: var(--text-primary-font-color);
   --color-card-secondary: var(--card-secondary);
   --color-card-primary: var(--card-primary);
@@ -71,13 +73,15 @@
 :root {
   --radius: 0.625rem;
   --background: #ffffff;
+  --background-alt-neutral-grey: #E5E7EB;
   --foreground: #1e1e1e;
   --text-primary: #1B1D20;
   --text-secondary: #4B5563;
   --secondary-text: #606368;
   --text-teal: #0C9A8E;
-  --text-teal-border: #99F6E4;
-  --text-teal-light: #F0FDFA;
+  --teal-border: #99F6E4;
+  --teal-light: #F0FDFA;
+  --teal-text: #0F766E;
   --input-border-focus: #2DD4BF;
   --text-primary-font-color: #111827;
   --card-secondary: #F9F9F9;
