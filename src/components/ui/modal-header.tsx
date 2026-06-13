@@ -32,10 +32,10 @@ export function ModalHeader({
           </button>
         )}
         <div className="min-w-0">
-          <h3 className="text-2xl font-semibold leading-8 text-card-text max-sm:text-[24px] max-sm:leading-8">
+          <h3 className="text-2xl font-semibold leading-8 text-text-primary max-sm:text-[24px] max-sm:leading-8">
             {title}
           </h3>
-          <p className="text-sm font-normal leading-6 text-text mt-1">
+          <p className="text-[12px] font-normal leading-5.5 text-text-secondary mt-1">
             {subtitle}
           </p>
         </div>

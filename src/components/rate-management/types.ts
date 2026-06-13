@@ -46,8 +46,7 @@ export interface SpreadRow {
 export interface EditSpreadModalProps {
   asset: string;
   symbol: string;
-  color: string;
-  initial: string;
+  initial?: string;
   defaultBuySpread: number;
   defaultSellSpread: number;
   onClose: () => void;

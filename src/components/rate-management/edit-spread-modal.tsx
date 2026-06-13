@@ -14,7 +14,6 @@ import { Label } from "../ui/label";
 export function EditSpreadModal({
   asset,
   symbol,
-  color,
   initial,
   defaultBuySpread,
   defaultSellSpread,
@@ -54,7 +53,7 @@ export function EditSpreadModal({
               <input
                 type="number"
                 value={buySpread}
-                onChange={(e) => setBuySpread(parseFloat(e.target.value) || 0)}
+                onChange={(e) => setBuySpread(parseFloat(e.target.value))}
                 className="flex-1 border-none outline-none px-3 py-2.5 text-[14px] font-medium bg-transparent"
               />
               <span className="px-3 py-2.5 text-[#9CA3AF] text-[14px] border-l border-[#E5E7EB]">
@@ -73,7 +72,7 @@ export function EditSpreadModal({
               <input
                 type="number"
                 value={sellSpread}
-                onChange={(e) => setSellSpread(parseFloat(e.target.value) || 0)}
+                onChange={(e) => setSellSpread(parseFloat(e.target.value))}
                 className="flex-1 border-none outline-none px-3 py-2.5 text-[14px] font-medium bg-transparent"
               />
               <span className="px-3 py-2.5 text-[#9CA3AF] text-[14px] border-l border-[#E5E7EB]">
