@@ -4,6 +4,7 @@ import {
   getAllSegments,
   getCryptoRates,
   postCryptoRates,
+  UpdateAllSegments,
   updateBuyAndSpreadRates,
 } from "../actions/rates";
 import { handleApiError } from "../errors/handleApiError";
@@ -65,6 +66,25 @@ export const useGetAllSegments = () => {
       } catch (error) {
         handleApiError(error);
       }
+    },
+  });
+};
+
+export const useUpdateAllSegments = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: UpdateAllSegments,
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["get-all-segments"],
+      });
+      toast.success("Bulk segment updated successfully")
+    },
+
+    onError: (error) => {
+      handleApiError(error);
     },
   });
 };

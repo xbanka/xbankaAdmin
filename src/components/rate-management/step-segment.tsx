@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { AlertTriangle, Check } from "lucide-react";
+import { AlertTriangle, Building2, Check } from "lucide-react";
 import { Segment } from "./types";
 
 export function StepSegment({
@@ -28,13 +28,12 @@ export function StepSegment({
         <div className="flex items-center justify-between gap-8">
           <div className="flex gap-4 items-center">
             {segments.map((seg) => {
-              const Icon = seg.icon;
               return (
                 <div
                   key={seg.id}
                   onClick={() => onToggle(seg.id)}
                   className={cn(
-                    "flex flex-col justify-between border rounded-[12px] min-h-[242px] p-5 max-w-[288px] space-y-4 cursor-pointer relative transition-all",
+                    "flex flex-col justify-between border rounded-[12px] min-h-[242px] p-5 max-w-[288px] min-w-[288px] space-y-4 cursor-pointer relative transition-all bg-card-primary",
                     seg.selected
                       ? "border-input-border-focus"
                       : "border-[#E5E7EB]",
@@ -43,7 +42,7 @@ export function StepSegment({
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div className="w-8 h-8 border border-teal-border rounded-[8px] p-2 bg-teal-light flex items-center justify-center text-[#0F766E]">
-                        <Icon size={16} />
+                        <Building2 size={16} />
                       </div>
                       {seg.selected && (
                         <div className="w-5 h-5 rounded bg-[#0D9488] flex items-center justify-center">
@@ -56,7 +55,7 @@ export function StepSegment({
                         {seg.name}
                       </h4>
                       <p className="text-[11px] text-[#5C544A]">
-                        {seg.description}
+                        {seg.name}
                       </p>
                     </div>
                   </div>
@@ -65,12 +64,12 @@ export function StepSegment({
                       Example Assets
                     </div>
                     <div className="text-[12px] text-[#374151] mt-1 flex items-center gap-2">
-                      {seg.examples?.map((item) => (
+                      {seg.assets?.map((item) => (
                         <div
-                          key={item}
+                          key={item.name}
                           className="rounded-[4px] border px-2 bg-card-secondary border-card-border-secondary"
                         >
-                          {item}
+                          {item.currency}
                         </div>
                       ))}
                     </div>

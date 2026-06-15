@@ -17,7 +17,6 @@ import { useState } from "react";
 import { DashboardLayout } from "../layout/dashboard-layout";
 import { EmptySpreadSchedule } from "./empty-spread-schedule";
 import {
-  useGetAllSegments,
   useGetCryptoRates,
 } from "@/lib/services/rates.service";
 import { CryptoCurrencyTypes } from "@/lib/types/rates-types";
@@ -30,12 +29,6 @@ export default function RateManagement() {
   const [editRow, setEditRow] = useState<CryptoCurrencyTypes | null>(null);
   const [view, setView] = useState<"list" | "wizard">("list");
   const { data, isPending, error } = useGetCryptoRates();
-  const {
-    data: segmentData,
-    isPending: isPendingSegment,
-    error: errorSegment,
-  } = useGetAllSegments();
-  console.log("segmentData", segmentData);
   console.log("rates", data);
   const ratesData = data?.data;
   console.log(ratesData);
@@ -197,6 +190,7 @@ export default function RateManagement() {
                   itemsPerPage={10}
                   totalCount={ratesData?.length}
                   emptyMessage="No spreads configured yet."
+                  isLoading={isPending}
                 />
               </main>
             )
