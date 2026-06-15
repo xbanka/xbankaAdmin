@@ -59,7 +59,7 @@ export function DataTableLayout<T>({
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
   const paginatedData = !onPageChange
-    ? data.slice((page - 1) * itemsPerPage, page * itemsPerPage)
+    ? data?.slice((page - 1) * itemsPerPage, page * itemsPerPage)
     : data;
 
   const handlePageChange = (newPage: number) => {

@@ -12,52 +12,75 @@ import { DataTableLayout } from "../DataTableLayout/DataTableLayout";
 import { CreateSpreadWizard } from "./create-spread-wizard";
 import { EditSpreadModal } from "./edit-spread-modal";
 import { Button } from "../ui/button";
-import { MOCK_DATA, NAV_ITEMS } from "./mock";
 import { cn } from "@/lib/utils";
-import { SpreadRow } from "./types";
 import { useState } from "react";
 import { DashboardLayout } from "../layout/dashboard-layout";
 import { EmptySpreadSchedule } from "./empty-spread-schedule";
+import {
+  useGetCryptoRates,
+} from "@/lib/services/rates.service";
+import { CryptoCurrencyTypes } from "@/lib/types/rates-types";
+import { formatDate } from "@/lib/formatDate";
 
 export default function RateManagement() {
   const [activeTab, setActiveTab] = useState<"schedule" | "history">(
     "schedule",
   );
-  const [editRow, setEditRow] = useState<SpreadRow | null>(null);
+  const [editRow, setEditRow] = useState<CryptoCurrencyTypes | null>(null);
   const [view, setView] = useState<"list" | "wizard">("list");
-  const emptyData: any[] = [];
+  const { data, isPending, error } = useGetCryptoRates();
+  console.log("rates", data);
+  const ratesData = data?.data;
+  console.log(ratesData);
 
   const columns = [
     {
       key: "asset",
       header: "Asset",
-      render: (row: SpreadRow) => (
+      render: (row: CryptoCurrencyTypes) => (
         <div className="flex items-center gap-3">
           <div
-            className="w-8 h-8 rounded-full flex items-center justify-center text-white text-[11px] font-bold flex-shrink-0"
-            style={{ background: row.color }}
-          >
-            {row.initial}
-          </div>
+            className="w-8 h-8 rounded-full flex items-center justify-center text-white bg-black/50 text-[11px] font-bold flex-shrink-0"
+            // style={{ background: row.color }}
+          ></div>
           <div>
             <div className="font-semibold text-[13px] text-[#111827]">
-              {row.asset}
+              {row.name}
             </div>
-            <div className="text-[11px] text-[#9CA3AF]">{row.symbol}</div>
+            <div className="text-[11px] text-[#9CA3AF]">{row.currency}</div>
           </div>
         </div>
       ),
     },
-    { key: "buySpread", header: "Buy Spread" },
-    { key: "sellSpread", header: "Sell Spread" },
+    {
+      key: "Segment",
+      header: "Segment",
+      render: (row: CryptoCurrencyTypes) => (
+        <div className="">{row.segment?.name}</div>
+      ),
+    },
+    {
+      key: "buyFeeValue",
+      header: "Buy Spread",
+      render: (row: CryptoCurrencyTypes) => (
+        <div className="">{row.segment?.buySpread}%</div>
+      ),
+    },
+    {
+      key: "sellFeeValue",
+      header: "Sell Spread",
+      render: (row: CryptoCurrencyTypes) => (
+        <div className="">{row.segment?.buySpread}%</div>
+      ),
+    },
     {
       key: "status",
       header: "Status",
-      render: (row: SpreadRow) => (
+      render: (row: CryptoCurrencyTypes) => (
         <span
           className={cn(
             "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-medium",
-            row.status === "Active"
+            row.isActive === true
               ? "bg-[#ECFDF5] text-[#059669]"
               : "bg-[#F3F4F6] text-[#6B7280]",
           )}
@@ -65,27 +88,31 @@ export default function RateManagement() {
           <span
             className={cn(
               "w-1.5 h-1.5 rounded-full",
-              row.status === "Active" ? "bg-[#059669]" : "bg-[#9CA3AF]",
+              row.isActive === true ? "bg-[#059669]" : "bg-[#9CA3AF]",
             )}
           />
-          {row.status}
+          {row.isActive ? "Active" : "Inactive"}
         </span>
       ),
     },
     {
       key: "requestedAt",
       header: "Requested Date",
-      render: (row: SpreadRow) => (
+      render: (row: CryptoCurrencyTypes) => (
         <div>
-          <div className="text-[12px] text-[#111827]">{row.requestedBy}</div>
-          <div className="text-[11px] text-[#9CA3AF]">{row.requestedAt}</div>
+          <div className="text-[12px] text-[#111827]">
+            {formatDate(row?.updatedAt)}
+          </div>
+          <div className="text-[11px] text-[#9CA3AF]">
+            {formatDate(row?.updatedAt)}
+          </div>
         </div>
       ),
     },
     {
       key: "actions",
       header: "Action",
-      render: (row: SpreadRow) => (
+      render: (row: CryptoCurrencyTypes) => (
         <div className="flex items-center gap-2">
           <button
             onClick={() => setEditRow(row)}
@@ -116,7 +143,7 @@ export default function RateManagement() {
 
           {/* Content */}
           {view === "list" ? (
-            emptyData.length === 0 ? (
+            ratesData?.length === 0 ? (
               <EmptySpreadSchedule onClick={() => setView("wizard")} />
             ) : (
               <main className="flex-1 px-8">
@@ -157,12 +184,13 @@ export default function RateManagement() {
                 </div>
 
                 <DataTableLayout
-                  data={emptyData}
+                  data={ratesData}
                   columns={columns}
                   rowKey={(row) => row.id}
                   itemsPerPage={10}
-                  totalCount={300}
+                  totalCount={ratesData?.length}
                   emptyMessage="No spreads configured yet."
+                  isLoading={isPending}
                 />
               </main>
             )
@@ -174,12 +202,7 @@ export default function RateManagement() {
         {/* Edit Modal */}
         {editRow && (
           <EditSpreadModal
-            asset={editRow.asset}
-            symbol={editRow.symbol}
-            color={editRow.color}
-            initial={editRow.initial}
-            defaultBuySpread={parseFloat(editRow.buySpread) || 2.5}
-            defaultSellSpread={parseFloat(editRow.sellSpread) || 1.5}
+            spreadData={editRow}
             onClose={() => setEditRow(null)}
             onSave={(buy, sell) => {
               console.log("Saved:", buy, sell);
