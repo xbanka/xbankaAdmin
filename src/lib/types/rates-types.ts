@@ -1,4 +1,4 @@
-export type FeeType = 'FLAT' | 'PERCENTAGE' | string; 
+export type FeeType = 'FLAT' | 'PERCENTAGE' | string;
 
 export interface CurrencyConfig {
   currency: string;
@@ -42,4 +42,14 @@ export interface CryptoCurrencyTypes {
 export interface UpdateCryptoRatesArgs {
   rateId: string;
   payload: CurrencyConfig;
+}
+
+export interface UpdateSegmentPayload {
+  id: string;
+  name: string;
+  isActive: boolean;
+  buyFeeType: FeeType;
+  buySpread: number;
+  sellFeeType: FeeType;
+  sellSpread: number;
 }

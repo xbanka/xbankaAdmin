@@ -18,32 +18,32 @@ export const STEP_LABELS = [
   "Review & Activate",
 ];
 
-export const INITIAL_SEGMENTS: Segment[] = [
-  {
-    id: "stable",
-    name: "Stable coins",
-    description: "Low-volatility assets used for stable pricing",
-    icon: Building2,
-    examples: ["USDT", "USDC"],
-    selected: true,
-  },
-  {
-    id: "major",
-    name: "Major coins",
-    description: "High-volume assets with stronger liquidity",
-    icon: Building2,
-    examples: ["BTC", "ETH"],
-    selected: true,
-  },
-  {
-    id: "alt",
-    name: "Alt coins",
-    description: "Other supported crypto assets with higher volatility",
-    icon: Building2,
-    examples: ["SOL", "BNB", "XRP"],
-    selected: true,
-  },
-];
+// export const INITIAL_SEGMENTS = [
+//   {
+//     id: "stable",
+//     name: "Stable coins",
+//     description: "Low-volatility assets used for stable pricing",
+//     icon: Building2,
+//     examples: ["USDT", "USDC"],
+//     selected: true,
+//   },
+//   {
+//     id: "major",
+//     name: "Major coins",
+//     description: "High-volume assets with stronger liquidity",
+//     icon: Building2,
+//     examples: ["BTC", "ETH"],
+//     selected: true,
+//   },
+//   {
+//     id: "alt",
+//     name: "Alt coins",
+//     description: "Other supported crypto assets with higher volatility",
+//     icon: Building2,
+//     examples: ["SOL", "BNB", "XRP"],
+//     selected: true,
+//   },
+// ];
 
 export const INITIAL_ASSETS: Asset[] = [
   {

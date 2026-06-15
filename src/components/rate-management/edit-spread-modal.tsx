@@ -78,7 +78,7 @@ export function EditSpreadModal({
               <input
                 type="number"
                 value={buySpread}
-                onChange={(e) => setBuySpread(Number(e.target.value) || 0)}
+                onChange={(e) => setBuySpread(Number(e.target.value))}
                 className="flex-1 border-none outline-none px-3 py-2.5 text-[14px] font-medium bg-transparent"
               />
               <span className="px-3 py-2.5 text-[#9CA3AF] text-[14px] border-l border-[#E5E7EB]">
@@ -97,7 +97,7 @@ export function EditSpreadModal({
               <input
                 type="number"
                 value={sellSpread}
-                onChange={(e) => setSellSpread(Number(e.target.value) || 0)}
+                onChange={(e) => setSellSpread(Number(e.target.value))}
                 className="flex-1 border-none outline-none px-3 py-2.5 text-[14px] font-medium bg-transparent"
               />
               <span className="px-3 py-2.5 text-[#9CA3AF] text-[14px] border-l border-[#E5E7EB]">
@@ -150,7 +150,7 @@ export function EditSpreadModal({
             <div className="text-[14px] font-medium leading-[20px] text-text-primary uppercase tracking-wide mb-2">
               Buy spread
             </div>
-            <PreviewRow label="Oblex Buy Rate" value={fmt(OBLEX_BUY_RATE)} />
+            <PreviewRow label="Obiex Buy Rate" value={fmt(OBLEX_BUY_RATE)} />
             <PreviewRow
               label="Buy Spread"
               value={`+${buySpread.toFixed(2)}%`}
@@ -165,7 +165,7 @@ export function EditSpreadModal({
             <div className="flex items-start gap-1 mt-2">
               <Info size={13} className="text-[#9CA3AF] flex-shrink-0 mt-0.5" />
               <p className="text-[11px] text-[#9CA3AF]">
-                Customer buys {spreadData.currency} at Oblex buy rate plus
+                Customer buys {spreadData.currency} at Obiex buy rate plus
                 XBanka buy spread.
               </p>
             </div>
@@ -176,7 +176,7 @@ export function EditSpreadModal({
             <div className="text-[11px] font-semibold text-[#9CA3AF] uppercase tracking-wide mb-2">
               Sell spread
             </div>
-            <PreviewRow label="Oblex Sell Rate" value={fmt(OBLEX_SELL_RATE)} />
+            <PreviewRow label="Obiex Sell Rate" value={fmt(OBLEX_SELL_RATE)} />
             <PreviewRow
               label="Buy Spread"
               value={`-${sellSpread.toFixed(2)}%`}
@@ -191,7 +191,7 @@ export function EditSpreadModal({
             <div className="flex items-start gap-1 mt-2">
               <Info size={13} className="text-[#9CA3AF] flex-shrink-0 mt-0.5" />
               <p className="text-[11px] text-[#9CA3AF]">
-                XBanka pays customer Oblex sell rate minus XBanka sell spread.
+                XBanka pays customer Obiex sell rate minus XBanka sell spread.
               </p>
             </div>
           </div>
