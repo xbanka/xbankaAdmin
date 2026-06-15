@@ -120,10 +120,10 @@ export default function RateManagement() {
           >
             <Pencil size={13} /> Edit
           </button>
-          <span className="text-[#E5E7EB] text-[12px]">|</span>
+          {/* <span className="text-[#E5E7EB] text-[12px]">|</span>
           <button className="flex items-center gap-1 text-[12px] text-[#EF4444] font-medium hover:opacity-70 transition-opacity">
             <Trash2 size={13} /> Delete
-          </button>
+          </button> */}
         </div>
       ),
     },
