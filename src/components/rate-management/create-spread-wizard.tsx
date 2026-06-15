@@ -1,51 +1,120 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
-import { Modal } from "../ui/modal";
-import { INITIAL_ASSETS, INITIAL_SEGMENTS, STEP_LABELS } from "./mock";
+import { INITIAL_ASSETS, STEP_LABELS } from "./mock";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 import { StepAssignAssets } from "./step-assign-assets";
 import { StepReview } from "./step-review";
 import { StepSetSpread } from "./step-set-spread";
 import { StepSegment } from "./step-segment";
-import { Asset, Segment, SegmentSpread, Step } from "./types";
+import { Asset, Segment, SegmentResponse, SegmentSpread, Step } from "./types";
+import {
+  useGetAllSegments,
+  useUpdateAllSegments,
+} from "@/lib/services/rates.service";
 
 export function CreateSpreadWizard({ onClose }: { onClose: () => void }) {
   const [step, setStep] = useState<Step>(1);
-  const [segments, setSegments] = useState<Segment[]>(INITIAL_SEGMENTS);
-  const [spreads, setSpreads] = useState<SegmentSpread[]>([
-    { id: "stable", buySpread: 2.5, sellSpread: 1.5, enabled: true },
-    { id: "major", buySpread: 2.5, sellSpread: 1.5, enabled: true },
-    { id: "alt", buySpread: 2.5, sellSpread: 1.5, enabled: true },
-  ]);
+  const [segments, setSegments] = useState<Segment[]>([]);
+  const [spreads, setSpreads] = useState<SegmentSpread[]>([]);
+
+  const {
+    data: segmentData,
+    isPending: isPendingSegment,
+    error: errorSegment,
+  } = useGetAllSegments();
+  const { mutate: updateSegments, isPending } = useUpdateAllSegments();
+  const selectedSegments = segments.filter((s) => s.selected);
+
+  const selectedCount = selectedSegments.length;
+
+  const estimatedAssets = selectedSegments.reduce(
+    (sum, segment) => sum + segment.assets.length,
+    0,
+  );
   const [assets, setAssets] = useState<Asset[]>(INITIAL_ASSETS);
   const [setupNote, setSetupNote] = useState("");
- 
-  const selectedCount = segments.filter((s) => s.selected).length;
-  const estimatedAssets = selectedCount * 7;
- 
+
   const toggleSegment = (id: string) => {
-    setSegments((prev) => prev.map((s) => (s.id === id ? { ...s, selected: !s.selected } : s)));
+    setSegments((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, selected: !s.selected } : s)),
+    );
   };
- 
-  const updateSpread = (id: string, field: "buySpread" | "sellSpread", value: number) => {
-    setSpreads((prev) => prev.map((s) => (s.id === id ? { ...s, [field]: value } : s)));
+
+  const updateSpread = (
+    id: string,
+    field: "buySpread" | "sellSpread",
+    value: number,
+  ) => {
+    setSegments((prev) =>
+      prev.map((segment) =>
+        segment.id === id ? { ...segment, [field]: value } : segment,
+      ),
+    );
   };
- 
+
   const toggleSpread = (id: string) => {
-    setSpreads((prev) => prev.map((s) => (s.id === id ? { ...s, enabled: !s.enabled } : s)));
+    setSegments((prev) =>
+      prev.map((segment) =>
+        segment.id === id
+          ? {
+              ...segment,
+              isActive: !segment.isActive,
+            }
+          : segment,
+      ),
+    );
   };
- 
+
   const toggleAsset = (id: string) => {
-    setAssets((prev) => prev.map((a) => (a.id === id ? { ...a, checked: !a.checked } : a)));
+    setAssets((prev) =>
+      prev.map((a) => (a.id === id ? { ...a, checked: !a.checked } : a)),
+    );
   };
- 
+
   const updateAssetSegment = (id: string, seg: string) => {
-    setAssets((prev) => prev.map((a) => (a.id === id ? { ...a, assignedSegment: seg } : a)));
+    setAssets((prev) =>
+      prev.map((a) => (a.id === id ? { ...a, assignedSegment: seg } : a)),
+    );
   };
- 
+
+  const handleSaveSegments = () => {
+    const payload = segments
+      .filter((segment) => segment.selected)
+      .map((segment) => ({
+        id: segment.id,
+        name: segment.name,
+        isActive: segment.isActive,
+        buyFeeType: "PERCENTAGE",
+        buySpread: segment.buySpread,
+        sellFeeType: "PERCENTAGE",
+        sellSpread: segment.sellSpread,
+      }));
+
+    updateSegments(payload, {
+      onSuccess: () => {
+        setStep(3);
+      },
+    });
+  };
+
+  useEffect(() => {
+    if (segmentData?.data) {
+      setSegments(
+        segmentData.data.map((segment: SegmentResponse) => ({
+          id: segment.id,
+          name: segment.name,
+          selected: false,
+          buySpread: segment.buySpread,
+          sellSpread: segment.sellSpread,
+          assets: segment.assets,
+        })),
+      );
+    }
+  }, [segmentData]);
+
   return (
     <div className="flex flex-col h-full bg-card-secondary">
       {/* Wizard Header */}
@@ -62,7 +131,9 @@ export function CreateSpreadWizard({ onClose }: { onClose: () => void }) {
                   <div
                     className={cn(
                       "w-7 h-7 rounded-full flex items-center justify-center text-[12px] font-semibold",
-                      done || current ? "bg-[#0D9488] text-white" : "bg-[#F3F4F6] text-[#9CA3AF]"
+                      done || current
+                        ? "bg-[#0D9488] text-white"
+                        : "bg-[#F3F4F6] text-[#9CA3AF]",
                     )}
                   >
                     {done ? <Check size={13} /> : "%"}
@@ -70,7 +141,7 @@ export function CreateSpreadWizard({ onClose }: { onClose: () => void }) {
                   <div
                     className={cn(
                       "text-[11px] font-medium whitespace-nowrap",
-                      done || current ? "text-[#0D9488]" : "text-[#9CA3AF]"
+                      done || current ? "text-[#0D9488]" : "text-[#9CA3AF]",
                     )}
                   >
                     {label}
@@ -78,14 +149,17 @@ export function CreateSpreadWizard({ onClose }: { onClose: () => void }) {
                 </div>
                 {i < STEP_LABELS.length - 1 && (
                   <div
-                    className={cn("w-14 h-[1.5px] mb-5 mx-1", done ? "bg-[#0D9488]" : "bg-[#E5E7EB]")}
+                    className={cn(
+                      "w-14 h-[1.5px] mb-5 mx-1",
+                      done ? "bg-[#0D9488]" : "bg-[#E5E7EB]",
+                    )}
                   />
                 )}
               </div>
             );
           })}
         </div>
-  
+
         {/* Step Content */}
         <div className="px-6 pb-2">
           {step === 1 && (
@@ -99,7 +173,6 @@ export function CreateSpreadWizard({ onClose }: { onClose: () => void }) {
           {step === 2 && (
             <StepSetSpread
               segments={segments.filter((s) => s.selected)}
-              spreads={spreads}
               onUpdateSpread={updateSpread}
               onToggleSpread={toggleSpread}
               setupNote={setupNote}
@@ -114,10 +187,12 @@ export function CreateSpreadWizard({ onClose }: { onClose: () => void }) {
               onUpdateSegment={updateAssetSegment}
             />
           )}
-          {step === 4 && <StepReview segments={segments} spreads={spreads} assets={assets} />}
+          {step === 4 && (
+            <StepReview segments={segments} spreads={spreads} assets={assets} />
+          )}
         </div>
       </div>
- 
+
       {/* Footer */}
       <div className="mt-auto flex items-center justify-between px-6 py-4 border-t border-background-alt-neutral-grey">
         <Button variant="outline" onClick={onClose}>
@@ -125,17 +200,30 @@ export function CreateSpreadWizard({ onClose }: { onClose: () => void }) {
         </Button>
         <div className="flex gap-2.5">
           {step > 1 && (
-            <Button variant="outline" onClick={() => setStep((s) => (s - 1) as Step)}>
+            <Button
+              variant="outline"
+              onClick={() => setStep((s) => (s - 1) as Step)}
+            >
               Back
             </Button>
           )}
           {step < 4 ? (
-            <Button onClick={() => setStep((s) => (s + 1) as Step)}>
+            <Button
+              onClick={() => {
+                if (step === 2) {
+                  handleSaveSegments();
+                  return;
+                }
+
+                setStep((s) => (s + 1) as Step);
+              }}
+              disabled={isPending}
+            >
               {step === 1
                 ? "Continue to Spread Segment"
                 : step === 2
-                ? "Continue to Assign Assets"
-                : "Continue to Review"}
+                  ? "Continue to Assign Assets"
+                  : "Continue to Review"}
             </Button>
           ) : (
             <Button onClick={onClose}>Activate Spread Schedule</Button>
