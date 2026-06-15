@@ -1,7 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CurrencyConfig, UpdateCryptoRatesArgs } from "../types/rates-types";
-import { getAllSegments, getCryptoRates, postCryptoRates, updateCryptoRates } from "../actions/rates";
+import {
+  getAllSegments,
+  getCryptoRates,
+  postCryptoRates,
+  updateBuyAndSpreadRates,
+} from "../actions/rates";
 import { handleApiError } from "../errors/handleApiError";
+import { toast } from "sonner";
 
 export const useGetCryptoRates = () => {
   return useQuery({
@@ -32,14 +38,16 @@ export const usePostCryptoRates = () => {
   });
 };
 
-export const useUpdatesCryptoRates = () => {
+export const useUpdateBuyAndSpreadRates = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ rateId, payload }: UpdateCryptoRatesArgs) => updateCryptoRates(rateId, payload),
+    mutationFn: ({ rateId, payload }: UpdateCryptoRatesArgs) =>
+      updateBuyAndSpreadRates(rateId, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["get-crypto-rates"],
       });
+      toast.success("Rate updated successfully")
     },
     onError: (err) => {
       handleApiError(err);

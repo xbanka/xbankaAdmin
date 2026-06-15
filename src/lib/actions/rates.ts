@@ -11,7 +11,7 @@ export const postCryptoRates = async (payload: CurrencyConfig) => {
   return response.data;
 };
 
-export const updateCryptoRates = async (rateId: string, payload: CurrencyConfig) => {
+export const updateBuyAndSpreadRates = async (rateId: string, payload: CurrencyConfig) => {
   const response = await AxiosInstance.put(`/api/rates/crypto/${rateId}`, payload);
   return response.data;
 };

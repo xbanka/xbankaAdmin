@@ -16,7 +16,10 @@ import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { DashboardLayout } from "../layout/dashboard-layout";
 import { EmptySpreadSchedule } from "./empty-spread-schedule";
-import { useGetAllSegments, useGetCryptoRates } from "@/lib/services/rates.service";
+import {
+  useGetAllSegments,
+  useGetCryptoRates,
+} from "@/lib/services/rates.service";
 import { CryptoCurrencyTypes } from "@/lib/types/rates-types";
 import { formatDate } from "@/lib/formatDate";
 
@@ -26,13 +29,16 @@ export default function RateManagement() {
   );
   const [editRow, setEditRow] = useState<CryptoCurrencyTypes | null>(null);
   const [view, setView] = useState<"list" | "wizard">("list");
-  const { data, isPending, error} = useGetCryptoRates()
-  const { data: segmentData, isPending: isPendingSegment, error: errorSegment} = useGetAllSegments()
-  console.log(segmentData)
-  console.log("rates", data)
-  const ratesData = data?.data
-  console.log(ratesData)
-  const emptyData: any[] = [];
+  const { data, isPending, error } = useGetCryptoRates();
+  const {
+    data: segmentData,
+    isPending: isPendingSegment,
+    error: errorSegment,
+  } = useGetAllSegments();
+  console.log("segmentData", segmentData);
+  console.log("rates", data);
+  const ratesData = data?.data;
+  console.log(ratesData);
 
   const columns = [
     {
@@ -43,8 +49,7 @@ export default function RateManagement() {
           <div
             className="w-8 h-8 rounded-full flex items-center justify-center text-white bg-black/50 text-[11px] font-bold flex-shrink-0"
             // style={{ background: row.color }}
-          >
-          </div>
+          ></div>
           <div>
             <div className="font-semibold text-[13px] text-[#111827]">
               {row.name}
@@ -54,9 +59,27 @@ export default function RateManagement() {
         </div>
       ),
     },
-    { key: "Segment", header: "Segment" },
-    { key: "buyFeeValue", header: "Buy Spread" },
-    { key: "sellFeeValue", header: "Sell Spread" },
+    {
+      key: "Segment",
+      header: "Segment",
+      render: (row: CryptoCurrencyTypes) => (
+        <div className="">{row.segment?.name}</div>
+      ),
+    },
+    {
+      key: "buyFeeValue",
+      header: "Buy Spread",
+      render: (row: CryptoCurrencyTypes) => (
+        <div className="">{row.segment?.buySpread}%</div>
+      ),
+    },
+    {
+      key: "sellFeeValue",
+      header: "Sell Spread",
+      render: (row: CryptoCurrencyTypes) => (
+        <div className="">{row.segment?.buySpread}%</div>
+      ),
+    },
     {
       key: "status",
       header: "Status",
@@ -84,8 +107,12 @@ export default function RateManagement() {
       header: "Requested Date",
       render: (row: CryptoCurrencyTypes) => (
         <div>
-          <div className="text-[12px] text-[#111827]">{formatDate(row?.updatedAt)}</div>
-          <div className="text-[11px] text-[#9CA3AF]">{formatDate(row?.updatedAt)}</div>
+          <div className="text-[12px] text-[#111827]">
+            {formatDate(row?.updatedAt)}
+          </div>
+          <div className="text-[11px] text-[#9CA3AF]">
+            {formatDate(row?.updatedAt)}
+          </div>
         </div>
       ),
     },
@@ -181,11 +208,7 @@ export default function RateManagement() {
         {/* Edit Modal */}
         {editRow && (
           <EditSpreadModal
-            asset={editRow.name}
-            symbol={editRow.currency}
-            // initial={editRow.initial}
-            defaultBuySpread={editRow?.buyFeeValue}
-            defaultSellSpread={editRow.sellFeeValue}
+            spreadData={editRow}
             onClose={() => setEditRow(null)}
             onSave={(buy, sell) => {
               console.log("Saved:", buy, sell);

@@ -1,3 +1,5 @@
+import { CryptoCurrencyTypes } from "@/lib/types/rates-types";
+
 export type Step = 1 | 2 | 3 | 4;
  
 export interface Segment {
@@ -44,11 +46,7 @@ export interface SpreadRow {
 }
 
 export interface EditSpreadModalProps {
-  asset: string;
-  symbol: string;
-  initial?: string;
-  defaultBuySpread: number;
-  defaultSellSpread: number;
+  spreadData: CryptoCurrencyTypes;
   onClose: () => void;
   onSave: (buySpread: number, sellSpread: number) => void;
 }

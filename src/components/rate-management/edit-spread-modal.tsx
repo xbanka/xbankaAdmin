@@ -10,19 +10,20 @@ import { PreviewRow } from "./preview-row";
 import { fmt } from "@/lib/utils/formatNumber";
 import { ModalHeader } from "../ui/modal-header";
 import { Label } from "../ui/label";
+import { useUpdateBuyAndSpreadRates } from "@/lib/services/rates.service";
 
 export function EditSpreadModal({
-  asset,
-  symbol,
-  initial,
-  defaultBuySpread,
-  defaultSellSpread,
+  spreadData,
   onClose,
   onSave,
 }: EditSpreadModalProps) {
-  const [buySpread, setBuySpread] = useState(defaultBuySpread);
-  const [sellSpread, setSellSpread] = useState(defaultSellSpread);
-  const [spreadActive, setSpreadActive] = useState(true);
+  const [buySpread, setBuySpread] = useState(spreadData?.segment?.buySpread ?? 0);
+  const [sellSpread, setSellSpread] = useState(spreadData?.segment?.sellSpread ?? 0);
+
+  const [spreadActive, setSpreadActive] = useState(
+    spreadData?.isActive ?? true,
+  );
+  const { mutate, error, isPending } = useUpdateBuyAndSpreadRates();
 
   const OBLEX_BUY_RATE = 150_000_000;
   const OBLEX_SELL_RATE = 149_500_000;
@@ -32,11 +33,35 @@ export function EditSpreadModal({
   const sellAmt = OBLEX_SELL_RATE * (sellSpread / 100);
   const customerSellRate = OBLEX_SELL_RATE - sellAmt;
 
+  const handleUpdate = () => {
+    mutate(
+      {
+        rateId: spreadData.id,
+        payload: {
+          currency: spreadData.currency,
+          name: spreadData.name,
+          isActive: spreadActive,
+          buyFeeType: spreadData.buyFeeType,
+          buyFeeValue: buySpread,
+          sellFeeType: spreadData.sellFeeType,
+          sellFeeValue: sellSpread,
+          segmentId: spreadData.segmentId,
+        },
+      },
+      {
+        onSuccess: () => {
+          onSave(buySpread, sellSpread);
+          onClose();
+        },
+      },
+    );
+  };
+
   return (
     <Modal onClose={onClose} className="max-w-[700px] px-0 pb-0 border-none">
       {/* Header */}
       <ModalHeader
-        title={`Edit Spread — ${asset} (${symbol})`}
+        title={`Edit Spread — ${spreadData?.name} (${spreadData?.currency})`}
         subtitle="Changes take effect immediately across all active customer quotes."
         onClose={onClose}
         className="border-b border-card-border-secondary bg-card-primary rounded-tl-2xl rounded-tr-2xl"
@@ -53,7 +78,7 @@ export function EditSpreadModal({
               <input
                 type="number"
                 value={buySpread}
-                onChange={(e) => setBuySpread(parseFloat(e.target.value))}
+                onChange={(e) => setBuySpread(Number(e.target.value) || 0)}
                 className="flex-1 border-none outline-none px-3 py-2.5 text-[14px] font-medium bg-transparent"
               />
               <span className="px-3 py-2.5 text-[#9CA3AF] text-[14px] border-l border-[#E5E7EB]">
@@ -72,7 +97,7 @@ export function EditSpreadModal({
               <input
                 type="number"
                 value={sellSpread}
-                onChange={(e) => setSellSpread(parseFloat(e.target.value))}
+                onChange={(e) => setSellSpread(Number(e.target.value) || 0)}
                 className="flex-1 border-none outline-none px-3 py-2.5 text-[14px] font-medium bg-transparent"
               />
               <span className="px-3 py-2.5 text-[#9CA3AF] text-[14px] border-l border-[#E5E7EB]">
@@ -91,7 +116,7 @@ export function EditSpreadModal({
                 Spread Active
               </div>
               <div className="text-[11px] text-[#9CA3AF]">
-                Enable or disable custom spread for {symbol}
+                Enable or disable custom spread for {spreadData.currency}
               </div>
             </div>
             <button
@@ -140,7 +165,8 @@ export function EditSpreadModal({
             <div className="flex items-start gap-1 mt-2">
               <Info size={13} className="text-[#9CA3AF] flex-shrink-0 mt-0.5" />
               <p className="text-[11px] text-[#9CA3AF]">
-                Customer buys {symbol} at Oblex buy rate plus XBanka buy spread.
+                Customer buys {spreadData.currency} at Oblex buy rate plus
+                XBanka buy spread.
               </p>
             </div>
           </div>
@@ -184,7 +210,8 @@ export function EditSpreadModal({
         <div className="flex items-center gap-2">
           <AlertTriangle size={15} className="text-[#D97706] flex-shrink-0" />
           <p className="text-[11px] text-[#92400E]">
-            Saving this change will update the active spread rule for {asset}.
+            Saving this change will update the active spread rule for{" "}
+            {spreadData?.name}.
           </p>
         </div>
 
@@ -193,7 +220,7 @@ export function EditSpreadModal({
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button onClick={() => onSave(buySpread, sellSpread)}>
+          <Button onClick={handleUpdate} disabled={isPending}>
             Update Spread
           </Button>
         </div>
