@@ -17,8 +17,12 @@ export function EditSpreadModal({
   onClose,
   onSave,
 }: EditSpreadModalProps) {
-  const [buySpread, setBuySpread] = useState(spreadData?.segment?.buySpread ?? 0);
-  const [sellSpread, setSellSpread] = useState(spreadData?.segment?.sellSpread ?? 0);
+  const [buySpread, setBuySpread] = useState(
+    spreadData?.segment?.buySpread ?? 0,
+  );
+  const [sellSpread, setSellSpread] = useState(
+    spreadData?.segment?.sellSpread ?? 0,
+  );
 
   const [spreadActive, setSpreadActive] = useState(
     spreadData?.isActive ?? true,
@@ -74,7 +78,7 @@ export function EditSpreadModal({
           {/* Buy Spread */}
           <div className="mb-4 space-y-2">
             <Label>Buy Spread</Label>
-            <div className="flex items-center border border-[#E5E7EB] rounded-lg overflow-hidden focus-within:border-[#0D9488] focus-within:ring-[3px] focus-within:ring-[#0D9488]/10 transition-all">
+            <div className="flex items-center border border-[#E5E7EB] rounded-[8px] bg-[#F9FAFB] overflow-hidden focus-within:border-[#0D9488] focus-within:ring-[3px] focus-within:ring-[#0D9488]/10 transition-all">
               <input
                 type="number"
                 value={buySpread}
@@ -93,7 +97,7 @@ export function EditSpreadModal({
           {/* Sell Spread */}
           <div className="mb-4 space-y-2">
             <Label>Sell Spread</Label>
-            <div className="flex items-center border border-[#E5E7EB] rounded-lg overflow-hidden focus-within:border-[#0D9488] focus-within:ring-[3px] focus-within:ring-[#0D9488]/10 transition-all">
+            <div className="flex items-center border border-[#E5E7EB] rounded-[8px] bg-[#F9FAFB] overflow-hidden focus-within:border-[#0D9488] focus-within:ring-[3px] focus-within:ring-[#0D9488]/10 transition-all">
               <input
                 type="number"
                 value={sellSpread}
@@ -162,9 +166,8 @@ export function EditSpreadModal({
               value={fmt(customerBuyRate)}
               valueClass="text-[15px] text-[#0D9488] font-semibold"
             />
-            <div className="flex items-start gap-1 mt-2">
-              <Info size={13} className="text-[#9CA3AF] flex-shrink-0 mt-0.5" />
-              <p className="text-[11px] text-[#9CA3AF]">
+            <div className="flex items-start gap-1 mt-2 bg-card-secondary rounded-[8px]">
+              <p className="text-[12px] font-normal text-text-secondary py-1 px-2">
                 Customer buys {spreadData.currency} at Obiex buy rate plus
                 XBanka buy spread.
               </p>
@@ -188,9 +191,8 @@ export function EditSpreadModal({
               value={fmt(customerSellRate)}
               valueClass="text-[15px] text-[#0D9488] font-semibold"
             />
-            <div className="flex items-start gap-1 mt-2">
-              <Info size={13} className="text-[#9CA3AF] flex-shrink-0 mt-0.5" />
-              <p className="text-[11px] text-[#9CA3AF]">
+            <div className="flex items-start gap-1 mt-2 bg-card-secondary rounded-[8px]">
+              <p className="text-[12px] font-normal text-text-secondary py-1 px-2">
                 XBanka pays customer Obiex sell rate minus XBanka sell spread.
               </p>
             </div>

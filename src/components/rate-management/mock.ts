@@ -160,3 +160,9 @@ export const NAV_ITEMS = [
   { icon: Percent, label: "Rate Management", active: true },
   { icon: Headset, label: "Support Center" },
 ];
+
+export const SEGMENT_TYPES = [
+  "major coin",
+  "stable coin",
+  "alt coin",
+];
