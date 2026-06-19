@@ -10,6 +10,9 @@ export interface CurrencyConfig {
   sellFeeValue: number;
   segmentId: string
 }
+export interface SegmentConfig {
+  segmentId: string;
+}
 
 export interface AssetSegment {
   id: string;
@@ -41,7 +44,7 @@ export interface CryptoCurrencyTypes {
 
 export interface UpdateCryptoRatesArgs {
   rateId: string;
-  payload: CurrencyConfig;
+  payload: CurrencyConfig | SegmentConfig;
 }
 
 export interface UpdateSegmentPayload {

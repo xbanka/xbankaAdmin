@@ -17,6 +17,8 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { MetricCarousel } from "@/components/dashboard/metric-carousel"
+import { useGetAllTransactions } from "@/lib/services/transaction.service"
+import { CATEGORY_MAP } from "@/components/transaction/transactions-table"
 
 
 const recentTransactions = [
@@ -95,6 +97,19 @@ const topWriters = [
 ]
 
 export default function Dashboard() {
+  const {
+      data: allTransactions,
+      isPending: isPendingTransactions,
+      isError: isErrorTransactions,
+      error: errorTransactions,
+      refetch,
+    } = useGetAllTransactions({
+      page: 1,
+      limit: 10,
+      status: undefined,
+      category: CATEGORY_MAP[activeFilter],
+      search: undefined,
+    });
   return (
     <DashboardLayout title="Dashboard Overview">
       <div className="p-4">

@@ -1,20 +1,200 @@
 import { cn } from "@/lib/utils";
 import { Check, Search } from "lucide-react";
 import { Asset, Segment } from "./types";
+import { CryptoCurrencyTypes } from "@/lib/types/rates-types";
+import { SelectFieldLayout } from "../forms/SelectFieldLayout";
+import { Badge } from "./badge";
+import { DataTableLayout } from "../DataTableLayout/DataTableLayout";
+import { useState } from "react";
+import {
+  useBulkAssignSegment,
+  useUpdateBuyAndSpreadRates,
+} from "@/lib/services/rates.service";
 
 export function StepAssignAssets({
   assets,
   segments,
-  onToggleAsset,
-  onUpdateSegment,
+  setStep,
 }: {
-  assets: Asset[];
+  assets: CryptoCurrencyTypes[];
   segments: Segment[];
-  onToggleAsset: (id: string) => void;
-  onUpdateSegment: (id: string, seg: string) => void;
+  setStep: () => void;
 }) {
   const segOptions = segments.map((s) => s.name);
-  const selectedCount = assets.filter((a) => a.checked).length;
+  const [selectedAssetIds, setSelectedAssetIds] = useState<string[]>([]);
+  const [selectedSegmentName, setSelectedSegmentName] = useState("");
+  const [selectedSegments, setSelectedSegments] = useState<
+    Record<string, string>
+  >({});
+  const [setupNote, setSetupNote] = useState("");
+  // const selectedCount = assets.filter((a) => a.checked).length;
+  const { mutate: bulkAssign, error, isPending } = useBulkAssignSegment();
+  const segmentOptions = segments.map((segment) => ({
+    label: segment.name,
+    value: segment.id,
+  }));
+  console.log("segments", segments);
+  console.log("assets", assets);
+
+  const toggleAsset = (row: CryptoCurrencyTypes) => {
+    const isSelected = selectedAssetIds.includes(row.id);
+
+    if (isSelected) {
+      setSelectedAssetIds((prev) => prev.filter((id) => id !== row.id));
+      return;
+    }
+
+    setSelectedAssetIds((prev) => [...prev, row.id]);
+
+    const segmentId = selectedSegments[row.id] ?? row.segmentId;
+
+    if (segmentId !== row.segmentId) {
+      updateCryptoSegment({
+        rateId: row.id,
+        payload: {
+          segmentId,
+        },
+      });
+    }
+  };
+
+  const { mutate: updateCryptoSegment } = useUpdateBuyAndSpreadRates();
+
+  const handleAssignSelected = () => {
+    const updates = assets.filter(
+      (asset) =>
+        selectedAssetIds.includes(asset.id) &&
+        selectedSegments[asset.id] &&
+        selectedSegments[asset.id] !== asset.segmentId,
+    );
+
+    updates.forEach((asset) => {
+      updateCryptoSegment({
+        rateId: asset.id,
+        payload: {
+          segmentId: selectedSegments[asset.id],
+        },
+      });
+    });
+  };
+
+  const handleSegmentChange = (row: CryptoCurrencyTypes, segmentId: string) => {
+    // always update local UI state
+    setSelectedSegments((prev) => ({
+      ...prev,
+      [row.id]: segmentId,
+    }));
+
+    // only send request if row is checked
+    if (selectedAssetIds.includes(row.id)) {
+      updateCryptoSegment({
+        rateId: row.id,
+        payload: {
+          segmentId,
+        },
+      });
+    }
+  };
+
+  const columns = [
+    {
+      key: "select",
+      header: "",
+      render: (row: CryptoCurrencyTypes) => (
+        <input
+          type="checkbox"
+          checked={selectedAssetIds.includes(row.id)}
+          onChange={() => toggleAsset(row)}
+        />
+      ),
+    },
+
+    {
+      key: "asset",
+      header: "Asset",
+      render: (row: CryptoCurrencyTypes) => (
+        <div>
+          <div>{row.name}</div>
+          <div>{row.currency}</div>
+        </div>
+      ),
+    },
+
+    {
+      key: "segment",
+      header: "Current Segment",
+      render: (row: CryptoCurrencyTypes) => row.segment?.name,
+    },
+    {
+      key: "buyFeeValue",
+      header: "Buy Rate",
+      render: (row: CryptoCurrencyTypes) => `${row.segment?.buySpread}%`,
+    },
+    {
+      key: "sellFeeValue",
+      header: "Sell Rate",
+      render: (row: CryptoCurrencyTypes) => `${row.segment?.sellSpread}%`,
+    },
+
+    {
+      key: "status",
+      header: "Status",
+      render: (row: CryptoCurrencyTypes) => (
+        <Badge
+          active={row.isActive}
+          text={row.isActive ? "Active" : "Inactive"}
+        />
+      ),
+    },
+
+    {
+      key: "assign",
+      header: "Assign Segment",
+      render: (row: CryptoCurrencyTypes) => {
+        const currentSegmentId =
+          selectedSegments[row.id] || row.segmentId || "";
+        return (
+          <SelectFieldLayout
+            id={`segment-${row.id}`}
+            value={currentSegmentId}
+            onChange={(segmentId) => handleSegmentChange(row, segmentId)}
+            options={segmentOptions}
+          />
+        );
+      },
+    },
+  ];
+
+  // const handleBulkAssign = () => {
+  //   const selectedSegment = segments.find(
+  //     (segment) => segment.name === selectedSegmentName,
+  //   );
+
+  //   if (!selectedSegment) return;
+
+  //   bulkAssign({
+  //     segmentId: selectedSegment.id,
+  //     payload: {
+  //       assetIds: selectedAssetIds,
+  //       setupNote,
+  //     },
+  //   });
+
+  //   bulkAssign(
+  //     {
+  //       segmentId: selectedSegment.id,
+  //       payload: {
+  //         assetIds: selectedAssetIds,
+  //         setupNote,
+  //       },
+  //     },
+  //     {
+  //       onSuccess: () => {
+  //         setStep;
+  //       },
+  //     },
+  //   );
+  // };
 
   return (
     <div>
@@ -47,7 +227,7 @@ export function StepAssignAssets({
         </select>
         <div className="ml-auto flex items-center gap-2">
           <span className="text-[12px] text-[#6B7280]">
-            {selectedCount} asset selected
+            {/* {selectedCount} asset selected */}
           </span>
           <select className="border border-[#E5E7EB] rounded-lg px-3 py-1.5 text-[12px] text-[#6B7280] bg-white">
             <option>Assigned selected to</option>
@@ -62,109 +242,13 @@ export function StepAssignAssets({
       </div>
 
       <div className="border-b border-x border-[#E5E7EB] rounded-[8px] overflow-hidden">
-        <table className="w-full text-[12px]">
-          <thead className="">
-            <tr className="bg-card-secondary border-y border-card-border-secondary">
-              <th className="w-8 p-3">
-                <input type="checkbox" />
-              </th>
-              <th className="text-left p-3 font-medium text-[#6B7280]">
-                Asset
-              </th>
-              <th className="text-left p-3 font-medium text-[#6B7280]">
-                Current Segment
-              </th>
-              <th className="text-left p-3 font-medium text-[#6B7280]">
-                Buy Rate
-              </th>
-              <th className="text-left p-3 font-medium text-[#6B7280]">
-                Sell Rate
-              </th>
-              <th className="text-left p-3 font-medium text-[#6B7280]">
-                Status
-              </th>
-              <th className="text-left p-3 font-medium text-[#6B7280]">
-                Action
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-card-primary divide-y-1">
-            {assets.map((asset) => (
-              <tr
-                key={asset.id}
-                className="hover:bg-[#FAFAFA]"
-              >
-                <td className="p-3">
-                  <input
-                    type="checkbox"
-                    checked={asset.checked}
-                    onChange={() => onToggleAsset(asset.id)}
-                  />
-                </td>
-                <td className="p-3">
-                  <div className="flex items-center gap-2">
-                    <div
-                      className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0"
-                      style={{ background: asset.color }}
-                    >
-                      {asset.initial}
-                    </div>
-                    <div>
-                      <div className="font-semibold text-[12px]">
-                        {asset.name}
-                      </div>
-                      <div className="text-[11px] text-[#9CA3AF]">
-                        {asset.symbol}
-                      </div>
-                    </div>
-                  </div>
-                </td>
-                <td className="p-3">
-                  <span
-                    className={cn(
-                      "text-[11px] font-medium px-2 py-0.5 rounded-full",
-                    )}
-                  >
-                    {asset.currentSegment}
-                  </span>
-                </td>
-                <td className="p-3">₦{asset.buyRate.toLocaleString()}</td>
-                <td className="p-3">₦{asset.sellRate.toLocaleString()}</td>
-                <td className="p-3">
-                  <span
-                    className={cn(
-                      "inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full",
-                      asset.status === "Active"
-                        ? "bg-[#ECFDF5] text-[#059669]"
-                        : "bg-[#F3F4F6] text-[#6B7280]",
-                    )}
-                  >
-                    <span
-                      className={cn(
-                        "w-1.5 h-1.5 rounded-full",
-                        asset.status === "Active"
-                          ? "bg-[#059669]"
-                          : "bg-[#9CA3AF]",
-                      )}
-                    />
-                    {asset.status}
-                  </span>
-                </td>
-                <td className="p-3">
-                  <select
-                    value={asset.assignedSegment}
-                    onChange={(e) => onUpdateSegment(asset.id, e.target.value)}
-                    className="border border-[#E5E7EB] rounded-lg px-2 py-1 text-[11px] text-[#6B7280] bg-white"
-                  >
-                    {segOptions.map((s) => (
-                      <option key={s}>{s}</option>
-                    ))}
-                  </select>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <DataTableLayout
+          data={assets}
+          columns={columns}
+          rowKey={(row) => row.id}
+          itemsPerPage={10}
+          totalCount={assets.length}
+        />
       </div>
     </div>
   );

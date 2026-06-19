@@ -18,10 +18,10 @@ export function EditSpreadModal({
   onSave,
 }: EditSpreadModalProps) {
   const [buySpread, setBuySpread] = useState(
-    spreadData?.segment?.buySpread ?? 0,
+    spreadData?.buyFeeValue ?? 0,
   );
   const [sellSpread, setSellSpread] = useState(
-    spreadData?.segment?.sellSpread ?? 0,
+    spreadData?.sellFeeValue ?? 0,
   );
 
   const [spreadActive, setSpreadActive] = useState(

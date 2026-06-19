@@ -12,6 +12,7 @@ import { StepSegment } from "./step-segment";
 import { Asset, Segment, SegmentResponse, SegmentSpread, Step } from "./types";
 import {
   useGetAllSegments,
+  useGetCryptoRates,
   useUpdateAllSegments,
 } from "@/lib/services/rates.service";
 
@@ -34,7 +35,9 @@ export function CreateSpreadWizard({ onClose }: { onClose: () => void }) {
     (sum, segment) => sum + segment.assets.length,
     0,
   );
-  const [assets, setAssets] = useState<Asset[]>(INITIAL_ASSETS);
+  const { data: cryptoData } = useGetCryptoRates();
+
+  const cryptoAssets = cryptoData?.data ?? [];
   const [setupNote, setSetupNote] = useState("");
 
   const toggleSegment = (id: string) => {
@@ -68,17 +71,17 @@ export function CreateSpreadWizard({ onClose }: { onClose: () => void }) {
     );
   };
 
-  const toggleAsset = (id: string) => {
-    setAssets((prev) =>
-      prev.map((a) => (a.id === id ? { ...a, checked: !a.checked } : a)),
-    );
-  };
+  // const toggleAsset = (id: string) => {
+  //   setAssets((prev) =>
+  //     prev.map((a) => (a.id === id ? { ...a, checked: !a.checked } : a)),
+  //   );
+  // };
 
-  const updateAssetSegment = (id: string, seg: string) => {
-    setAssets((prev) =>
-      prev.map((a) => (a.id === id ? { ...a, assignedSegment: seg } : a)),
-    );
-  };
+  // const updateAssetSegment = (id: string, seg: string) => {
+  //   setAssets((prev) =>
+  //     prev.map((a) => (a.id === id ? { ...a, assignedSegment: seg } : a)),
+  //   );
+  // };
 
   const handleSaveSegments = () => {
     const payload = segments
@@ -181,15 +184,14 @@ export function CreateSpreadWizard({ onClose }: { onClose: () => void }) {
           )}
           {step === 3 && (
             <StepAssignAssets
-              assets={assets}
-              segments={segments.filter((s) => s.selected)}
-              onToggleAsset={toggleAsset}
-              onUpdateSegment={updateAssetSegment}
+              assets={cryptoAssets}
+              segments={segments}
+              setStep={() => setStep(4)}
+              // onToggleAsset={toggleAsset}
+              // onUpdateSegment={updateAssetSegment}
             />
           )}
-          {step === 4 && (
-            <StepReview segments={segments} spreads={spreads} assets={assets} />
-          )}
+          {step === 4 && <StepReview segments={segments} spreads={spreads} />}
         </div>
       </div>
 

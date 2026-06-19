@@ -10,11 +10,18 @@ import { cn } from "@/lib/utils";
 import { LucideIcon } from "lucide-react";
 import { FieldError } from "react-hook-form";
 
+type SelectOption =
+  | string
+  | {
+      label: string;
+      value: string;
+    };
+
 interface SelectFieldProps {
   id: string;
   label?: string;
   icon?: LucideIcon;
-  options: string[];
+  options: SelectOption[];
   placeholder?: string;
   onChange?: (value: string) => void;
   className?: string;
@@ -52,11 +59,16 @@ export const SelectFieldLayout = ({
             <SelectValue placeholder={placeholder} />
           </SelectTrigger>
           <SelectContent>
-            {options.map((option) => (
-              <SelectItem key={option} value={option}>
-                {option}
-              </SelectItem>
-            ))}
+            {options.map((option) => {
+              const value = typeof option === "string" ? option : option.value;
+
+              const label = typeof option === "string" ? option : option.label;
+              return (
+                <SelectItem key={value} value={value}>
+                  {label}
+                </SelectItem>
+              );
+            })}
           </SelectContent>
         </Select>
       </div>
