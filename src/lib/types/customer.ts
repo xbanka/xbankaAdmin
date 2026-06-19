@@ -1,23 +1,18 @@
+export interface KycStatus {
+  bvnVerified: boolean;
+  addressStatus: "PENDING" | "APPROVED" | "REJECTED" | string | null;
+  idStatus: "PENDING" | "APPROVED" | "REJECTED" | string | null;
+}
 export interface CustomerProps {
-  id: string;
-  first_name: string;
-  last_name: string;
+  userId: string;
+  firstName: string;
+  lastName: string;
   email: string;
-  phone_no: string;
-  note?: string;
-  affiliate?: {
-    id: string;
-    first_name: string;
-    last_name: string;
-    email: string;
-    username: string;
-    phone_no: string;
-    bank: string;
-    account_no: string;
-    ref_code: string;
-    custom_refcode: string;
-    created_at: string;
-  };
+  isEmailVerified: boolean;
+  phoneNumber: string | null;
+  currentStep: "BVN" | "ADDRESS" | "ID_CARD" | string; // Steps in your onboarding flow
+  kycStatus: KycStatus;
+  createdAt: string; // ISO Date String
 }
 
 export interface CustomerSearchSidebarProps {

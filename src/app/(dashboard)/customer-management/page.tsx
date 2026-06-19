@@ -22,30 +22,30 @@ export default function CustomerManagement() {
     useState<CustomerProps | null>(null);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-
   const { data, isLoading, isError, error } = useGetCustomer(search);
+  console.log("data:", data?.data?.data?.items)
 
-  const customers: CustomerProps[] = data?.data ?? [];
+  const customers: CustomerProps[] = data?.data?.data?.items ?? [];
 
   const handleClose = () => {
     setOpenModal(false);
   };
 
   const columns = [
-    { key: "first_name", header: "First Name" },
-    { key: "last_name", header: "Last Name" },
+    { key: "firstName", header: "First Name" },
+    { key: "lastName", header: "Last Name" },
     { key: "email", header: "Email" },
-    { key: "phone_no", header: "Phone Number" },
-    {
-      key: "affiliate",
-      header: "Affiliate",
-      render: (item: CustomerProps) =>
-        item.affiliate?.username ? (
-          <span className="font-medium">{item.affiliate.username}</span>
-        ) : (
-          <span className="text-gray-400">—</span>
-        ),
-    },
+    { key: "phoneNumber", header: "Phone Number" },
+    // {
+    //   key: "affiliate",
+    //   header: "Affiliate",
+    //   render: (item: CustomerProps) =>
+    //     item.affiliate?.username ? (
+    //       <span className="font-medium">{item.affiliate.username}</span>
+    //     ) : (
+    //       <span className="text-gray-400">—</span>
+    //     ),
+    // },
     {
       key: "actions",
       header: "",
@@ -101,7 +101,7 @@ export default function CustomerManagement() {
           <DataTableLayout<CustomerProps>
             data={customers}
             columns={columns}
-            rowKey={(item) => item.id}
+            rowKey={(item) => item.userId}
             isLoading={isLoading}
             isError={isError}
             errorMessage={error?.message ?? "Failed to load customers"}

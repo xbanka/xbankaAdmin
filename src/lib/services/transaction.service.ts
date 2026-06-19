@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { handleApiError } from "../errors/handleApiError";
-import { createTransactionAction, getAllTransactionsAction, getAllTransactionsByCustomer, getTransactionByIdAction, uploadTransactionAttachmentAction } from "../actions/transactions";
+import { createTransactionAction, getAllTransactions, getAllTransactionsAction, getAllTransactionsByCustomer, getTransactionByIdAction, GetTransactionsParams, uploadTransactionAttachmentAction } from "../actions/transactions";
 import { toast } from "sonner";
 import { CreateTransactionPayload } from "@/components/transaction/transaction-data";
 
@@ -78,5 +78,20 @@ export const useUploadTransactionAttachment = () => {
     onError: (err) => {
       handleApiError(err);
     },
+  });
+};
+
+export const useGetAllTransactions = (params: GetTransactionsParams) => {
+  return useQuery({
+    queryKey: ["get-all-transactions", params],
+    queryFn: async () => {
+      try {
+        const response = await getAllTransactions(params);
+        return response;
+      } catch (error) {
+        handleApiError(error);
+      }
+    },
+    placeholderData: (previousData) => previousData, // keep old page while fetching next
   });
 };

@@ -2,6 +2,7 @@
 
 import {
   Calendar,
+  Edit,
   Pencil,
   Plus,
   Search,
@@ -16,19 +17,24 @@ import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { DashboardLayout } from "../layout/dashboard-layout";
 import { EmptySpreadSchedule } from "./empty-spread-schedule";
-import {
-  useGetCryptoRates,
-} from "@/lib/services/rates.service";
+import { useGetCryptoRates } from "@/lib/services/rates.service";
 import { CryptoCurrencyTypes } from "@/lib/types/rates-types";
 import { formatDate } from "@/lib/formatDate";
+import { Input } from "../ui/input";
+import { SelectFieldLayout } from "../forms/SelectFieldLayout";
+import { SEGMENT_TYPES } from "./mock";
+import { Badge } from "./badge";
 
 export default function RateManagement() {
   const [activeTab, setActiveTab] = useState<"schedule" | "history">(
     "schedule",
   );
+  const [searchQuery, setSearchQuery] = useState("");
   const [editRow, setEditRow] = useState<CryptoCurrencyTypes | null>(null);
   const [view, setView] = useState<"list" | "wizard">("list");
   const { data, isPending, error } = useGetCryptoRates();
+  const [selectedTransactionType, setSelectedTransactionType] =
+    useState<string>("");
   console.log("rates", data);
   const ratesData = data?.data;
   console.log(ratesData);
@@ -63,36 +69,37 @@ export default function RateManagement() {
       key: "buyFeeValue",
       header: "Buy Spread",
       render: (row: CryptoCurrencyTypes) => (
-        <div className="">{row.segment?.buySpread}%</div>
+        <div className="">{row.buyFeeValue}%</div>
       ),
     },
     {
       key: "sellFeeValue",
       header: "Sell Spread",
       render: (row: CryptoCurrencyTypes) => (
-        <div className="">{row.segment?.buySpread}%</div>
+        <div className="">{row.sellFeeValue}%</div>
       ),
     },
     {
       key: "status",
       header: "Status",
       render: (row: CryptoCurrencyTypes) => (
-        <span
-          className={cn(
-            "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-medium",
-            row.isActive === true
-              ? "bg-[#ECFDF5] text-[#059669]"
-              : "bg-[#F3F4F6] text-[#6B7280]",
-          )}
-        >
-          <span
-            className={cn(
-              "w-1.5 h-1.5 rounded-full",
-              row.isActive === true ? "bg-[#059669]" : "bg-[#9CA3AF]",
-            )}
-          />
-          {row.isActive ? "Active" : "Inactive"}
-        </span>
+        // <span
+        //   className={cn(
+        //     "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-medium",
+        //     row.isActive === true
+        //       ? "bg-[#ECFDF5] text-[#059669]"
+        //       : "bg-[#F3F4F6] text-[#6B7280]",
+        //   )}
+        // >
+        //   <span
+        //     className={cn(
+        //       "w-1.5 h-1.5 rounded-full",
+        //       row.isActive === true ? "bg-[#059669]" : "bg-[#9CA3AF]",
+        //     )}
+        //   />
+        //   {row.isActive ? "Active" : "Inactive"}
+        // </span>
+        <Badge active={row.isActive} text={row.isActive ? "Active" : "Inactive"} />
       ),
     },
     {
@@ -116,9 +123,9 @@ export default function RateManagement() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setEditRow(row)}
-            className="flex items-center gap-1 text-[12px] text-[#0D9488] font-medium hover:opacity-70 transition-opacity"
+            className="flex items-center gap-1 leading-[22px] text-[14px] text-text-primary-font-color font-medium hover:opacity-70 transition-opacity"
           >
-            <Pencil size={13} /> Edit
+            <Edit size={16} className="text-[#004C99]" /> Edit
           </button>
           {/* <span className="text-[#E5E7EB] text-[12px]">|</span>
           <button className="flex items-center gap-1 text-[12px] text-[#EF4444] font-medium hover:opacity-70 transition-opacity">
@@ -172,12 +179,24 @@ export default function RateManagement() {
 
                 {/* Toolbar */}
                 <div className="flex items-center gap-2.5 mb-6">
-                  <div className="flex items-center gap-1.5 border border-[#E5E7EB] rounded-lg px-3 py-2 text-[13px] text-[#9CA3AF] bg-white w-44">
-                    <Search size={14} /> Search
+                  <div className="relative max-w-[200px]">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Input
+                      placeholder="Search"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-10"
+                    />
                   </div>
-                  <button className="flex items-center gap-1.5 border border-[#E5E7EB] rounded-lg px-3 py-2 text-[13px] text-[#6B7280] bg-white">
-                    <Calendar size={14} /> Date Submitted
-                  </button>
+                  <SelectFieldLayout
+                    id="transactionType"
+                    options={SEGMENT_TYPES}
+                    placeholder="All segment"
+                    value={selectedTransactionType}
+                    onChange={setSelectedTransactionType}
+                    className="w-full md:w-[180px]"
+                    selectClassName="border border-gray-300"
+                  />
                   <button className="flex items-center gap-1.5 border border-[#E5E7EB] rounded-lg px-3 py-2 text-[13px] text-[#6B7280] bg-white">
                     <SlidersHorizontal size={14} /> Advanced filter
                   </button>
