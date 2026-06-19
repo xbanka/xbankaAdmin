@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Check, Search } from "lucide-react";
+import { Check, Search, SlidersHorizontal } from "lucide-react";
 import { Asset, Segment } from "./types";
 import { CryptoCurrencyTypes } from "@/lib/types/rates-types";
 import { SelectFieldLayout } from "../forms/SelectFieldLayout";
@@ -10,22 +10,26 @@ import {
   useBulkAssignSegment,
   useUpdateBuyAndSpreadRates,
 } from "@/lib/services/rates.service";
+import { Input } from "../ui/input";
+import { SEGMENT_TYPES } from "./mock";
 
 export function StepAssignAssets({
   assets,
   segments,
-  setStep,
 }: {
   assets: CryptoCurrencyTypes[];
   segments: Segment[];
-  setStep: () => void;
 }) {
   const segOptions = segments.map((s) => s.name);
   const [selectedAssetIds, setSelectedAssetIds] = useState<string[]>([]);
   const [selectedSegmentName, setSelectedSegmentName] = useState("");
+  const [selectedTransactionType, setSelectedTransactionType] =
+    useState<string>("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedSegments, setSelectedSegments] = useState<
     Record<string, string>
   >({});
+  const [bulkSegmentId, setBulkSegmentId] = useState("");
   const [setupNote, setSetupNote] = useState("");
   // const selectedCount = assets.filter((a) => a.checked).length;
   const { mutate: bulkAssign, error, isPending } = useBulkAssignSegment();
@@ -100,12 +104,21 @@ export function StepAssignAssets({
     {
       key: "select",
       header: "",
+      className: "w-[10px]",
       render: (row: CryptoCurrencyTypes) => (
-        <input
-          type="checkbox"
-          checked={selectedAssetIds.includes(row.id)}
-          onChange={() => toggleAsset(row)}
-        />
+        <div
+          onClick={() => toggleAsset(row)}
+          className={cn(
+            "w-5 h-5 rounded flex items-center justify-center border cursor-pointer transition-all",
+            selectedAssetIds.includes(row.id)
+              ? "bg-[#0D9488] border-[#0D9488]"
+              : "bg-transparent border-[#D1D5DB]",
+          )}
+        >
+          {selectedAssetIds.includes(row.id) && (
+            <Check size={12} className="text-white" />
+          )}
+        </div>
       ),
     },
 
@@ -113,9 +126,15 @@ export function StepAssignAssets({
       key: "asset",
       header: "Asset",
       render: (row: CryptoCurrencyTypes) => (
-        <div>
-          <div>{row.name}</div>
-          <div>{row.currency}</div>
+        <div className="flex items-center gap-3">
+          <div
+            className="w-8 h-8 rounded-full flex items-center justify-center text-white bg-black/50 text-[11px] font-bold flex-shrink-0"
+            // style={{ background: row.color }}
+          ></div>
+          <div>
+            <div>{row.name}</div>
+            <div>{row.currency}</div>
+          </div>
         </div>
       ),
     },
@@ -165,36 +184,27 @@ export function StepAssignAssets({
     },
   ];
 
-  // const handleBulkAssign = () => {
-  //   const selectedSegment = segments.find(
-  //     (segment) => segment.name === selectedSegmentName,
-  //   );
+  const handleBulkAssign = () => {
+    if (!bulkSegmentId) return;
 
-  //   if (!selectedSegment) return;
+    if (selectedAssetIds.length === 0) return;
 
-  //   bulkAssign({
-  //     segmentId: selectedSegment.id,
-  //     payload: {
-  //       assetIds: selectedAssetIds,
-  //       setupNote,
-  //     },
-  //   });
-
-  //   bulkAssign(
-  //     {
-  //       segmentId: selectedSegment.id,
-  //       payload: {
-  //         assetIds: selectedAssetIds,
-  //         setupNote,
-  //       },
-  //     },
-  //     {
-  //       onSuccess: () => {
-  //         setStep;
-  //       },
-  //     },
-  //   );
-  // };
+    bulkAssign(
+      {
+        segmentId: bulkSegmentId,
+        payload: {
+          assetIds: selectedAssetIds,
+          setupNote,
+        },
+      },
+      {
+        onSuccess: () => {
+          setSelectedAssetIds([]);
+          setBulkSegmentId("");
+        },
+      },
+    );
+  };
 
   return (
     <div>
@@ -211,31 +221,53 @@ export function StepAssignAssets({
 
       {/* Toolbar */}
       <div className="flex items-center gap-2 mb-4 flex-wrap">
-        <div className="flex items-center gap-1.5 border border-[#E5E7EB] rounded-lg px-3 py-1.5 text-[12px] text-[#9CA3AF] bg-white w-36">
-          <Search size={13} /> Search asset
+        <div className="flex items-center gap-2.5 mb-6">
+          <div className="relative max-w-[200px]">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <SelectFieldLayout
+            id="transactionType"
+            options={SEGMENT_TYPES}
+            placeholder="All segment"
+            value={selectedTransactionType}
+            onChange={setSelectedTransactionType}
+            className="w-full md:w-[180px]"
+            selectClassName="border border-gray-300"
+          />
+          <button className="flex items-center gap-1.5 border border-[#E5E7EB] rounded-lg px-3 py-2 text-[13px] text-[#6B7280] bg-white">
+            <SlidersHorizontal size={14} /> Advanced filter
+          </button>
         </div>
-        <select className="border border-[#E5E7EB] rounded-lg px-3 py-1.5 text-[12px] text-[#6B7280] bg-white">
-          <option>Major coins</option>
-          {segOptions.map((s) => (
-            <option key={s}>{s}</option>
-          ))}
-        </select>
-        <select className="border border-[#E5E7EB] rounded-lg px-3 py-1.5 text-[12px] text-[#6B7280] bg-white">
-          <option>Status: All</option>
-          <option>Active</option>
-          <option>Inactive</option>
-        </select>
         <div className="ml-auto flex items-center gap-2">
           <span className="text-[12px] text-[#6B7280]">
-            {/* {selectedCount} asset selected */}
+            {selectedAssetIds.length} asset
+            {selectedAssetIds.length !== 1 ? "s" : ""} selected
           </span>
-          <select className="border border-[#E5E7EB] rounded-lg px-3 py-1.5 text-[12px] text-[#6B7280] bg-white">
-            <option>Assigned selected to</option>
-            {segOptions.map((s) => (
-              <option key={s}>{s}</option>
-            ))}
-          </select>
-          <button className="w-8 h-8 rounded-lg bg-[#0D9488] flex items-center justify-center text-white">
+          <SelectFieldLayout
+            id="bulk-segment"
+            value={bulkSegmentId}
+            onChange={setBulkSegmentId}
+            options={segmentOptions}
+            placeholder="Assign selected to"
+          />
+          <button
+            onClick={handleBulkAssign}
+            disabled={
+              !bulkSegmentId || selectedAssetIds.length === 0 || isPending
+            }
+            className={cn(
+              "w-8 h-8 rounded-lg flex items-center justify-center text-white",
+              !bulkSegmentId || selectedAssetIds.length === 0
+                ? "bg-gray-300 cursor-not-allowed"
+                : "bg-[#0D9488]",
+            )}
+          >
             <Check size={15} />
           </button>
         </div>

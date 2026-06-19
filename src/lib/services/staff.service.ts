@@ -1,39 +1,44 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { handleApiError } from "../errors/handleApiError"
-import { deleteStaff, getAllStaff, getStaff, inviteStaff } from "../actions/staff"
-import { toast } from "sonner"
-import { StaffPayload } from "../types/staffTypes"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { handleApiError } from "../errors/handleApiError";
+import {
+  deleteStaff,
+  getAllStaff,
+  getStaff,
+  inviteStaff,
+} from "../actions/staff";
+import { toast } from "sonner";
+import { StaffPayload } from "../types/staffTypes";
 
 export const useGetAllStaff = () => {
-    return useQuery({
-        queryKey: ["getAllStaff"],
-        queryFn: async() => {
-            try{
-                const response = await getAllStaff()
-                return response
-            }catch(error){
-                handleApiError(error)
-            }
-        }
-    })
-}
+  return useQuery({
+    queryKey: ["getAllStaff"],
+    queryFn: async () => {
+      try {
+        const response = await getAllStaff();
+        return response;
+      } catch (error) {
+        handleApiError(error);
+      }
+    },
+  });
+};
 
 export const useGetStaff = (role: string) => {
-    return useQuery({
-        queryKey: ["getStaff"],
-        queryFn: async() => {
-            try{
-                const response = await getStaff(role)
-                return response
-            }catch(error){
-                handleApiError(error)
-            }
-        }
-    })
-}
+  return useQuery({
+    queryKey: ["getStaff"],
+    queryFn: async () => {
+      try {
+        const response = await getStaff(role);
+        return response;
+      } catch (error) {
+        handleApiError(error);
+      }
+    },
+  });
+};
 
 export const useInviteStaff = () => {
-    const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (payload: StaffPayload) => inviteStaff(payload),
     onSuccess: () => {
@@ -41,16 +46,15 @@ export const useInviteStaff = () => {
       queryClient.invalidateQueries({
         queryKey: ["getStaff"],
       });
-
     },
     onError: (err) => {
       handleApiError(err);
     },
   });
-}
+};
 
 export const useDeleteStaff = () => {
-    const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (payload: string) => deleteStaff(payload),
     onSuccess: () => {
@@ -58,10 +62,9 @@ export const useDeleteStaff = () => {
       queryClient.invalidateQueries({
         queryKey: ["getAllStaff"],
       });
-
     },
     onError: (err) => {
       handleApiError(err);
     },
   });
-}
+};
