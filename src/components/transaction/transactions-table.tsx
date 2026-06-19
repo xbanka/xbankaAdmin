@@ -141,12 +141,15 @@ export function TransactionsTable({
       header: "Customer",
       className: "md:w-[140px]",
       render: (item: TransactionRecord) => (
-        <div className="cursor-pointer">
-          <span className="text-[var(--text-teal)] text-sm font-medium hover:underline block">
+        // <div className="cursor-pointer">
+        //   <span className="text-[var(--text-teal)] text-sm font-medium hover:underline block">
+        //     {item.customer?.firstName} {item.customer?.lastName}
+        //   </span>
+        //   <span className="text-xs text-gray-500">{item.customer?.email}</span>
+        // </div>
+        <div className="text-[var(--text-teal)] text-sm font-medium hover:underline block">
             {item.customer?.firstName} {item.customer?.lastName}
-          </span>
-          <span className="text-xs text-gray-500">{item.customer?.email}</span>
-        </div>
+          </div>
       ),
     },
   ];
@@ -475,7 +478,7 @@ export function TransactionsTable({
 
         {/* Search and Filters */}
         <div className="flex flex-col md:flex-row gap-3 mb-6">
-          <div className="relative flex-1">
+          {/* <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
               placeholder="Search"
@@ -486,7 +489,7 @@ export function TransactionsTable({
               }}
               className="pl-9"
             />
-          </div>
+          </div> */}
           <SelectFieldLayout
             id="statusFilter"
             options={["COMPLETED", "PENDING", "FAILED", "PROCESSING"]}
