@@ -7,13 +7,11 @@ import { Search, Upload } from "lucide-react";
 import { DataTableLayout } from "../DataTableLayout/DataTableLayout";
 import { FilterTabs } from "../ui/FilterTabs";
 import { TransactionsTableProps } from "@/lib/types/transactionTypes";
-import { CustomerInfoPopup } from "./customer-info-popup";
 import {
   useGetAllTransactions,
   useTransactions,
 } from "@/lib/services/transaction.service";
 import Header from "../ui/Header";
-import { SERVICE_TYPE_FILTER_MAP } from "@/lib/enum/transaction.enum";
 import { useUserStore } from "@/store/userStore";
 import {
   hasPermission,
@@ -21,15 +19,14 @@ import {
 } from "@/lib/rolePermissions";
 import { SelectFieldLayout } from "../forms/SelectFieldLayout";
 import { formatDate } from "@/lib/formatDate";
-import { useAllColumns } from "./use-all-colums";
-import { useFiatColumns } from "./use-fiat-colums";
-import { useCryptoColumns } from "./use-crypto-columns";
-import { useManualColumns } from "./use-manual-columns";
 import { AllTabFilters } from "./all-tab-filters";
 import { ManualTabFilters } from "./manual-tab-filters";
 import { FiatTabFilters } from "./fiat-tab-filters";
 import { CryptoTabFilters } from "./crypto-tab-filters";
 import { TransactionRecord } from "@/lib/types/transaction-types";
+import { TierBadge } from "./tier-badge";
+import { StatusBadge } from "./badge";
+import { useProfile } from "@/lib/services/profile.service";
 
 const TRANSACTION_TYPES = [
   "USDT-NGN",
@@ -68,33 +65,17 @@ export function TransactionsTable({
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [sourceFilter, setSourceFilter] = useState("");
+  const [searchInput, setSearchInput] = useState("");
   const [transactionTypeFilter, setTransactionTypeFilter] = useState("");
-  const [selectedCustomer, setSelectedCustomer] =
-    useState<TransactionRecord | null>(null);
   const [page, setPage] = useState(1);
-  const [popupPosition, setPopupPosition] = useState({ top: 0, left: 0 });
-  const user = useUserStore((state) => state.user);
+  const {
+    data: userData,
+    isPending: isPendingData,
+    error: errorData,
+  } = useProfile();
   const apiPermissionSet = normalizePermissionsFromApi(
-    user?.role.allowed_permissions ?? [],
+    userData?.data.role.allowed_permissions ?? [],
   );
-  const [selectedTransactionType, setSelectedTransactionType] =
-    useState<string>("");
-  const [selectedDateRange, setSelectedDateRange] = useState<string>("");
-
-  const normalizedFilter = activeFilter.toLowerCase();
-  const apiServiceType = SERVICE_TYPE_FILTER_MAP[normalizedFilter];
-
-  const handleCustomerClick = (
-    item: TransactionRecord,
-    e: React.MouseEvent,
-  ) => {
-    setSelectedCustomer(item);
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    setPopupPosition({
-      top: rect.bottom + 8, // Position 8px below the customer cell
-      left: rect.left + rect.width / 2, // Center with the customer name column
-    });
-  };
 
   const {
     data: transactionData,
@@ -117,64 +98,11 @@ export function TransactionsTable({
     search: searchQuery || undefined,
   });
 
-  const SERVICE_TYPE_MAP: Record<ActiveTab, string | null> = {
-    all: null,
-    fiat: "FIAT",
-    crypto: "CRYPTO",
-    manual: "MANUAL",
-    "gift cards": "GIFT_CARD",
-    "bill payments": "BILL_PAYMENT",
-  };
-
-  const transactions = transactionData?.data?.data ?? [];
+  // const transactions = transactionData?.data?.data ?? [];
   const transactionsBody = transactionData?.data;
-  // const transactions: TransactionRecord[] = data?.items ?? [];
-  // const meta = data?.meta;
-  const filteredData = transactions.filter((item: TransactionRecord) => {
-    const serviceTypeMatch =
-      !SERVICE_TYPE_MAP[activeFilter] ||
-      item.service_type === SERVICE_TYPE_MAP[activeFilter];
-    const searchMatch =
-      !searchQuery ||
-      `${item.customer?.first_name} ${item.customer?.last_name}`
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase()) ||
-      item.txn_id?.toLowerCase().includes(searchQuery.toLowerCase());
-
-    const statusMatch =
-      !statusFilter ||
-      statusFilter === "All" ||
-      item.status?.toLowerCase() === statusFilter.toLowerCase();
-
-    const sourceMatch =
-      !sourceFilter ||
-      sourceFilter === "All" ||
-      item.source?.toLowerCase() === sourceFilter.toLowerCase();
-
-    const typeMatch =
-      !transactionTypeFilter ||
-      transactionTypeFilter === "All" ||
-      item.transaction_type?.toLowerCase() ===
-        transactionTypeFilter.toLowerCase();
-
-    return (
-      serviceTypeMatch && searchMatch && statusMatch && sourceMatch && typeMatch
-    );
-  });
-
-  // const allColumns = useAllColumns(handleCustomerClick);
-  // const fiatColumns = useFiatColumns(handleCustomerClick);
-  // const cryptoColumns = useCryptoColumns(handleCustomerClick);
-  // const manualColumns = useManualColumns(handleCustomerClick);
-
-  // const activeColumns =
-  //   activeFilter === "fiat"
-  //     ? fiatColumns
-  //     : activeFilter === "crypto"
-  //       ? cryptoColumns
-  //       : activeFilter === "manual"
-  //         ? manualColumns
-  //         : allColumns;
+  const transactions: TransactionRecord[] = allTransactions?.data?.items ?? [];
+  const meta = allTransactions?.meta;
+  console.log(allTransactions, transactions);
 
   const handleTabChange = (tab: string) => {
     setActiveFilter(tab.toLowerCase() as ActiveTab);
@@ -184,135 +112,16 @@ export function TransactionsTable({
     setTransactionTypeFilter("");
     setPage(1);
   };
-
-  // Get unique formatted dates for date filter (deduplicated by formatted label)
-  const uniqueDates = Array.from(
-    new Set(
-      filteredData.map((item: TransactionRecord) =>
-        formatDate(item.created_at),
-      ),
-    ),
-  )
-    .sort()
-    .reverse();
-
-  // Calculate date range label
-  const getDateRangeLabel = (dateStr: string) => {
-    if (!dateStr) return "";
-    const date = new Date(dateStr);
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-
-    const isToday = date.toDateString() === today.toDateString();
-    const isYesterday = date.toDateString() === yesterday.toDateString();
-
-    if (isToday) return `Today (${dateStr})`;
-    if (isYesterday) return `Yesterday (${dateStr})`;
-    return dateStr;
-  };
-
-  // const columns = [
-  //   {
-  //     key: "txn_id",
-  //     header: "Transaction ID",
-  //     className: "md:w-[140px]",
-  //     render: (item: TransactionRecord) => (
-  //       <span
-  //         className="block text-abstractCyan truncate max-w-full"
-  //         title={item.txn_id}
-  //       >
-  //         {item.txn_id}
-  //       </span>
-  //     ),
-  //   },
-  //   {
-  //     key: "affiliate_source",
-  //     header: "Customer",
-  //     className: "md:w-[140px]",
-  //     render: (item: TransactionRecord) => (
-  //       <div
-  //         onClick={(e) => handleCustomerClick(item, e)}
-  //         className="relative flex flex-col cursor-pointer hover:text-teal-600 transition"
-  //       >
-  //         <span className="font-medium text-teal-600 hover:underline">
-  //           {item.customer.first_name} {item.customer.last_name}
-  //         </span>
-  //         <span className="text-xs text-gray-500">{item.customer.email}</span>
-  //       </div>
-  //     ),
-  //   },
-  //   {
-  //     key: "service_type",
-  //     header: "Service Type",
-  //     className: "md:w-[140px]",
-  //   },
-  //   {
-  //     key: "transaction_type",
-  //     header: "Transaction Type",
-  //     className: "md:w-[140px]",
-  //   },
-  //   {
-  //     key: "amount_in",
-  //     header: "Amount In",
-  //     className: "md:w-[140px]",
-  //   },
-  //   {
-  //     key: "amount_out",
-  //     header: "Amount Out",
-  //     className: "md:w-[140px]",
-  //   },
-  //   {
-  //     key: "vendor_rate",
-  //     header: "Vendor Rate",
-  //     className: "md:w-[140px]",
-  //   },
-  //   {
-  //     key: "xbanka_rate",
-  //     header: "Xbanka Rate",
-  //     className: "md:w-[140px]",
-  //   },
-  //   {
-  //     key: "margin",
-  //     header: "Margin",
-  //     className: "md:w-[140px]",
-  //   },
-  //   // {
-  //   //   key: "status",
-  //   //   header: "Status",
-  //   //   render: (item: TransactionRecord) => (
-  //   //     <span
-  //   //       className={`capitalize px-3 py-1 rounded-full text-xs font-medium ${
-  //   //         item.status === "completed"
-  //   //           ? "bg-[#D1FAE5] text-[#37703F]"
-  //   //           : item.status === "failed"
-  //   //           ? "bg-[#FCE6E6] text-[#EF4444]"
-  //   //           : "bg-[#FFF8D8] text-[#B29504]"
-  //   //       }`}
-  //   //     >
-  //   //       {item.status}
-  //   //     </span>
-  //   //   ),
-  //   // },
-  //   { key: "vendor", header: "Vendor", className: "md:w-[140px]" },
-
-  //   { key: "assignedRep", header: "Assigned Rep", className: "md:w-[140px]" },
-
-  //   {
-  //     key: "created_at",
-  //     header: "Date",
-  //     className: "md:w-[140px]",
-  //     render: (item: TransactionRecord) => formatDate(item.created_at),
-  //   },
-  // ];
-
   const baseColumns = [
     {
       key: "reference",
       header: "Txn ID",
       className: "md:w-[140px]",
       render: (item: TransactionRecord) => (
-        <span className="text-[var(--text-teal)] text-xs truncate block" title={item.reference}>
+        <span
+          className="text-[var(--text-teal)] text-xs truncate block"
+          title={item.reference}
+        >
           {item.reference}
         </span>
       ),
@@ -322,7 +131,9 @@ export function TransactionsTable({
       header: "Date",
       className: "md:w-[110px]",
       render: (item: TransactionRecord) => (
-        <span className="text-xs text-gray-600">{formatDate(item.createdAt)}</span>
+        <span className="text-xs text-gray-600">
+          {formatDate(item.createdAt)}
+        </span>
       ),
     },
     {
@@ -330,7 +141,7 @@ export function TransactionsTable({
       header: "Customer",
       className: "md:w-[140px]",
       render: (item: TransactionRecord) => (
-        <div onClick={(e) => handleCustomerClick(item, e)} className="cursor-pointer">
+        <div className="cursor-pointer">
           <span className="text-[var(--text-teal)] text-sm font-medium hover:underline block">
             {item.customer?.firstName} {item.customer?.lastName}
           </span>
@@ -346,7 +157,9 @@ export function TransactionsTable({
       key: "kycTier",
       header: "Tier Level",
       className: "md:w-[100px]",
-      render: (item: TransactionRecord) => <TierBadge tier={item.customer?.kycTier} />,
+      render: (item: TransactionRecord) => (
+        <TierBadge tier={item.customer?.kycTier} />
+      ),
     },
     {
       key: "details",
@@ -354,7 +167,9 @@ export function TransactionsTable({
       className: "md:w-[200px]",
       render: (item: TransactionRecord) => (
         <div className="flex flex-col">
-          <span className="text-xs font-medium text-gray-800">{item.displayType}</span>
+          <span className="text-xs font-medium text-gray-800">
+            {item.displayType}
+          </span>
           <span className="text-[10px] text-gray-400">{item.note}</span>
         </div>
       ),
@@ -384,7 +199,9 @@ export function TransactionsTable({
       header: "Type",
       className: "md:w-[110px]",
       render: (item: TransactionRecord) => (
-        <span className="text-xs text-gray-700 capitalize">{item.type?.toLowerCase()}</span>
+        <span className="text-xs text-gray-700 capitalize">
+          {item.type?.toLowerCase()}
+        </span>
       ),
     },
     {
@@ -394,7 +211,9 @@ export function TransactionsTable({
       render: (item: TransactionRecord) => {
         const credit = item.type === "DEPOSIT";
         return (
-          <span className={`text-xs font-medium ${credit ? "text-[var(--success-text)]" : "text-[var(--mainRed)]"}`}>
+          <span
+            className={`text-xs font-medium ${credit ? "text-[var(--success-text)]" : "text-[var(--mainRed)]"}`}
+          >
             {credit ? "Credit" : "Debit"}
           </span>
         );
@@ -415,7 +234,9 @@ export function TransactionsTable({
       header: "Channel",
       className: "md:w-[140px]",
       render: (item: TransactionRecord) => (
-        <span className="text-xs text-gray-600">{item.tradeDetails?.deliveryMethod ?? "—"}</span>
+        <span className="text-xs text-gray-600">
+          {item.tradeDetails?.deliveryMethod ?? "—"}
+        </span>
       ),
     },
     {
@@ -423,7 +244,9 @@ export function TransactionsTable({
       header: "Provider",
       className: "md:w-[110px]",
       render: (item: TransactionRecord) => (
-        <span className="text-xs text-gray-600">{item.tradeDetails?.partner ?? "—"}</span>
+        <span className="text-xs text-gray-600">
+          {item.tradeDetails?.partner ?? "—"}
+        </span>
       ),
     },
   ];
@@ -434,7 +257,9 @@ export function TransactionsTable({
       key: "kycTier",
       header: "Tier Level",
       className: "md:w-[100px]",
-      render: (item: TransactionRecord) => <TierBadge tier={item.customer?.kycTier} />,
+      render: (item: TransactionRecord) => (
+        <TierBadge tier={item.customer?.kycTier} />
+      ),
     },
     {
       key: "type",
@@ -450,7 +275,8 @@ export function TransactionsTable({
       className: "md:w-[120px]",
       render: (item: TransactionRecord) => (
         <span className="text-xs font-medium text-gray-700">
-          {item.tradeDetails?.sourceCurrency}-{item.tradeDetails?.targetCurrency}
+          {item.tradeDetails?.sourceCurrency}-
+          {item.tradeDetails?.targetCurrency}
         </span>
       ),
     },
@@ -460,7 +286,8 @@ export function TransactionsTable({
       className: "md:w-[130px]",
       render: (item: TransactionRecord) => (
         <span className="text-xs text-gray-800">
-          {moneyFmt(item.tradeDetails?.sourceAmount)} {item.tradeDetails?.sourceCurrency}
+          {moneyFmt(item.tradeDetails?.sourceAmount)}{" "}
+          {item.tradeDetails?.sourceCurrency}
         </span>
       ),
     },
@@ -470,7 +297,8 @@ export function TransactionsTable({
       className: "md:w-[140px]",
       render: (item: TransactionRecord) => (
         <span className="text-xs text-gray-800">
-          {moneyFmt(item.tradeDetails?.payoutAmount)} {item.tradeDetails?.targetCurrency}
+          {moneyFmt(item.tradeDetails?.payoutAmount)}{" "}
+          {item.tradeDetails?.targetCurrency}
         </span>
       ),
     },
@@ -498,7 +326,8 @@ export function TransactionsTable({
       className: "md:w-[120px]",
       render: (item: TransactionRecord) => (
         <span className="text-xs font-medium text-gray-700">
-          {item.tradeDetails?.sourceCurrency}-{item.tradeDetails?.targetCurrency}
+          {item.tradeDetails?.sourceCurrency}-
+          {item.tradeDetails?.targetCurrency}
         </span>
       ),
     },
@@ -508,7 +337,8 @@ export function TransactionsTable({
       className: "md:w-[130px]",
       render: (item: TransactionRecord) => (
         <span className="text-xs text-gray-800">
-          {moneyFmt(item.tradeDetails?.sourceAmount)} {item.tradeDetails?.sourceCurrency}
+          {moneyFmt(item.tradeDetails?.sourceAmount)}{" "}
+          {item.tradeDetails?.sourceCurrency}
         </span>
       ),
     },
@@ -518,7 +348,8 @@ export function TransactionsTable({
       className: "md:w-[140px]",
       render: (item: TransactionRecord) => (
         <span className="text-xs text-gray-800">
-          {moneyFmt(item.tradeDetails?.payoutAmount)} {item.tradeDetails?.targetCurrency}
+          {moneyFmt(item.tradeDetails?.payoutAmount)}{" "}
+          {item.tradeDetails?.targetCurrency}
         </span>
       ),
     },
@@ -527,16 +358,21 @@ export function TransactionsTable({
       header: "Channel",
       className: "md:w-[110px]",
       render: (item: TransactionRecord) => (
-        <span className="text-xs text-gray-600">{item.tradeDetails?.channelOrigin ?? "—"}</span>
+        <span className="text-xs text-gray-600">
+          {item.tradeDetails?.channelOrigin ?? "—"}
+        </span>
       ),
     },
   ];
 
   const activeColumns =
-    activeFilter === "fiat" ? fiatColumns :
-    activeFilter === "crypto" ? cryptoColumns :
-    activeFilter === "manual" ? manualColumns :
-    allColumns;
+    activeFilter === "fiat"
+      ? fiatColumns
+      : activeFilter === "crypto"
+        ? cryptoColumns
+        : activeFilter === "manual"
+          ? manualColumns
+          : allColumns;
 
   return (
     <div className="">
@@ -642,37 +478,32 @@ export function TransactionsTable({
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Search customer name"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              placeholder="Search"
+              value={searchInput}
+              onChange={(e) => {
+                setSearchInput(e.target.value);
+                setPage(1);
+              }}
+              className="pl-9"
             />
           </div>
           <SelectFieldLayout
-            id="transactionType"
-            options={TRANSACTION_TYPES}
-            placeholder="Select transaction type"
-            value={selectedTransactionType}
-            onChange={setSelectedTransactionType}
-            className="w-full md:w-64"
-            selectClassName="border border-gray-300"
-          />
-
-          <SelectFieldLayout
-            id="dateCreated"
-            // eslint-ignore-next-line react-hooks/rules-of-hooks
-            options={uniqueDates as string[]}
-            placeholder="Select date"
-            value={selectedDateRange}
-            onChange={setSelectedDateRange}
-            className="w-full md:w-48"
+            id="statusFilter"
+            options={["COMPLETED", "PENDING", "FAILED", "PROCESSING"]}
+            placeholder="Status: All"
+            value={statusFilter}
+            onChange={(v) => {
+              setStatusFilter(v);
+              setPage(1);
+            }}
+            className="w-40"
             selectClassName="border border-gray-300"
           />
         </div>
       </div>
       <div className="w-full md:max-w-[700px] lg:min-w-[100%] xl:min-w-full min-h-screen">
         <DataTableLayout
-          data={filteredData}
+          data={transactions}
           columns={activeColumns}
           rowKey={(item) => item.id}
           isError={isError}
@@ -685,18 +516,6 @@ export function TransactionsTable({
           onPageChange={setPage}
         />
       </div>
-
-      {/* <CustomerInfoPopup
-        customer={selectedCustomer}
-        popupPosition={popupPosition}
-        onClose={() => setSelectedCustomer(null)}
-        onViewDetails={() => {
-          if (selectedCustomer && onCustomerDetailsOpen) {
-            onCustomerDetailsOpen(selectedCustomer);
-            setSelectedCustomer(null);
-          }
-        }}
-      /> */}
     </div>
   );
 }

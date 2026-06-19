@@ -90,8 +90,12 @@ export function CustomerSearchSidebar({
     setSearchQuery("");
   };
 
+  const customerItems = data?.data?.data?.items
+  console.log("customerItems:", customerItems)
+
+
   const customers = useMemo(() => {
-    return (data?.data ?? []).map((c: Customer) => ({
+    return (customerItems ?? []).map((c: Customer) => ({
       id: c.id,
       name: `${c.first_name} ${c.last_name}`,
       email: c.email,

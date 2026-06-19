@@ -111,7 +111,7 @@ export interface GetTransactionsParams {
 }
 
 export const getAllTransactions = async (params: GetTransactionsParams) => {
-  const response = await AxiosInstance.get("/api/v2/transactions/all", {
+  const response = await AxiosInstance.get("/api/transactions/all", {
     params: {
       page: params.page,
       limit: params.limit,
