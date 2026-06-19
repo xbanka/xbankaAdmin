@@ -47,9 +47,6 @@ export function FiatTabFilters({
           className="w-44"
           selectClassName="border border-gray-300"
         />
-        <button className="text-xs text-gray-500 border border-gray-200 rounded px-3 py-2 hover:bg-gray-50">
-          More filter
-        </button>
       </div>
     </div>
   );

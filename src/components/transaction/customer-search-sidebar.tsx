@@ -12,7 +12,10 @@ import FormField from "../forms/FormField";
 import { ActiveCustomer, Customer } from "../../lib/types/transactionTypes";
 import { TransactionFormValues } from "@/lib/schema/transaction.schema";
 import { useUserStore } from "@/store/userStore";
-import { CustomerSearchSidebarProps } from "@/lib/types/customer";
+import {
+  CustomerProps,
+  CustomerSearchSidebarProps,
+} from "@/lib/types/customer";
 
 export function CustomerSearchSidebar({
   isOpen,
@@ -32,8 +35,6 @@ export function CustomerSearchSidebar({
 
   const user = useUserStore((state) => state.user);
 
-  
-
   useEffect(() => {
     if (user) {
       setValue("customer.assignedRep", `${user.first_name} ${user.last_name}`, {
@@ -42,23 +43,24 @@ export function CustomerSearchSidebar({
     }
   }, [user, setValue]);
 
-  const handleCustomerSelect = (customer: Customer) => {
-    const assignedRep = user ? `${user.first_name} ${user.last_name}` : "";
+  // const handleCustomerSelect = (customer: Customer) => {
+  //   const assignedRep = user ? `${user.first_name} ${user.last_name}` : "";
 
-    setValue(
-      "customer",
-      {
-        id: customer.id,
-        name: customer.first_name,
-        email: customer.email,
-        phone: customer.phone_no,
-        assignedRep, // ✅ injected automatically
-      },
-      { shouldValidate: true }
-    );
-  };
+  //   setValue(
+  //     "customer",
+  //     {
+  //       id: customer.id,
+  //       name: customer.profile?.firstName,
+  //       email: customer.email,
+  //       phone: customer.profile?.phoneNumber,
+  //       assignedRep, // ✅ injected automatically
+  //     },
+  //     { shouldValidate: true }
+  //   );
+  // };
 
   const { data, isLoading: customerLoading } = useGetCustomer(searchQuery);
+  console.log("CUSTOMER API RESPONSE", data);
 
   const handleActiveCustomer = (customer: ActiveCustomer) => {
     const fullCustomer = data?.data.find((c: Customer) => c.id === customer.id);
@@ -84,24 +86,46 @@ export function CustomerSearchSidebar({
         affiliateAttribution: fullCustomer?.affiliate?.username ?? "",
         assignedRep,
       },
-      { shouldValidate: true }
+      { shouldValidate: true },
     );
     setActiveCustomer(selectedCustomer);
     setSearchQuery("");
   };
 
-  const customerItems = data?.data?.data?.items
-  console.log("customerItems:", customerItems)
+  const customerItems = data?.data?.data;
+  console.log("customerItems:", customerItems, data?.data?.data);
+  console.log("FULL RESPONSE", data);
+  console.log("CUSTOMER ITEMS", customerItems);
 
+  const filteredUsers = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+
+    if (!query) return customerItems ?? [];
+
+    return (customerItems ?? []).filter((user: Customer) => {
+      const firstName = user.profile?.firstName?.toLowerCase() ?? "";
+      const lastName = user.profile?.lastName?.toLowerCase() ?? "";
+      const email = user.email?.toLowerCase() ?? "";
+
+      return (
+        firstName.includes(query) ||
+        lastName.includes(query) ||
+        `${firstName} ${lastName}`.includes(query) ||
+        email.includes(query)
+      );
+    });
+  }, [customerItems, searchQuery]);
 
   const customers = useMemo(() => {
-    return (customerItems ?? []).map((c: Customer) => ({
-      id: c.id,
-      name: `${c.first_name} ${c.last_name}`,
-      email: c.email,
-      phone: c.phone_no,
+    return (customerItems ?? []).map((user: CustomerProps) => ({
+      id: user.userId,
+      name: user.firstName
+        ? `${user.firstName} ${user.lastName}`
+        : "No Profile",
+      email: user.email,
+      phone: user?.phoneNumber ?? "-",
     }));
-  }, [data]);
+  }, [customerItems]);
 
   const onSubmit = (data: TransactionFormValues) => {
     if (!activeCustomer) return;
@@ -220,7 +244,6 @@ export function CustomerSearchSidebar({
                   />
                 </div>
                 <div className="flex items-center gap-4">
-                 
                   <FormField
                     label="Affiliate Attribution"
                     id="customer.affiliateAttribution"
