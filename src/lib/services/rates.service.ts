@@ -33,6 +33,9 @@ export const usePostCryptoRates = () => {
       queryClient.invalidateQueries({
         queryKey: ["get-crypto-rates"],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["get-all-segments"],
+      });
     },
     onError: (err) => {
       handleApiError(err);
@@ -48,6 +51,9 @@ export const useUpdateBuyAndSpreadRates = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["get-crypto-rates"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["get-all-segments"],
       });
       toast.success("Rate updated successfully");
     },
@@ -81,6 +87,9 @@ export const useUpdateAllSegments = () => {
       queryClient.invalidateQueries({
         queryKey: ["get-all-segments"],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["get-crypto-rates"],
+      });
       toast.success("Bulk segment updated successfully");
     },
 
@@ -107,6 +116,9 @@ export const useBulkAssignSegment = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["get-all-segments"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["get-crypto-rates"],
       });
       toast.success("Bulk segment updated successfully");
     },

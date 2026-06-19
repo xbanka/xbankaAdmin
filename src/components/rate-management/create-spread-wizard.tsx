@@ -19,7 +19,6 @@ import {
 export function CreateSpreadWizard({ onClose }: { onClose: () => void }) {
   const [step, setStep] = useState<Step>(1);
   const [segments, setSegments] = useState<Segment[]>([]);
-  const [spreads, setSpreads] = useState<SegmentSpread[]>([]);
 
   const {
     data: segmentData,
@@ -71,18 +70,6 @@ export function CreateSpreadWizard({ onClose }: { onClose: () => void }) {
     );
   };
 
-  // const toggleAsset = (id: string) => {
-  //   setAssets((prev) =>
-  //     prev.map((a) => (a.id === id ? { ...a, checked: !a.checked } : a)),
-  //   );
-  // };
-
-  // const updateAssetSegment = (id: string, seg: string) => {
-  //   setAssets((prev) =>
-  //     prev.map((a) => (a.id === id ? { ...a, assignedSegment: seg } : a)),
-  //   );
-  // };
-
   const handleSaveSegments = () => {
     const payload = segments
       .filter((segment) => segment.selected)
@@ -109,7 +96,8 @@ export function CreateSpreadWizard({ onClose }: { onClose: () => void }) {
         segmentData.data.map((segment: SegmentResponse) => ({
           id: segment.id,
           name: segment.name,
-          selected: false,
+          selected: true,
+          isActive: segment.isActive ?? true,
           buySpread: segment.buySpread,
           sellSpread: segment.sellSpread,
           assets: segment.assets,
@@ -171,6 +159,7 @@ export function CreateSpreadWizard({ onClose }: { onClose: () => void }) {
               onToggle={toggleSegment}
               selectedCount={selectedCount}
               estimatedAssets={estimatedAssets}
+              loading={isPendingSegment}
             />
           )}
           {step === 2 && (
@@ -183,15 +172,8 @@ export function CreateSpreadWizard({ onClose }: { onClose: () => void }) {
             />
           )}
           {step === 3 && (
-            <StepAssignAssets
-              assets={cryptoAssets}
-              segments={segments}
-              setStep={() => setStep(4)}
-              // onToggleAsset={toggleAsset}
-              // onUpdateSegment={updateAssetSegment}
-            />
+            <StepAssignAssets assets={cryptoAssets} segments={segments} />
           )}
-          {step === 4 && <StepReview segments={segments} spreads={spreads} />}
         </div>
       </div>
 
@@ -209,7 +191,7 @@ export function CreateSpreadWizard({ onClose }: { onClose: () => void }) {
               Back
             </Button>
           )}
-          {step < 4 ? (
+          {step < 3 ? (
             <Button
               onClick={() => {
                 if (step === 2) {
@@ -223,12 +205,10 @@ export function CreateSpreadWizard({ onClose }: { onClose: () => void }) {
             >
               {step === 1
                 ? "Continue to Spread Segment"
-                : step === 2
-                  ? "Continue to Assign Assets"
-                  : "Continue to Review"}
+                : "Continue to Assign Assets"}
             </Button>
           ) : (
-            <Button onClick={onClose}>Activate Spread Schedule</Button>
+            <Button onClick={onClose}>Done</Button>
           )}
         </div>
       </div>
