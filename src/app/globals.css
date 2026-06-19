@@ -25,6 +25,11 @@
   --color-card-border-secondary: var(--card-border-secondary);
   --color-border-default: var(--border-default);
   --color-success-border: var(--success-border);
+  --color-success-light: var(--success-light);
+  --color-success-text: var(--success-text);
+  --color-grey-light: var(--grey-light);
+  --color-grey-border: var(--grey-border);
+  --color-grey-text: var(--grey-text);
   --color-customCyan: var(--customCyan);
   --color-lightCyan: var(--lightCyan);
   --color-abstractCyan: var(--abstractCyan);
@@ -93,6 +98,11 @@
   --card-border-secondary: #E9EBEE;
   --border-default: #E9EBEE;
   --success-border: #A6F4C5;
+  --success-light: #ECFDF3;
+  --success-text: #037508;
+  --grey-light: #F9F9F9;
+  --grey-border: #DADDE2;
+  --grey-text: #374151;
   --customCyan: #cff7f2;
   --abstractCyan: #0C9A8E;
   --mainGreen: #14ae5c;

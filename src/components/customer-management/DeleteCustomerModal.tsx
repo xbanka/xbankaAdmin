@@ -1,15 +1,15 @@
-"use client"
+"use client";
 
-import { AlertCircle } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { CustomerProps } from "@/lib/types/customer"
-import { DialogLayout } from "../layout/modalLayout"
-import { useDeleteCustomer } from "@/lib/services/customer.service"
+import { AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { CustomerProps } from "@/lib/types/customer";
+import { DialogLayout } from "../layout/modalLayout";
+import { useDeleteCustomer } from "@/lib/services/customer.service";
 
 interface DeleteCustomerModalProps {
-  isOpen: boolean
-  onClose: () => void
-  customer: CustomerProps | null
+  isOpen: boolean;
+  onClose: () => void;
+  customer: CustomerProps | null;
 }
 
 export default function DeleteCustomerModal({
@@ -17,17 +17,15 @@ export default function DeleteCustomerModal({
   onClose,
   customer,
 }: DeleteCustomerModalProps) {
-  const { mutate, isPending } = useDeleteCustomer()
+  const { mutate, isPending } = useDeleteCustomer();
 
   const handleDelete = async () => {
-    mutate( customer?.id ?? "",
-      {
-        onSuccess: () => {
-          onClose();
-        },
-      }
-    );
-  }
+    mutate(customer?.userId ?? "", {
+      onSuccess: () => {
+        onClose();
+      },
+    });
+  };
 
   return (
     <DialogLayout
@@ -36,7 +34,11 @@ export default function DeleteCustomerModal({
       title="Delete Customer"
       footer={
         <>
-          <Button className="flex-1 bg-transparent" onClick={onClose} variant="outline">
+          <Button
+            className="flex-1 bg-transparent"
+            onClick={onClose}
+            variant="outline"
+          >
             Cancel
           </Button>
           <Button
@@ -57,10 +59,13 @@ export default function DeleteCustomerModal({
             Are you sure you want to delete this customer?
           </p>
           <p className="text-sm text-gray-600">
-            <span className="font-medium">{customer?.first_name} {customer?.last_name}</span> will be permanently deleted. This action cannot be undone.
+            <span className="font-medium">
+              {customer?.firstName} {customer?.lastName}
+            </span>{" "}
+            will be permanently deleted. This action cannot be undone.
           </p>
         </div>
       </div>
     </DialogLayout>
-  )
+  );
 }

@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CurrencyConfig, UpdateCryptoRatesArgs } from "../types/rates-types";
 import {
+  bulkAssignSegment,
   getAllSegments,
   getCryptoRates,
   postCryptoRates,
@@ -32,6 +33,9 @@ export const usePostCryptoRates = () => {
       queryClient.invalidateQueries({
         queryKey: ["get-crypto-rates"],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["get-all-segments"],
+      });
     },
     onError: (err) => {
       handleApiError(err);
@@ -48,7 +52,10 @@ export const useUpdateBuyAndSpreadRates = () => {
       queryClient.invalidateQueries({
         queryKey: ["get-crypto-rates"],
       });
-      toast.success("Rate updated successfully")
+      queryClient.invalidateQueries({
+        queryKey: ["get-all-segments"],
+      });
+      toast.success("Rate updated successfully");
     },
     onError: (err) => {
       handleApiError(err);
@@ -80,9 +87,41 @@ export const useUpdateAllSegments = () => {
       queryClient.invalidateQueries({
         queryKey: ["get-all-segments"],
       });
-      toast.success("Bulk segment updated successfully")
+      queryClient.invalidateQueries({
+        queryKey: ["get-crypto-rates"],
+      });
+      toast.success("Bulk segment updated successfully");
     },
 
+    onError: (error) => {
+      handleApiError(error);
+    },
+  });
+};
+
+export const useBulkAssignSegment = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      segmentId,
+      payload,
+    }: {
+      segmentId: string;
+      payload: {
+        assetIds: string[];
+        setupNote: string;
+      };
+    }) => bulkAssignSegment(segmentId, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["get-all-segments"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["get-crypto-rates"],
+      });
+      toast.success("Bulk segment updated successfully");
+    },
     onError: (error) => {
       handleApiError(error);
     },

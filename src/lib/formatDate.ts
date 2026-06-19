@@ -1,8 +1,8 @@
 export function formatDate(isoString: string): string {
-  const date = new Date(isoString);
-  return date.toLocaleDateString("en-UK", {
+  return new Intl.DateTimeFormat("en-GB", {
     year: "numeric",
-    month: "short", // e.g., Sep
+    month: "short",
     day: "2-digit",
-  });
+    timeZone: "UTC",
+  }).format(new Date(isoString));
 }

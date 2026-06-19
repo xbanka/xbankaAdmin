@@ -99,3 +99,28 @@ export const uploadTransactionAttachmentAction = async ({
     status: response.status,
   };
 };
+
+export interface GetTransactionsParams {
+  page?: number;
+  limit?: number;
+  status?: "COMPLETED" | "PENDING" | "FAILED" | "PROCESSING" | string;
+  category?: "CRYPTO" | "FIAT" | "GIFT_CARD" | "BILL_PAYMENT" | "MANUAL" | string;
+  startDate?: string; // ISO date string
+  endDate?: string;
+  search?: string;
+}
+
+export const getAllTransactions = async (params: GetTransactionsParams) => {
+  const response = await AxiosInstance.get("/api/transactions/all", {
+    params: {
+      page: params.page,
+      limit: params.limit,
+      status: params.status,
+      category: params.category,
+      startDate: params.startDate,
+      endDate: params.endDate,
+      search: params.search,
+    },
+  });
+  return response.data;
+};
