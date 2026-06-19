@@ -3,26 +3,16 @@ import { TransactionRecord } from "@/components/transaction/transaction-data";
 export type TransactionType = "crypto" | "gift-card" | "bill-payments";
 export type ServiceType = "crypto" | "gift-card" | "bill-payments";
 
+export interface AdminUserProfile {
+  firstName: string;
+  lastName: string;
+  phoneNumber: string | null;
+}
 export interface Customer {
   id: string;
-  first_name: string;
-  last_name: string;
   email: string;
-  phone_no: string;
-  note: string;
-  affiliate?: {
-    id: string;
-    first_name: string;
-    last_name: string;
-    email: string;
-    username: string;
-    phone_no: string;
-    bank: string;
-    account_no: string;
-    ref_code: string;
-    custom_refcode: string;
-    created_at: string;
-  };
+  createdAt: string;
+  profile: AdminUserProfile | null;
 }
 
 export interface ActiveCustomer {
