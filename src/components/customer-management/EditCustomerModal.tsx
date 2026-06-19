@@ -25,11 +25,11 @@ export default function EditCustomerModal({
   const { register, handleSubmit, formState: { errors }, reset } = useForm<NewCustomerFormValues>({
     resolver: zodResolver(newCustomerSchema),
     defaultValues: {
-      firstName: customer?.first_name || "",
-      lastName: customer?.last_name || "",
+      firstName: customer?.firstName || "",
+      lastName: customer?.lastName || "",
       email: customer?.email || "",
-      phoneNumber: customer?.phone_no || "",
-      username: customer?.affiliate?.username || "",
+      phoneNumber: customer?.phoneNumber || "",
+      username: customer?.firstName || "",
     },
   })
 
