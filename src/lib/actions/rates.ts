@@ -1,5 +1,5 @@
 import AxiosInstance from "../Axiosinstance/axiosInstance";
-import { CurrencyConfig, UpdateSegmentPayload } from "../types/rates-types";
+import { CurrencyConfig, SegmentConfig, UpdateSegmentPayload } from "../types/rates-types";
 
 export const getCryptoRates = async () => {
   const response = await AxiosInstance.get(`/api/rates/crypto/all`);
@@ -13,7 +13,7 @@ export const postCryptoRates = async (payload: CurrencyConfig) => {
 
 export const updateBuyAndSpreadRates = async (
   rateId: string,
-  payload: CurrencyConfig,
+  payload: CurrencyConfig | SegmentConfig,
 ) => {
   const response = await AxiosInstance.put(
     `/api/rates/crypto/${rateId}`,
@@ -29,5 +29,20 @@ export const getAllSegments = async () => {
 
 export const UpdateAllSegments = async (payload: UpdateSegmentPayload[]) => {
   const response = await AxiosInstance.put(`/api/rates/segments/bulk`, payload);
+  return response.data;
+};
+
+export const bulkAssignSegment = async (
+  segmentId: string,
+  payload: {
+    assetIds: string[];
+    setupNote: string;
+  },
+) => {
+  const response = await AxiosInstance.put(
+    `/api/rates/segments/${segmentId}/bulk-assign`,
+    payload,
+  );
+
   return response.data;
 };

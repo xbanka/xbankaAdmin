@@ -2,13 +2,13 @@
 
 import { X, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { CryptoTransactionForm } from "./transaction-form-crypto";
 import { GiftCardTransactionForm } from "./transaction-form-gift-card";
 import { BillPaymentTransactionForm } from "./transaction-form-bill-payment";
 import { ActiveCustomer } from "../../lib/types/transactionTypes";
 import { CustomerDetailsDisplay } from "./customers-details-display";
 import { SelectFieldLayout } from "../forms/SelectFieldLayout";
 import { useFormContext } from "react-hook-form";
+import { CryptoTransactionSteps } from "./crypto-transaction-steps";
 
 type TransactionType = "crypto" | "gift-card" | "bill-payments" | null;
 
@@ -59,8 +59,8 @@ export function TransactionAddSidebar({
                   serviceType === "gift-card"
                     ? "Gift Card"
                     : serviceType === "bill-payments"
-                    ? "Bill Payment"
-                    : "Crypto"
+                      ? "Bill Payment"
+                      : "Crypto"
                 } Transaction`
               : "New Transaction"}
           </h2>
@@ -100,7 +100,10 @@ export function TransactionAddSidebar({
               </div>
             </div>
           ) : serviceType === "crypto" ? (
-            <CryptoTransactionForm handleClose={handleCloseSidebar} />
+            <CryptoTransactionSteps
+              handleClose={handleCloseSidebar}
+              onBack={() => setValue("serviceType", undefined)}
+            />
           ) : serviceType === "gift-card" ? (
             <GiftCardTransactionForm handleClose={handleCloseSidebar} />
           ) : (

@@ -4,30 +4,30 @@ import { giftCardTransactionSchema } from "./giftcard-transaction.schema";
 import { billPaymentTransactionSchema } from "./bill-payment-transaction.schema";
 
 export const cryptoTransactionSchema = z.object({
-
-    serviceType: z.literal("crypto"),
-
-    transactionType: z.string().min(1, "Transaction type is required"),
-
-    customerAmount: z.coerce.number().positive("Amount must be greater than 0"),
-
-    vendor: z.string().min(1, "Vendor is required"),
-
-    vendorRate: z.string().min(1, "Vendor rate is required"),
-
-    xbankaRate: z.string().min(1, "Xbanka rate is required"),
-
-    margin: z.string().min(1, "Margin is required"),
-
-    expectedPayout: z.string().min(1, "Expected payout is required"),
-
-    customerAccountWallet: z
-      .string()
-      .min(1, "Customer account/wallet is required"),
-
-    xbankaAccount: z.string().min(1, "Xbanka account is required"),
-
-    paymentDate: z.string().min(1, "Payment date is required"),
+  // Step 1
+  transactionType: z.string().optional(),
+  tradeDirection: z.string().optional(),
+  channelOrigin: z.string().optional(),
+  // Step 2
+  customerPays: z.string().optional(),
+  customerPaysCurrency: z.string().optional(),
+  customerReceives: z.string().optional(),
+  customerReceivesCurrency: z.string().optional(),
+  partner: z.string().optional(),
+  partnerRate: z.string().optional(),
+  xbankaRate: z.string().optional(),
+  internalNotes: z.string().optional(),
+  // Step 3
+  paymentMethod: z.string().optional(),
+  paymentStatus: z.string().optional(),
+  paymentReference: z.string().optional(),
+  xbankaAccount: z.string().optional(),
+  deliveryMethod: z.string().optional(),
+  deliveryAsset: z.string().optional(),
+  deliverySource: z.string().optional(),
+  deliveryStatus: z.string().optional(),
+  deliveryReference: z.string().optional(),
+  attachment: z.string().nullable().optional(),
 });
 
 export type CryptoTransactionFormValues = z.infer<

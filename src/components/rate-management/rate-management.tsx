@@ -69,14 +69,14 @@ export default function RateManagement() {
       key: "buyFeeValue",
       header: "Buy Spread",
       render: (row: CryptoCurrencyTypes) => (
-        <div className="">{row.segment?.buySpread}%</div>
+        <div className="">{row.buyFeeValue}%</div>
       ),
     },
     {
       key: "sellFeeValue",
       header: "Sell Spread",
       render: (row: CryptoCurrencyTypes) => (
-        <div className="">{row.segment?.buySpread}%</div>
+        <div className="">{row.sellFeeValue}%</div>
       ),
     },
     {
