@@ -19,15 +19,6 @@ export function AllTabFilters({
 }) {
   return (
     <div className="flex flex-col md:flex-row gap-3 mb-6 items-start md:items-center justify-between">
-      <div className="relative w-full md:w-64">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-        <Input
-          placeholder="Search"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-9"
-        />
-      </div>
       <div className="flex gap-2">
         <SelectFieldLayout
           id="statusFilter"

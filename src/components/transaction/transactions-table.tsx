@@ -27,6 +27,8 @@ import { TransactionRecord } from "@/lib/types/transaction-types";
 import { TierBadge } from "./tier-badge";
 import { StatusBadge } from "./badge";
 import { useProfile } from "@/lib/services/profile.service";
+import Image from "next/image";
+import { tierImages } from "@/lib/utils/tier-images";
 
 const TRANSACTION_TYPES = [
   "USDT-NGN",
@@ -148,8 +150,8 @@ export function TransactionsTable({
         //   <span className="text-xs text-gray-500">{item.customer?.email}</span>
         // </div>
         <div className="text-[var(--text-teal)] text-sm font-medium hover:underline block">
-            {item.customer?.firstName} {item.customer?.lastName}
-          </div>
+          {item.customer?.firstName} {item.customer?.lastName}
+        </div>
       ),
     },
   ];
@@ -160,9 +162,18 @@ export function TransactionsTable({
       key: "kycTier",
       header: "Tier Level",
       className: "md:w-[100px]",
-      render: (item: TransactionRecord) => (
-        <TierBadge tier={item.customer?.kycTier} />
-      ),
+      render: (item: TransactionRecord) => {
+        const tier = item.customer.kycTier ?? 0;
+
+        return (
+          <Image
+            src={tierImages[tier] || "/Tier0.svg"}
+            alt={`Tier ${tier}`}
+            width={80}
+            height={24}
+          />
+        );
+      },
     },
     {
       key: "details",
@@ -251,6 +262,12 @@ export function TransactionsTable({
           {item.tradeDetails?.partner ?? "—"}
         </span>
       ),
+    },
+    {
+      key: "status",
+      header: "Status",
+      className: "md:w-[110px]",
+      render: (item: TransactionRecord) => <StatusBadge status={item.status} />,
     },
   ];
 
@@ -405,8 +422,8 @@ export function TransactionsTable({
       </div>
 
       {/* Filter Buttons */}
-      <div className="md:flex items-center justify-between">
-        <div className="flex flex-wrap gap-2 mb-6 ">
+      <div className="md:flex items-center justify-between w-full">
+        <div className="flex flex-col flex-wrap gap-2 mb-6 ">
           <FilterTabs
             filters={[
               "All",
@@ -419,89 +436,83 @@ export function TransactionsTable({
             value={activeFilter}
             onChange={handleTabChange}
           />
-        </div>
-
-        <div>
-          {/* Per-tab filter bar */}
-          {activeFilter === "all" && (
-            <AllTabFilters
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              statusFilter={statusFilter}
-              setStatusFilter={setStatusFilter}
-              sourceFilter={sourceFilter}
-              setSourceFilter={setSourceFilter}
-            />
-          )}
-          {activeFilter === "fiat" && (
-            <FiatTabFilters
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              statusFilter={statusFilter}
-              setStatusFilter={setStatusFilter}
-              transactionTypeFilter={transactionTypeFilter}
-              setTransactionTypeFilter={setTransactionTypeFilter}
-            />
-          )}
-          {activeFilter === "crypto" && (
-            <CryptoTabFilters
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              statusFilter={statusFilter}
-              setStatusFilter={setStatusFilter}
-              sourceFilter={sourceFilter}
-              setSourceFilter={setSourceFilter}
-            />
-          )}
-          {activeFilter === "manual" && (
-            <ManualTabFilters
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              statusFilter={statusFilter}
-              setStatusFilter={setStatusFilter}
-              sourceFilter={sourceFilter}
-              setSourceFilter={setSourceFilter}
-            />
-          )}
-          {(activeFilter === "gift cards" ||
-            activeFilter === "bill payments") && (
-            <AllTabFilters
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              statusFilter={statusFilter}
-              setStatusFilter={setStatusFilter}
-              sourceFilter={sourceFilter}
-              setSourceFilter={setSourceFilter}
-            />
-          )}
-        </div>
-
-        {/* Search and Filters */}
-        <div className="flex flex-col md:flex-row gap-3 mb-6">
-          {/* <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="Search"
-              value={searchInput}
-              onChange={(e) => {
-                setSearchInput(e.target.value);
-                setPage(1);
-              }}
-              className="pl-9"
-            />
-          </div> */}
-          <SelectFieldLayout
-            id="statusFilter"
-            options={["COMPLETED", "PENDING", "FAILED", "PROCESSING"]}
-            placeholder="Status: All"
-            value={statusFilter}
-            onChange={(v) => {
-              setStatusFilter(v);
-              setPage(1);
-            }}
-            className="w-40"
-            selectClassName="border border-gray-300"
-          />
+          <div className="flex items-center justify-between w-full">
+            <div className="relative w-full md:w-64">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            <div className="flex flex-col items-center md:flex-row gap-3">
+              {/* Per-tab filter bar */}
+              {activeFilter === "all" && (
+                <AllTabFilters
+                  searchQuery={searchQuery}
+                  setSearchQuery={setSearchQuery}
+                  statusFilter={statusFilter}
+                  setStatusFilter={setStatusFilter}
+                  sourceFilter={sourceFilter}
+                  setSourceFilter={setSourceFilter}
+                />
+              )}
+              {activeFilter === "fiat" && (
+                <FiatTabFilters
+                  searchQuery={searchQuery}
+                  setSearchQuery={setSearchQuery}
+                  statusFilter={statusFilter}
+                  setStatusFilter={setStatusFilter}
+                  transactionTypeFilter={transactionTypeFilter}
+                  setTransactionTypeFilter={setTransactionTypeFilter}
+                />
+              )}
+              {activeFilter === "crypto" && (
+                <CryptoTabFilters
+                  searchQuery={searchQuery}
+                  setSearchQuery={setSearchQuery}
+                  statusFilter={statusFilter}
+                  setStatusFilter={setStatusFilter}
+                  sourceFilter={sourceFilter}
+                  setSourceFilter={setSourceFilter}
+                />
+              )}
+              {activeFilter === "manual" && (
+                <ManualTabFilters
+                  searchQuery={searchQuery}
+                  setSearchQuery={setSearchQuery}
+                  statusFilter={statusFilter}
+                  setStatusFilter={setStatusFilter}
+                  sourceFilter={sourceFilter}
+                  setSourceFilter={setSourceFilter}
+                />
+              )}
+              {(activeFilter === "gift cards" ||
+                activeFilter === "bill payments") && (
+                <AllTabFilters
+                  searchQuery={searchQuery}
+                  setSearchQuery={setSearchQuery}
+                  statusFilter={statusFilter}
+                  setStatusFilter={setStatusFilter}
+                  sourceFilter={sourceFilter}
+                  setSourceFilter={setSourceFilter}
+                />
+              )}
+              {/* <SelectFieldLayout
+                id="statusFilter"
+                options={["COMPLETED", "PENDING", "FAILED", "PROCESSING"]}
+                placeholder="Status: All"
+                value={statusFilter}
+                onChange={(v) => {
+                  setStatusFilter(v);
+                  setPage(1);
+                }}
+                className="w-40"
+                selectClassName="border border-gray-300"
+              /> */}
+            </div>
+          </div>
         </div>
       </div>
       <div className="w-full md:max-w-[700px] lg:min-w-[100%] xl:min-w-full min-h-screen">
