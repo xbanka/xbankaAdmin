@@ -92,7 +92,15 @@ export function CustomerSearchSidebar({
     setSearchQuery("");
   };
 
-  const customerItems = data?.data?.data;
+  const customerItems = useMemo(() => {
+  const responseData = data?.data?.data;
+
+  if (Array.isArray(responseData)) {
+    return responseData; // search response
+  }
+
+  return responseData?.items ?? []; // initial paginated response
+}, [data]);
   console.log("customerItems:", customerItems, data?.data?.data);
   console.log("FULL RESPONSE", data);
   console.log("CUSTOMER ITEMS", customerItems);
