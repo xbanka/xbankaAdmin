@@ -13,6 +13,7 @@ import { ActiveCustomer, Customer } from "../../lib/types/transactionTypes";
 import { TransactionFormValues } from "@/lib/schema/transaction.schema";
 import { useUserStore } from "@/store/userStore";
 import {
+  CustomerAccountItem,
   CustomerProps,
   CustomerSearchSidebarProps,
 } from "@/lib/types/customer";
@@ -24,7 +25,10 @@ export function CustomerSearchSidebar({
   isLoading = false,
 }: CustomerSearchSidebarProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeCustomer, setActiveCustomer] = useState<ActiveCustomer | null>();
+  const [showResults, setShowResults] = useState(false);
+  const [activeCustomer, setActiveCustomer] = useState<ActiveCustomer | null>(
+    null,
+  );
 
   const {
     setValue,
@@ -62,45 +66,25 @@ export function CustomerSearchSidebar({
   const { data, isLoading: customerLoading } = useGetCustomer(searchQuery);
   console.log("CUSTOMER API RESPONSE", data);
 
-  const handleActiveCustomer = (customer: ActiveCustomer) => {
-    const fullCustomer = data?.data.find((c: Customer) => c.id === customer.id);
-    const assignedRep = user ? `${user.first_name} ${user.last_name}` : "";
-
-    if (!fullCustomer) return;
-
-    const selectedCustomer = {
-      id: fullCustomer.id,
-      name: `${fullCustomer.first_name} ${fullCustomer.last_name}`,
-      email: fullCustomer.email,
-      phone: fullCustomer.phone_no,
-
-      username: fullCustomer.username,
-      affiliate: fullCustomer?.affiliate?.username,
-      totalTransactions: fullCustomer.total_transactions,
-      joinedAt: fullCustomer.created_at,
-    };
-    setValue(
-      "customer",
-      {
-        id: fullCustomer.id,
-        affiliateAttribution: fullCustomer?.affiliate?.username ?? "",
-        assignedRep,
-      },
-      { shouldValidate: true },
-    );
-    setActiveCustomer(selectedCustomer);
-    setSearchQuery("");
-  };
+  const rawData = data?.data;
+  console.log("raw", rawData);
 
   const customerItems = useMemo(() => {
-  const responseData = data?.data?.data;
+    if (!rawData) return [];
 
-  if (Array.isArray(responseData)) {
-    return responseData; // search response
-  }
+    // Initial customer endpoint
+    if ("items" in rawData) {
+      return rawData.items;
+    }
 
-  return responseData?.items ?? []; // initial paginated response
-}, [data]);
+    // Search endpoint
+    if (Array.isArray(rawData.data)) {
+      console.log("rawData", rawData);
+      return rawData.data;
+    }
+
+    return [];
+  }, [rawData]);
   console.log("customerItems:", customerItems, data?.data?.data);
   console.log("FULL RESPONSE", data);
   console.log("CUSTOMER ITEMS", customerItems);
@@ -108,36 +92,86 @@ export function CustomerSearchSidebar({
   const filteredUsers = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
 
-    if (!query) return customerItems ?? [];
+    return (customerItems ?? [])
+      .filter((user: CustomerAccountItem) => {
+        if (!query) return true;
 
-    return (customerItems ?? []).filter((user: Customer) => {
-      const firstName = user.profile?.firstName?.toLowerCase() ?? "";
-      const lastName = user.profile?.lastName?.toLowerCase() ?? "";
-      const email = user.email?.toLowerCase() ?? "";
+        const firstName = user.profile?.firstName?.toLowerCase() ?? "";
+        const lastName = user.profile?.lastName?.toLowerCase() ?? "";
+        const email = user.email?.toLowerCase() ?? "";
 
-      return (
-        firstName.includes(query) ||
-        lastName.includes(query) ||
-        `${firstName} ${lastName}`.includes(query) ||
-        email.includes(query)
-      );
-    });
+        return (
+          firstName.includes(query) ||
+          lastName.includes(query) ||
+          `${firstName} ${lastName}`.includes(query) ||
+          email.includes(query)
+        );
+      })
+      .map((user: CustomerAccountItem) => ({
+        id: user.id,
+        name: user.profile?.firstName
+          ? `${user.profile.firstName} ${user.profile.lastName}`
+          : "No Profile",
+        email: user.email,
+        phone: user.profile?.phoneNumber ?? "-",
+
+        // keep original data attached
+        raw: user,
+      }));
   }, [customerItems, searchQuery]);
 
-  const customers = useMemo(() => {
-    return (customerItems ?? []).map((user: CustomerProps) => ({
-      id: user.userId,
-      name: user.firstName
-        ? `${user.firstName} ${user.lastName}`
-        : "No Profile",
-      email: user.email,
-      phone: user?.phoneNumber ?? "-",
-    }));
-  }, [customerItems]);
+  useEffect(() => {
+    console.log("isOpen changed:", isOpen);
+  }, [isOpen]);
+
+  useEffect(() => {
+    console.log("activeCustomer changed:", activeCustomer);
+  }, [activeCustomer]);
+
+  console.log("RENDER", {
+    activeCustomer,
+    searchQuery,
+  });
+
+  // const customers = useMemo(() => {
+  //   return (customerItems ?? []).map((user: CustomerAccountItem) => ({
+  //     id: user.id,
+  //     name: user.profile.firstName
+  //       ? `${user.profile.firstName} ${user.profile.lastName}`
+  //       : "No Profile",
+  //     email: user.email,
+  //     phone: user?.profile.phoneNumber ?? "-",
+  //   }));
+  // }, [customerItems]);
+
+  const handleActiveCustomer = (customer: (typeof filteredUsers)[number]) => {
+    console.log("clicked");
+    setActiveCustomer({
+      id: customer.id,
+      name: customer.name,
+      email: customer.email,
+      phone: customer.phone,
+      username: "-",
+      affiliate: "-",
+      totalTransactions: "-",
+      joinedAt: customer.raw.createdAt,
+    });
+    setShowResults(false);
+    // setSearchQuery("")
+  };
+
+  console.log("rendering", filteredUsers);
 
   const onSubmit = (data: TransactionFormValues) => {
     if (!activeCustomer) return;
     onCustomerSelect(activeCustomer);
+  };
+
+  const handleClose = () => {
+    setSearchQuery("");
+    setActiveCustomer(null);
+    setShowResults(false);
+    onClose();
   };
 
   useEffect(() => {
@@ -152,12 +186,12 @@ export function CustomerSearchSidebar({
   return (
     <div className="fixed inset-0 z-50 flex">
       {/* Overlay */}
-      <div className="flex-1 bg-black/50" onClick={onClose} />
+      <div className="flex-1 bg-black/50" onClick={handleClose} />
 
       {/* Sidebar */}
       <div className="w-full md:w-[37%] bg-white shadow-lg flex flex-col h-full">
         {/* Header */}
-        <SidebarHeader header="New Transaction" onClose={onClose} />
+        <SidebarHeader header="New Transaction" onClose={handleClose} />
 
         {/* Search Input */}
         <div className="p-6">
@@ -166,16 +200,28 @@ export function CustomerSearchSidebar({
             <Input
               placeholder="Search for customer name or username"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value;
+
+                setSearchQuery(value);
+
+                if (value.trim()) {
+                  setActiveCustomer(null);
+                  setShowResults(true);
+                }
+              }}
               className="pl-10 py-2 h-10"
             />
 
-            {searchQuery && customers.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto z-20">
-                {customers.map((customer: ActiveCustomer) => (
+            {searchQuery && !activeCustomer && filteredUsers.length > 0 && (
+              <div className="absolute top-full left-0 right-0 z-[9999] mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto">
+                {filteredUsers.map((customer: ActiveCustomer) => (
                   <button
                     key={customer.id}
-                    onClick={() => handleActiveCustomer(customer)}
+                    onClick={() => {
+                      console.log("clicked");
+                      handleActiveCustomer(customer);
+                    }}
                     className="w-full text-left p-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
                   >
                     <div className="flex items-start gap-3">
@@ -210,7 +256,7 @@ export function CustomerSearchSidebar({
               </div>
             )}
 
-            {searchQuery && customers.length === 0 && !isLoading && (
+            {searchQuery && filteredUsers.length === 0 && !isLoading && (
               <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-20">
                 <p className="text-sm text-gray-500 text-center">
                   No customers found
@@ -226,11 +272,11 @@ export function CustomerSearchSidebar({
             <div className="flex items-center justify-center h-full text-gray-500">
               Loading customers...
             </div>
-          ) : customers?.length === 0 && searchQuery ? (
+          ) : filteredUsers?.length === 0 && searchQuery ? (
             <div className="text-center py-8 text-gray-500">
               No customers found
             </div>
-          ) : customers?.length === 0 ? (
+          ) : filteredUsers?.length === 0 ? (
             <div className="text-center py-8 text-gray-500 text-sm">
               Start typing to search for customers
             </div>

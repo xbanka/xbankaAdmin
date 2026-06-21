@@ -15,6 +15,19 @@ export interface CustomerProps {
   createdAt: string; // ISO Date String
 }
 
+export interface CustomerUserProfile{
+  firstName: string;
+  lastName: string;
+  phoneNumber: string; // Stored as a string to preserve leading zeros like '0808...'
+}
+
+export interface CustomerAccountItem {
+  id: string;
+  email: string;
+  createdAt: string; // ISO Date String
+  profile: CustomerUserProfile | null;
+}
+
 export interface CustomerSearchSidebarProps {
   isOpen: boolean;
   onClose: () => void;
