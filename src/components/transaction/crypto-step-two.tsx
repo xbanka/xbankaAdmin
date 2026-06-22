@@ -19,7 +19,6 @@ export function CryptoStepTwo({ onContinue, onBack }: Props) {
   const { watch, setValue, register } = useFormContext();
 
   const customerPays = watch("details.customerPays") ?? "";
-  const customerReceives = watch("details.customerReceives") ?? "";
   const customerPaysCurrency = watch("details.customerPaysCurrency") ?? "NGN";
   const customerReceivesCurrency = watch("details.customerReceivesCurrency") ?? "USDT";
   const partnerRate = watch("details.partnerRate") ?? "";
@@ -33,22 +32,14 @@ export function CryptoStepTwo({ onContinue, onBack }: Props) {
     return "";
   }, [partnerRate, xbankaRate]);
 
-  // Total margin is earned per unit of crypto the customer receives.
   const totalMargin = useMemo(() => {
-    const recv = parseFloat(customerReceives);
+    const pays = parseFloat(customerPays);
     const mg = parseFloat(marginPerUnit);
-    if (!isNaN(recv) && !isNaN(mg)) return (recv * mg).toFixed(2);
+    if (!isNaN(pays) && !isNaN(mg)) return (pays * mg).toFixed(2); // simplified
     return "";
-  }, [customerReceives, marginPerUnit]);
+  }, [customerPays, marginPerUnit]);
 
-  const marginPct = useMemo(() => {
-    const pr = parseFloat(partnerRate);
-    const mg = parseFloat(marginPerUnit);
-    if (!isNaN(pr) && pr !== 0 && !isNaN(mg)) return ((mg / pr) * 100).toFixed(2);
-    return "";
-  }, [partnerRate, marginPerUnit]);
-
-  const isValid = customerPays && customerReceives && partnerRate && xbankaRate;
+  const isValid = customerPays && partnerRate && xbankaRate;
 
   return (
     <div className="flex flex-col gap-4">
@@ -134,25 +125,13 @@ export function CryptoStepTwo({ onContinue, onBack }: Props) {
           {marginPerUnit && (
             <div className="bg-[var(--grey-light)] rounded-lg p-3 text-xs flex flex-col gap-1">
               <div className="flex justify-between">
-                <span className="text-[var(--text-secondary)]">
-                  Margin per {customerReceivesCurrency}
-                </span>
-                <span className="text-[var(--text-teal)] font-medium">
-                  +₦{Number(marginPerUnit).toLocaleString()}
-                </span>
+                <span className="text-[var(--text-secondary)]">Margin per USDT</span>
+                <span className="text-[var(--text-teal)] font-medium">+${marginPerUnit}</span>
               </div>
               {totalMargin && (
                 <div className="flex justify-between">
                   <span className="text-[var(--text-secondary)]">Total Margin</span>
-                  <span className="text-[var(--text-teal)] font-semibold">
-                    ₦{Number(totalMargin).toLocaleString()}
-                  </span>
-                </div>
-              )}
-              {marginPct && (
-                <div className="flex justify-between">
-                  <span className="text-[var(--text-secondary)]">Margin</span>
-                  <span className="text-[var(--text-teal)] font-semibold">{marginPct}%</span>
+                  <span className="text-[var(--text-teal)] font-semibold">₦{totalMargin}</span>
                 </div>
               )}
             </div>
