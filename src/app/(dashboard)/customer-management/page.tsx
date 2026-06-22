@@ -8,11 +8,12 @@ import { useState } from "react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import NewCustomerModal from "@/components/customer-management/NewCustomerModal";
 import Header from "@/components/ui/Header";
-import { Upload } from "lucide-react";
+import { Eye, Upload } from "lucide-react";
 import { CustomerProps } from "@/lib/types/customer";
 import CustomerActionMenu from "@/components/customer-management/CustomerActionMenu";
 import EditCustomerModal from "@/components/customer-management/EditCustomerModal";
 import DeleteCustomerModal from "@/components/customer-management/DeleteCustomerModal";
+import { TierBadge } from "@/components/transaction/tier-badge";
 
 export default function CustomerManagement() {
   const [openModal, setOpenModal] = useState(false);
@@ -23,7 +24,7 @@ export default function CustomerManagement() {
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const { data, isLoading, isError, error } = useGetCustomer(search);
-  console.log("data:", data?.data?.data?.items)
+  console.log("data:", data?.data?.data?.items);
 
   const customers: CustomerProps[] = data?.data?.data?.items ?? [];
 
@@ -32,43 +33,60 @@ export default function CustomerManagement() {
   };
 
   const columns = [
-    { key: "firstName", header: "First Name" },
-    { key: "lastName", header: "Last Name" },
+    {
+      key: "firstName",
+      header: "Full Name",
+      render: (item: CustomerProps) => (
+        <div>
+          {item.firstName ? `${item.firstName + " " + item.lastName}` : "-"}
+        </div>
+      ),
+    },
     { key: "email", header: "Email" },
-    { key: "phoneNumber", header: "Phone Number" },
-    // {
-    //   key: "affiliate",
-    //   header: "Affiliate",
-    //   render: (item: CustomerProps) =>
-    //     item.affiliate?.username ? (
-    //       <span className="font-medium">{item.affiliate.username}</span>
-    //     ) : (
-    //       <span className="text-gray-400">—</span>
-    //     ),
-    // },
+    {
+      key: "phoneNumber",
+      header: "Phone Number",
+      render: (item: CustomerProps) => (
+        <div>
+          {item.phoneNumber ? item.phoneNumber : "-"}
+        </div>
+      ),
+    },
+    {
+      key: "kyc",
+      header: "KYC Tier",
+      render: (item: CustomerProps) =>
+        // <TierBadge tier={item.} />
+      <div></div>
+    },
+    {
+      key: "status",
+      header: "Status",
+      render: (item: CustomerProps) =>
+        // <TierBadge tier={item.} />
+      <div></div>
+    },
+    {
+      key: "createdAt",
+      header: "Date Joined",
+      render: (item: CustomerProps) =>
+        // <TierBadge tier={item.} />
+      <div></div>
+    },
     {
       key: "actions",
-      header: "",
+      header: "Action",
       render: (item: CustomerProps) => (
-        <CustomerActionMenu
-          customer={item}
-          onEdit={() => {
-            setSelectedCustomer(item);
-            setEditOpen(true);
-          }}
-          onDelete={() => {
-            setSelectedCustomer(item);
-            setDeleteOpen(true);
-          }}
-        />
+        <div className="flex items-center font-[500] text-[14px] leading-[22px] text-text-teal gap-2">
+          <Eye size={16}/>
+          View
+        </div>
       ),
     },
   ];
 
   return (
-    <DashboardLayout
-    breadcrumbs={[{ label: "Customer Management" }]}
-    >
+    <DashboardLayout breadcrumbs={[{ label: "Customer Management" }]}>
       <div className="p-4">
         <div className="space-y-4">
           <div className="flex items-center justify-between mb-[24px]">
