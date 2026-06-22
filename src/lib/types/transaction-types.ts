@@ -71,6 +71,8 @@ export interface CreateManualTransactionPayload {
   };
 
   tradeDirection: string;
+  transactionType?: string;
+  channelOrigin?: string;
 
   customerPaysCurrency: string;
   customerPaysAmount: number;
