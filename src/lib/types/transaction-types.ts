@@ -61,7 +61,7 @@ export interface TransactionsResponse {
 export interface CreateManualTransactionPayload {
   isNewUser: boolean;
 
-  customerId?: string;
+  userId?: string;
 
   newUserData?: {
     email: string;
@@ -99,4 +99,77 @@ export interface CreateManualTransactionPayload {
 
   internalNotes?: string;
   attachmentUrl?: string;
+}
+
+export type OnboardingStep = 
+  | "SIGNUP" 
+  | "EMAIL_VERIFIED" 
+  | "BASIC_INFO" 
+  | "BVN" 
+  | "IDENTITY" 
+  | "SELFIE" 
+  | "ADDRESS" 
+  | "COMPLETED";
+
+// 2. Profile Interface
+export interface CustomerUserProfileDetails {
+  id: string;
+  userId: string;
+  avatarUrl: string;
+  country: string;
+  state: string;
+  city?: string | null;
+  firstName: string;
+  lastName: string;
+  gender: "male" | "female" | string;
+  phoneNumber: string;
+  dateOfBirth: string; // ISO String
+  createdAt: string;
+  updatedAt: string;
+}
+
+// 3. User Interface
+export interface CustomerUser {
+  id: string;
+  email: string;
+  isEmailVerified: boolean;
+  isTwoFactorEnabled: boolean;
+  googleId: string | null;
+  mapleradCustomerId: string | null;
+  referralCode: string | null;
+  referredBy: string | null;
+  currentStep: OnboardingStep;
+  // Kept as string since it arrives as a stringified JSON array from your DB
+  completedOnboardingSteps: string; 
+  createdAt: string;
+  updatedAt: string;
+  profile: CustomerUserProfileDetails;
+  
+  // Excluded or optional sensitive/nullable backend auth fields 
+  password?: string;
+  transactionPin?: string;
+  twoFactorSecret?: string | null;
+  securityOtp?: string | null;
+  securityOtpExpiresAt?: string | null;
+  verificationToken?: string | null;
+  verificationTokenExpiresAt?: string | null;
+}
+
+// 4. Main Transaction Root Interface
+export interface TransactionDetails {
+  id: string;
+  userId: string;
+  amount: number;
+  currency: "NGN" | "USD" | string;
+  reference: string;
+  status: "COMPLETED" | "PENDING" | "FAILED" | string;
+  type: "MANUAL_TRADE" | string;
+  note: string;
+  details?: string | null;
+  errorGroup?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  user: CustomerUser;
+  // Kept as string since it arrives as a stringified JSON object from your DB
+  metadata: string; 
 }
