@@ -5,8 +5,7 @@ import { useFormContext } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { SelectFieldLayout } from "../forms/SelectFieldLayout";
 import FormField from "../forms/FormField";
-import { Upload } from "lucide-react";
-import { useRef } from "react";
+import { AttachmentFile, AttachmentUpload } from "../ui/UploadAttachment";
 
 const PAYMENT_METHODS = ["Bank Transfer", "Cash", "USDT Transfer", "Card"];
 const PAYMENT_STATUSES = ["Payment Received", "Pending", "Failed"];
@@ -23,7 +22,6 @@ interface Props {
 
 export function CryptoStepThree({ onContinue, onBack }: Props) {
   const { watch, setValue, register } = useFormContext();
-  const fileRef = useRef<HTMLInputElement>(null);
 
   const paymentMethod = watch("details.paymentMethod") ?? "";
   const paymentStatus = watch("details.paymentStatus") ?? "";
@@ -32,7 +30,7 @@ export function CryptoStepThree({ onContinue, onBack }: Props) {
   const deliveryAsset = watch("details.deliveryAsset") ?? "";
   const deliverySource = watch("details.deliverySource") ?? "";
   const deliveryStatus = watch("details.deliveryStatus") ?? "";
-  const attachment = watch("details.attachment");
+  const attachments: AttachmentFile[] = watch("details.attachments") ?? [];
 
   const isValid = paymentMethod && paymentStatus && deliveryMethod;
 
@@ -140,37 +138,12 @@ export function CryptoStepThree({ onContinue, onBack }: Props) {
         <p className="text-xs text-[var(--text-secondary)] mb-2">
           Include receipt of transaction
         </p>
-        <input
-          ref={fileRef}
-          type="file"
-          accept=".jpg,.png,.pdf"
-          className="hidden"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) setValue("details.attachment", file.name);
-          }}
+        <AttachmentUpload
+          value={attachments}
+          onChange={(files) =>
+            setValue("details.attachments", files, { shouldDirty: true })
+          }
         />
-        {attachment ? (
-          <div className="flex items-center gap-2 p-2 rounded border border-[var(--border-default)] bg-[var(--grey-light)] text-xs">
-            <span className="flex-1 truncate text-[var(--text-primary)]">{attachment}</span>
-            <button
-              type="button"
-              className="text-[var(--text-secondary)] hover:text-[var(--mainRed)]"
-              onClick={() => setValue("details.attachment", null)}
-            >
-              ✕
-            </button>
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={() => fileRef.current?.click()}
-            className="w-full border border-dashed border-[var(--grey-border)] rounded-lg p-6 flex flex-col items-center gap-2 text-xs text-[var(--text-secondary)] hover:bg-[var(--grey-light)] transition"
-          >
-            <Upload className="h-5 w-5" />
-            <span>JPG, PNG OR PDF • Max 5MB</span>
-          </button>
-        )}
       </div>
 
       <div className="flex gap-3 pt-4 border-t border-[var(--border-default)] mt-auto">

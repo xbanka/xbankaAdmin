@@ -29,7 +29,9 @@ export function CryptoTransactionSteps({
       {step === 1 && <CryptoStepOne onContinue={next} onBack={back} />}
       {step === 2 && <CryptoStepTwo onContinue={next} onBack={back} />}
       {step === 3 && <CryptoStepThree onContinue={next} onBack={back} />}
-      {step === 4 && <CryptoStepFour onClose={handleClose} onBack={back} />}
+      {step === 4 && (
+        <CryptoStepFour onClose={handleClose} onBack={back} goToStep={setStep} />
+      )}
     </>
   );
 }
