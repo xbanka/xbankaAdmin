@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Upload } from "lucide-react";
+import { Eye, Search, Upload } from "lucide-react";
 import { DataTableLayout } from "../DataTableLayout/DataTableLayout";
 import { FilterTabs } from "../ui/FilterTabs";
 import { TransactionsTableProps } from "@/lib/types/transactionTypes";
@@ -206,7 +206,12 @@ export function TransactionsTable({
       key: "action",
       header: "",
       className: "md:w-[110px]",
-      render: (item: TransactionRecord) => <div>view more</div>,
+      render: (item: TransactionRecord) => (
+        <div className="text-text-teal flex items-center gap-2 font-[500] text-[14px] leading-[22px] cursor-pointer">
+          <Eye size={16} />
+          view more
+        </div>
+      ),
     },
   ];
 
@@ -217,9 +222,7 @@ export function TransactionsTable({
       header: "Type",
       className: "md:w-[110px]",
       render: (item: TransactionRecord) => (
-        <span className="text-xs text-gray-700 capitalize">
-          {item.type?.toLowerCase()}
-        </span>
+        <span className="capitalize">{item.type?.toLowerCase()}</span>
       ),
     },
     {
@@ -229,11 +232,7 @@ export function TransactionsTable({
       render: (item: TransactionRecord) => {
         const credit = item.type === "DEPOSIT";
         return (
-          <span
-            className={`text-xs font-medium ${credit ? "text-[var(--success-text)]" : "text-[var(--mainRed)]"}`}
-          >
-            {credit ? "Credit" : "Debit"}
-          </span>
+          <span className={`font-medium`}>{credit ? "Credit" : "Debit"}</span>
         );
       },
     },
@@ -273,6 +272,17 @@ export function TransactionsTable({
       className: "md:w-[110px]",
       render: (item: TransactionRecord) => <StatusBadge status={item.status} />,
     },
+    {
+      key: "",
+      header: "",
+      className: "md:w-[110px]",
+      render: (item: TransactionRecord) => (
+        <div className="text-text-teal flex items-center gap-2 font-[500] text-[14px] leading-[22px] cursor-pointer">
+          <Eye size={16} />
+          view more
+        </div>
+      ),
+    },
   ];
 
   const cryptoColumns = [
@@ -281,9 +291,18 @@ export function TransactionsTable({
       key: "kycTier",
       header: "Tier Level",
       className: "md:w-[100px]",
-      render: (item: TransactionRecord) => (
-        <TierBadge tier={item.customer?.kycTier} />
-      ),
+      render: (item: TransactionRecord) => {
+        const tier = item.customer.kycTier ?? 0;
+
+        return (
+          <Image
+            src={tierImages[tier] || "/Tier0.svg"}
+            alt={`Tier ${tier}`}
+            width={67}
+            height={24}
+          />
+        );
+      },
     },
     {
       key: "type",
@@ -331,6 +350,17 @@ export function TransactionsTable({
       header: "Status",
       className: "md:w-[110px]",
       render: (item: TransactionRecord) => <StatusBadge status={item.status} />,
+    },
+    {
+      key: "",
+      header: "",
+      className: "md:w-[110px]",
+      render: (item: TransactionRecord) => (
+        <div className="text-text-teal flex items-center gap-2 font-[500] text-[14px] leading-[22px] cursor-pointer">
+          <Eye size={16} />
+          view more
+        </div>
+      ),
     },
   ];
 
@@ -384,6 +414,47 @@ export function TransactionsTable({
       render: (item: TransactionRecord) => (
         <span className="text-xs text-gray-600">
           {item.tradeDetails?.channelOrigin ?? "—"}
+        </span>
+      ),
+    },
+    {
+      key: "partner",
+      header: "Partner",
+      className: "md:w-[110px]",
+      render: (item: TransactionRecord) => (
+        <span className="text-xs text-gray-600">
+          {item.tradeDetails?.channelOrigin ?? "—"}
+        </span>
+      ),
+    },
+    {
+      key: "margin",
+      header: "Margin",
+      className: "md:w-[110px]",
+      render: (item: TransactionRecord) => (
+        <span className="text-xs text-gray-600">
+          {item.tradeDetails?.channelOrigin ?? "—"}
+        </span>
+      ),
+    },
+    {
+      key: "status",
+      header: "Status",
+      className: "md:w-[110px]",
+      render: (item: TransactionRecord) => (
+        <span className="text-xs text-gray-600">
+          {item.tradeDetails?.channelOrigin ?? "—"}
+        </span>
+      ),
+    },
+    {
+      key: "",
+      header: "",
+      className: "md:w-[110px]",
+      render: (item: TransactionRecord) => (
+        <span className="text-text-teal flex items-center gap-2 font-[500] text-[14px] leading-[22px] cursor-pointer">
+          <Eye size={16} />
+          View more
         </span>
       ),
     },
