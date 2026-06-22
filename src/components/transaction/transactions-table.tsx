@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Upload } from "lucide-react";
+import { Eye, Search, Upload } from "lucide-react";
 import { DataTableLayout } from "../DataTableLayout/DataTableLayout";
 import { FilterTabs } from "../ui/FilterTabs";
 import { TransactionsTableProps } from "@/lib/types/transactionTypes";
@@ -12,12 +12,10 @@ import {
   useTransactions,
 } from "@/lib/services/transaction.service";
 import Header from "../ui/Header";
-import { useUserStore } from "@/store/userStore";
 import {
   hasPermission,
   normalizePermissionsFromApi,
 } from "@/lib/rolePermissions";
-import { SelectFieldLayout } from "../forms/SelectFieldLayout";
 import { formatDate } from "@/lib/formatDate";
 import { AllTabFilters } from "./all-tab-filters";
 import { ManualTabFilters } from "./manual-tab-filters";
@@ -27,6 +25,9 @@ import { TransactionRecord } from "@/lib/types/transaction-types";
 import { TierBadge } from "./tier-badge";
 import { StatusBadge } from "./badge";
 import { useProfile } from "@/lib/services/profile.service";
+import Image from "next/image";
+import { tierImages } from "@/lib/utils/tier-images";
+import { TransactionDetailSidebar } from "./transaction-detail-sidebar";
 
 const TRANSACTION_TYPES = [
   "USDT-NGN",
@@ -67,6 +68,9 @@ export function TransactionsTable({
   const [sourceFilter, setSourceFilter] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [transactionTypeFilter, setTransactionTypeFilter] = useState("");
+  const [detailTransactionId, setDetailTransactionId] = useState<string | null>(
+    null,
+  );
   const [page, setPage] = useState(1);
   const {
     data: userData,
@@ -119,7 +123,7 @@ export function TransactionsTable({
       className: "md:w-[140px]",
       render: (item: TransactionRecord) => (
         <span
-          className="text-[var(--text-teal)] text-xs truncate block"
+          className="text-text-teal font-500 text-[14px] leading-[16px] truncate block"
           title={item.reference}
         >
           {item.reference}
@@ -131,7 +135,7 @@ export function TransactionsTable({
       header: "Date",
       className: "md:w-[110px]",
       render: (item: TransactionRecord) => (
-        <span className="text-xs text-gray-600">
+        <span className="font-500 text-[14px] leading-[18px] text-[#111827]">
           {formatDate(item.createdAt)}
         </span>
       ),
@@ -147,9 +151,9 @@ export function TransactionsTable({
         //   </span>
         //   <span className="text-xs text-gray-500">{item.customer?.email}</span>
         // </div>
-        <div className="text-[var(--text-teal)] text-sm font-medium hover:underline block">
-            {item.customer?.firstName} {item.customer?.lastName}
-          </div>
+        <div className="text-text-teal text-sm font-medium leading-5 hover:underline block">
+          {item?.customer?.firstName} {item?.customer?.lastName}
+        </div>
       ),
     },
   ];
@@ -160,9 +164,18 @@ export function TransactionsTable({
       key: "kycTier",
       header: "Tier Level",
       className: "md:w-[100px]",
-      render: (item: TransactionRecord) => (
-        <TierBadge tier={item.customer?.kycTier} />
-      ),
+      render: (item: TransactionRecord) => {
+        const tier = item.customer.kycTier ?? 0;
+
+        return (
+          <Image
+            src={tierImages[tier] || "/Tier0.svg"}
+            alt={`Tier ${tier}`}
+            width={67}
+            height={24}
+          />
+        );
+      },
     },
     {
       key: "details",
@@ -170,7 +183,7 @@ export function TransactionsTable({
       className: "md:w-[200px]",
       render: (item: TransactionRecord) => (
         <div className="flex flex-col">
-          <span className="text-xs font-medium text-gray-800">
+          <span className="text-[14px] font-medium text-[#111827]">
             {item.displayType}
           </span>
           <span className="text-[10px] text-gray-400">{item.note}</span>
@@ -182,7 +195,7 @@ export function TransactionsTable({
       header: "Amount",
       className: "md:w-[120px]",
       render: (item: TransactionRecord) => (
-        <span className="text-xs font-medium text-gray-800">
+        <span className="text-[14px] font-medium text-[#111827] leading-[18px]">
           {item.currency} {moneyFmt(item.amount)}
         </span>
       ),
@@ -193,6 +206,20 @@ export function TransactionsTable({
       className: "md:w-[110px]",
       render: (item: TransactionRecord) => <StatusBadge status={item.status} />,
     },
+    {
+      key: "action",
+      header: "",
+      className: "md:w-[110px]",
+      render: (item: TransactionRecord) => (
+        <div
+          onClick={() => setDetailTransactionId(item.id)}
+          className="text-text-teal flex items-center gap-2 font-[500] text-[14px] leading-[22px] cursor-pointer"
+        >
+          <Eye size={16} />
+          view more
+        </div>
+      ),
+    },
   ];
 
   const fiatColumns = [
@@ -202,9 +229,7 @@ export function TransactionsTable({
       header: "Type",
       className: "md:w-[110px]",
       render: (item: TransactionRecord) => (
-        <span className="text-xs text-gray-700 capitalize">
-          {item.type?.toLowerCase()}
-        </span>
+        <span className="capitalize">{item.type?.toLowerCase()}</span>
       ),
     },
     {
@@ -214,11 +239,7 @@ export function TransactionsTable({
       render: (item: TransactionRecord) => {
         const credit = item.type === "DEPOSIT";
         return (
-          <span
-            className={`text-xs font-medium ${credit ? "text-[var(--success-text)]" : "text-[var(--mainRed)]"}`}
-          >
-            {credit ? "Credit" : "Debit"}
-          </span>
+          <span className={`font-medium`}>{credit ? "Credit" : "Debit"}</span>
         );
       },
     },
@@ -252,6 +273,26 @@ export function TransactionsTable({
         </span>
       ),
     },
+    {
+      key: "status",
+      header: "Status",
+      className: "md:w-[110px]",
+      render: (item: TransactionRecord) => <StatusBadge status={item.status} />,
+    },
+    {
+      key: "",
+      header: "",
+      className: "md:w-[110px]",
+      render: (item: TransactionRecord) => (
+        <div
+          onClick={() => setDetailTransactionId(item.id)}
+          className="text-text-teal flex items-center gap-2 font-[500] text-[14px] leading-[22px] cursor-pointer"
+        >
+          <Eye size={16} />
+          view more
+        </div>
+      ),
+    },
   ];
 
   const cryptoColumns = [
@@ -260,9 +301,18 @@ export function TransactionsTable({
       key: "kycTier",
       header: "Tier Level",
       className: "md:w-[100px]",
-      render: (item: TransactionRecord) => (
-        <TierBadge tier={item.customer?.kycTier} />
-      ),
+      render: (item: TransactionRecord) => {
+        const tier = item.customer.kycTier ?? 0;
+
+        return (
+          <Image
+            src={tierImages[tier] || "/Tier0.svg"}
+            alt={`Tier ${tier}`}
+            width={67}
+            height={24}
+          />
+        );
+      },
     },
     {
       key: "type",
@@ -310,6 +360,20 @@ export function TransactionsTable({
       header: "Status",
       className: "md:w-[110px]",
       render: (item: TransactionRecord) => <StatusBadge status={item.status} />,
+    },
+    {
+      key: "",
+      header: "",
+      className: "md:w-[110px]",
+      render: (item: TransactionRecord) => (
+        <div
+          onClick={() => setDetailTransactionId(item.id)}
+          className="text-text-teal flex items-center gap-2 font-[500] text-[14px] leading-[22px] cursor-pointer"
+        >
+          <Eye size={16} />
+          view more
+        </div>
+      ),
     },
   ];
 
@@ -366,6 +430,50 @@ export function TransactionsTable({
         </span>
       ),
     },
+    {
+      key: "partner",
+      header: "Partner",
+      className: "md:w-[110px]",
+      render: (item: TransactionRecord) => (
+        <span className="text-xs text-gray-600">
+          {item.tradeDetails?.channelOrigin ?? "—"}
+        </span>
+      ),
+    },
+    {
+      key: "margin",
+      header: "Margin",
+      className: "md:w-[110px]",
+      render: (item: TransactionRecord) => (
+        <span className="text-xs text-gray-600">
+          {item.tradeDetails?.channelOrigin ?? "—"}
+        </span>
+      ),
+    },
+    {
+      key: "status",
+      header: "Status",
+      className: "md:w-[110px]",
+      render: (item: TransactionRecord) => (
+        <span className="text-xs text-gray-600">
+          {item.tradeDetails?.channelOrigin ?? "—"}
+        </span>
+      ),
+    },
+    {
+      key: "",
+      header: "",
+      className: "md:w-[110px]",
+      render: (item: TransactionRecord) => (
+        <span
+          onClick={() => setDetailTransactionId(item.id)}
+          className="text-text-teal flex items-center gap-2 font-[500] text-[14px] leading-[22px] cursor-pointer"
+        >
+          <Eye size={16} />
+          View more
+        </span>
+      ),
+    },
   ];
 
   const activeColumns =
@@ -405,8 +513,8 @@ export function TransactionsTable({
       </div>
 
       {/* Filter Buttons */}
-      <div className="md:flex items-center justify-between">
-        <div className="flex flex-wrap gap-2 mb-6 ">
+      <div className="md:flex items-end justify-between w-full">
+        <div className="flex flex-col flex-wrap gap-2 mb-6 ">
           <FilterTabs
             filters={[
               "All",
@@ -419,9 +527,19 @@ export function TransactionsTable({
             value={activeFilter}
             onChange={handleTabChange}
           />
+          <div className="flex items-center justify-between w-full">
+            <div className="relative w-full">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+          </div>
         </div>
-
-        <div>
+        <div className="flex flex-col items-center md:flex-row gap-3">
           {/* Per-tab filter bar */}
           {activeFilter === "all" && (
             <AllTabFilters
@@ -474,34 +592,18 @@ export function TransactionsTable({
               setSourceFilter={setSourceFilter}
             />
           )}
-        </div>
-
-        {/* Search and Filters */}
-        <div className="flex flex-col md:flex-row gap-3 mb-6">
-          {/* <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="Search"
-              value={searchInput}
-              onChange={(e) => {
-                setSearchInput(e.target.value);
-                setPage(1);
-              }}
-              className="pl-9"
-            />
-          </div> */}
-          <SelectFieldLayout
-            id="statusFilter"
-            options={["COMPLETED", "PENDING", "FAILED", "PROCESSING"]}
-            placeholder="Status: All"
-            value={statusFilter}
-            onChange={(v) => {
-              setStatusFilter(v);
-              setPage(1);
-            }}
-            className="w-40"
-            selectClassName="border border-gray-300"
-          />
+          {/* <SelectFieldLayout
+                id="statusFilter"
+                options={["COMPLETED", "PENDING", "FAILED", "PROCESSING"]}
+                placeholder="Status: All"
+                value={statusFilter}
+                onChange={(v) => {
+                  setStatusFilter(v);
+                  setPage(1);
+                }}
+                className="w-40"
+                selectClassName="border border-gray-300"
+              /> */}
         </div>
       </div>
       <div className="w-full md:max-w-[700px] lg:min-w-[100%] xl:min-w-full min-h-screen">
@@ -519,6 +621,10 @@ export function TransactionsTable({
           onPageChange={setPage}
         />
       </div>
+      <TransactionDetailSidebar
+        transactionId={detailTransactionId}
+        onClose={() => setDetailTransactionId(null)}
+      />
     </div>
   );
 }
