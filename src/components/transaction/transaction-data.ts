@@ -63,3 +63,26 @@ export type GiftCardTransactionPayload = {
 export type CreateTransactionPayload =
   | CryptoTransactionPayload
   | GiftCardTransactionPayload;
+
+export type SidebarView = "search" | "new-user";
+
+export interface RawUserProfile {
+  firstName: string;
+  lastName: string;
+  phoneNumber: string; // Kept as string to preserve leading '0'
+}
+
+export interface RawUserData {
+  id: string;
+  email: string;
+  createdAt: string; // ISO 8601 Date String
+  profile: RawUserProfile;
+}
+
+export interface UserSummaryItem {
+  id: string;
+  email: string;
+  name: string;
+  phone: string;
+  raw: RawUserData;
+}

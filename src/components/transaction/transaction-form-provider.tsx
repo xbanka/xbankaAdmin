@@ -1,11 +1,11 @@
-"use client"
+"use client";
 
-import { FormProvider, useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { transactionSchema } from "@/lib/schema/transaction.schema"
-import { ReactNode } from "react"
+import { FormProvider, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { transactionSchema } from "@/lib/schema/transaction.schema";
+import { ReactNode } from "react";
 
-export function TransactionFormProvider({ children }: {children: ReactNode}) {
+export function TransactionFormProvider({ children }: { children: ReactNode }) {
   const methods = useForm({
     resolver: zodResolver(transactionSchema),
     defaultValues: {
@@ -13,12 +13,14 @@ export function TransactionFormProvider({ children }: {children: ReactNode}) {
         id: "",
         affiliateAttribution: "",
         assignedRep: "",
+        isNewUser: false,
+        newUserData: undefined,
       },
-      serviceType:  undefined,
+      serviceType: undefined,
       details: {},
     },
     mode: "onChange",
-  })
+  });
 
-  return <FormProvider {...methods}>{children}</FormProvider>
+  return <FormProvider {...methods}>{children}</FormProvider>;
 }
