@@ -3,6 +3,7 @@ import { handleApiError } from "../errors/handleApiError";
 import { createManualTransaction, createTransactionAction, getAllTransactions, getAllTransactionsAction, getAllTransactionsByCustomer, getTransactionById, getTransactionByIdAction, GetTransactionsParams, uploadTransactionAttachmentAction } from "../actions/transactions";
 import { toast } from "sonner";
 import { CreateTransactionPayload } from "@/components/transaction/transaction-data";
+import { TransactionDetails } from "../types/transaction-types";
 
 export const useTransactions = (page = 1, limit = 10) => {
   return useQuery({
@@ -112,8 +113,20 @@ export const useGetTransactionById = (transactionId: string | null) => {
 };
 
 export const useCreateManualTransaction = () => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: createManualTransaction,
+
+    onSuccess: () => {
+      toast.success("Transaction created successfully");
+      queryClient.invalidateQueries({
+        queryKey: ["transactions"],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["transaction"],
+      });
+    },
 
     onError: (error) => {
       handleApiError(error);

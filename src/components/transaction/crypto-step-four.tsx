@@ -74,12 +74,12 @@ export function CryptoStepFour({ onClose, onBack }: Props) {
       isNewUser: customer?.isNewUser ?? false,
       ...(customer?.isNewUser && customer?.newUserData
         ? { newUserData: customer.newUserData }
-        : { customerId: customer?.id }),
+        : { userId: customer?.id }),
 
       // ── Step 1 ──
       tradeDirection: d?.tradeDirection ?? "",
-      channelOrigin: d?.channelOrigin ?? "",
-      transactionType: d?.transactionType ?? "",
+      // channelOrigin: d?.channelOrigin ?? "",
+      // transactionType: d?.transactionType ?? "",
 
       // ── Step 2 ──
       customerPaysCurrency: d?.customerPaysCurrency ?? "NGN",
@@ -104,16 +104,16 @@ export function CryptoStepFour({ onClose, onBack }: Props) {
       deliverySource: d?.deliverySource ?? "",
       deliveryStatus: d?.deliveryStatus ?? "",
       deliveryReference: d?.deliveryReference ?? "",
-      attachmentUrl: d?.attachmentUrl ?? undefined,
+      attachmentUrl: d?.attachment ?? undefined,
     };
     console.log("payload:", payload)
 
-    // mutate(payload, {
-    //   onSuccess: () => {
-    //     toast.success("Transaction logged successfully");
-    //     onClose();
-    //   },
-    // });
+    mutate(payload, {
+      onSuccess: () => {
+        toast.success("Transaction logged successfully");
+        onClose();
+      },
+    });
   };
 
 
