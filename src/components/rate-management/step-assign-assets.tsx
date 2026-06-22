@@ -45,23 +45,10 @@ export function StepAssignAssets({
 
     if (isSelected) {
       setSelectedAssetIds((prev) => prev.filter((id) => id !== row.id));
-      return;
-    }
-
-    setSelectedAssetIds((prev) => [...prev, row.id]);
-
-    const segmentId = selectedSegments[row.id] ?? row.segmentId;
-
-    if (segmentId !== row.segmentId) {
-      updateCryptoSegment({
-        rateId: row.id,
-        payload: {
-          segmentId,
-        },
-      });
+    } else {
+      setSelectedAssetIds((prev) => [...prev, row.id]);
     }
   };
-
   const { mutate: updateCryptoSegment } = useUpdateBuyAndSpreadRates();
 
   const handleAssignSelected = () => {
@@ -83,21 +70,17 @@ export function StepAssignAssets({
   };
 
   const handleSegmentChange = (row: CryptoCurrencyTypes, segmentId: string) => {
-    // always update local UI state
     setSelectedSegments((prev) => ({
       ...prev,
       [row.id]: segmentId,
     }));
 
-    // only send request if row is checked
-    if (selectedAssetIds.includes(row.id)) {
-      updateCryptoSegment({
-        rateId: row.id,
-        payload: {
-          segmentId,
-        },
-      });
-    }
+    updateCryptoSegment({
+      rateId: row.id,
+      payload: {
+        segmentId,
+      },
+    });
   };
 
   const columns = [
