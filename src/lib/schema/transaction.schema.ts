@@ -10,6 +10,17 @@ export const customerBaseSchema = z.object({
   phone: z.string(),
   affiliateAttribution: z.string().optional(),
   assignedRep: z.string(), // ✅ REQUIRED HERE
+
+  isNewUser: z.boolean().optional().default(false),
+
+  newUserData: z
+    .object({
+      firstName: z.string(),
+      lastName: z.string(),
+      email: z.string().email(),
+      phoneNumber: z.string(),
+    })
+    .optional(),
 });
 
 export const transactionSchema = z

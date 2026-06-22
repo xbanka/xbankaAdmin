@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { handleApiError } from "../errors/handleApiError";
-import { createTransactionAction, getAllTransactions, getAllTransactionsAction, getAllTransactionsByCustomer, getTransactionByIdAction, GetTransactionsParams, uploadTransactionAttachmentAction } from "../actions/transactions";
+import { createManualTransaction, createTransactionAction, getAllTransactions, getAllTransactionsAction, getAllTransactionsByCustomer, getTransactionById, getTransactionByIdAction, GetTransactionsParams, uploadTransactionAttachmentAction } from "../actions/transactions";
 import { toast } from "sonner";
 import { CreateTransactionPayload } from "@/components/transaction/transaction-data";
 
@@ -93,5 +93,30 @@ export const useGetAllTransactions = (params: GetTransactionsParams) => {
       }
     },
     placeholderData: (previousData) => previousData, // keep old page while fetching next
+  });
+};
+
+export const useGetTransactionById = (transactionId: string | null) => {
+  return useQuery({
+    queryKey: ["get-transaction", transactionId],
+    queryFn: async () => {
+      try {
+        const response = await getTransactionById(transactionId!);
+        return response;
+      } catch (error) {
+        handleApiError(error);
+      }
+    },
+    enabled: !!transactionId, // only fires when an ID is passed
+  });
+};
+
+export const useCreateManualTransaction = () => {
+  return useMutation({
+    mutationFn: createManualTransaction,
+
+    onError: (error) => {
+      handleApiError(error);
+    },
   });
 };

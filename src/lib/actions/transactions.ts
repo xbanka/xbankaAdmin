@@ -1,4 +1,5 @@
 import AxiosInstance from "../Axiosinstance/axiosInstance";
+import { CreateManualTransactionPayload } from "../types/transaction-types";
 
 
 /**
@@ -122,5 +123,21 @@ export const getAllTransactions = async (params: GetTransactionsParams) => {
       search: params.search,
     },
   });
+  return response.data;
+};
+
+export const getTransactionById = async (transactionId: string) => {
+  const response = await AxiosInstance.get(`/api/transactions/${transactionId}`);
+  return response.data;
+};
+
+export const createManualTransaction = async (
+  payload: CreateManualTransactionPayload
+) => {
+  const response = await AxiosInstance.post(
+    "/api/transactions/manual-log",
+    payload
+  );
+
   return response.data;
 };

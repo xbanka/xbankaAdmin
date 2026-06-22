@@ -27,6 +27,7 @@ import { StatusBadge } from "./badge";
 import { useProfile } from "@/lib/services/profile.service";
 import Image from "next/image";
 import { tierImages } from "@/lib/utils/tier-images";
+import { TransactionDetailSidebar } from "./transaction-detail-sidebar";
 
 const TRANSACTION_TYPES = [
   "USDT-NGN",
@@ -67,6 +68,9 @@ export function TransactionsTable({
   const [sourceFilter, setSourceFilter] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [transactionTypeFilter, setTransactionTypeFilter] = useState("");
+  const [detailTransactionId, setDetailTransactionId] = useState<string | null>(
+    null,
+  );
   const [page, setPage] = useState(1);
   const {
     data: userData,
@@ -207,7 +211,10 @@ export function TransactionsTable({
       header: "",
       className: "md:w-[110px]",
       render: (item: TransactionRecord) => (
-        <div className="text-text-teal flex items-center gap-2 font-[500] text-[14px] leading-[22px] cursor-pointer">
+        <div
+          onClick={() => setDetailTransactionId(item.id)}
+          className="text-text-teal flex items-center gap-2 font-[500] text-[14px] leading-[22px] cursor-pointer"
+        >
           <Eye size={16} />
           view more
         </div>
@@ -277,7 +284,10 @@ export function TransactionsTable({
       header: "",
       className: "md:w-[110px]",
       render: (item: TransactionRecord) => (
-        <div className="text-text-teal flex items-center gap-2 font-[500] text-[14px] leading-[22px] cursor-pointer">
+        <div
+          onClick={() => setDetailTransactionId(item.id)}
+          className="text-text-teal flex items-center gap-2 font-[500] text-[14px] leading-[22px] cursor-pointer"
+        >
           <Eye size={16} />
           view more
         </div>
@@ -356,7 +366,10 @@ export function TransactionsTable({
       header: "",
       className: "md:w-[110px]",
       render: (item: TransactionRecord) => (
-        <div className="text-text-teal flex items-center gap-2 font-[500] text-[14px] leading-[22px] cursor-pointer">
+        <div
+          onClick={() => setDetailTransactionId(item.id)}
+          className="text-text-teal flex items-center gap-2 font-[500] text-[14px] leading-[22px] cursor-pointer"
+        >
           <Eye size={16} />
           view more
         </div>
@@ -452,7 +465,10 @@ export function TransactionsTable({
       header: "",
       className: "md:w-[110px]",
       render: (item: TransactionRecord) => (
-        <span className="text-text-teal flex items-center gap-2 font-[500] text-[14px] leading-[22px] cursor-pointer">
+        <span
+          onClick={() => setDetailTransactionId(item.id)}
+          className="text-text-teal flex items-center gap-2 font-[500] text-[14px] leading-[22px] cursor-pointer"
+        >
           <Eye size={16} />
           View more
         </span>
@@ -605,6 +621,10 @@ export function TransactionsTable({
           onPageChange={setPage}
         />
       </div>
+      <TransactionDetailSidebar
+        transactionId={detailTransactionId}
+        onClose={() => setDetailTransactionId(null)}
+      />
     </div>
   );
 }

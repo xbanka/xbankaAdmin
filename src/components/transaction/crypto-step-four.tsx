@@ -3,7 +3,9 @@
 
 import { useFormContext } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import { Pencil, ArrowUpRight } from "lucide-react";
+import { Pencil, ArrowUpRight, Loader2 } from "lucide-react";
+import { useCreateManualTransaction } from "@/lib/services/transaction.service";
+import { toast } from "sonner";
 
 interface Props {
   onClose: () => void;
@@ -52,24 +54,98 @@ function SummarySection({
 }
 
 export function CryptoStepFour({ onClose, onBack }: Props) {
-  const { watch, handleSubmit } = useFormContext();
+  const { watch } = useFormContext();
   const d = watch("details");
   const customer = watch("customer");
 
-  const onSubmit = (data: unknown) => {
-    // TODO: call your mutation here, then close
-    console.log("Submit transaction", data);
-    onClose();
+  const { mutate, isPending } = useCreateManualTransaction();
+
+  // Derived values (same logic as step two)
+  const partnerRate = parseFloat(d?.partnerRate ?? 0);
+  const xbankaRate = parseFloat(d?.xbankaRate ?? 0);
+  const customerPays = parseFloat(d?.customerPays ?? 0);
+  const marginPerUnit = isNaN(partnerRate) || isNaN(xbankaRate) ? 0 : xbankaRate - partnerRate;
+  const totalMargin = isNaN(customerPays) || isNaN(marginPerUnit) ? 0 : customerPays * marginPerUnit;
+  const marginPct = partnerRate > 0 ? ((marginPerUnit / partnerRate) * 100).toFixed(2) + "%" : "0%";
+
+  const handleSubmit = () => {
+    const payload = {
+      // ── Customer ──
+      isNewUser: customer?.isNewUser ?? false,
+      ...(customer?.isNewUser && customer?.newUserData
+        ? { newUserData: customer.newUserData }
+        : { customerId: customer?.id }),
+
+      // ── Step 1 ──
+      tradeDirection: d?.tradeDirection ?? "",
+      channelOrigin: d?.channelOrigin ?? "",
+      transactionType: d?.transactionType ?? "",
+
+      // ── Step 2 ──
+      customerPaysCurrency: d?.customerPaysCurrency ?? "NGN",
+      customerPaysAmount: customerPays,
+      customerReceivesCurrency: d?.customerReceivesCurrency ?? "USDT",
+      customerReceivesAmount: parseFloat(d?.customerReceives ?? 0),
+      partner: d?.partner ?? "",
+      partnerRate,
+      xbankaRate,
+      marginPerUsdt: marginPerUnit,
+      totalMargin,
+      marginPercentage: marginPct,
+      internalNotes: d?.internalNotes ?? undefined,
+
+      // ── Step 3 ──
+      paymentMethod: d?.paymentMethod ?? "",
+      paymentStatus: d?.paymentStatus ?? "",
+      paymentReference: d?.paymentReference ?? "",
+      receivedInto: d?.xbankaAccount ?? "",
+      deliveryMethod: d?.deliveryMethod ?? "",
+      deliveryAsset: d?.deliveryAsset ?? "",
+      deliverySource: d?.deliverySource ?? "",
+      deliveryStatus: d?.deliveryStatus ?? "",
+      deliveryReference: d?.deliveryReference ?? "",
+      attachmentUrl: d?.attachmentUrl ?? undefined,
+    };
+    console.log("payload:", payload)
+
+    // mutate(payload, {
+    //   onSuccess: () => {
+    //     toast.success("Transaction logged successfully");
+    //     onClose();
+    //   },
+    // });
   };
 
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2">
+      {/* Customer info header (read-only) */}
+      {customer?.isNewUser && customer?.newUserData && (
+        <div className="bg-[var(--teal-light)] border border-[var(--teal-border)] rounded-lg p-3 mb-2">
+          <p className="text-xs font-medium text-[var(--teal-text)] mb-1">New Customer</p>
+          <p className="text-xs text-[var(--text-primary)]">
+            {customer.newUserData.firstName} {customer.newUserData.lastName}
+          </p>
+          <p className="text-xs text-[var(--text-secondary)]">{customer.newUserData.email}</p>
+        </div>
+      )}
+
       <SummarySection title="Trade Summary">
-        <SummaryRow label="Customer Pays" value={d?.customerPays ? `₦${d.customerPays}` : undefined} />
-        <SummaryRow label="Customer Receives" value={d?.customerReceives ? `${d.customerReceives} ${d?.customerReceivesCurrency ?? ""}` : undefined} />
-        <SummaryRow label="Partner Rate" value={d?.partnerRate ? `$${d.partnerRate} / USDT` : undefined} />
-        <SummaryRow label="Xbanka Rate" value={d?.xbankaRate ? `$${d.xbankaRate} / USDT` : undefined} />
-        <SummaryRow label="Partner" value={d?.partner} />
+        <SummaryRow
+          label="Customer Pays"
+          value={customerPays ? `${d?.customerPaysCurrency} ${customerPays.toLocaleString()}` : undefined}
+        />
+        <SummaryRow
+          label="Customer Receives"
+          value={d?.customerReceives ? `${parseFloat(d.customerReceives).toLocaleString()} ${d?.customerReceivesCurrency}` : undefined}
+        />
+        <SummaryRow label="Partner Rate" value={partnerRate ? `$${partnerRate} / USDT` : undefined} />
+        <SummaryRow label="Xbanka Rate" value={xbankaRate ? `$${xbankaRate} / USDT` : undefined} />
+        <SummaryRow label="Partner Cost" value={`₦${(customerPays).toLocaleString()}`} />
+        <SummaryRow
+          label="Total Margin"
+          value={totalMargin ? `₦${totalMargin.toLocaleString()}` : undefined}
+        />
       </SummarySection>
 
       <SummarySection title="Settlement">
@@ -84,9 +160,7 @@ export function CryptoStepFour({ onClose, onBack }: Props) {
 
       {d?.attachment && (
         <div className="mb-4">
-          <h4 className="text-xs font-semibold text-[var(--text-primary)] uppercase tracking-wide mb-2">
-            Proof of Payment
-          </h4>
+          <h4 className="text-xs font-semibold text-[var(--text-primary)] mb-2">Proof of Payment</h4>
           <div className="bg-[var(--grey-light)] rounded-lg p-3 flex items-center justify-between">
             <span className="text-xs text-[var(--text-primary)] truncate">{d.attachment}</span>
             <span className="text-xs text-[var(--text-teal)] cursor-pointer">View</span>
@@ -95,16 +169,24 @@ export function CryptoStepFour({ onClose, onBack }: Props) {
       )}
 
       <div className="flex gap-3 pt-4 border-t border-[var(--border-default)]">
-        <Button type="button" variant="outline" className="flex-1" onClick={onBack}>
+        <Button type="button" variant="outline" className="flex-1" onClick={onBack} disabled={isPending}>
           Back
         </Button>
         <Button
-          type="submit"
+          type="button"
           className="flex-1 bg-[var(--button-primary-bg)] text-white"
+          onClick={handleSubmit}
+          disabled={isPending}
         >
-          Submit Transaction
+          {isPending ? (
+            <span className="flex items-center gap-2">
+              <Loader2 className="h-4 w-4 animate-spin" /> Submitting...
+            </span>
+          ) : (
+            "Submit Transaction"
+          )}
         </Button>
       </div>
-    </form>
+    </div>
   );
 }

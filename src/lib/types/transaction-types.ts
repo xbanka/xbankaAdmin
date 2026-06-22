@@ -57,3 +57,46 @@ export interface TransactionsResponse {
   items: TransactionRecord[];
   meta: TransactionsMeta;
 }
+
+export interface CreateManualTransactionPayload {
+  isNewUser: boolean;
+
+  customerId?: string;
+
+  newUserData?: {
+    email: string;
+    firstName: string;
+    lastName: string;
+    phoneNumber: string;
+  };
+
+  tradeDirection: string;
+
+  customerPaysCurrency: string;
+  customerPaysAmount: number;
+
+  customerReceivesCurrency: string;
+  customerReceivesAmount: number;
+
+  partner: string;
+  partnerRate: number;
+  xbankaRate: number;
+
+  marginPerUsdt: number;
+  totalMargin: number;
+  marginPercentage: string;
+
+  paymentMethod: string;
+  paymentStatus: string;
+  paymentReference: string;
+  receivedInto: string;
+
+  deliveryMethod: string;
+  deliveryAsset: string;
+  deliverySource: string;
+  deliveryStatus: string;
+  deliveryReference: string;
+
+  internalNotes?: string;
+  attachmentUrl?: string;
+}
