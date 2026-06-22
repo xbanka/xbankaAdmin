@@ -2,15 +2,10 @@
 "use client";
 
 import { useFormContext } from "react-hook-form";
-import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { ArrowUpRight, Loader2, FileText } from "lucide-react";
-import {
-  useCreateManualTransaction,
-  useUploadTransactionAttachment,
-} from "@/lib/services/transaction.service";
+import { ArrowUpRight, Loader2 } from "lucide-react";
+import { useCreateManualTransaction } from "@/lib/services/transaction.service";
 import { toast } from "sonner";
-import { AttachmentFile } from "../ui/UploadAttachment";
 
 interface Props {
   onClose: () => void;
@@ -71,17 +66,13 @@ function SummarySection({
 }
 
 export function CryptoStepFour({ onClose, onBack, goToStep }: Props) {
-  const { watch, reset } = useFormContext();
+  const { watch } = useFormContext();
   const d = watch("details");
   const customer = watch("customer");
-  const attachments: AttachmentFile[] = d?.attachments ?? [];
 
-  const queryClient = useQueryClient();
   const { mutate, isPending } = useCreateManualTransaction();
-  const { mutate: uploadAttachment, isPending: isUploading } =
-    useUploadTransactionAttachment();
 
-  // Derived values (same logic as step two)
+  // Derived values for display only (review screen)
   const partnerRate = parseFloat(d?.partnerRate ?? 0);
   const xbankaRate = parseFloat(d?.xbankaRate ?? 0);
   const customerPays = parseFloat(d?.customerPays ?? 0);
@@ -102,8 +93,6 @@ export function CryptoStepFour({ onClose, onBack, goToStep }: Props) {
   const paysCurrency = d?.customerPaysCurrency ?? "NGN";
   const receivesCurrency = d?.customerReceivesCurrency ?? "USDT";
 
-  const submitting = isPending || isUploading;
-
   const handleSubmit = () => {
     const payload = {
       // ── Customer ──
@@ -121,7 +110,7 @@ export function CryptoStepFour({ onClose, onBack, goToStep }: Props) {
       customerPaysCurrency: d?.customerPaysCurrency ?? "NGN",
       customerPaysAmount: customerPays,
       customerReceivesCurrency: d?.customerReceivesCurrency ?? "USDT",
-      customerReceivesAmount: customerReceives,
+      customerReceivesAmount: parseFloat(d?.customerReceives ?? 0),
       partner: d?.partner ?? "",
       partnerRate,
       xbankaRate,
@@ -140,49 +129,17 @@ export function CryptoStepFour({ onClose, onBack, goToStep }: Props) {
       deliverySource: d?.deliverySource ?? "",
       deliveryStatus: d?.deliveryStatus ?? "",
       deliveryReference: d?.deliveryReference ?? "",
+      attachmentUrl: d?.attachmentUrl ?? undefined,
     };
+    console.log("payload:", payload);
 
-    mutate(payload, {
-      onSuccess: (response) => {
-        // The manual-log endpoint returns the raw API body; the id can live
-        // at a couple of shapes depending on the wrapper.
-        const transactionId =
-          response?.data?.transaction?.id ??
-          response?.transaction?.id ??
-          response?.data?.id ??
-          response?.id;
-
-        const finish = () => {
-          toast.success("Transaction logged successfully");
-          queryClient.invalidateQueries({ queryKey: ["get-all-transactions"] });
-          queryClient.invalidateQueries({ queryKey: ["transactions"] });
-          reset();
-          onClose();
-        };
-
-        if (attachments.length > 0 && transactionId) {
-          let remaining = attachments.length;
-          attachments.forEach(({ file }) => {
-            uploadAttachment(
-              { transactionId, file },
-              {
-                onSettled: () => {
-                  remaining -= 1;
-                  if (remaining === 0) finish();
-                },
-              }
-            );
-          });
-        } else {
-          if (attachments.length > 0 && !transactionId) {
-            toast.error("Transaction created, but the receipt could not be attached");
-          }
-          finish();
-        }
-      },
-    });
+    // mutate(payload, {
+    //   onSuccess: () => {
+    //     toast.success("Transaction logged successfully");
+    //     onClose();
+    //   },
+    // });
   };
-
 
   return (
     <div className="flex flex-col gap-4">
@@ -235,51 +192,27 @@ export function CryptoStepFour({ onClose, onBack, goToStep }: Props) {
         <SummaryItem label="Delivery Source" value={d?.deliverySource} full />
       </SummarySection>
 
-      {attachments.length > 0 && (
+      {d?.attachment && (
         <div>
           <h4 className="text-sm font-semibold text-[var(--text-primary)] mb-2">Proof of Payment</h4>
-          <div className="flex flex-col gap-2">
-            {attachments.map((item, index) => (
-              <div
-                key={index}
-                className="bg-[var(--grey-light)] rounded-lg p-3 flex items-center justify-between"
-              >
-                <div className="flex items-center gap-2 min-w-0">
-                  <FileText className="h-4 w-4 text-[var(--text-secondary)] flex-shrink-0" />
-                  <div className="min-w-0">
-                    <p className="text-xs text-[var(--text-primary)] truncate">{item.file.name}</p>
-                    <p className="text-[10px] text-[var(--text-secondary)]">
-                      {(item.file.size / 1024 / 1024).toFixed(2)} MB
-                    </p>
-                  </div>
-                </div>
-                {item.previewUrl && (
-                  <a
-                    href={item.previewUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-xs text-[var(--text-teal)] cursor-pointer"
-                  >
-                    View
-                  </a>
-                )}
-              </div>
-            ))}
+          <div className="bg-[var(--grey-light)] rounded-lg p-3 flex items-center justify-between">
+            <span className="text-xs text-[var(--text-primary)] truncate">{d.attachment}</span>
+            <span className="text-xs text-[var(--text-teal)] cursor-pointer">View</span>
           </div>
         </div>
       )}
 
       <div className="flex gap-3 pt-4 border-t border-[var(--border-default)]">
-        <Button type="button" variant="outline" className="flex-1" onClick={onBack} disabled={submitting}>
+        <Button type="button" variant="outline" className="flex-1" onClick={onBack} disabled={isPending}>
           Back
         </Button>
         <Button
           type="button"
           className="flex-1 bg-[var(--button-primary-bg)] text-white"
           onClick={handleSubmit}
-          disabled={submitting}
+          disabled={isPending}
         >
-          {submitting ? (
+          {isPending ? (
             <span className="flex items-center gap-2">
               <Loader2 className="h-4 w-4 animate-spin" /> Submitting...
             </span>
