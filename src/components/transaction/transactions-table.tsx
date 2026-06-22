@@ -105,7 +105,9 @@ export function TransactionsTable({
   // const transactions = transactionData?.data?.data ?? [];
   const transactionsBody = transactionData?.data;
   const transactions: TransactionRecord[] = allTransactions?.data?.items ?? [];
-  const meta = allTransactions?.meta;
+  const meta = allTransactions?.data?.meta;
+  console.log("meta:", meta);
+
   console.log(allTransactions, transactions);
 
   const handleTabChange = (tab: string) => {
@@ -613,10 +615,10 @@ export function TransactionsTable({
           rowKey={(item) => item.id}
           isError={isError}
           isLoading={isPending}
-          errorMessage={error?.message}
-          itemsPerPage={10}
           emptyMessage="No transactions found."
-          totalCount={transactionsBody?.total}
+          errorMessage={error?.message ?? "Failed to load customers"}
+          totalCount={meta?.totalItems}
+          itemsPerPage={meta?.itemsPerPage}
           currentPage={page}
           onPageChange={setPage}
         />
