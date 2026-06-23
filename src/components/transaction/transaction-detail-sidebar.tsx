@@ -1,123 +1,167 @@
 // components/transaction/transaction-detail-sidebar.tsx
 "use client";
 
-import { X } from "lucide-react";
+import { useState } from "react";
+import { X, Copy, Check, ArrowUpRight } from "lucide-react";
 import { useGetTransactionById } from "@/lib/services/transaction.service";
 import { Skeleton } from "@/components/ui/skeleton";
+import { TierBadge } from "./tier-badge";
 import { TransactionDetails } from "@/lib/types/transaction-types";
-import Image from "next/image";
-import { tierImages } from "@/lib/utils/tier-images";
-import { formatDate } from "@/lib/formatDate";
 
 interface Props {
   transactionId: string | null;
   onClose: () => void;
 }
 
-function DetailRow({
+function Field({
   label,
   value,
+  children,
+  full,
 }: {
   label: string;
   value?: string | number | null;
+  children?: React.ReactNode;
+  full?: boolean;
 }) {
   return (
-    <div className="flex flex-col gap-0.5">
-      <span className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wide">
+    <div className={`flex flex-col gap-1 ${full ? "col-span-2" : ""}`}>
+      <span className="text-[11px] text-[var(--text-secondary)] uppercase tracking-wide">
         {label}
       </span>
-      <span className="text-xs font-medium text-[var(--text-primary)]">
-        {value ?? "—"}
-      </span>
+      {children ?? (
+        <span className="text-sm font-medium text-[var(--text-primary)]">
+          {value === 0 || value ? value : "—"}
+        </span>
+      )}
     </div>
   );
 }
 
-function DetailGrid({ children }: { children: React.ReactNode }) {
-  return <div className="grid grid-cols-2 gap-4">{children}</div>;
-}
-
-function Section({
+function InfoCard({
   title,
-  children,
   action,
+  children,
 }: {
   title: string;
-  children: React.ReactNode;
   action?: React.ReactNode;
+  children: React.ReactNode;
 }) {
   return (
-    <div className="mb-5">
-      <div className="flex items-center justify-between mb-3">
-        <h4 className="text-xs font-semibold text-[var(--text-primary)] uppercase tracking-wide">
-          {title}
-        </h4>
+    <div className="border border-[var(--border-default)] rounded-xl overflow-hidden">
+      <div className="flex items-center justify-between px-4 py-3 bg-[var(--grey-light)] border-b border-[var(--border-default)]">
+        <h4 className="text-sm font-semibold text-[var(--text-primary)]">{title}</h4>
         {action}
       </div>
-      <div className="flex flex-col gap-3">{children}</div>
+      <div className="grid grid-cols-2 gap-x-6 gap-y-4 p-4">{children}</div>
     </div>
+  );
+}
+
+function ActionLink({ label, onClick }: { label: string; onClick?: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className="flex items-center gap-1 text-xs font-medium text-[var(--text-teal)] hover:underline"
+    >
+      {label} <ArrowUpRight className="h-3.5 w-3.5" />
+    </button>
   );
 }
 
 function StatusBadge({ status }: { status: string }) {
   const s = status?.toLowerCase();
   const cls =
-    s === "completed"
+    s === "completed" || s === "successful"
       ? "bg-[#D1FAE5] text-[#037508]"
       : s === "failed"
         ? "bg-[#FCE6E6] text-[#EF4444]"
-        : s === "pending"
+        : s === "pending" || s === "processing"
           ? "bg-[#FFF8D8] text-[#B29504]"
           : "bg-[#E0F2FE] text-[#0369A1]";
   return (
     <span
-      className={`capitalize px-2.5 py-0.5 rounded-full text-xs font-medium ${cls}`}
+      className={`inline-flex items-center gap-1.5 capitalize px-2.5 py-1 rounded-full text-xs font-medium ${cls}`}
     >
-      {status?.toLowerCase()}
+      <span className="h-1.5 w-1.5 rounded-full bg-current" />
+      {s}
     </span>
   );
 }
 
 export function TransactionDetailSidebar({ transactionId, onClose }: Props) {
   const { data, isPending } = useGetTransactionById(transactionId);
+  const [copied, setCopied] = useState(false);
 
   if (!transactionId) return null;
 
   const txn: TransactionDetails = data?.data ?? data; // handle both { data: txn } and plain txn shapes
-  console.log("txn", txn);
+  const profile = txn?.user?.profile;
+  const customerName = profile
+    ? `${profile.firstName ?? ""} ${profile.lastName ?? ""}`.trim() || null
+    : null;
+
+  const handleCopy = () => {
+    if (!txn?.reference) return;
+    navigator.clipboard?.writeText(txn.reference);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+
+  const dateTime = txn?.createdAt
+    ? new Date(txn.createdAt).toLocaleString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : null;
+
+  const heroAmount =
+    txn?.amount != null
+      ? `${txn.currency ?? ""} ${txn.amount.toLocaleString()}`.trim()
+      : "—";
 
   return (
     <div className="fixed inset-0 z-50 flex">
       <div className="flex-1 bg-black/50" onClick={onClose} />
-      <div className="w-full md:w-[38%] bg-white shadow-lg flex flex-col h-full overflow-y-auto">
+      <div className="w-full md:w-[42%] bg-white shadow-lg flex flex-col h-full">
         {/* Header */}
         <div className="flex items-start justify-between p-6 border-b border-[var(--border-default)]">
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             {isPending ? (
               <Skeleton className="h-5 w-40 mb-2" />
             ) : (
               <>
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-sm font-semibold text-[var(--text-primary)]">
+                  <span className="text-lg font-semibold text-[var(--text-primary)]">
                     {txn?.type ?? "Transaction"}
                   </span>
                   {txn?.status && <StatusBadge status={txn.status} />}
                 </div>
-                <p className="text-xs text-[var(--text-secondary)]">
-                  {txn?.reference}
-                </p>
-                {/* {txn?.channelOrigin && (
-                  <p className="text-xs text-[var(--text-secondary)] mt-0.5">
-                    • {txn.channelOrigin}
-                  </p>
-                )} */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-xs text-[var(--text-secondary)] truncate">
+                    {txn?.reference ?? "—"}
+                  </span>
+                  {txn?.reference && (
+                    <button
+                      onClick={handleCopy}
+                      className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                      title="Copy reference"
+                    >
+                      {copied ? (
+                        <Check className="h-3.5 w-3.5 text-[var(--text-teal)]" />
+                      ) : (
+                        <Copy className="h-3.5 w-3.5" />
+                      )}
+                    </button>
+                  )}
+                </div>
               </>
             )}
           </div>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 ml-4"
-          >
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 ml-4">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -129,127 +173,73 @@ export function TransactionDetailSidebar({ transactionId, onClose }: Props) {
             ))}
           </div>
         ) : (
-          <div className="flex-1 p-6 flex flex-col gap-6">
+          <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-5">
             {/* Amount hero */}
-            <div className="bg-[var(--grey-light)] rounded-xl p-4">
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wide mb-1">
-                    Customer Received
-                  </p>
-                  <p className="text-xl font-bold text-[var(--text-primary)]">
-                    {txn.currency} {txn?.amount?.toLocaleString() ?? "—"}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wide mb-1">
-                    Debited
-                  </p>
-                  {/* <p className="text-base font-semibold text-[var(--text-primary)]">
-                    {txn?.payoutAmount?.toLocaleString()} {txn?.targetCurrency}
-                  </p> */}
-                </div>
-              </div>
-              {txn?.createdAt && (
-                <p className="text-[10px] text-[var(--text-secondary)] mt-2">
-                  {formatDate(txn?.createdAt)}
+            <div className="border border-[var(--border-default)] border-l-4 border-l-[var(--text-teal)] rounded-xl p-5">
+              <div className="text-center">
+                <p className="text-xs text-[var(--text-secondary)] uppercase tracking-wide mb-1">
+                  {txn?.type?.toLowerCase().includes("credit") ||
+                  txn?.type?.toLowerCase().includes("deposit")
+                    ? "Amount Credited"
+                    : "Customer Received"}
                 </p>
-              )}
+                <p className="text-3xl font-bold text-[var(--text-primary)]">
+                  {heroAmount}
+                </p>
+                {dateTime && (
+                  <p className="text-xs text-[var(--text-secondary)] mt-1">{dateTime}</p>
+                )}
+              </div>
+
+              <div className="border-t border-[var(--border-default)] mt-4 pt-4 grid grid-cols-2 gap-x-6 gap-y-4">
+                <Field label="Direction" value={txn?.type} />
+                <Field label="Asset" value={txn?.currency} />
+              </div>
             </div>
 
             {/* Customer */}
-            <Section title="Customer">
-              <DetailGrid>
-                <DetailRow
-                  label="Name"
-                  value={
-                    txn?.user?.profile?.firstName
-                      ? `${txn.user.profile.firstName} ${txn.user.profile.lastName}`
-                      : null
-                  }
-                />
-                <DetailRow label="UID" value={txn?.userId?.slice(0, 8)} />
-                <DetailRow
-                  label="Phone"
-                  value={txn?.user?.profile?.phoneNumber ? txn?.user?.profile?.phoneNumber : "-"}
-                />
-                <DetailRow label="Username" value={"-"} />
-                {/* <div>
-                  <Image
-                    src={tierImages[tier] || "/Tier0.svg"}
-                    alt={`Tier ${tier}`}
-                    width={67}
-                    height={24}
-                  />
-                </div> */}
-              </DetailGrid>
-            </Section>
+            <InfoCard title="Customer" action={<ActionLink label="View customer profile" />}>
+              <Field label="Name" value={customerName} />
+              <Field label="UID" value={txn?.userId?.slice(0, 8)} />
+              <Field label="Phone" value={profile?.phoneNumber} />
+              <Field label="Email" value={txn?.user?.email} />
+              <Field label="KYC Tier">
+                <TierBadge tier={undefined} />
+              </Field>
+            </InfoCard>
 
             {/* Trade Details */}
-            <Section title="Trade Details">
-              <DetailGrid>
-                <DetailRow
-                  label="Trade Pair"
-                  value={
-                    txn ? `${txn.currency} - ${txn.currency}` : null
-                  }
-                />
-                <DetailRow label="Type" value={txn?.type} />
-                <DetailRow
-                  label="Quantity"
-                  value={
-                    txn?.amount != null
-                      ? `${txn.amount} ${txn.currency}`
-                      : null
-                  }
-                />
-                <DetailRow
-                  label="Fiat"
-                  value={
-                    txn?.amount != null
-                      ? `₦${txn.amount?.toLocaleString()}`
-                      : null
-                  }
-                />
-              </DetailGrid>
-            </Section>
-
-            {/* Rate & Margin */}
-            <Section title="Rate & Margin">
-              <DetailGrid>
-                <div></div>
-                {/* <DetailRow
-                  label="Obiex Rate"
-                  value={rm?.obiexRate != null ? `$${rm.obiexRate}` : null}
-                /> */}
-                {/* <DetailRow
-                  label="Xbanka Customer Rate"
-                  value={
-                    rm?.xbankaCustomerRate != null
-                      ? `$${rm.xbankaCustomerRate}`
-                      : null
-                  }
-                /> */}
-                {/* <DetailRow label="Spread / Margin" value={rm?.spreadMargin} /> */}
-                {/* <DetailRow
-                  label="Platform Fee"
-                  value={rm?.platformFee != null ? `₦${rm.platformFee}` : null}
-                /> */}
-              </DetailGrid>
-            </Section>
+            <InfoCard title="Trade Details">
+              <Field
+                label="Trade Pair"
+                value={txn?.currency ? `${txn.currency} → ${txn.currency}` : null}
+              />
+              <Field label="Type" value={txn?.type} />
+              <Field
+                label="Quantity"
+                value={
+                  txn?.amount != null
+                    ? `${txn.amount.toLocaleString()} ${txn.currency ?? ""}`.trim()
+                    : null
+                }
+              />
+              <Field
+                label="Fiat"
+                value={txn?.amount != null ? `₦${txn.amount.toLocaleString()}` : null}
+              />
+            </InfoCard>
 
             {/* Settlement */}
-            <Section title="Settlement">
-              <DetailGrid>
-                {/* <DetailRow label="Payment Method" value={txn?.paymentMethod} /> */}
-                <DetailRow label="Payment Status" value={txn?.status} />
-                {/* <DetailRow label="Delivery Method" value={txn?.deliveryMethod} /> */}
-                <DetailRow label="Delivery Status" value={txn?.status} />
-                {/* {txn?.channelOrigin && (
-                  <DetailRow label="Channel Origin" value={txn.channelOrigin} />
-                )} */}
-              </DetailGrid>
-            </Section>
+            <InfoCard title="Settlement">
+              <Field label="Payment Status" value={txn?.status} />
+              <Field label="Delivery Status" value={txn?.status} />
+            </InfoCard>
+
+            {txn?.note && (
+              <InfoCard title="Notes">
+                <Field label="Internal Note" value={txn.note} full />
+              </InfoCard>
+            )}
           </div>
         )}
       </div>
