@@ -10,10 +10,11 @@ import NewCustomerModal from "@/components/customer-management/NewCustomerModal"
 import Header from "@/components/ui/Header";
 import { Eye, Upload } from "lucide-react";
 import { CustomerProps } from "@/lib/types/customer";
-import CustomerActionMenu from "@/components/customer-management/CustomerActionMenu";
 import EditCustomerModal from "@/components/customer-management/EditCustomerModal";
 import DeleteCustomerModal from "@/components/customer-management/DeleteCustomerModal";
-import { TierBadge } from "@/components/transaction/tier-badge";
+import { formatDate } from "@/lib/formatDate";
+import Image from "next/image";
+import { tierImages } from "@/lib/utils/tier-images";
 
 export default function CustomerManagement() {
   const [openModal, setOpenModal] = useState(false);
@@ -27,6 +28,8 @@ export default function CustomerManagement() {
   console.log("data:", data?.data?.data?.items);
 
   const customers: CustomerProps[] = data?.data?.data?.items ?? [];
+  const meta = data?.data?.data?.meta;
+  console.log("meta:", meta);
 
   const handleClose = () => {
     setOpenModal(false);
@@ -47,38 +50,52 @@ export default function CustomerManagement() {
       key: "phoneNumber",
       header: "Phone Number",
       render: (item: CustomerProps) => (
-        <div>
-          {item.phoneNumber ? item.phoneNumber : "-"}
-        </div>
+        <div>{item.phoneNumber ? item.phoneNumber : "-"}</div>
       ),
     },
     {
       key: "kyc",
       header: "KYC Tier",
-      render: (item: CustomerProps) =>
-        // <TierBadge tier={item.} />
-      <div></div>
+      render: (item: CustomerProps) => {
+        const tier = item.tier ?? 0;
+
+        return (
+          <Image
+            src={tierImages[tier] || "/Tier0.svg"}
+            alt={`Tier ${tier}`}
+            width={67}
+            height={24}
+          />
+        );
+      },
     },
     {
       key: "status",
       header: "Status",
-      render: (item: CustomerProps) =>
-        // <TierBadge tier={item.} />
-      <div></div>
+      render: (item: CustomerProps) => {
+        const tier = item.tier ?? 0;
+
+        return (
+          <Image
+            src={tierImages[tier] || "/Tier0.svg"}
+            alt={`Tier ${tier}`}
+            width={67}
+            height={24}
+          />
+        );
+      },
     },
     {
       key: "createdAt",
       header: "Date Joined",
-      render: (item: CustomerProps) =>
-        // <TierBadge tier={item.} />
-      <div></div>
+      render: (item: CustomerProps) => <div>{formatDate(item.createdAt)}</div>,
     },
     {
       key: "actions",
       header: "Action",
       render: (item: CustomerProps) => (
         <div className="flex items-center font-[500] text-[14px] leading-[22px] text-text-teal gap-2">
-          <Eye size={16}/>
+          <Eye size={16} />
           View
         </div>
       ),
@@ -123,10 +140,11 @@ export default function CustomerManagement() {
             isLoading={isLoading}
             isError={isError}
             errorMessage={error?.message ?? "Failed to load customers"}
-            // totalCount={customerBody.total}
+            emptyMessage="No transactions found."
+            totalCount={meta?.totalItems}
+            itemsPerPage={meta?.itemsPerPage}
             currentPage={page}
             onPageChange={setPage}
-            emptyMessage="No customers found."
           />
         </div>
         <NewCustomerModal isOpen={openModal} onClose={handleClose} />

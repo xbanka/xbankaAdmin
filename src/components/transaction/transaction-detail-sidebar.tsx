@@ -6,6 +6,7 @@ import { X, Copy, Check, ArrowUpRight } from "lucide-react";
 import { useGetTransactionById } from "@/lib/services/transaction.service";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TierBadge } from "./tier-badge";
+import { TransactionDetails } from "@/lib/types/transaction-types";
 
 interface Props {
   transactionId: string | null;
@@ -94,10 +95,11 @@ export function TransactionDetailSidebar({ transactionId, onClose }: Props) {
 
   if (!transactionId) return null;
 
-  const txn = data?.data ?? data; // handle both { data: txn } and plain txn shapes
-  const td = txn?.tradeDetails;
-  const rm = txn?.rateAndMargin;
-  const c = txn?.customer;
+  const txn: TransactionDetails = data?.data ?? data; // handle both { data: txn } and plain txn shapes
+  const profile = txn?.user?.profile;
+  const customerName = profile
+    ? `${profile.firstName ?? ""} ${profile.lastName ?? ""}`.trim() || null
+    : null;
 
   const handleCopy = () => {
     if (!txn?.reference) return;
@@ -117,11 +119,9 @@ export function TransactionDetailSidebar({ transactionId, onClose }: Props) {
     : null;
 
   const heroAmount =
-    td?.payoutAmount != null
-      ? `₦${td.payoutAmount.toLocaleString()}`
-      : td?.sourceAmount != null
-        ? `₦${td.sourceAmount.toLocaleString()}`
-        : "—";
+    txn?.amount != null
+      ? `${txn.currency ?? ""} ${txn.amount.toLocaleString()}`.trim()
+      : "—";
 
   return (
     <div className="fixed inset-0 z-50 flex">
@@ -136,7 +136,7 @@ export function TransactionDetailSidebar({ transactionId, onClose }: Props) {
               <>
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-lg font-semibold text-[var(--text-primary)]">
-                    Transaction
+                    {txn?.type ?? "Transaction"}
                   </span>
                   {txn?.status && <StatusBadge status={txn.status} />}
                 </div>
@@ -156,14 +156,6 @@ export function TransactionDetailSidebar({ transactionId, onClose }: Props) {
                         <Copy className="h-3.5 w-3.5" />
                       )}
                     </button>
-                  )}
-                  {(td?.channelOrigin || txn?.displayType) && (
-                    <>
-                      <span className="text-[var(--text-secondary)] text-xs">•</span>
-                      <span className="text-xs text-[var(--text-secondary)]">
-                        {td?.channelOrigin ?? txn?.displayType}
-                      </span>
-                    </>
                   )}
                 </div>
               </>
@@ -186,8 +178,8 @@ export function TransactionDetailSidebar({ transactionId, onClose }: Props) {
             <div className="border border-[var(--border-default)] border-l-4 border-l-[var(--text-teal)] rounded-xl p-5">
               <div className="text-center">
                 <p className="text-xs text-[var(--text-secondary)] uppercase tracking-wide mb-1">
-                  {txn?.type?.toLowerCase() === "credit" ||
-                  txn?.type?.toLowerCase() === "deposit"
+                  {txn?.type?.toLowerCase().includes("credit") ||
+                  txn?.type?.toLowerCase().includes("deposit")
                     ? "Amount Credited"
                     : "Customer Received"}
                 </p>
@@ -201,26 +193,18 @@ export function TransactionDetailSidebar({ transactionId, onClose }: Props) {
 
               <div className="border-t border-[var(--border-default)] mt-4 pt-4 grid grid-cols-2 gap-x-6 gap-y-4">
                 <Field label="Direction" value={txn?.type} />
-                <Field
-                  label="Asset"
-                  value={td?.targetCurrency ?? td?.sourceCurrency ?? txn?.currency}
-                />
-                <Field label="Source" value={td?.channelOrigin} />
-                <Field label="Provider" value={td?.partner} />
+                <Field label="Asset" value={txn?.currency} />
               </div>
             </div>
 
             {/* Customer */}
             <InfoCard title="Customer" action={<ActionLink label="View customer profile" />}>
-              <Field
-                label="Name"
-                value={c ? `${c.firstName ?? ""} ${c.lastName ?? ""}`.trim() || null : null}
-              />
-              <Field label="UID" value={c?.id} />
-              <Field label="Phone" value={c?.phoneNumber} />
-              <Field label="Username" value={c?.username} />
+              <Field label="Name" value={customerName} />
+              <Field label="UID" value={txn?.userId?.slice(0, 8)} />
+              <Field label="Phone" value={profile?.phoneNumber} />
+              <Field label="Email" value={txn?.user?.email} />
               <Field label="KYC Tier">
-                <TierBadge tier={c?.kycTier} />
+                <TierBadge tier={undefined} />
               </Field>
             </InfoCard>
 
@@ -228,50 +212,27 @@ export function TransactionDetailSidebar({ transactionId, onClose }: Props) {
             <InfoCard title="Trade Details">
               <Field
                 label="Trade Pair"
-                value={td ? `${td.sourceCurrency ?? "—"} → ${td.targetCurrency ?? "—"}` : null}
+                value={txn?.currency ? `${txn.currency} → ${txn.currency}` : null}
               />
-              <Field label="Type" value={txn?.displayType} />
+              <Field label="Type" value={txn?.type} />
               <Field
                 label="Quantity"
                 value={
-                  td?.sourceAmount != null
-                    ? `${td.sourceAmount.toLocaleString()} ${td.sourceCurrency ?? ""}`.trim()
+                  txn?.amount != null
+                    ? `${txn.amount.toLocaleString()} ${txn.currency ?? ""}`.trim()
                     : null
                 }
               />
               <Field
                 label="Fiat"
-                value={td?.payoutAmount != null ? `₦${td.payoutAmount.toLocaleString()}` : null}
-              />
-            </InfoCard>
-
-            {/* Rate & Margin */}
-            <InfoCard title="Rate & Margin">
-              <Field
-                label="Obiex Rate"
-                value={rm?.obiexRate != null ? `$${rm.obiexRate.toLocaleString()}` : null}
-              />
-              <Field
-                label="Xbanka Customer Rate"
-                value={
-                  rm?.xbankaCustomerRate != null
-                    ? `$${rm.xbankaCustomerRate.toLocaleString()}`
-                    : null
-                }
-              />
-              <Field label="Spread / Margin" value={rm?.spreadMargin} />
-              <Field
-                label="Platform Fee"
-                value={rm?.platformFee != null ? `₦${rm.platformFee.toLocaleString()}` : null}
+                value={txn?.amount != null ? `₦${txn.amount.toLocaleString()}` : null}
               />
             </InfoCard>
 
             {/* Settlement */}
             <InfoCard title="Settlement">
-              <Field label="Payment Method" value={td?.paymentMethod} />
-              <Field label="Payment Status" value={td?.paymentStatus} />
-              <Field label="Delivery Method" value={td?.deliveryMethod} />
-              <Field label="Delivery Status" value={td?.deliveryStatus} />
+              <Field label="Payment Status" value={txn?.status} />
+              <Field label="Delivery Status" value={txn?.status} />
             </InfoCard>
 
             {txn?.note && (

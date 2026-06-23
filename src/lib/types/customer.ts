@@ -11,6 +11,7 @@ export interface CustomerProps {
   isEmailVerified: boolean;
   phoneNumber: string | null;
   currentStep: "BVN" | "ADDRESS" | "ID_CARD" | string; // Steps in your onboarding flow
+  tier: number;
   kycStatus: KycStatus;
   createdAt: string; // ISO Date String
 }
