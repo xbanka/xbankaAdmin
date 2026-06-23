@@ -16,6 +16,21 @@ export const getCustomers = async (query?: string) => {
   };
 };
 
+export const getCustomerById = async (customerId: string) => {
+  const response = await AxiosInstance.get(
+    `${BASE_URL}/${customerId}`,
+    {
+      withCredentials: true,
+    }
+  );
+
+  return {
+    success: true,
+    data: response.data,
+    status: response.status,
+  };
+};
+
 export const createCustomer = async (payload: {
   first_name: string;
   last_name: string;

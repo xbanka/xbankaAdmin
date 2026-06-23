@@ -15,6 +15,7 @@ import DeleteCustomerModal from "@/components/customer-management/DeleteCustomer
 import { formatDate } from "@/lib/formatDate";
 import Image from "next/image";
 import { tierImages } from "@/lib/utils/tier-images";
+import CustomerDetailsSidebar from "@/components/customer-management/customer-details-sidebar";
 
 export default function CustomerManagement() {
   const [openModal, setOpenModal] = useState(false);
@@ -24,6 +25,11 @@ export default function CustomerManagement() {
     useState<CustomerProps | null>(null);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [customerDetailsOpen, setCustomerDetailsOpen] = useState(false);
+
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(
+    null,
+  );
   const { data, isLoading, isError, error } = useGetCustomer(search);
   console.log("data:", data?.data?.data?.items);
 
@@ -94,7 +100,13 @@ export default function CustomerManagement() {
       key: "actions",
       header: "Action",
       render: (item: CustomerProps) => (
-        <div className="flex items-center font-[500] text-[14px] leading-[22px] text-text-teal gap-2">
+        <div
+          onClick={() => {
+            setSelectedCustomerId(item.userId);
+            setCustomerDetailsOpen(true);
+          }}
+          className="flex items-center font-[500] text-[14px] leading-[22px] text-text-teal gap-2 cursor-pointer"
+        >
           <Eye size={16} />
           View
         </div>
@@ -160,6 +172,14 @@ export default function CustomerManagement() {
           customer={selectedCustomer}
         />
       </div>
+      <CustomerDetailsSidebar
+        isOpen={customerDetailsOpen}
+        customerId={selectedCustomerId}
+        onClose={() => {
+          setCustomerDetailsOpen(false);
+          setSelectedCustomerId(null);
+        }}
+      />
     </DashboardLayout>
   );
 }
