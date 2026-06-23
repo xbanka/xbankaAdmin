@@ -1,4 +1,4 @@
-import { createCustomer, DeleteCustomer, getCustomers } from "@/lib/actions/customerAction";
+import { createCustomer, DeleteCustomer, getCustomerById, getCustomers } from "@/lib/actions/customerAction";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useDebounce } from "../../hooks/useDebounce";
 import { toast } from "sonner";
@@ -17,6 +17,20 @@ export const useGetCustomer = (search: string) => {
       }
     },
     enabled: debouncedSearch !== undefined,
+  });
+};
+
+export const useGetCustomerById = (customerId?: string) => {
+  return useQuery({
+    queryKey: ["customer", customerId],
+    queryFn: async () => {
+      try {
+        return await getCustomerById(customerId!);
+      } catch (error) {
+        handleApiError(error);
+      }
+    },
+    enabled: !!customerId,
   });
 };
 
