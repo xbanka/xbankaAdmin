@@ -1,16 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import {
-  X,
-  ArrowDownToLine,
-  CheckCircle2,
-  XCircle,
-  Bell,
-} from "lucide-react";
+import { X, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getNotifications,
@@ -27,6 +20,7 @@ interface Notification {
   type: string;
   is_read: boolean;
   read_at: string;
+  created_at?: string;
   amount: number;
   method: string;
   affiliate: {
@@ -43,34 +37,6 @@ interface Notification {
   };
 }
 
-/** Derives a visual category from the notification message/type. */
-function getCategory(n: Notification) {
-  const text = `${n.type ?? ""} ${n.message ?? ""}`.toLowerCase();
-  if (text.includes("reject") || text.includes("fail") || text.includes("decline"))
-    return "error" as const;
-  if (text.includes("process") || text.includes("success") || text.includes("paid"))
-    return "success" as const;
-  return "request" as const;
-}
-
-const CATEGORY_STYLES = {
-  request: {
-    Icon: ArrowDownToLine,
-    iconWrap: "bg-[#E6FBF7] text-[#0D9488]",
-    accent: "before:bg-[#0D9488]",
-  },
-  success: {
-    Icon: CheckCircle2,
-    iconWrap: "bg-[#D1FAE5] text-[#037508]",
-    accent: "before:bg-[#037508]",
-  },
-  error: {
-    Icon: XCircle,
-    iconWrap: "bg-[#FCE6E6] text-[#EF4444]",
-    accent: "before:bg-[#EF4444]",
-  },
-};
-
 const formatMethod = (m?: string) =>
   (m ?? "")
     .split("_")
@@ -80,6 +46,26 @@ const formatMethod = (m?: string) =>
 
 const formatAmount = (a?: number) =>
   a == null ? "—" : `₦${Number(a).toLocaleString()}`;
+
+const withAt = (u?: string) =>
+  !u ? "—" : u.startsWith("@") ? u : `@${u}`;
+
+function timeAgo(iso?: string) {
+  if (!iso) return "";
+  const then = new Date(iso).getTime();
+  if (Number.isNaN(then)) return "";
+  const mins = Math.floor((Date.now() - then) / 60000);
+  if (mins < 1) return "Just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  if (days < 7) return `${days}d ago`;
+  return new Date(iso).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+  });
+}
 
 export function NotificationsPanel({ onClose }: { onClose: () => void }) {
   const [activeTab, setActiveTab] = useState<"all" | "unread" | "archived">(
@@ -111,12 +97,6 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
     openDetailsSidebar(id);
   };
 
-  const handleMarkAllRead = () => {
-    notifications
-      .filter((n) => !n.is_read)
-      .forEach((n) => markReadMutation.mutate({ id: n.id }));
-  };
-
   const filteredNotifications = notifications.filter((n) => {
     if (activeTab === "unread") return !n.is_read;
     if (activeTab === "archived") return false;
@@ -132,37 +112,16 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
       />
 
       {/* Panel */}
-      <aside className="absolute top-0 right-0 h-screen w-full sm:w-[440px] bg-white border-l border-[#E5E3E3] shadow-2xl flex flex-col animate-in slide-in-from-right duration-200">
+      <aside className="absolute top-0 right-0 flex h-screen w-full flex-col border-l border-[#E5E3E3] bg-white shadow-2xl sm:w-[440px] animate-in slide-in-from-right duration-200">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[#E5E3E3] flex-shrink-0">
-          <div className="flex items-center gap-2.5">
-            <h2 className="text-[18px] font-semibold text-[#111827]">
-              Notifications
-            </h2>
-            {unreadCount > 0 && (
-              <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-[#E6FBF7] text-abstractCyan text-[11px] font-semibold">
-                {unreadCount}
-              </span>
-            )}
-          </div>
-          <div className="flex items-center gap-1">
-            {unreadCount > 0 && (
-              <button
-                onClick={handleMarkAllRead}
-                className="text-[12px] font-medium text-abstractCyan hover:underline mr-1"
-              >
-                Mark all read
-              </button>
-            )}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onClose}
-              className="h-7 w-7 text-gray-500 hover:text-gray-700"
-            >
-              <X className="w-4 h-4" />
-            </Button>
-          </div>
+        <div className="flex flex-shrink-0 items-center justify-between border-b border-[#E5E3E3] px-5 py-4">
+          <h2 className="text-[20px] font-bold text-[#111827]">Notifications</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700"
+          >
+            <X className="h-5 w-5" />
+          </button>
         </div>
 
         {/* Tabs */}
@@ -171,20 +130,24 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
           onValueChange={(value) =>
             setActiveTab(value as "all" | "unread" | "archived")
           }
-          className="flex flex-col flex-1 min-h-0 w-full gap-0"
+          className="flex w-full flex-1 flex-col gap-0 min-h-0"
         >
-          <TabsList className="w-full justify-start gap-1 rounded-none bg-transparent border-b border-[#E5E3E3] px-4 py-0 h-auto flex-shrink-0">
+          <TabsList className="h-auto w-full flex-shrink-0 justify-start gap-2 rounded-none border-b border-[#E5E3E3] bg-transparent px-4 py-3">
             {(
               [
                 ["all", `All (${allCount})`],
                 ["unread", `Unread (${unreadCount})`],
-                ["archived", `Archived (${archivedCount})`],
+                ["archived", `Archive (${archivedCount})`],
               ] as const
             ).map(([value, label]) => (
               <TabsTrigger
                 key={value}
                 value={value}
-                className="data-[state=active]:border-b-2 data-[state=active]:border-abstractCyan data-[state=active]:text-abstractCyan rounded-none border-b-2 border-transparent font-medium text-[13px] py-3 px-3 -mb-px text-text-secondary shadow-none data-[state=active]:shadow-none bg-transparent data-[state=active]:bg-transparent"
+                className={cn(
+                  "rounded-full border px-3.5 py-1.5 text-[13px] font-medium shadow-none transition-colors",
+                  "border-transparent bg-transparent text-[#6B7280]",
+                  "data-[state=active]:border-abstractCyan data-[state=active]:bg-[#E6FBF7] data-[state=active]:text-abstractCyan data-[state=active]:shadow-none",
+                )}
               >
                 {label}
               </TabsTrigger>
@@ -194,7 +157,7 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
           {/* Scrollable content */}
           <TabsContent
             value={activeTab}
-            className="flex-1 overflow-y-auto min-h-0 m-0 focus-visible:outline-none"
+            className="m-0 min-h-0 flex-1 overflow-y-auto focus-visible:outline-none"
           >
             {isPending && (
               <div className="flex items-center justify-center py-16">
@@ -203,30 +166,25 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
             )}
 
             {error && (
-              <div className="flex items-center justify-center py-16 px-6 text-center">
-                <p className="text-red-500 text-sm">{error?.message}</p>
+              <div className="flex items-center justify-center px-6 py-16 text-center">
+                <p className="text-sm text-red-500">{error?.message}</p>
               </div>
             )}
 
             {!isPending && !error && filteredNotifications.length === 0 && (
-              <div className="flex flex-col items-center justify-center py-20 px-6 text-center gap-3 text-gray-400">
-                <Bell className="w-10 h-10 text-gray-300" />
+              <div className="flex flex-col items-center justify-center gap-3 px-6 py-20 text-center text-gray-400">
+                <Bell className="h-10 w-10 text-gray-300" />
                 <p className="text-sm font-medium text-gray-500">
                   No notifications
                 </p>
-                <p className="text-xs text-gray-400">
-                  You&apos;re all caught up.
-                </p>
+                <p className="text-xs text-gray-400">You&apos;re all caught up.</p>
               </div>
             )}
 
             {!isPending && !error && filteredNotifications.length > 0 && (
               <ul className="divide-y divide-[#F0F0F0]">
                 {filteredNotifications.map((notification) => {
-                  const category = getCategory(notification);
-                  const { Icon, iconWrap, accent } = CATEGORY_STYLES[category];
                   const unread = !notification.is_read;
-
                   return (
                     <li
                       key={notification.id}
@@ -234,70 +192,57 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
                       className={cn(
                         "relative cursor-pointer px-5 py-4 transition-colors hover:bg-[#F9FAFB]",
                         "before:absolute before:left-0 before:top-0 before:h-full before:w-[3px] before:content-['']",
-                        unread ? accent : "before:bg-transparent",
-                        unread ? "bg-[#F6FFFD]" : "bg-white",
+                        unread
+                          ? "bg-[#F1FFFD] before:bg-abstractCyan"
+                          : "bg-white before:bg-transparent",
                       )}
                     >
                       <div className="flex gap-3">
-                        {/* Type icon over avatar */}
-                        <div className="relative flex-shrink-0">
-                          <Avatar className="w-10 h-10">
-                            <AvatarFallback className="bg-[#F0F0F0] text-abstractCyan text-[12px] font-semibold">
-                              {notification.affiliate.first_name?.charAt(0)}
-                              {notification.affiliate.last_name?.charAt(0)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span
-                            className={cn(
-                              "absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full ring-2 ring-white",
-                              iconWrap,
-                            )}
-                          >
-                            <Icon className="h-3 w-3" />
-                          </span>
-                        </div>
+                        {/* Naira icon */}
+                        <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#F0F0F0] text-[16px] font-bold text-abstractCyan">
+                          ₦
+                        </span>
 
                         {/* Content */}
-                        <div className="flex flex-col min-w-0 flex-1">
-                          <div className="flex items-start justify-between gap-2">
-                            <p className="font-semibold text-[14px] leading-[18px] text-[#111827]">
-                              {notification.message}
-                            </p>
-                            {unread && (
-                              <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-abstractCyan" />
-                            )}
-                          </div>
+                        <div className="flex min-w-0 flex-1 flex-col">
+                          <p className="text-[15px] font-semibold text-[#111827]">
+                            {notification.message}
+                          </p>
 
                           <p className="mt-1 text-[13px] leading-[18px] text-[#4B5563]">
                             <span className="text-[#6B7280]">Affiliate:</span>{" "}
-                            {notification.affiliate.username}
-                          </p>
-                          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[13px] leading-[18px] text-[#4B5563]">
-                            <span>
-                              <span className="text-[#6B7280]">Amount:</span>{" "}
-                              <span className="font-medium text-[#111827]">
-                                {formatAmount(notification.amount)}
-                              </span>
+                            {withAt(notification.affiliate.username)}
+                            <span className="mx-2 text-gray-300">|</span>
+                            <span className="text-[#6B7280]">Amount:</span>{" "}
+                            <span className="font-medium text-[#111827]">
+                              {formatAmount(notification.amount)}
                             </span>
-                            <span className="text-gray-300">•</span>
-                            <span>
-                              {formatMethod(notification.method)}
-                              {notification.affiliate.bank
-                                ? ` (${notification.affiliate.bank})`
-                                : ""}
+                          </p>
+                          <p className="mt-0.5 text-[13px] leading-[18px] text-[#4B5563]">
+                            <span className="text-[#6B7280]">Method:</span>{" "}
+                            {formatMethod(notification.method)}
+                            {notification.affiliate.bank
+                              ? ` (${notification.affiliate.bank})`
+                              : ""}
+                          </p>
+
+                          <div className="mt-3 flex items-center justify-between gap-2">
+                            <Button
+                              size="sm"
+                              className="h-9 w-fit rounded-lg bg-[#17E1C5] px-4 text-[13px] font-semibold text-[#06251F] hover:bg-[#13C9B0]"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleViewRequest(notification.id);
+                              }}
+                            >
+                              View Request
+                            </Button>
+                            <span className="text-[12px] text-[#9CA3AF]">
+                              {timeAgo(
+                                notification.created_at ?? notification.read_at,
+                              )}
                             </span>
                           </div>
-
-                          <Button
-                            size="sm"
-                            className="mt-3 w-fit h-8 px-4 bg-abstractCyan hover:bg-teal-700 text-white text-[12px] font-medium"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleViewRequest(notification.id);
-                            }}
-                          >
-                            View Request
-                          </Button>
                         </div>
                       </div>
                     </li>
