@@ -508,7 +508,7 @@ export function TransactionsTable({
               className="text-white py-2 px-3"
               onClick={onNewTransaction}
             >
-              + New Transaction
+              Log Manual Transaction
             </Button>
           )}
         </div>
