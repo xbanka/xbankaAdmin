@@ -27,6 +27,7 @@ import {
   UI_TO_API_PERMISSION_MAP,
 } from "@/lib/rolePermissions";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 interface AddStaffSidebarProps {
   isOpen: boolean;
   onClose: () => void;
@@ -141,13 +142,15 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
     setStep(step - 1);
   };
 
+  useBodyScrollLock(isOpen);
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex">
       <div className="flex-1 bg-black/50" onClick={handleClose} />
-      <div className="bg-white w-full max-w-[550px] h-full overflow-y-auto shadow-lg">
-        <div className="p-6 border-b z-50 flex items-center justify-between sticky top-0 bg-white">
+      <div className="bg-white w-full max-w-[550px] h-full flex flex-col shadow-lg">
+        <div className="p-6 border-b z-50 flex items-center justify-between bg-white flex-shrink-0">
           <div>
             <h2 className="text-lg font-semibold text-gray-900">Assign Role</h2>
             <span className="text-sm text-gray-600 mb-6">
@@ -162,12 +165,12 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
           </button>
         </div>
 
-        <div className="p-6">
-          {step === 1 && (
-            <form
-              onSubmit={handleSubmitStep1(handleInviteSubmit)}
-              className="space-y-4 flex flex-col min-h-[700px] justify-between"
-            >
+        {step === 1 && (
+          <form
+            onSubmit={handleSubmitStep1(handleInviteSubmit)}
+            className="flex-1 flex flex-col min-h-0"
+          >
+            <div className="flex-1 overflow-y-auto p-6 space-y-4">
               <FormField
                 id="email"
                 label="Email address"
@@ -177,28 +180,30 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
                 register={registerStep1}
                 error={errorsStep1.email}
               />
+            </div>
 
-              <div className="flex gap-3 pt-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleClose}
-                  className="flex-1 bg-transparent"
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" className="flex-3">
-                  Continue
-                </Button>
-              </div>
-            </form>
-          )}
+            <div className="flex gap-3 p-6 border-t border-gray-200 flex-shrink-0">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleClose}
+                className="flex-1 bg-transparent"
+              >
+                Cancel
+              </Button>
+              <Button type="submit" className="flex-3">
+                Continue
+              </Button>
+            </div>
+          </form>
+        )}
 
-          {step === 2 && (
-            <form
-              onSubmit={handleSubmitStep2(handleRoleSubmit)}
-              className="space-y-4"
-            >
+        {step === 2 && (
+          <form
+            onSubmit={handleSubmitStep2(handleRoleSubmit)}
+            className="flex-1 flex flex-col min-h-0"
+          >
+            <div className="flex-1 overflow-y-auto p-6 space-y-4">
               <SelectFieldLayout
                 id="role"
                 label="Enter Job Role"
@@ -273,27 +278,27 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
                   )}
                 </div>
               )}
+            </div>
 
-              <div className="flex gap-3 pt-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleBack}
-                  className="flex-1 bg-transparent"
-                >
-                  Back
-                </Button>
-                <Button
-                  disabled={!roleValue || isPending}
-                  type="submit"
-                  className="flex-3"
-                >
-                  Send Invite
-                </Button>
-              </div>
-            </form>
-          )}
-        </div>
+            <div className="flex gap-3 p-6 border-t border-gray-200 flex-shrink-0">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleBack}
+                className="flex-1 bg-transparent"
+              >
+                Back
+              </Button>
+              <Button
+                disabled={!roleValue || isPending}
+                type="submit"
+                className="flex-3"
+              >
+                Send Invite
+              </Button>
+            </div>
+          </form>
+        )}
       </div>
     </div>
   );
