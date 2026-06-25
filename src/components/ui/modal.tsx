@@ -1,5 +1,8 @@
+"use client";
+
 import { cn } from "@/lib/utils";
 import { MouseEvent } from "react";
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 
 export function Modal({
   onClose,
@@ -12,21 +15,14 @@ export function Modal({
   className?: string;
   backdropClassName?: string;
 }) {
+  useBodyScrollLock(true);
+
   const handleBackdropClick = (event: MouseEvent<HTMLDivElement>) => {
     if (event.target === event.currentTarget) {
       onClose();
     }
   };
 
-  // useEffect(() => {
-  //   const h = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-  //   document.addEventListener("keydown", h);
-  //   document.body.style.overflow = "hidden";
-  //   return () => {
-  //     document.removeEventListener("keydown", h);
-  //     document.body.style.overflow = "";
-  //   };
-  // }, [onClose]);
   return (
     <div
       className={cn(

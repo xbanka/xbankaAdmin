@@ -15,6 +15,7 @@ import {
 } from "@/lib/actions/notificationsActions";
 import LoaderSpinner from "../ui/loaderSpinner";
 import { usePayoutSidebarStore } from "@/store/usePayoutSidebarStore";
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 
 interface Notification {
   id: string;
@@ -43,6 +44,7 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
   const [activeTab, setActiveTab] = useState<"all" | "unread" | "archived">(
     "all"
   );
+  useBodyScrollLock(true);
   const queryClient = useQueryClient();
 
   const { data, error, isPending } = useQuery({
@@ -102,7 +104,7 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
           onValueChange={(value) =>
             setActiveTab(value as "all" | "unread" | "archived")
           }
-           className="flex flex-col max-h-screen w-full"
+           className="flex flex-col flex-1 min-h-0 w-full"
         >
           <TabsList className="w-full justify-start rounded-none bg-transparent border-b border-[#E5E3E3] px-4 py-[12px]">
             <TabsTrigger

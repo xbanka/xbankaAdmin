@@ -9,6 +9,7 @@ import { CustomerDetailsDisplay } from "./customers-details-display";
 import { SelectFieldLayout } from "../forms/SelectFieldLayout";
 import { useFormContext } from "react-hook-form";
 import { CryptoTransactionSteps } from "./crypto-transaction-steps";
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 
 type TransactionType = "crypto" | "gift-card" | "bill-payments" | null;
 
@@ -29,6 +30,8 @@ export function TransactionAddSidebar({
 
   const serviceType = watch("serviceType");
 
+  useBodyScrollLock(isOpen);
+
   if (!isOpen || !customer) return null;
 
   const handleCloseSidebar = () => {
@@ -42,9 +45,9 @@ export function TransactionAddSidebar({
       <div className="flex-1 bg-black/50" onClick={handleCloseSidebar} />
 
       {/* Sidebar */}
-      <div className="w-full md:w-[40%] bg-white shadow-lg flex flex-col overflow-y-auto">
+      <div className="w-full md:w-[40%] bg-white shadow-lg flex flex-col h-full">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-[#E5E7EB]">
+        <div className="flex items-center justify-between p-6 border-b border-[#E5E7EB] flex-shrink-0">
           {serviceType && (
             <button
               onClick={() => setValue("serviceType", undefined)}
@@ -72,13 +75,14 @@ export function TransactionAddSidebar({
           </button>
         </div>
 
-        {/* Content */}
-        <CustomerDetailsDisplay
-          displayTitle="Customer info"
-          customer={customer}
-        />
-        <div className="flex-1 p-6">
-          {!serviceType ? (
+        {/* Content (scrollable) */}
+        <div className="flex-1 overflow-y-auto">
+          <CustomerDetailsDisplay
+            displayTitle="Customer info"
+            customer={customer}
+          />
+          <div className="p-6">
+            {!serviceType ? (
             <div className="space-y-6">
               {/* Customer Info */}
 
@@ -109,11 +113,12 @@ export function TransactionAddSidebar({
           ) : (
             <BillPaymentTransactionForm />
           )}
+          </div>
         </div>
 
         {/* Footer - Close Button */}
         {!serviceType && (
-          <div className="p-6 border-t border-[#E5E7EB]">
+          <div className="p-6 border-t border-[#E5E7EB] flex-shrink-0">
             <Button
               onClick={handleCloseSidebar}
               variant="outline"
