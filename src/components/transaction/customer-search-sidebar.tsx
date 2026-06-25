@@ -18,6 +18,7 @@ import {
   CustomerSearchSidebarProps,
 } from "@/lib/types/customer";
 import { SidebarView, UserSummaryItem } from "./transaction-data";
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 
 export function CustomerSearchSidebar({
   isOpen,
@@ -50,6 +51,8 @@ export function CustomerSearchSidebar({
   } = useFormContext<TransactionFormValues>();
 
   const user = useUserStore((state) => state.user);
+
+  useBodyScrollLock(isOpen);
 
   useEffect(() => {
     if (user) {
