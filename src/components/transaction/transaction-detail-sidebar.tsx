@@ -7,6 +7,7 @@ import { useGetTransactionById } from "@/lib/services/transaction.service";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TierBadge } from "./tier-badge";
 import { TransactionDetails } from "@/lib/types/transaction-types";
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 
 interface Props {
   transactionId: string | null;
@@ -93,6 +94,8 @@ export function TransactionDetailSidebar({ transactionId, onClose }: Props) {
   const { data, isPending } = useGetTransactionById(transactionId);
   const [copied, setCopied] = useState(false);
 
+  useBodyScrollLock(!!transactionId);
+
   if (!transactionId) return null;
 
   const txn: TransactionDetails = data?.data ?? data; // handle both { data: txn } and plain txn shapes
@@ -128,7 +131,7 @@ export function TransactionDetailSidebar({ transactionId, onClose }: Props) {
       <div className="flex-1 bg-black/50" onClick={onClose} />
       <div className="w-full md:w-[42%] bg-white shadow-lg flex flex-col h-full">
         {/* Header */}
-        <div className="flex items-start justify-between p-6 border-b border-[var(--border-default)]">
+        <div className="flex items-start justify-between p-6 border-b border-[var(--border-default)] flex-shrink-0">
           <div className="flex-1 min-w-0">
             {isPending ? (
               <Skeleton className="h-5 w-40 mb-2" />

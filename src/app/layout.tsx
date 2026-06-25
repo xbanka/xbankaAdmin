@@ -31,7 +31,7 @@ export default function RootLayout({
     <QueryProvider>
     <html className="overflow-x-hidden" lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-x-hidden`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
         <Toaster

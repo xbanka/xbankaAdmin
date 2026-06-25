@@ -11,6 +11,7 @@ import FormField from "../forms/FormField";
 import { Label } from "../ui/label";
 import { AttachmentFile, AttachmentUpload } from "../ui/UploadAttachment";
 import { useState } from "react";
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 
 interface ConfirmPayoutSidebarProps {
   isOpen: boolean;
@@ -39,6 +40,7 @@ export function ConfirmPayoutSidebar({
   } = useForm();
   const [attachments, setAttachments] = useState<AttachmentFile[]>([]);
   const hasAttachments = attachments.length > 0;
+  useBodyScrollLock(isOpen);
   const handleConfirm = () => {
     onConfirm();
     onClose();
@@ -70,7 +72,7 @@ export function ConfirmPayoutSidebar({
 
       {/* Sidebar */}
       <div
-        className={`fixed right-0 top-0 h-screen w-full max-w-[500px] bg-white shadow-lg z-50 transform transition-transform duration-300 overflow-y-auto ${
+        className={`fixed right-0 top-0 h-screen w-full max-w-[500px] bg-white shadow-lg z-50 transform transition-transform duration-300 ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
