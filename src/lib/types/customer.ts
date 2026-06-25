@@ -16,6 +16,45 @@ export interface CustomerProps {
   createdAt: string; // ISO Date String
 }
 
+export type OnboardingStep = 
+  | "SIGNUP" 
+  | "EMAIL_VERIFIED" 
+  | "BASIC_INFO" 
+  | "BVN" 
+  | "IDENTITY" 
+  | "SELFIE" 
+  | "ADDRESS" 
+  | "COMPLETED" 
+  | string;
+
+export interface UserKycStatus {
+  bvnVerified: boolean;
+  idStatus: "PENDING" | "APPROVED" | "REJECTED" | string | null;
+  addressStatus: "PENDING" | "APPROVED" | "REJECTED" | string | null;
+}
+
+export interface UserProfileData {
+  userId: string;
+  email: string;
+  isEmailVerified: boolean;
+  currentStep: OnboardingStep;
+  referralCode: string | null;
+  isTwoFactorEnabled: boolean;
+  hasTransactionPin: boolean;
+  firstName: string;
+  lastName: string;
+  phoneNumber: string; // Kept as string to preserve leading '0'
+  dateOfBirth: string | null; // ISO Date String when populated
+  gender: "male" | "female" | string | null;
+  country: string | null;
+  state: string | null;
+  avatarUrl: string | null;
+  completedOnboardingSteps: OnboardingStep[];
+  kycStatus: UserKycStatus;
+  createdAt: string; // ISO 8601 Date String
+  updatedAt: string; // ISO 8601 Date String
+}
+
 export interface CustomerUserProfile{
   firstName: string;
   lastName: string;
