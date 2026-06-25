@@ -5,6 +5,7 @@ import { useFormContext } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { SelectFieldLayout } from "../forms/SelectFieldLayout";
 import FormField from "../forms/FormField";
+import { AmountField } from "../forms/AmountField";
 import { useMemo } from "react";
 
 const PARTNERS = ["Luno", "Quidax", "Bybit", "Obiex", "Binance"];
@@ -60,11 +61,9 @@ export function CryptoStepTwo({ onContinue, onBack }: Props) {
                 onChange={(v) => setValue("details.customerPaysCurrency", v)}
                 className="w-28"
               />
-              <FormField
+              <AmountField
                 id="details.customerPays"
-                register={register}
                 placeholder="1,000,000"
-                type="number"
               />
             </div>
           </div>
@@ -79,11 +78,9 @@ export function CryptoStepTwo({ onContinue, onBack }: Props) {
                 onChange={(v) => setValue("details.customerReceivesCurrency", v)}
                 className="w-28"
               />
-              <FormField
+              <AmountField
                 id="details.customerReceives"
-                register={register}
                 placeholder="2,000"
-                type="number"
               />
             </div>
           </div>
@@ -106,19 +103,15 @@ export function CryptoStepTwo({ onContinue, onBack }: Props) {
           />
           {/* Rates row */}
           <div className="grid grid-cols-2 gap-3">
-            <FormField
+            <AmountField
               id="details.partnerRate"
               label="Partner Rate"
-              register={register}
               placeholder="$ 1,500.00"
-              type="number"
             />
-            <FormField
+            <AmountField
               id="details.xbankaRate"
               label="Xbanka Rate"
-              register={register}
               placeholder="$ 1,518.00"
-              type="number"
             />
           </div>
           {/* Margin summary */}
