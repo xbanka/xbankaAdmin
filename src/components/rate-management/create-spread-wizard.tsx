@@ -178,7 +178,7 @@ export function CreateSpreadWizard({ onClose }: { onClose: () => void }) {
       </div>
 
       {/* Footer */}
-      <div className="mt-auto flex items-center justify-between px-6 py-4 border-t border-background-alt-neutral-grey">
+      <div className="mt-auto sticky bottom-0 z-20 flex items-center justify-between px-6 py-4 border-t border-background-alt-neutral-grey bg-card-secondary">
         <Button variant="outline" onClick={onClose}>
           Cancel
         </Button>

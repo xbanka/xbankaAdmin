@@ -7,6 +7,7 @@ import FinanceDetailsHeader from "./FinanceDetailsHeader";
 import LoaderSpinner from "../ui/loaderSpinner";
 import { PayoutDetailsSidebarProps } from "@/lib/types";
 import { formatDate } from "@/lib/formatDate";
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 
 export function PayoutDetailsSidebar({
   isOpen,
@@ -17,6 +18,8 @@ export function PayoutDetailsSidebar({
   loading,
   error,
 }: PayoutDetailsSidebarProps) {
+  useBodyScrollLock(isOpen);
+
   if (!isOpen) return null;
 
   const showContent = !loading && !error;
@@ -31,7 +34,7 @@ export function PayoutDetailsSidebar({
 
       {/* Sidebar - slides from right */}
       <div
-        className={`fixed bg-white right-0 top-0 h-screen overflow-x-hidden w-full md:w-[37%] shadow-lg z-50 transform flex flex-col justify-between items-start transition-transform duration-300 overflow-y-auto ${
+        className={`fixed bg-white right-0 top-0 h-screen overflow-x-hidden w-full md:w-[37%] shadow-lg z-50 transform flex flex-col justify-between items-start transition-transform duration-300 ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
