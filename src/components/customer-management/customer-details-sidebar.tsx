@@ -29,7 +29,6 @@ export default function CustomerDetailsSidebar({
   if (!isOpen) return null;
 
   const customer: UserProfileData = data?.data?.data;
-
   const tier = customer?.tier ?? 0;
 
   return (

@@ -174,7 +174,10 @@ export default function RateManagement() {
                       </button>
                     ))}
                   </div>
-                  <Button onClick={() => setView("wizard")}>Add Spread</Button>
+                  <Button onClick={() => setView("wizard")}>
+                    <Edit />
+                    Edit Spread
+                  </Button>
                 </div>
 
                 {/* Toolbar */}
