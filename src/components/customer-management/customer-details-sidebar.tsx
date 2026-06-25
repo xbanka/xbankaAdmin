@@ -30,7 +30,15 @@ export default function CustomerDetailsSidebar({
 
   const customer: UserProfileData = data?.data?.data;
 
-  const tier = customer?.tier ?? 0;
+  // Derive tier from kycStatus (UserProfileData has no `tier` field).
+  const tier =
+    customer?.kycStatus?.addressStatus === "APPROVED"
+      ? 3
+      : customer?.kycStatus?.idStatus === "APPROVED"
+        ? 2
+        : customer?.kycStatus?.bvnVerified
+          ? 1
+          : 0;
 
   return (
     <div className="fixed inset-0 z-50 flex">
