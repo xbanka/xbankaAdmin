@@ -55,7 +55,7 @@ export const useUpdateBuyAndSpreadRates = () => {
       queryClient.invalidateQueries({
         queryKey: ["get-all-segments"],
       });
-      toast.success("Rate updated successfully");
+      toast.success("Status updated successfully");
     },
     onError: (err) => {
       handleApiError(err);

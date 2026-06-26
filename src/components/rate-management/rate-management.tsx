@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { DashboardLayout } from "../layout/dashboard-layout";
 import { EmptySpreadSchedule } from "./empty-spread-schedule";
-import { useGetCryptoRates } from "@/lib/services/rates.service";
+import { useGetCryptoRates, useUpdateBuyAndSpreadRates } from "@/lib/services/rates.service";
 import { CryptoCurrencyTypes } from "@/lib/types/rates-types";
 import { formatDate } from "@/lib/formatDate";
 import { Input } from "../ui/input";
@@ -33,6 +33,7 @@ export default function RateManagement() {
   const [editRow, setEditRow] = useState<CryptoCurrencyTypes | null>(null);
   const [view, setView] = useState<"list" | "wizard">("list");
   const { data, isPending, error } = useGetCryptoRates();
+  const { mutate: updateCryptoRate } = useUpdateBuyAndSpreadRates();
   const [selectedTransactionType, setSelectedTransactionType] =
     useState<string>("");
   console.log("rates", data);
@@ -99,7 +100,10 @@ export default function RateManagement() {
         //   />
         //   {row.isActive ? "Active" : "Inactive"}
         // </span>
-        <Badge active={row.isActive} text={row.isActive ? "Active" : "Inactive"} />
+        <Badge
+          active={row.isActive}
+          text={row.isActive ? "Active" : "Inactive"}
+        />
       ),
     },
     {
@@ -131,6 +135,39 @@ export default function RateManagement() {
           <button className="flex items-center gap-1 text-[12px] text-[#EF4444] font-medium hover:opacity-70 transition-opacity">
             <Trash2 size={13} /> Delete
           </button> */}
+        </div>
+      ),
+    },
+    {
+      key: "actions",
+      header: "",
+      render: (row: CryptoCurrencyTypes) => (
+        <div className="flex items-center justify-between gap-4">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+
+              updateCryptoRate({
+                rateId: row.id,
+                payload: {
+                  isActive: !row.isActive,
+                },
+              });
+            }}
+            className={cn(
+              "w-10 h-[22px] rounded-full relative transition-colors flex-shrink-0",
+              row.isActive ? "bg-[#0D9488]" : "bg-[#D1D5DB]",
+            )}
+            role="switch"
+            aria-checked={row.isActive}
+          >
+            <span
+              className={cn(
+                "absolute top-[3px] w-4 h-4 bg-white rounded-full transition-all",
+                row.isActive ? "right-[3px]" : "left-[3px]",
+              )}
+            />
+          </button>
         </div>
       ),
     },

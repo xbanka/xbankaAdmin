@@ -17,6 +17,7 @@ import {
 import { useForm, useFormContext } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import FormField from "../forms/FormField";
+import { AmountField } from "../forms/AmountField";
 import { SearchSelectFieldLayout } from "../forms/SearchableSelectLayout";
 
 export function BillPaymentTransactionForm() {
@@ -98,20 +99,12 @@ export function BillPaymentTransactionForm() {
 
       {/* Customer Amount & Vendor */}
       <div className="grid grid-cols-2 gap-4">
-        <FormField
-          id="amountToPay"
-          label="Amount to Pay"
-          placeholder="₦5,000"
-          register={register}
-          // error={errors.amountToPay}
-        />
+        <AmountField id="amountToPay" label="Amount to Pay" placeholder="₦5,000" />
 
-        <FormField
+        <AmountField
           id="transactionFee"
           label="Transaction Fee"
           placeholder="₦5,000"
-          register={register}
-          // error={errors.transactionFee}
         />
       </div>
 
