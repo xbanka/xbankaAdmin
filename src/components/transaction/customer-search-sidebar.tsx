@@ -150,7 +150,7 @@ export function CustomerSearchSidebar({
     setValue("customer.isNewUser", false, { shouldValidate: true });
     setValue("customer.id", customer.id, { shouldValidate: true });
     setValue("customer.affiliateAttribution", customer.raw?.affiliate?.username ?? "", { shouldValidate: true });
-    // setSearchQuery("")
+    setSearchQuery("")
   };
 
   console.log("rendering", filteredUsers);
@@ -184,6 +184,7 @@ export function CustomerSearchSidebar({
       joinedAt: new Date().toISOString(),
     });
     setView("search"); // back to showing customer detail + "+ Add Transaction"
+    setSearchQuery("")
   };
 
   const onSubmit = (data: TransactionFormValues) => {

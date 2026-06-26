@@ -1,5 +1,5 @@
 import AxiosInstance from "../Axiosinstance/axiosInstance";
-import { CurrencyConfig, SegmentConfig, UpdateSegmentPayload } from "../types/rates-types";
+import { ActiveConfig, CurrencyConfig, SegmentConfig, UpdateSegmentPayload } from "../types/rates-types";
 
 export const getCryptoRates = async () => {
   const response = await AxiosInstance.get(`/api/rates/crypto/all`);
@@ -13,7 +13,7 @@ export const postCryptoRates = async (payload: CurrencyConfig) => {
 
 export const updateBuyAndSpreadRates = async (
   rateId: string,
-  payload: CurrencyConfig | SegmentConfig,
+  payload: CurrencyConfig | SegmentConfig | ActiveConfig,
 ) => {
   const response = await AxiosInstance.put(
     `/api/rates/crypto/${rateId}`,
