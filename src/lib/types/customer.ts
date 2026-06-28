@@ -85,3 +85,40 @@ export interface SelectedCustomer {
   totalTransactions: string;
   username: string;
 }
+
+export interface CustomerVerificationData {
+  userId: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  avatarUrl: string;
+  completedOnboardingSteps: string[];
+  currentStep: string;
+  kycStatus: KycStatus;
+  hasTransactionPin: boolean;
+  isActive: boolean;
+  isEmailVerified: boolean;
+  isTwoFactorEnabled: boolean;
+  referralCode: string;
+  createdAt: string; // or Date, if you parse it
+  updatedAt: string; // or Date, if you parse it
+  country: string | null;
+  dateOfBirth: string | null;
+  gender: string | null;
+  phoneNumber: string | null;
+  state: string | null;
+}
+
+export interface CustomerCryptoAsset {
+  id: string;
+  currency: string; // e.g., "BNB", "BTC", "ETH"
+  balance: number;
+  addresses: any[]; // Kept as any[] per your request
+}
+
+export interface CustomerWalletData {
+  userId: string;
+  totalWallets: number;
+  cryptoAssets: CustomerCryptoAsset[];
+  fiatAssets: any[]; // Kept as any[] per your request
+}

@@ -1,6 +1,6 @@
 export function SectionCard({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-[var(--grey-light)] rounded-xl p-4 flex flex-col gap-4">
+    <div className="rounded-bl-[12px] rounded-br-[12px] py-4 px-5 bg-card-primary border-x border-b border-card-border-secondary flex flex-col gap-4">
       {children}
     </div>
   );
