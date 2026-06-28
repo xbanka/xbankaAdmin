@@ -1,35 +1,38 @@
+import { CustomerWalletData } from "@/lib/types/customer";
 import { ActiveBadge } from "./active-badge";
 import { DetailField } from "./detail-field";
 import { SectionCard } from "./section-card";
 import { SectionTitle } from "./section-title";
 
-export function WalletTab() {
+interface WalletTabProps {
+  wallet: CustomerWalletData;
+}
+
+export function WalletTab({ wallet }: WalletTabProps) {
   // Placeholder — no wallet data from UserProfileData yet
   return (
     <div className="p-6 flex flex-col gap-5">
       {/* Wallet Summary */}
       <div>
         <SectionTitle>Wallet Summary</SectionTitle>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-3 bg-card-primary py-4 px-5">
           {[
             { label: "Total NGN Balance", value: "—" },
             { label: "Crypto Asset Held", value: "—" },
             { label: "Total Crypto Balance", value: "—" },
           ].map((s) => (
-            <div key={s.label} className="bg-[var(--grey-light)] rounded-xl p-4 flex flex-col gap-1">
-              <p className="text-xs text-[var(--text-secondary)]">{s.label}</p>
-              <p className="text-base font-bold text-[var(--text-primary)]">{s.value}</p>
-            </div>
+            <DetailField key={s.label} label={s.label} value={s.value} />
           ))}
         </div>
       </div>
 
       {/* NGN Wallet */}
       <div>
-        <div className="flex items-center gap-2 mb-3">
-          <SectionTitle>NGN Wallet</SectionTitle>
-          <ActiveBadge active={true} />
-        </div>
+        <SectionTitle>
+          <div className="flex items-center gap-2">
+          NGN Wallet <ActiveBadge active={true} />
+          </div>
+        </SectionTitle>
         <SectionCard>
           <div className="grid grid-cols-3 gap-4">
             <DetailField label="Available Balance" value="—" />
@@ -42,7 +45,6 @@ export function WalletTab() {
       {/* Dedicated Funding Account */}
       <div>
         <SectionTitle>Dedicated Funding Account</SectionTitle>
-        <p className="text-xs text-[var(--text-secondary)] mb-3">— Payment Service Bank</p>
         <SectionCard>
           <div className="grid grid-cols-3 gap-4">
             <DetailField label="Account Name" value="—" />
@@ -60,13 +62,21 @@ export function WalletTab() {
             <thead>
               <tr className="bg-[var(--grey-light)] border-b border-[var(--border-default)]">
                 {["Asset", "Available", "Provider", "Status", ""].map((h) => (
-                  <th key={h} className="text-left px-3 py-2.5 text-[var(--text-secondary)] font-medium">{h}</th>
+                  <th
+                    key={h}
+                    className="text-left px-3 py-2.5 text-[var(--text-secondary)] font-medium"
+                  >
+                    {h}
+                  </th>
                 ))}
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td colSpan={5} className="text-center py-8 text-[var(--text-secondary)]">
+                <td
+                  colSpan={5}
+                  className="text-center py-8 text-[var(--text-secondary)]"
+                >
                   No wallet data available
                 </td>
               </tr>

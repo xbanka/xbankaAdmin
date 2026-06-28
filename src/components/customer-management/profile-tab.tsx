@@ -12,7 +12,7 @@ export function ProfileTab({ customer }: { customer: UserProfileData }) {
     : null;
 
   return (
-    <div className="p-6 flex flex-col gap-4">
+    <div className="p-6">
       <SectionTitle>Personal Details</SectionTitle>
       <SectionCard>
         <div className="grid grid-cols-3 gap-x-4 gap-y-5">
