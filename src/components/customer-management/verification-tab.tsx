@@ -7,13 +7,15 @@ import { SectionCard } from "./section-card";
 import { SectionTitle } from "./section-title";
 import { TierBadge } from "./tier-badge";
 import { VerificationStatusBadge } from "./verification-status-badge";
+import Image from "next/image";
+import { tierImages } from "@/lib/utils/tier-images";
 
 export function VerificationTab({
   customer,
 }: {
   customer: CustomerVerificationData;
 }) {
-  const { kycStatus } = customer;
+  const { kycStatus, isActive } = customer;
 
   const verificationRequirements = [
     {
@@ -43,6 +45,9 @@ export function VerificationTab({
     },
   ];
 
+  // const tier = customer.kycStatus.bvnVerified ?? 0;
+  const tier = 1;
+
   // Derive current tier from kycStatus
   const currentTier =
     kycStatus?.addressStatus === "APPROVED"
@@ -66,25 +71,22 @@ export function VerificationTab({
               <p className="text-xs text-[var(--text-secondary)]">
                 Current Tier
               </p>
-              <TierBadge tier={currentTier} />
+              <Image
+                src={tierImages[tier] || "/Tier0.svg"}
+                alt={`Tier ${tier}`}
+                width={67}
+                height={24}
+              />
             </div>
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col items-start gap-1">
               <p className="text-xs text-[var(--text-secondary)]">
                 Verification Status
               </p>
-              <VerificationStatusBadge status={overallStatus} />
+              <VerificationStatusBadge status={isActive} />
             </div>
             <DetailField
               label="Date Verified"
-              value={
-                kycStatus?.bvnVerified
-                  ? new Date(customer.updatedAt).toLocaleDateString("en-GB", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    })
-                  : null
-              }
+              value={"-"}
             />
           </div>
         </SectionCard>
@@ -118,10 +120,15 @@ export function VerificationTab({
                     {row.requirement}
                   </td>
                   <td className="px-4 py-3">
-                    <TierBadge tier={row.tier} />
+                    <Image
+                      src={tierImages[tier] || "/Tier0.svg"}
+                      alt={`Tier ${tier}`}
+                      width={67}
+                      height={24}
+                    />
                   </td>
                   <td className="px-4 py-3">
-                    <VerificationStatusBadge status={row.status} />
+                    <VerificationStatusBadge status={isActive} />
                   </td>
                 </tr>
               ))}
