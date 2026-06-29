@@ -6,7 +6,7 @@ import { DetailField } from "./detail-field";
 import { SectionCard } from "./section-card";
 import { SectionTitle } from "./section-title";
 import { TierBadge } from "./tier-badge";
-import { VerificationStatusBadge } from "./verification-status-badge";
+import { VerificationRequirementsBadge, VerificationStatusBadge } from "./verification-status-badge";
 import Image from "next/image";
 import { tierImages } from "@/lib/utils/tier-images";
 
@@ -21,44 +21,24 @@ export function VerificationTab({
     {
       requirement: "BVN Verification",
       tier: 1,
-      status: kycStatus?.bvnVerified ? "Verified" : "Not Submitted",
+      status: kycStatus?.bvnVerified,
     },
     {
       requirement: "ID & Liveness Verification",
       tier: 2,
       status:
-        kycStatus?.idStatus === "APPROVED"
-          ? "Verified"
-          : kycStatus?.idStatus === "PENDING"
-            ? "Pending Review"
-            : "Not Submitted",
+        kycStatus?.idStatus === null && false
     },
     {
       requirement: "Proof of Address",
       tier: 3,
       status:
-        kycStatus?.addressStatus === "APPROVED"
-          ? "Verified"
-          : kycStatus?.addressStatus === "PENDING"
-            ? "Pending Review"
-            : "Not Submitted",
+        kycStatus?.addressStatus === null && false
     },
   ];
 
   // const tier = customer.kycStatus.bvnVerified ?? 0;
   const tier = 1;
-
-  // Derive current tier from kycStatus
-  const currentTier =
-    kycStatus?.addressStatus === "APPROVED"
-      ? 3
-      : kycStatus?.idStatus === "APPROVED"
-        ? 2
-        : kycStatus?.bvnVerified
-          ? 1
-          : 0;
-
-  const overallStatus = currentTier >= 1 ? "Active" : "Inactive";
 
   return (
     <div className="p-6 flex flex-col gap-5">
@@ -84,10 +64,7 @@ export function VerificationTab({
               </p>
               <VerificationStatusBadge status={isActive} />
             </div>
-            <DetailField
-              label="Date Verified"
-              value={"-"}
-            />
+            <DetailField label="Date Verified" value={"-"} />
           </div>
         </SectionCard>
       </div>
@@ -121,14 +98,14 @@ export function VerificationTab({
                   </td>
                   <td className="px-4 py-3">
                     <Image
-                      src={tierImages[tier] || "/Tier0.svg"}
-                      alt={`Tier ${tier}`}
+                      src={tierImages[row.tier] || "/Tier0.svg"}
+                      alt={`Tier ${row.tier}`}
                       width={67}
                       height={24}
                     />
                   </td>
                   <td className="px-4 py-3">
-                    <VerificationStatusBadge status={isActive} />
+                    <VerificationRequirementsBadge status={row.status} />
                   </td>
                 </tr>
               ))}
@@ -173,15 +150,7 @@ export function VerificationTab({
                     <TierBadge tier={2} />
                   </td>
                   <td className="px-4 py-3">
-                    <VerificationStatusBadge
-                      status={
-                        kycStatus.idStatus === "APPROVED"
-                          ? "Verified"
-                          : kycStatus.idStatus === "PENDING"
-                            ? "Pending Review"
-                            : "Rejected"
-                      }
-                    />
+                    <VerificationStatusBadge status={isActive} />
                   </td>
                   <td className="px-4 py-3">
                     <button className="text-[var(--text-teal)] hover:underline text-xs">
