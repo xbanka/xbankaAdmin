@@ -86,3 +86,81 @@ export interface UserSummaryItem {
   phone: string;
   raw: RawUserData;
 }
+
+export interface TradeMetadata {
+  isManual: boolean;
+  tradeDirection: string; // e.g., "Buy Crypto"
+  sourceCurrency: string; // e.g., "NGN"
+  targetCurrency: string; // e.g., "USDT"
+  sourceAmount: number;
+  grossPayout: number;
+  partner: string;
+  partnerRate: number;
+  xbankaRate: number;
+  marginPerUsdt: number;
+  totalMargin: number;
+  marginPercentage: string; // e.g., "-6.67%"
+  paymentMethod: string;
+  paymentStatus: string;
+  paymentReference: string;
+  receivedInto: string;
+  deliveryMethod: string;
+  deliveryAsset: string;
+  deliverySource: string;
+  deliveryStatus: string;
+  deliveryReference: string;
+  attachmentUrl: string;
+}
+
+export interface UserProfile {
+  id: string;
+  userId: string;
+  firstName: string;
+  lastName: string;
+  email: string; // From parent context, nested fields vary
+  avatarUrl: string;
+  country: string;
+  state: string;
+  gender: string;
+  phoneNumber: string;
+  dateOfBirth: string; // ISO String
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TradeUser {
+  id: string;
+  email: string;
+  googleId: string | null;
+  isActive: boolean;
+  isEmailVerified: boolean;
+  isTwoFactorEnabled: boolean;
+  mapleradCustomerId: string;
+  currentStep: string;
+  completedOnboardingSteps: string; // Note: Received as a stringified JSON array in payload
+  profile: UserProfile;
+  referralCode: string;
+  referredBy: string | null;
+  securityOtp: string | null;
+  securityOtpExpiresAt: string | null;
+  twoFactorSecret: string | null;
+  verificationToken: string | null;
+  verificationTokenExpiresAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ManualTradeTransaction {
+  id: string;
+  userId: string;
+  type: 'MANUAL_TRADE' | string;
+  status: 'COMPLETED' | string;
+  amount: number;
+  currency: string;
+  reference: string;
+  note: string;
+  metadata: string; // Parse this into the `TradeMetadata` interface
+  user: TradeUser;
+  createdAt: string;
+  updatedAt: string;
+}

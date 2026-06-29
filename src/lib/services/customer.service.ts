@@ -1,6 +1,7 @@
 import {
   createCustomer,
   DeleteCustomer,
+  getAllCustomers,
   getCustomerAssets,
   getCustomerById,
   getCustomers,
@@ -12,6 +13,45 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useDebounce } from "../../hooks/useDebounce";
 import { toast } from "sonner";
 import { handleApiError } from "../errors/handleApiError";
+import { GetCustomersParams } from "../types/customer";
+
+export const useGetAllCustomers = ({
+  page = 1,
+  limit = 10,
+  search,
+  status,
+  startDate,
+  endDate,
+}: GetCustomersParams) => {
+  const debouncedSearch = useDebounce(search ?? "", 500);
+
+  return useQuery({
+    queryKey: [
+      "customers",
+      page,
+      limit,
+      debouncedSearch,
+      status,
+      startDate,
+      endDate,
+    ],
+    queryFn: () => {
+      try {
+        const response = getAllCustomers({
+          page,
+          limit,
+          search: debouncedSearch || undefined,
+          status,
+          startDate,
+          endDate,
+        });
+        return response;
+      } catch (error) {
+        handleApiError(error);
+      }
+    },
+  });
+};
 
 export const useGetCustomer = (search: string) => {
   const debouncedSearch = useDebounce(search, 500);

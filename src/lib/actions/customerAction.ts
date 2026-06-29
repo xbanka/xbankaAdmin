@@ -1,4 +1,5 @@
 import AxiosInstance from "../Axiosinstance/axiosInstance";
+import { GetCustomersParams } from "../types/customer";
 
 const BASE_URL = "/api/customers";
 
@@ -9,6 +10,38 @@ export const getCustomers = async (query?: string) => {
   const response = await AxiosInstance.get(url, {
     withCredentials: true,
   });
+  return {
+    success: true,
+    data: response.data,
+    status: response.status,
+  };
+};
+
+export const getAllCustomers = async ({
+  page = 1,
+  limit = 10,
+  search,
+  status,
+  startDate,
+  endDate,
+}: GetCustomersParams) => {
+  const params = new URLSearchParams();
+
+  params.append("page", page.toString());
+  params.append("limit", limit.toString());
+
+  if (search) params.append("search", search);
+  if (status) params.append("status", status);
+  if (startDate) params.append("startDate", startDate);
+  if (endDate) params.append("endDate", endDate);
+
+  const response = await AxiosInstance.get(
+    `${BASE_URL}/all?${params.toString()}`,
+    {
+      withCredentials: true,
+    },
+  );
+
   return {
     success: true,
     data: response.data,
