@@ -122,3 +122,12 @@ export interface CustomerWalletData {
   cryptoAssets: CustomerCryptoAsset[];
   fiatAssets: any[]; // Kept as any[] per your request
 }
+
+export interface GetCustomersParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: string;
+  startDate?: string;
+  endDate?: string;
+}
