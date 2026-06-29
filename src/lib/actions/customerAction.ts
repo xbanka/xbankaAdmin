@@ -17,12 +17,9 @@ export const getCustomers = async (query?: string) => {
 };
 
 export const getCustomerById = async (customerId: string) => {
-  const response = await AxiosInstance.get(
-    `${BASE_URL}/${customerId}`,
-    {
-      withCredentials: true,
-    }
-  );
+  const response = await AxiosInstance.get(`${BASE_URL}/${customerId}`, {
+    withCredentials: true,
+  });
 
   return {
     success: true,
@@ -51,12 +48,9 @@ export const createCustomer = async (payload: {
 };
 
 export const DeleteCustomer = async (customer_id: string) => {
-  const response = await AxiosInstance.delete(
-    `/api/customers/${customer_id}`,
-    {
-      withCredentials: true,
-    }
-  );
+  const response = await AxiosInstance.delete(`/api/customers/${customer_id}`, {
+    withCredentials: true,
+  });
 
   return {
     success: true,
@@ -66,16 +60,62 @@ export const DeleteCustomer = async (customer_id: string) => {
 };
 
 export const EditCustomer = async (customer_id: string) => {
-  const response = await AxiosInstance.post(
-    `/api/customers/${customer_id}`,
-    {
-      withCredentials: true,
-    }
-  );
+  const response = await AxiosInstance.post(`/api/customers/${customer_id}`, {
+    withCredentials: true,
+  });
 
   return {
     success: true,
     data: response.data,
     status: response.status,
   };
+};
+
+export const getCustomerVerification = async (customerId: string) => {
+  const response = await AxiosInstance.get(
+    `/api/customers/${customerId}/verification`,
+    {
+      withCredentials: true,
+    },
+  );
+
+  return response.data;
+};
+
+export const getCustomerAssets = async (customerId: string) => {
+  const response = await AxiosInstance.get(
+    `/api/customers/${customerId}/assets`,
+    {
+      withCredentials: true,
+    },
+  );
+
+  return response.data;
+};
+
+export const getCustomerTransactions = async (
+  customerId: string,
+  limit = 1,
+) => {
+  const response = await AxiosInstance.get(
+    `/api/customers/${customerId}/transactions?limit=${limit}`,
+    {
+      withCredentials: true,
+    },
+  );
+
+  return response.data;
+};
+
+// Toggle Customer Status
+export const toggleCustomerStatus = async (customerId: string) => {
+  const response = await AxiosInstance.put(
+    `/api/customers/${customerId}/status`,
+    {},
+    {
+      withCredentials: true,
+    },
+  );
+
+  return response.data;
 };

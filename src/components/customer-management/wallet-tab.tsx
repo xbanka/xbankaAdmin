@@ -1,39 +1,44 @@
+import { CustomerWalletData } from "@/lib/types/customer";
 import { ActiveBadge } from "./active-badge";
 import { DetailField } from "./detail-field";
 import { SectionCard } from "./section-card";
 import { SectionTitle } from "./section-title";
+import { getTotalCryptoBalance } from "@/lib/getCryptoBalance";
 
-export function WalletTab() {
+interface WalletTabProps {
+  wallet: CustomerWalletData;
+}
+
+export function WalletTab({ wallet }: WalletTabProps) {
   // Placeholder — no wallet data from UserProfileData yet
+  const totalCryptoBalance = getTotalCryptoBalance(wallet.cryptoAssets ?? []);
   return (
     <div className="p-6 flex flex-col gap-5">
       {/* Wallet Summary */}
       <div>
         <SectionTitle>Wallet Summary</SectionTitle>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-3 bg-card-primary py-4 px-5">
           {[
-            { label: "Total NGN Balance", value: "—" },
-            { label: "Crypto Asset Held", value: "—" },
-            { label: "Total Crypto Balance", value: "—" },
+            { label: "Total NGN Balance", value: "₦0" },
+            { label: "Crypto Asset Held", value: wallet.totalWallets },
+            { label: "Total Crypto Balance", value: totalCryptoBalance },
           ].map((s) => (
-            <div key={s.label} className="bg-[var(--grey-light)] rounded-xl p-4 flex flex-col gap-1">
-              <p className="text-xs text-[var(--text-secondary)]">{s.label}</p>
-              <p className="text-base font-bold text-[var(--text-primary)]">{s.value}</p>
-            </div>
+            <DetailField key={s.label} label={s.label} value={s.value} />
           ))}
         </div>
       </div>
 
       {/* NGN Wallet */}
       <div>
-        <div className="flex items-center gap-2 mb-3">
-          <SectionTitle>NGN Wallet</SectionTitle>
-          <ActiveBadge active={true} />
-        </div>
+        <SectionTitle>
+          <div className="flex items-center gap-2">
+            NGN Wallet <ActiveBadge active={true} />
+          </div>
+        </SectionTitle>
         <SectionCard>
           <div className="grid grid-cols-3 gap-4">
-            <DetailField label="Available Balance" value="—" />
-            <DetailField label="Wallet ID" value="—" />
+            <DetailField label="Available Balance" value="₦0" />
+            <DetailField label="Wallet ID" value={wallet.userId} />
             <DetailField label="Provider" value="—" />
           </div>
         </SectionCard>
@@ -42,7 +47,6 @@ export function WalletTab() {
       {/* Dedicated Funding Account */}
       <div>
         <SectionTitle>Dedicated Funding Account</SectionTitle>
-        <p className="text-xs text-[var(--text-secondary)] mb-3">— Payment Service Bank</p>
         <SectionCard>
           <div className="grid grid-cols-3 gap-4">
             <DetailField label="Account Name" value="—" />
@@ -54,22 +58,72 @@ export function WalletTab() {
 
       {/* Crypto Wallets */}
       <div>
-        <SectionTitle>Crypto Wallets</SectionTitle>
-        <div className="rounded-xl border border-[var(--border-default)] overflow-hidden">
+        <SectionTitle className="bg-card-primary">Crypto Wallets</SectionTitle>
+        <div className="border border-[var(--border-default)] overflow-hidden">
           <table className="w-full text-xs">
             <thead>
-              <tr className="bg-[var(--grey-light)] border-b border-[var(--border-default)]">
+              <tr className="bg-card-secondary border-b border-card-border-secondary">
                 {["Asset", "Available", "Provider", "Status", ""].map((h) => (
-                  <th key={h} className="text-left px-3 py-2.5 text-[var(--text-secondary)] font-medium">{h}</th>
+                  <th
+                    key={h}
+                    className="text-left px-3 py-2.5 text-[var(--text-secondary)] font-medium"
+                  >
+                    {h}
+                  </th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td colSpan={5} className="text-center py-8 text-[var(--text-secondary)]">
-                  No wallet data available
-                </td>
-              </tr>
+              {wallet?.cryptoAssets?.length ? (
+                wallet?.cryptoAssets?.map((asset) => (
+                  <tr
+                    key={asset.id}
+                    className="border-b border-card-border-secondary last:border-0"
+                  >
+                    <td className="px-3 py-3 font-medium text-[var(--text-primary)]">
+                      {asset.currency}
+                    </td>
+
+                    <td className="px-3 py-3 text-[var(--text-primary)]">
+                      {Number(asset.balance).toLocaleString()}
+                    </td>
+
+                    <td className="px-3 py-3 text-[var(--text-secondary)]">
+                      —
+                    </td>
+
+                    <td className="px-3 py-3">
+                      <span
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
+                          asset.addresses.length > 0
+                            ? "bg-[#D1FAE5] text-[#037508]"
+                            : "bg-[#FFF8D8] text-[#B29504]"
+                        }`}
+                      >
+                        <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                        {asset.addresses.length > 0 ? "Active" : "Inactive"}
+                      </span>
+                    </td>
+
+                    <td className="px-3 py-3 text-right">
+                      {asset.addresses.length > 0 ? (
+                        <button className="text-text-teal hover:underline">
+                          View
+                        </button>
+                      ) : null}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan={5}
+                    className="text-center py-8 text-[var(--text-secondary)]"
+                  >
+                    No wallet data available
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

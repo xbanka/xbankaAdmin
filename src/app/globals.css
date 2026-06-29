@@ -20,6 +20,7 @@
   --color-card-primary: var(--card-primary);
   --color-error-text: var(--error-text);
   --color-error-border: var(--error-border);
+  --color-error-light: var(--error-light);
   --color-button-primary-bg: var(--button-primary-bg);
   --color-button-primary-border: var(--button-primary-border);
   --color-card-border-secondary: var(--card-border-secondary);
@@ -28,6 +29,8 @@
   --color-success-light: var(--success-light);
   --color-success-text: var(--success-text);
   --color-grey-light: var(--grey-light);
+  --color-warning-light: var(--warning-light);
+  --color-warning-text: var(--warning-text);
   --color-grey-border: var(--grey-border);
   --color-grey-text: var(--grey-text);
   --color-customCyan: var(--customCyan);
@@ -93,6 +96,7 @@
   --card-primary: #FFFFFF;
   --error-text: #E50500;
   --error-border: #FFDAD8;
+  --error-light: #FFF4F3;
   --button-primary-bg: #0C9A8E;
   --button-primary-border: #5EEAD4;
   --card-border-secondary: #E9EBEE;
@@ -103,6 +107,8 @@
   --grey-light: #F9F9F9;
   --grey-border: #DADDE2;
   --grey-text: #374151;
+  --warning-text: #A27D00;
+  --warning-light: #FFFAEB;
   --customCyan: #cff7f2;
   --abstractCyan: #0C9A8E;
   --mainGreen: #14ae5c;
