@@ -8,6 +8,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { TierBadge } from "./tier-badge";
 import { TransactionDetails } from "@/lib/types/transaction-types";
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
+import { ManualTradeTransaction } from "./transaction-data";
+import Image from "next/image";
+import { tierImages } from "@/lib/utils/tier-images";
 
 interface Props {
   transactionId: string | null;
@@ -49,9 +52,11 @@ function InfoCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="border border-[var(--border-default)] rounded-xl overflow-hidden">
+    <div className="border border-[var(--border-default)] rounded-xl">
       <div className="flex items-center justify-between px-4 py-3 bg-[var(--grey-light)] border-b border-[var(--border-default)]">
-        <h4 className="text-sm font-semibold text-[var(--text-primary)]">{title}</h4>
+        <h4 className="text-sm font-semibold text-[var(--text-primary)]">
+          {title}
+        </h4>
         {action}
       </div>
       <div className="grid grid-cols-2 gap-x-6 gap-y-4 p-4">{children}</div>
@@ -59,7 +64,13 @@ function InfoCard({
   );
 }
 
-function ActionLink({ label, onClick }: { label: string; onClick?: () => void }) {
+function ActionLink({
+  label,
+  onClick,
+}: {
+  label: string;
+  onClick?: () => void;
+}) {
   return (
     <button
       onClick={onClick}
@@ -98,8 +109,10 @@ export function TransactionDetailSidebar({ transactionId, onClose }: Props) {
 
   if (!transactionId) return null;
 
-  const txn: TransactionDetails = data?.data ?? data; // handle both { data: txn } and plain txn shapes
+  const txn: ManualTradeTransaction = data?.data ?? data; // handle both { data: txn } and plain txn shapes
+  console.log("txn", txn);
   const profile = txn?.user?.profile;
+  // const tier = item.customer.kycTier ?? 0;
   const customerName = profile
     ? `${profile.firstName ?? ""} ${profile.lastName ?? ""}`.trim() || null
     : null;
@@ -164,7 +177,10 @@ export function TransactionDetailSidebar({ transactionId, onClose }: Props) {
               </>
             )}
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 ml-4">
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 ml-4"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -190,7 +206,9 @@ export function TransactionDetailSidebar({ transactionId, onClose }: Props) {
                   {heroAmount}
                 </p>
                 {dateTime && (
-                  <p className="text-xs text-[var(--text-secondary)] mt-1">{dateTime}</p>
+                  <p className="text-xs text-[var(--text-secondary)] mt-1">
+                    {dateTime}
+                  </p>
                 )}
               </div>
 
@@ -201,13 +219,21 @@ export function TransactionDetailSidebar({ transactionId, onClose }: Props) {
             </div>
 
             {/* Customer */}
-            <InfoCard title="Customer" action={<ActionLink label="View customer profile" />}>
+            <InfoCard
+              title="Customer"
+              action={<ActionLink label="View customer profile" />}
+            >
               <Field label="Name" value={customerName} />
               <Field label="UID" value={txn?.userId?.slice(0, 8)} />
               <Field label="Phone" value={profile?.phoneNumber} />
               <Field label="Email" value={txn?.user?.email} />
               <Field label="KYC Tier">
-                <TierBadge tier={undefined} />
+                {/* <Image
+                  src={tierImages[tier] || "/Tier0.svg"}
+                  alt={`Tier ${tier}`}
+                  width={67}
+                  height={24}
+                /> */}
               </Field>
             </InfoCard>
 
@@ -215,7 +241,9 @@ export function TransactionDetailSidebar({ transactionId, onClose }: Props) {
             <InfoCard title="Trade Details">
               <Field
                 label="Trade Pair"
-                value={txn?.currency ? `${txn.currency} → ${txn.currency}` : null}
+                value={
+                  txn?.currency ? `${txn.currency} → ${txn.currency}` : null
+                }
               />
               <Field label="Type" value={txn?.type} />
               <Field
@@ -228,7 +256,9 @@ export function TransactionDetailSidebar({ transactionId, onClose }: Props) {
               />
               <Field
                 label="Fiat"
-                value={txn?.amount != null ? `₦${txn.amount.toLocaleString()}` : null}
+                value={
+                  txn?.amount != null ? `₦${txn.amount.toLocaleString()}` : null
+                }
               />
             </InfoCard>
 
