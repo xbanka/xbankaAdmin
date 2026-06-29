@@ -2,15 +2,20 @@
 
 import { X } from "lucide-react";
 import Image from "next/image";
-import { useGetCustomerById } from "@/lib/services/customer.service";
+import {
+  useGetCustomerAssets,
+  useGetCustomerById,
+  useGetCustomerTransactions,
+  useGetCustomerVerification,
+} from "@/lib/services/customer.service";
 import { tierImages } from "@/lib/utils/tier-images";
-import { UserProfileData } from "@/lib/types/customer";
 import { Tab, TABS } from "./data";
 import { useState } from "react";
 import { ProfileTab } from "./profile-tab";
 import { WalletTab } from "./wallet-tab";
 import { TransactionsTab } from "./transactions-tab";
 import { VerificationTab } from "./verification-tab";
+import { UserProfileData } from "@/lib/types/customer";
 
 interface Props {
   isOpen: boolean;
@@ -25,6 +30,19 @@ export default function CustomerDetailsSidebar({
 }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>("profile");
   const { data, isLoading } = useGetCustomerById(customerId || "");
+  const { data: verificationData } = useGetCustomerVerification(
+    customerId || "",
+  );
+
+  const { data: walletData } = useGetCustomerAssets(customerId || "");
+
+  const { data: transactionData } = useGetCustomerTransactions(
+    customerId || "",
+    20,
+  );
+  console.log("verificationData", verificationData);
+  console.log("walletData", walletData);
+  console.log("transactionData", transactionData);
 
   if (!isOpen) return null;
 
@@ -106,26 +124,34 @@ export default function CustomerDetailsSidebar({
               ))}
             </div>
 
-            <div className="flex-1 overflow-y-auto">
-            {isLoading ? (
-              <div className="p-6 flex flex-col gap-4 animate-pulse">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="h-10 bg-gray-100 rounded-lg" />
-                ))}
-              </div>
-            ) : !customer ? (
-              <div className="p-12 text-center text-[var(--text-secondary)] text-sm">
-                Customer data unavailable.
-              </div>
-            ) : (
-              <>
-                {activeTab === "profile" && <ProfileTab customer={customer} />}
-                {activeTab === "wallet" && <WalletTab />}
-                {activeTab === "transactions" && <TransactionsTab />}
-                {activeTab === "verification" && <VerificationTab customer={customer} />}
-              </>
-            )}
-          </div>
+            <div className="flex-1 overflow-y-auto bg-card-secondary h-screen">
+              {isLoading ? (
+                <div className="p-6 flex flex-col gap-4 animate-pulse">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="h-10 bg-gray-100 rounded-lg" />
+                  ))}
+                </div>
+              ) : !customer ? (
+                <div className="p-12 text-center text-[var(--text-secondary)] text-sm">
+                  Customer data unavailable.
+                </div>
+              ) : (
+                <>
+                  {activeTab === "profile" && (
+                    <ProfileTab customer={customer} />
+                  )}
+                  {activeTab === "wallet" && (
+                    <WalletTab wallet={walletData?.data} />
+                  )}
+                  {activeTab === "transactions" && (
+                    <TransactionsTab transactions={transactionData?.data} />
+                  )}
+                  {activeTab === "verification" && (
+                    <VerificationTab customer={verificationData?.data} />
+                  )}
+                </>
+              )}
+            </div>
           </>
         )}
       </div>
