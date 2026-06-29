@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useGetCustomer } from "@/lib/services/customer.service";
+import { useGetAllCustomers, useGetCustomer } from "@/lib/services/customer.service";
 import { Input } from "@/components/ui/input";
 import { DataTableLayout } from "@/components/DataTableLayout/DataTableLayout";
 import { useState } from "react";
@@ -45,11 +45,20 @@ export default function CustomerManagement() {
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [customerDetailsOpen, setCustomerDetailsOpen] = useState(false);
+  const [limit, setLimit] = useState(10);
 
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(
     null,
   );
-  const { data, isLoading, isError, error } = useGetCustomer(search);
+  // const { data, isLoading, isError, error } = useGetCustomer(search, page);
+  const { data, isLoading, error, isError } = useGetAllCustomers({
+  page,
+  limit,
+  search,
+  status: statusFilter === "all" ? undefined : statusFilter,
+  startDate: dateFrom || undefined,
+  endDate: dateTo || undefined,
+});
 
   const customers: CustomerProps[] = data?.data?.data?.items ?? [];
   const meta = data?.data?.data?.meta;
