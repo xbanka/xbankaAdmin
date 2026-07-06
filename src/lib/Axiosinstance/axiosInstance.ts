@@ -10,6 +10,8 @@ const AxiosInstance = axios.create({
   withCredentials: true,
 });
 
+console.log(AxiosInstance.defaults.baseURL);
+
 AxiosInstance.interceptors.request.use(
   (config) => {
     const token = authToken.get();
