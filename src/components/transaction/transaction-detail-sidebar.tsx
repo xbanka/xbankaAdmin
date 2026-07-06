@@ -5,12 +5,9 @@ import { useState } from "react";
 import { X, Copy, Check, ArrowUpRight } from "lucide-react";
 import { useGetTransactionById } from "@/lib/services/transaction.service";
 import { Skeleton } from "@/components/ui/skeleton";
-import { TierBadge } from "./tier-badge";
-import { TransactionDetails } from "@/lib/types/transaction-types";
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 import { ManualTradeTransaction } from "./transaction-data";
-import Image from "next/image";
-import { tierImages } from "@/lib/utils/tier-images";
+import { useCustomerSidebarStore } from "@/store/customer-sidebar-store";
 
 interface Props {
   transactionId: string | null;
@@ -104,6 +101,7 @@ function StatusBadge({ status }: { status: string }) {
 export function TransactionDetailSidebar({ transactionId, onClose }: Props) {
   const { data, isPending } = useGetTransactionById(transactionId);
   const [copied, setCopied] = useState(false);
+  const { openCustomer } = useCustomerSidebarStore();
 
   useBodyScrollLock(!!transactionId);
 
@@ -221,7 +219,17 @@ export function TransactionDetailSidebar({ transactionId, onClose }: Props) {
             {/* Customer */}
             <InfoCard
               title="Customer"
-              action={<ActionLink label="View customer profile" />}
+              action={
+                <ActionLink
+                  label="View customer profile"
+                  onClick={() => {
+                    if (txn?.userId) {
+                      openCustomer(txn.userId);
+                      onClose()
+                    }
+                  }}
+                />
+              }
             >
               <Field label="Name" value={customerName} />
               <Field label="UID" value={txn?.userId?.slice(0, 8)} />

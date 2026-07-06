@@ -2,7 +2,7 @@ import axios from "axios";
 import { authToken } from "../authToken";
 
 const AxiosInstance = axios.create({
-  baseURL: "https://api.xbankang.com/",
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
   headers: {
     "Content-Type": "application/json",
   },
