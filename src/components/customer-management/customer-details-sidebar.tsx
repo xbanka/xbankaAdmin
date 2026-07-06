@@ -30,9 +30,7 @@ export default function CustomerDetailsSidebar({
 }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>("profile");
   const { data, isLoading } = useGetCustomerById(customerId || "");
-  const { data: verificationData } = useGetCustomerVerification(
-    customerId || "",
-  );
+  const { data: verificationData } = useGetCustomerVerification(customerId || "",);
 
   const { data: walletData } = useGetCustomerAssets(customerId || "");
 
