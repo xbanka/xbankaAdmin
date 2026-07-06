@@ -23,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useCustomerSidebarStore } from "@/store/customer-sidebar-store";
 
 const fmtShort = (d: string) =>
   d
@@ -50,6 +51,7 @@ export default function CustomerManagement() {
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(
     null,
   );
+  const { openCustomer } = useCustomerSidebarStore();
   // const { data, isLoading, isError, error } = useGetCustomer(search, page);
   const { data, isLoading, error, isError } = useGetAllCustomers({
   page,
@@ -196,8 +198,7 @@ export default function CustomerManagement() {
       render: (item: CustomerProps) => (
         <div
           onClick={() => {
-            setSelectedCustomerId(item.userId);
-            setCustomerDetailsOpen(true);
+            openCustomer(item.userId);
           }}
           className="flex items-center font-[500] text-[14px] leading-[22px] text-text-teal gap-2 cursor-pointer"
         >
