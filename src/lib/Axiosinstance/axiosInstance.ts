@@ -1,5 +1,6 @@
 import axios from "axios";
 import { authToken } from "../authToken";
+import { refreshAccessToken } from "../refresh-token";
 
 const AxiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -20,7 +21,7 @@ AxiosInstance.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 // Response interceptor: handle errors globally
@@ -72,21 +73,11 @@ AxiosInstance.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const refreshResponse = await AxiosInstance.post(
-          "/api/auth/erp/refresh",
-          {},
-          { withCredentials: true }
-        );
-
-        const newAccessToken = refreshResponse.data?.access_token;
-        if (newAccessToken) {
-          authToken.set(newAccessToken);
-          // originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-          originalRequest.headers = {
-            ...(originalRequest.headers || {}),
-            Authorization: `Bearer ${newAccessToken}`,
-          };
-        }
+        const newAccessToken = await refreshAccessToken();
+        originalRequest.headers = {
+          ...(originalRequest.headers || {}),
+          Authorization: `Bearer ${newAccessToken}`,
+        };
         return AxiosInstance(originalRequest);
       } catch (refreshError) {
         if (typeof window !== "undefined") {
@@ -140,7 +131,7 @@ AxiosInstance.interceptors.response.use(
     // };
 
     return Promise.reject(customError);
-  }
+  },
 );
 
 export default AxiosInstance;

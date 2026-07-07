@@ -1,18 +1,17 @@
-// components/transaction/crypto-step-four.tsx
 "use client";
-
+ 
 import { useFormContext } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { ArrowUpRight, Loader2 } from "lucide-react";
 import { useCreateManualTransaction } from "@/lib/services/transaction.service";
 import { toast } from "sonner";
-
+ 
 interface Props {
   onClose: () => void;
   onBack: () => void;
   goToStep: (step: number) => void;
 }
-
+ 
 function SummaryItem({
   label,
   value,
@@ -37,7 +36,7 @@ function SummaryItem({
     </div>
   );
 }
-
+ 
 function SummarySection({
   title,
   onEdit,
@@ -64,35 +63,36 @@ function SummarySection({
     </div>
   );
 }
-
+ 
 export function CryptoStepFour({ onClose, onBack, goToStep }: Props) {
   const { watch } = useFormContext();
   const d = watch("details");
   const customer = watch("customer");
-
+ 
   const { mutate, isPending } = useCreateManualTransaction();
-
+ 
+  const isBuy = d?.tradeDirection === "Buy Crypto";
+ 
   // Derived values for display only (review screen)
   const partnerRate = parseFloat(d?.partnerRate ?? 0);
   const xbankaRate = parseFloat(d?.xbankaRate ?? 0);
   const customerPays = parseFloat(d?.customerPays ?? 0);
   const customerReceives = parseFloat(d?.customerReceives ?? 0);
+  // The crypto leg is whichever side isn't NGN, and margin is always earned on that leg.
+  const cryptoAmount = isBuy ? customerReceives : customerPays;
   const marginPerUnit =
     isNaN(partnerRate) || isNaN(xbankaRate) ? 0 : xbankaRate - partnerRate;
   const totalMargin =
-    isNaN(customerReceives) || isNaN(marginPerUnit)
-      ? 0
-      : customerReceives * marginPerUnit;
+    isNaN(cryptoAmount) || isNaN(marginPerUnit) ? 0 : cryptoAmount * marginPerUnit;
   const partnerCost =
-    isNaN(customerReceives) || isNaN(partnerRate)
-      ? 0
-      : customerReceives * partnerRate;
+    isNaN(cryptoAmount) || isNaN(partnerRate) ? 0 : cryptoAmount * partnerRate;
   const marginPct =
     partnerRate > 0 ? ((marginPerUnit / partnerRate) * 100).toFixed(2) + "%" : "0%";
-
-  const paysCurrency = d?.customerPaysCurrency ?? "NGN";
-  const receivesCurrency = d?.customerReceivesCurrency ?? "USDT";
-
+ 
+  const paysCurrency = d?.customerPaysCurrency ?? (isBuy ? "NGN" : "USDT");
+  const receivesCurrency = d?.customerReceivesCurrency ?? (isBuy ? "USDT" : "NGN");
+  const rateUnit = isBuy ? receivesCurrency : paysCurrency;
+ 
   const handleSubmit = () => {
     const payload = {
       // ── Customer ──
@@ -100,39 +100,64 @@ export function CryptoStepFour({ onClose, onBack, goToStep }: Props) {
       ...(customer?.isNewUser && customer?.newUserData
         ? { newUserData: customer.newUserData }
         : { userId: customer?.id }),
-
+ 
       // ── Step 1 ──
       tradeDirection: d?.tradeDirection ?? "",
-      // channelOrigin: d?.channelOrigin ?? "",
-      // transactionType: d?.transactionType ?? "",
-
+      transactionType: d?.transactionType ?? "",
+      channelOrigin: d?.channelOrigin ?? "",
+ 
       // ── Step 2 ──
-      customerPaysCurrency: d?.customerPaysCurrency ?? "NGN",
+      customerPaysCurrency: paysCurrency,
       customerPaysAmount: customerPays,
-      customerReceivesCurrency: d?.customerReceivesCurrency ?? "USDT",
-      customerReceivesAmount: parseFloat(d?.customerReceives ?? 0),
+      customerReceivesCurrency: receivesCurrency,
+      customerReceivesAmount: customerReceives,
       partner: d?.partner ?? "",
       partnerRate,
       xbankaRate,
-      marginPerUsdt: marginPerUnit,
+      marginPerUnit,
       totalMargin,
       marginPercentage: marginPct,
       internalNotes: d?.internalNotes ?? undefined,
-
-      // ── Step 3 ──
+ 
+      // ── Step 3: Customer Payment (fiat if Buy, crypto if Sell) ──
       paymentMethod: d?.paymentMethod ?? "",
       paymentStatus: d?.paymentStatus ?? "",
       paymentReference: d?.paymentReference ?? "",
-      receivedInto: d?.xbankaAccount ?? "",
+      receivedInto: d?.receivedInto ?? "",
+      expectedAmount: d?.expectedAmount ?? undefined,
+      amountReceived: d?.amountReceived ?? undefined,
+      dateReceived: d?.dateReceived ?? undefined,
+      ...(isBuy
+        ? {}
+        : {
+            paymentAsset: d?.paymentAsset ?? "",
+            paymentNetwork: d?.paymentNetwork ?? "",
+            senderWalletAddress: d?.senderWalletAddress ?? "",
+            transactionHash: d?.transactionHash ?? "",
+          }),
+ 
+      // ── Step 3: Xbanka Delivery (crypto if Buy, fiat if Sell) ──
       deliveryMethod: d?.deliveryMethod ?? "",
-      deliveryAsset: d?.deliveryAsset ?? "",
-      deliverySource: d?.deliverySource ?? "",
       deliveryStatus: d?.deliveryStatus ?? "",
       deliveryReference: d?.deliveryReference ?? "",
+      ...(isBuy
+        ? {
+            deliveryAsset: d?.deliveryAsset ?? "",
+            deliveryNetwork: d?.deliveryNetwork ?? "",
+            deliveryExpectedAmount: d?.deliveryExpectedAmount ?? undefined,
+            deliveryAmountReceived: d?.deliveryAmountReceived ?? undefined,
+            deliverySource: d?.deliverySource ?? "",
+          }
+        : {
+            expectedNgnAmount: d?.expectedNgnAmount ?? undefined,
+            amountPaid: d?.amountPaid ?? undefined,
+            paidFrom: d?.paidFrom ?? "",
+          }),
+ 
       attachmentUrl: d?.attachment ?? undefined,
     };
     console.log("payload:", payload);
-
+ 
     mutate(payload, {
       onSuccess: () => {
         toast.success("Transaction logged successfully");
@@ -140,7 +165,7 @@ export function CryptoStepFour({ onClose, onBack, goToStep }: Props) {
       },
     });
   };
-
+ 
   return (
     <div className="flex flex-col gap-4">
       {/* Customer info header (read-only) */}
@@ -153,7 +178,7 @@ export function CryptoStepFour({ onClose, onBack, goToStep }: Props) {
           <p className="text-xs text-[var(--text-secondary)]">{customer.newUserData.email}</p>
         </div>
       )}
-
+ 
       <SummarySection title="Trade Summary" onEdit={() => goToStep(2)}>
         <SummaryItem
           label="Customer Pays"
@@ -165,33 +190,49 @@ export function CryptoStepFour({ onClose, onBack, goToStep }: Props) {
         />
         <SummaryItem
           label="Partner Rate"
-          value={partnerRate ? `${paysCurrency} ${partnerRate.toLocaleString()} / ${receivesCurrency}` : undefined}
+          value={partnerRate ? `₦${partnerRate.toLocaleString()} / ${rateUnit}` : undefined}
         />
         <SummaryItem
           label="Xbanka Rate"
-          value={xbankaRate ? `${paysCurrency} ${xbankaRate.toLocaleString()} / ${receivesCurrency}` : undefined}
+          value={xbankaRate ? `₦${xbankaRate.toLocaleString()} / ${rateUnit}` : undefined}
         />
         <SummaryItem
           label="Partner Cost"
-          value={partnerCost ? `${paysCurrency} ${partnerCost.toLocaleString()}` : undefined}
+          value={partnerCost ? `₦${partnerCost.toLocaleString()}` : undefined}
         />
         <SummaryItem
           label="Total Margin"
-          value={totalMargin ? `${paysCurrency} ${totalMargin.toLocaleString()} (${marginPct})` : undefined}
+          value={totalMargin ? `₦${totalMargin.toLocaleString()} (${marginPct})` : undefined}
           highlight
         />
       </SummarySection>
-
+ 
       <SummarySection title="Settlement" onEdit={() => goToStep(3)}>
-        <SummaryItem label="Payment Method" value={d?.paymentMethod} />
-        <SummaryItem label="Payment Status" value={d?.paymentStatus} />
-        <SummaryItem label="Received Into" value={d?.xbankaAccount} />
-        <SummaryItem label="Payment Ref" value={d?.paymentReference} />
-        <SummaryItem label="Delivery Method" value={d?.deliveryMethod} />
-        <SummaryItem label="Delivery Status" value={d?.deliveryStatus} />
-        <SummaryItem label="Delivery Source" value={d?.deliverySource} full />
+        {isBuy ? (
+          <>
+            <SummaryItem label="Payment Method" value={d?.paymentMethod} />
+            <SummaryItem label="Payment Status" value={d?.paymentStatus} />
+            <SummaryItem label="Received Into" value={d?.receivedInto} />
+            <SummaryItem label="Payment Ref" value={d?.paymentReference} />
+            <SummaryItem label="Delivery Method" value={d?.deliveryMethod} />
+            <SummaryItem label="Delivery Status" value={d?.deliveryStatus} />
+            <SummaryItem label="Delivery Source" value={d?.deliverySource} full />
+          </>
+        ) : (
+          <>
+            <SummaryItem label="Payment Method" value={d?.paymentMethod} />
+            <SummaryItem label="Settlement Status" value={d?.paymentStatus} />
+            <SummaryItem label="Received Into" value={d?.receivedInto} />
+            <SummaryItem label="Payment Ref" value={d?.paymentReference} />
+            <SummaryItem label="Sender Wallet Address" value={d?.senderWalletAddress} />
+            <SummaryItem label="Transaction Hash" value={d?.transactionHash} />
+            <SummaryItem label="Delivery Method" value={d?.deliveryMethod} />
+            <SummaryItem label="Delivery Status" value={d?.deliveryStatus} />
+            <SummaryItem label="Paid From" value={d?.paidFrom} full />
+          </>
+        )}
       </SummarySection>
-
+ 
       {d?.attachment && (
         <div>
           <h4 className="text-sm font-semibold text-[var(--text-primary)] mb-2">Proof of Payment</h4>
@@ -201,7 +242,7 @@ export function CryptoStepFour({ onClose, onBack, goToStep }: Props) {
           </div>
         </div>
       )}
-
+ 
       <div className="flex gap-3 pt-4 border-t border-[var(--border-default)]">
         <Button type="button" variant="outline" className="flex-1" onClick={onBack} disabled={isPending}>
           Back
