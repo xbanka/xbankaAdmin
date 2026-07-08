@@ -1,21 +1,25 @@
-import { Upload } from 'lucide-react';
-import React, { useRef } from 'react'
-import { Button } from '../ui/button';
-import { SelectFieldLayout } from '../forms/SelectFieldLayout';
-import { useFormContext } from 'react-hook-form';
-import FormField from '../forms/FormField';
-import { CardLayout } from '../ui/card-layout';
+import { Upload } from "lucide-react";
+import React, { useRef } from "react";
+import { Button } from "../ui/button";
+import { SelectFieldLayout } from "../forms/SelectFieldLayout";
+import { useFormContext } from "react-hook-form";
+import FormField from "../forms/FormField";
+import { CardLayout } from "../ui/card-layout";
 
 const PAYMENT_METHODS = ["Bank Transfer", "Cash", "USDT Transfer", "Card"];
 const PAYMENT_STATUSES = ["Payment Received", "Pending", "Failed"];
 const XBANKA_ACCOUNTS = ["Stanbic Account", "GTB Account", "Zenith Account"];
-const DELIVERY_METHODS = ["Customer Wallet", "Bank Transfer", "Exchange Wallet"];
+const DELIVERY_METHODS = [
+  "Customer Wallet",
+  "Bank Transfer",
+  "Exchange Wallet",
+];
 const DELIVERY_ASSETS = ["USDT", "BTC", "ETH", "NGN"];
 const DELIVERY_SOURCES = ["Luno Wallet", "Binance Wallet", "Quidax Wallet"];
 const DELIVERY_STATUSES = ["Delivered", "Pending", "Failed"];
 
 export function BuySettlement() {
- const { watch, setValue, register } = useFormContext();
+  const { watch, setValue, register } = useFormContext();
   const fileRef = useRef<HTMLInputElement>(null);
 
   const paymentMethod = watch("details.paymentMethod") ?? "";
@@ -34,7 +38,7 @@ export function BuySettlement() {
       {/* Customer Payment */}
       <div>
         <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
-          Customer Payment buy
+          Customer Payment
         </h3>
         <CardLayout className="space-y-3">
           <div className="">
@@ -49,7 +53,7 @@ export function BuySettlement() {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <SelectFieldLayout
-              id="details.paymentMethod"
+              id="details.expectedAmount"
               label="Expected Amount"
               options={PAYMENT_METHODS}
               placeholder="Select method"
@@ -57,7 +61,7 @@ export function BuySettlement() {
               onChange={(v) => setValue("details.paymentMethod", v)}
             />
             <SelectFieldLayout
-              id="details.paymentStatus"
+              id="details.amountReceived"
               label="Amount Received"
               options={PAYMENT_STATUSES}
               placeholder="Select status"
@@ -67,7 +71,7 @@ export function BuySettlement() {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <SelectFieldLayout
-              id="details.paymentMethod"
+              id="details.paymentStatus"
               label="Payment Status"
               options={PAYMENT_METHODS}
               placeholder="Select method"
@@ -75,8 +79,8 @@ export function BuySettlement() {
               onChange={(v) => setValue("details.paymentMethod", v)}
             />
             <SelectFieldLayout
-              id="details.paymentStatus"
-              label="Received Info"
+              id="details.receivedInto"
+              label="Received Into"
               options={PAYMENT_STATUSES}
               placeholder="Select status"
               value={paymentStatus}
@@ -91,7 +95,7 @@ export function BuySettlement() {
               placeholder="GTB-TRF-882910"
             />
             <SelectFieldLayout
-              id="details.xbankaAccount"
+              id="details.dateReceived"
               label="Date Received"
               options={XBANKA_ACCOUNTS}
               placeholder="Select account"
@@ -128,7 +132,7 @@ export function BuySettlement() {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <SelectFieldLayout
-              id="details.deliverySource"
+              id="details.deliveryExpectedAmount"
               label="Expected Amount"
               options={DELIVERY_SOURCES}
               placeholder="Select source"
@@ -136,7 +140,7 @@ export function BuySettlement() {
               onChange={(v) => setValue("details.deliverySource", v)}
             />
             <SelectFieldLayout
-              id="details.deliveryStatus"
+              id="details.deliveryAmountReceived"
               label="Amount Received"
               options={DELIVERY_STATUSES}
               placeholder="Select status"
@@ -146,7 +150,7 @@ export function BuySettlement() {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <SelectFieldLayout
-              id="details.deliverySource"
+              id="details.deliveryNetwork"
               label="Network"
               options={DELIVERY_SOURCES}
               placeholder="Select source"
@@ -154,7 +158,7 @@ export function BuySettlement() {
               onChange={(v) => setValue("details.deliverySource", v)}
             />
             <SelectFieldLayout
-              id="details.deliveryStatus"
+              id="details.deliverySource"
               label="Delivery Source"
               options={DELIVERY_STATUSES}
               placeholder="Select status"
@@ -164,7 +168,7 @@ export function BuySettlement() {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <SelectFieldLayout
-              id="details.deliverySource"
+              id="details.deliveryDestination"
               label="Destination"
               options={DELIVERY_SOURCES}
               placeholder="Select source"
@@ -182,13 +186,13 @@ export function BuySettlement() {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <FormField
-            id="details.deliveryReference"
-            label="Delivery Reference"
-            register={register}
-            placeholder="WAL-CREDIT-00921"
-          />
+              id="details.deliveryReference"
+              label="Delivery Reference"
+              register={register}
+              placeholder="WAL-CREDIT-00921"
+            />
             <SelectFieldLayout
-              id="details.deliveryStatus"
+              id="details.deliveryDate"
               label="Delivery Date"
               options={DELIVERY_STATUSES}
               placeholder="Select status"
@@ -219,7 +223,9 @@ export function BuySettlement() {
         />
         {attachment ? (
           <div className="flex items-center gap-2 p-2 rounded border border-[var(--border-default)] bg-[var(--grey-light)] text-xs">
-            <span className="flex-1 truncate text-[var(--text-primary)]">{attachment}</span>
+            <span className="flex-1 truncate text-[var(--text-primary)]">
+              {attachment}
+            </span>
             <button
               type="button"
               className="text-[var(--text-secondary)] hover:text-[var(--mainRed)]"

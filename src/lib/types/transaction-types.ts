@@ -39,7 +39,13 @@ export interface TransactionRecord {
   currency: string;
   amount: number;
   note: string;
-  category: "CRYPTO" | "FIAT" | "GIFT_CARD" | "BILL_PAYMENT" | "MANUAL" | string;
+  category:
+    | "CRYPTO"
+    | "FIAT"
+    | "GIFT_CARD"
+    | "BILL_PAYMENT"
+    | "MANUAL"
+    | string;
   customer: TransactionCustomer;
   tradeDetails: TransactionTradeDetails;
   rateAndMargin: TransactionRateAndMargin;
@@ -59,7 +65,7 @@ export interface TransactionsResponse {
 }
 
 export interface CreateManualTransactionPayload {
-  isNewUser: boolean;
+  isNewUser?: boolean;
 
   userId?: string;
 
@@ -82,33 +88,51 @@ export interface CreateManualTransactionPayload {
   partnerRate: number;
   xbankaRate: number;
 
+  partnerCost: number;
   marginPerUsdt: number;
-  totalMargin: number;
-  marginPercentage: string;
+  grossMargin: number;
+  marginPercentage: number;
 
+  // Customer Payment
   paymentMethod: string;
   paymentStatus: string;
   paymentReference: string;
+  expectedAmount: number;
+  amountReceived: number;
   receivedInto: string;
+  dateReceived: string;
 
+  // Sell only
+  asset?: string;
+  network?: string;
+  senderWalletAddress?: string;
+  transactionHash?: string;
+
+  // Delivery
   deliveryMethod: string;
-  deliveryAsset: string;
-  deliverySource: string;
   deliveryStatus: string;
-  deliveryReference: string;
+  deliverySource: string;
+
+  // Buy only
+  deliveryAsset?: string;
+  // network?: string;
+
+  expectedDeliveryAmount: number;
+  amountDelivered: number;
+
+  attachmentUrl?: string;
 
   internalNotes?: string;
-  attachmentUrl?: string;
 }
 
-export type OnboardingStep = 
-  | "SIGNUP" 
-  | "EMAIL_VERIFIED" 
-  | "BASIC_INFO" 
-  | "BVN" 
-  | "IDENTITY" 
-  | "SELFIE" 
-  | "ADDRESS" 
+export type OnboardingStep =
+  | "SIGNUP"
+  | "EMAIL_VERIFIED"
+  | "BASIC_INFO"
+  | "BVN"
+  | "IDENTITY"
+  | "SELFIE"
+  | "ADDRESS"
   | "COMPLETED";
 
 // 2. Profile Interface
@@ -140,12 +164,12 @@ export interface CustomerUser {
   referredBy: string | null;
   currentStep: OnboardingStep;
   // Kept as string since it arrives as a stringified JSON array from your DB
-  completedOnboardingSteps: string; 
+  completedOnboardingSteps: string;
   createdAt: string;
   updatedAt: string;
   profile: CustomerUserProfileDetails;
-  
-  // Excluded or optional sensitive/nullable backend auth fields 
+
+  // Excluded or optional sensitive/nullable backend auth fields
   password?: string;
   transactionPin?: string;
   twoFactorSecret?: string | null;
@@ -171,5 +195,5 @@ export interface TransactionDetails {
   updatedAt: string;
   user: CustomerUser;
   // Kept as string since it arrives as a stringified JSON object from your DB
-  metadata: string; 
+  metadata: string;
 }
