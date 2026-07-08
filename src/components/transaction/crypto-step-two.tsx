@@ -30,20 +30,57 @@ export function CryptoStepTwo({ onContinue, onBack }: Props) {
   const partnerRate = watch("details.partnerRate") ?? "";
   const xbankaRate = watch("details.xbankaRate") ?? "";
 
-  // Auto-calculate margin per unit and totals
-  const marginPerUnit = useMemo(() => {
-    const pr = parseFloat(partnerRate);
-    const xr = parseFloat(xbankaRate);
-    if (!isNaN(pr) && !isNaN(xr)) return (xr - pr).toFixed(2);
-    return "";
-  }, [partnerRate, xbankaRate]);
+  const customerPaysAmount = parseFloat(watch("details.customerPays") || "0");
+  const customerReceivesAmount = parseFloat(
+    watch("details.customerReceives") || "0",
+  );
+
+  const partnerRateValue = parseFloat(partnerRate || "0");
+  const xbankaRateValue = parseFloat(xbankaRate || "0");
+
+  const calculations = useMemo(() => {
+    if (
+      isNaN(customerPaysAmount) ||
+      isNaN(customerReceivesAmount) ||
+      isNaN(partnerRateValue) ||
+      isNaN(xbankaRateValue)
+    ) {
+      return {
+        partnerCost: 0,
+        marginPerUnit: 0,
+        grossMargin: 0,
+        marginPercentage: 0,
+      };
+    }
+
+    const partnerCost = customerReceivesAmount * partnerRateValue;
+
+    const marginPerUnit = xbankaRateValue - partnerRateValue;
+
+    const grossMargin = customerPaysAmount - partnerCost;
+
+    const marginPercentage =
+      partnerCost > 0 ? (grossMargin / partnerCost) * 100 : 0;
+
+    return {
+      partnerCost,
+      marginPerUnit,
+      grossMargin,
+      marginPercentage,
+    };
+  }, [
+    customerPaysAmount,
+    customerReceivesAmount,
+    partnerRateValue,
+    xbankaRateValue,
+  ]);
 
   const totalMargin = useMemo(() => {
     const pays = parseFloat(customerPays);
-    const mg = parseFloat(marginPerUnit);
+    const mg = calculations?.marginPerUnit ?? 0;
     if (!isNaN(pays) && !isNaN(mg)) return (pays * mg).toFixed(2); // simplified
     return "";
-  }, [customerPays, marginPerUnit]);
+  }, [customerPays, calculations.marginPerUnit]);
 
   const isValid = customerPays && partnerRate && xbankaRate;
 
@@ -116,23 +153,43 @@ export function CryptoStepTwo({ onContinue, onBack }: Props) {
             />
           </div>
           {/* Margin summary */}
-          {marginPerUnit && (
+          {calculations?.marginPerUnit && (
             <div className="bg-[var(--grey-light)] rounded-lg p-3 text-xs flex flex-col gap-1">
               <div className="flex justify-between">
                 <span className="text-[var(--text-secondary)]">
-                  Margin per USDT
+                  Partners cost
                 </span>
                 <span className="text-[var(--text-teal)] font-medium">
-                  +${marginPerUnit}
+                  ₦{calculations.partnerCost.toLocaleString()}
                 </span>
               </div>
-              {totalMargin && (
+              {calculations?.marginPerUnit && (
                 <div className="flex justify-between">
                   <span className="text-[var(--text-secondary)]">
-                    Total Margin
+                    Margin per USDT
                   </span>
                   <span className="text-[var(--text-teal)] font-semibold">
-                    ₦{totalMargin}
+                    +₦{calculations.marginPerUnit.toLocaleString()}
+                  </span>
+                </div>
+              )}
+              {calculations?.grossMargin && (
+                <div className="flex justify-between">
+                  <span className="text-[var(--text-secondary)]">
+                    Gross Margin
+                  </span>
+                  <span className="text-[var(--text-teal)] font-semibold">
+                    ₦{calculations.grossMargin.toLocaleString()}
+                  </span>
+                </div>
+              )}
+              {calculations?.marginPercentage && (
+                <div className="flex justify-between">
+                  <span className="text-[var(--text-secondary)]">
+                    Margin percentage
+                  </span>
+                  <span className="text-[var(--text-teal)] font-semibold">
+                    {calculations.marginPercentage.toFixed(2)}%
                   </span>
                 </div>
               )}

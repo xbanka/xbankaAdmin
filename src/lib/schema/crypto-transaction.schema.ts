@@ -18,15 +18,33 @@ export const cryptoTransactionSchema = z.object({
   xbankaRate: z.string().optional(),
   internalNotes: z.string().optional(),
   // Step 3
+  // Step 3 - Common
   paymentMethod: z.string().optional(),
   paymentStatus: z.string().optional(),
   paymentReference: z.string().optional(),
-  xbankaAccount: z.string().optional(),
+  dateReceived: z.string().optional(),
+
+  expectedAmount: z.string().optional(),
+  amountReceived: z.string().optional(),
+  receivedInto: z.string().optional(),
+
+  // Sell only
+  paymentAsset: z.string().optional(),
+  paymentNetwork: z.string().optional(),
+  senderWalletAddress: z.string().optional(),
+  transactionHash: z.string().optional(),
+
+  // Delivery
   deliveryMethod: z.string().optional(),
-  deliveryAsset: z.string().optional(),
-  deliverySource: z.string().optional(),
   deliveryStatus: z.string().optional(),
-  deliveryReference: z.string().optional(),
+  deliverySource: z.string().optional(),
+
+  deliveryAsset: z.string().optional(),
+  deliveryNetwork: z.string().optional(),
+
+  expectedDeliveryAmount: z.string().optional(),
+  amountDelivered: z.string().optional(),
+
   attachment: z.string().nullable().optional(),
 });
 
