@@ -19,6 +19,7 @@
   --color-card-secondary: var(--card-secondary);
   --color-card-primary: var(--card-primary);
   --color-error-text: var(--error-text);
+  --color-alert-error-text: var(--alert-error-text);
   --color-error-border: var(--error-border);
   --color-error-light: var(--error-light);
   --color-button-primary-bg: var(--button-primary-bg);
@@ -41,6 +42,7 @@
   --color-mainRed: var(--mainRed);
   --color-deepBlue: var(--deepBlue);
   --color-offWhite: var(--offWhite);
+  --color-background-base: var(--background-base);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -95,6 +97,7 @@
   --card-secondary: #F9F9F9;
   --card-primary: #FFFFFF;
   --error-text: #E50500;
+  --alert-error-text: #991B1B;
   --error-border: #FFDAD8;
   --error-light: #FFF4F3;
   --button-primary-bg: #0C9A8E;
@@ -117,6 +120,7 @@
   --subCyan: #0198af;
   --deepBlue: #04153e;
   --offWhite: #f3f3f3;
+  --background-base: #F9FAFB;
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
