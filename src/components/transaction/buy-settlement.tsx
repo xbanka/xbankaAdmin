@@ -1,10 +1,11 @@
-import { Upload } from "lucide-react";
+import { File, Trash, Upload } from "lucide-react";
 import React, { useRef } from "react";
 import { Button } from "../ui/button";
 import { SelectFieldLayout } from "../forms/SelectFieldLayout";
 import { useFormContext } from "react-hook-form";
 import FormField from "../forms/FormField";
 import { CardLayout } from "../ui/card-layout";
+import { DateField } from "../ui/date-field";
 
 const PAYMENT_METHODS = ["Bank Transfer", "Cash", "USDT Transfer", "Card"];
 const PAYMENT_STATUSES = ["Payment Received", "Pending", "Failed"];
@@ -24,8 +25,10 @@ export function BuySettlement() {
 
   const paymentMethod = watch("details.paymentMethod") ?? "";
   const paymentStatus = watch("details.paymentStatus") ?? "";
+  const receivedInto = watch("details.receivedInto") ?? "";
   const xbankaAccount = watch("details.xbankaAccount") ?? "";
   const deliveryMethod = watch("details.deliveryMethod") ?? "";
+  const deliveryNetwork = watch("details.deliveryNetwork") ?? "";
   const deliveryAsset = watch("details.deliveryAsset") ?? "";
   const deliverySource = watch("details.deliverySource") ?? "";
   const deliveryStatus = watch("details.deliveryStatus") ?? "";
@@ -52,39 +55,35 @@ export function BuySettlement() {
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <SelectFieldLayout
+            <FormField
               id="details.expectedAmount"
               label="Expected Amount"
-              options={PAYMENT_METHODS}
-              placeholder="Select method"
-              value={paymentMethod}
-              onChange={(v) => setValue("details.paymentMethod", v)}
+              placeholder="Enter amount"
+              register={register}
             />
-            <SelectFieldLayout
+            <FormField
               id="details.amountReceived"
               label="Amount Received"
-              options={PAYMENT_STATUSES}
-              placeholder="Select status"
-              value={paymentStatus}
-              onChange={(v) => setValue("details.paymentStatus", v)}
+              placeholder="Enter amount"
+              register={register}
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <SelectFieldLayout
               id="details.paymentStatus"
               label="Payment Status"
-              options={PAYMENT_METHODS}
+              options={["Payment Received"]}
               placeholder="Select method"
-              value={paymentMethod}
-              onChange={(v) => setValue("details.paymentMethod", v)}
+              value={paymentStatus}
+              onChange={(v) => setValue("details.paymentStatus", v)}
             />
             <SelectFieldLayout
               id="details.receivedInto"
               label="Received Into"
-              options={PAYMENT_STATUSES}
-              placeholder="Select status"
-              value={paymentStatus}
-              onChange={(v) => setValue("details.paymentStatus", v)}
+              options={["Stanbic Account", "GTB Account", "Zenith Account"]}
+              placeholder="Select method"
+              value={receivedInto}
+              onChange={(v) => setValue("details.receivedInto", v)}
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -94,13 +93,17 @@ export function BuySettlement() {
               register={register}
               placeholder="GTB-TRF-882910"
             />
-            <SelectFieldLayout
+            <DateField
               id="details.dateReceived"
               label="Date Received"
-              options={XBANKA_ACCOUNTS}
-              placeholder="Select account"
-              value={xbankaAccount}
-              onChange={(v) => setValue("details.xbankaAccount", v)}
+              value={
+                watch("details.dateReceived")
+                  ? new Date(watch("details.dateReceived"))
+                  : undefined
+              }
+              onChange={(date) =>
+                setValue("details.dateReceived", date ? date.toISOString() : "")
+              }
             />
           </div>
         </CardLayout>
@@ -131,49 +134,43 @@ export function BuySettlement() {
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <SelectFieldLayout
+            <FormField
               id="details.deliveryExpectedAmount"
               label="Expected Amount"
-              options={DELIVERY_SOURCES}
-              placeholder="Select source"
-              value={deliverySource}
-              onChange={(v) => setValue("details.deliverySource", v)}
+              placeholder="Enter amount"
+              register={register}
             />
-            <SelectFieldLayout
+            <FormField
               id="details.deliveryAmountReceived"
               label="Amount Received"
-              options={DELIVERY_STATUSES}
-              placeholder="Select status"
-              value={deliveryStatus}
-              onChange={(v) => setValue("details.deliveryStatus", v)}
+              placeholder="Enter amount"
+              register={register}
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <SelectFieldLayout
               id="details.deliveryNetwork"
               label="Network"
-              options={DELIVERY_SOURCES}
-              placeholder="Select source"
-              value={deliverySource}
-              onChange={(v) => setValue("details.deliverySource", v)}
+              options={["TRC20"]}
+              placeholder="Select network"
+              value={deliveryNetwork}
+              onChange={(v) => setValue("details.deliveryNetwork", v)}
             />
             <SelectFieldLayout
               id="details.deliverySource"
               label="Delivery Source"
-              options={DELIVERY_STATUSES}
-              placeholder="Select status"
-              value={deliveryStatus}
-              onChange={(v) => setValue("details.deliveryStatus", v)}
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <SelectFieldLayout
-              id="details.deliveryDestination"
-              label="Destination"
-              options={DELIVERY_SOURCES}
+              options={["Luno Wallet"]}
               placeholder="Select source"
               value={deliverySource}
               onChange={(v) => setValue("details.deliverySource", v)}
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <FormField
+              id="details.deliveryDestination"
+              label="Destination"
+              placeholder="Enter delivery destination"
+              register={register}
             />
             <SelectFieldLayout
               id="details.deliveryStatus"
@@ -191,13 +188,17 @@ export function BuySettlement() {
               register={register}
               placeholder="WAL-CREDIT-00921"
             />
-            <SelectFieldLayout
+            <DateField
               id="details.deliveryDate"
               label="Delivery Date"
-              options={DELIVERY_STATUSES}
-              placeholder="Select status"
-              value={deliveryStatus}
-              onChange={(v) => setValue("details.deliveryStatus", v)}
+              value={
+                watch("details.deliveryDate")
+                  ? new Date(watch("details.deliveryDate"))
+                  : undefined
+              }
+              onChange={(date) =>
+                setValue("details.deliveryDate", date ? date.toISOString() : "")
+              }
             />
           </div>
         </CardLayout>
@@ -221,9 +222,18 @@ export function BuySettlement() {
             if (file) setValue("details.attachment", file.name);
           }}
         />
-        {attachment ? (
-          <div className="flex items-center gap-2 p-2 rounded border border-[var(--border-default)] bg-[var(--grey-light)] text-xs">
-            <span className="flex-1 truncate text-[var(--text-primary)]">
+        <button
+          type="button"
+          onClick={() => fileRef.current?.click()}
+          className="w-full border border-dashed border-[var(--grey-border)] rounded-lg p-6 flex flex-col items-center gap-2 text-xs text-[var(--text-secondary)] hover:bg-[var(--grey-light)] transition"
+        >
+          <Upload className="h-5 w-5" />
+          <span>JPG, PNG OR PDF • Max 5MB</span>
+        </button>
+        {attachment &&(
+          <div className="flex items-center gap-2 py-2 px-4 h-14 rounded-[8px] border border-background-alt-neutral-grey bg-background-base text-xs">
+            <File className="h-4 w-4 text-text-secondary" />
+            <span className="flex-1 truncate text-text-primary">
               {attachment}
             </span>
             <button
@@ -231,18 +241,9 @@ export function BuySettlement() {
               className="text-[var(--text-secondary)] hover:text-[var(--mainRed)]"
               onClick={() => setValue("details.attachment", null)}
             >
-              ✕
+              <Trash className="h-4 w-4 text-alert-error-text" />
             </button>
           </div>
-        ) : (
-          <button
-            type="button"
-            onClick={() => fileRef.current?.click()}
-            className="w-full border border-dashed border-[var(--grey-border)] rounded-lg p-6 flex flex-col items-center gap-2 text-xs text-[var(--text-secondary)] hover:bg-[var(--grey-light)] transition"
-          >
-            <Upload className="h-5 w-5" />
-            <span>JPG, PNG OR PDF • Max 5MB</span>
-          </button>
         )}
       </div>
     </div>
