@@ -122,7 +122,7 @@ export function TransactionsTable({
     {
       key: "reference",
       header: "Txn ID",
-      className: "md:w-[140px]",
+      className: "md:w-[230px]",
       render: (item: TransactionRecord) => (
         <span
           className="text-text-teal font-500 text-[14px] leading-[16px] truncate block"
@@ -135,7 +135,7 @@ export function TransactionsTable({
     {
       key: "createdAt",
       header: "Date",
-      className: "md:w-[110px]",
+      className: "md:w-[130px]",
       render: (item: TransactionRecord) => (
         <span className="font-500 text-[14px] leading-[18px] text-[#111827]">
           {formatDate(item.createdAt)}
@@ -147,12 +147,6 @@ export function TransactionsTable({
       header: "Customer",
       className: "md:w-[140px]",
       render: (item: TransactionRecord) => (
-        // <div className="cursor-pointer">
-        //   <span className="text-[var(--text-teal)] text-sm font-medium hover:underline block">
-        //     {item.customer?.firstName} {item.customer?.lastName}
-        //   </span>
-        //   <span className="text-xs text-gray-500">{item.customer?.email}</span>
-        // </div>
         <div className="text-text-teal text-sm font-medium leading-5 hover:underline block">
           {item?.customer?.firstName} {item?.customer?.lastName}
         </div>
@@ -182,7 +176,7 @@ export function TransactionsTable({
     {
       key: "details",
       header: "Details",
-      className: "md:w-[200px]",
+      className: "md:w-[230px]",
       render: (item: TransactionRecord) => (
         <div className="flex flex-col">
           <span className="text-[14px] font-medium text-[#111827]">
@@ -195,7 +189,7 @@ export function TransactionsTable({
     {
       key: "amount",
       header: "Amount",
-      className: "md:w-[120px]",
+      className: "md:w-[150px]",
       render: (item: TransactionRecord) => (
         <span className="text-[14px] font-medium text-[#111827] leading-[18px]">
           {item.currency} {moneyFmt(item.amount)}
@@ -205,13 +199,13 @@ export function TransactionsTable({
     {
       key: "status",
       header: "Status",
-      className: "md:w-[110px]",
+      className: "md:w-[150px]",
       render: (item: TransactionRecord) => <StatusBadge status={item.status} />,
     },
     {
       key: "action",
       header: "",
-      className: "md:w-[110px]",
+      className: "md:w-[140px]",
       render: (item: TransactionRecord) => (
         <div
           onClick={() => setDetailTransactionId(item.id)}
@@ -291,7 +285,7 @@ export function TransactionsTable({
           className="text-text-teal flex items-center gap-2 font-[500] text-[14px] leading-[22px] cursor-pointer"
         >
           <Eye size={16} />
-          view more
+          view
         </div>
       ),
     },

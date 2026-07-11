@@ -7,9 +7,11 @@ import { SelectFieldLayout } from "../forms/SelectFieldLayout";
 import FormField from "../forms/FormField";
 import { AmountField } from "../forms/AmountField";
 import { useMemo } from "react";
+import { CardLayout } from "../ui/card-layout";
 
 const PARTNERS = ["Luno"];
 const CRYPTO_CURRENCIES = ["USDT", "BTC", "ETH", "NGN"];
+const DELIVERY_SOURCES = ["Luno Wallet", "Rayosh", "Obiex", "Salmnine", "GredoEx"];
 
 interface Props {
   onContinue: () => void;
@@ -93,7 +95,7 @@ export function CryptoStepTwo({ onContinue, onBack }: Props) {
         </h3>
         <div className="flex flex-col gap-3">
           {/* Customer Pays row with currency select + amount */}
-          <div className="flex gap-2 items-end">
+          <CardLayout className="flex gap-2 items-end">
             <SelectFieldLayout
               label="Customer Pays"
               id="details.customerPaysCurrency"
@@ -103,9 +105,9 @@ export function CryptoStepTwo({ onContinue, onBack }: Props) {
               className="w-28"
             />
             <AmountField id="details.customerPays" placeholder="1,000,000" />
-          </div>
+          </CardLayout>
           {/* Customer Receives */}
-          <div className="flex gap-2 items-end">
+          <CardLayout className="flex gap-2 items-end">
             <SelectFieldLayout
               label="Customer Receives"
               id="details.customerReceivesCurrency"
@@ -115,7 +117,7 @@ export function CryptoStepTwo({ onContinue, onBack }: Props) {
               className="w-28"
             />
             <AmountField id="details.customerReceives" placeholder="2,000" />
-          </div>
+          </CardLayout>
         </div>
       </div>
 
@@ -128,73 +130,93 @@ export function CryptoStepTwo({ onContinue, onBack }: Props) {
           <SelectFieldLayout
             id="details.partner"
             label="Partner"
-            options={PARTNERS}
+            options={DELIVERY_SOURCES}
             placeholder="Select partner"
             value={watch("details.partner") ?? ""}
             onChange={(v) => setValue("details.partner", v)}
           />
-          {/* Rates row */}
-          <div className="grid grid-cols-2 gap-3">
-            <AmountField
-              id="details.partnerRate"
-              label="Partner Rate"
-              placeholder=" 1,500.00"
-              currencySymbol="₦"
-              currency="/USDT"
-              inputClassName="pl-6"
-            />
-            <AmountField
-              id="details.xbankaRate"
-              label="Xbanka Rate"
-              placeholder=" 1,500.00"
-              currencySymbol="₦"
-              currency="/USDT"
-              inputClassName="pl-6"
-            />
-          </div>
-          {/* Margin summary */}
-          {calculations?.marginPerUnit && (
-            <div className="bg-[var(--grey-light)] rounded-lg p-3 text-xs flex flex-col gap-1">
+          <CardLayout className="space-y-2">
+            {/* Rates row */}
+            <div className="grid grid-cols-2 gap-3">
+              <AmountField
+                id="details.partnerRate"
+                label="Partner Rate"
+                placeholder=" 1,500.00"
+                currencySymbol="₦"
+                currency="/USDT"
+                inputClassName="pl-6"
+              />
+              <AmountField
+                id="details.xbankaRate"
+                label="Xbanka Rate"
+                placeholder=" 1,500.00"
+                currencySymbol="₦"
+                currency="/USDT"
+                inputClassName="pl-6"
+              />
+            </div>
+            {/* Margin summary */}
+            <div className="text-xs flex flex-col gap-1">
               <div className="flex justify-between">
-                <span className="text-[var(--text-secondary)]">
+                <span className="font-medium leading-[20px] text-secondary-text">
                   Partners cost
                 </span>
-                <span className="text-[var(--text-teal)] font-medium">
-                  ₦{calculations.partnerCost.toLocaleString()}
-                </span>
-              </div>
-              {calculations?.marginPerUnit && (
-                <div className="flex justify-between">
-                  <span className="text-[var(--text-secondary)]">
-                    Margin per USDT
+                {calculations?.partnerCost > 0 ? (
+                  <span className="font-normal text-[16px] text-text-teal leading-[24px]">
+                    ₦{calculations.partnerCost.toLocaleString()}
                   </span>
-                  <span className="text-[var(--text-teal)] font-semibold">
+                ) : (
+                  <span className="font-normal text-[16px] text-text-teal leading-[24px]">
+                    ₦0.00
+                  </span>
+                )}
+              </div>
+
+              <div className="flex justify-between">
+                <span className="font-medium leading-[20px] text-secondary-text">
+                  Margin per USDT
+                </span>
+                {calculations?.marginPerUnit > 0 ? (
+                  <span className="font-normal text-[16px] text-text-teal leading-[24px]">
                     +₦{calculations.marginPerUnit.toLocaleString()}
                   </span>
-                </div>
-              )}
-              {calculations?.grossMargin && (
+                ) : (
+                  <span className="font-normal text-[16px] text-text-teal leading-[24px]">
+                    ₦0.00
+                  </span>
+                )}
+              </div>
+
                 <div className="flex justify-between">
-                  <span className="text-[var(--text-secondary)]">
+                  <span className="font-medium leading-[20px] text-secondary-text">
                     Gross Margin
                   </span>
-                  <span className="text-[var(--text-teal)] font-semibold">
-                    ₦{calculations.grossMargin.toLocaleString()}
-                  </span>
+                  {calculations?.grossMargin > 0 ? (
+                    <span className="font-normal text-[16px] text-text-teal leading-[24px]">
+                      +₦{calculations.grossMargin.toLocaleString()}
+                    </span>
+                  ) : (
+                    <span className="font-normal text-[16px] text-text-teal leading-[24px]">
+                      ₦0.00
+                    </span>
+                  )}
                 </div>
-              )}
-              {calculations?.marginPercentage && (
-                <div className="flex justify-between">
-                  <span className="text-[var(--text-secondary)]">
-                    Margin percentage
-                  </span>
-                  <span className="text-[var(--text-teal)] font-semibold">
+              <div className="flex justify-between">
+                <span className="font-medium leading-[20px] text-secondary-text">
+                  Margin percentage
+                </span>
+                {calculations?.marginPercentage > 0 ? (
+                  <span className="font-normal text-[16px] text-text-teal leading-[24px]">
                     {calculations.marginPercentage.toFixed(2)}%
                   </span>
-                </div>
-              )}
+                ) : (
+                  <span className="font-normal text-[16px] text-text-teal leading-[24px]">
+                    0.00%
+                  </span>
+                )}
+              </div>
             </div>
-          )}
+          </CardLayout>
         </div>
       </div>
 
@@ -203,12 +225,15 @@ export function CryptoStepTwo({ onContinue, onBack }: Props) {
         <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
           Additional Info
         </h3>
-        <FormField
-          id="details.internalNotes"
-          label="Internal Notes (Optional)"
-          register={register}
-          placeholder="Add internal notes..."
-        />
+        <CardLayout>
+          <FormField
+            id="details.internalNotes"
+            label="Internal Notes (Optional)"
+            register={register}
+            placeholder="Add internal notes..."
+            inputClassName="h-20"
+          />
+        </CardLayout>
       </div>
 
       <div className="flex gap-3 pt-4 border-t border-[var(--border-default)] mt-auto">

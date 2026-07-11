@@ -3,6 +3,7 @@ import React from "react";
 import { FieldError, FieldErrors } from "react-hook-form";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
+import { cn } from "@/lib/utils";
 
 interface FormFieldProps {
   id: string;
@@ -19,6 +20,7 @@ interface FormFieldProps {
   inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   value?: string;
+  inputClassName?: string;
 }
 
 const FormField = ({
@@ -32,7 +34,8 @@ const FormField = ({
   inputProps,
   error,
   onChange,
-  value
+  value,
+  inputClassName
 }: FormFieldProps) => {
   return (
     <div className="space-y-2 w-full">
@@ -45,9 +48,7 @@ const FormField = ({
           id={id}
           type={type}
           placeholder={placeholder}
-          className={`${
-            Icon ? "pl-10" : "px-3"
-          } focus:border-[var(--abstractCyan)]`}
+          className={cn( Icon ? "pl-10" : "px-3", "focus:border-abstractCyan", inputClassName)}
           readOnly={readOnly}
           onChange={onChange}
           value={value}
