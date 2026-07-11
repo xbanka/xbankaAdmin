@@ -1,22 +1,18 @@
 import { File, Trash, Upload } from "lucide-react";
-import React, { useRef } from "react";
-import { Button } from "../ui/button";
+import React, { useEffect, useRef } from "react";
 import { SelectFieldLayout } from "../forms/SelectFieldLayout";
 import { useFormContext } from "react-hook-form";
 import FormField from "../forms/FormField";
 import { CardLayout } from "../ui/card-layout";
 import { DateField } from "../ui/date-field";
+import { AmountField } from "../forms/AmountField";
 
-const PAYMENT_METHODS = ["Bank Transfer", "Cash", "USDT Transfer", "Card"];
+const PAYMENT_METHODS = ["Bank Transfer"];
 const PAYMENT_STATUSES = ["Payment Received", "Pending", "Failed"];
 const XBANKA_ACCOUNTS = ["Stanbic Account", "GTB Account", "Zenith Account"];
-const DELIVERY_METHODS = [
-  "Customer Wallet",
-  "Bank Transfer",
-  "Exchange Wallet",
-];
-const DELIVERY_ASSETS = ["USDT", "BTC", "ETH", "NGN"];
-const DELIVERY_SOURCES = ["Luno Wallet", "Binance Wallet", "Quidax Wallet"];
+const DELIVERY_METHODS = ["External Wallet Transfer", "Xbanka Wallet"];
+const DELIVERY_ASSETS = ["USDT", "BTC", "ETH"];
+const DELIVERY_SOURCES = ["Stanbic Account", "GTB Account", "Zenith Account"];
 const DELIVERY_STATUSES = ["Delivered", "Pending", "Failed"];
 
 export function BuySettlement() {
@@ -33,8 +29,26 @@ export function BuySettlement() {
   const deliverySource = watch("details.deliverySource") ?? "";
   const deliveryStatus = watch("details.deliveryStatus") ?? "";
   const attachment = watch("details.attachment");
+  const customerPays = watch("details.customerPays") ?? "";
+  const customerReceivesAmount = watch("details.customerReceives") ?? "";
+  const customerReceives = watch("details.customerReceives") ?? "";
+  const customerPaysCurrency = watch("details.customerPaysCurrency") ?? "NGN";
+  const customerReceivesCurrency =
+    watch("details.customerReceivesCurrency") ?? "USDT";
 
   const isValid = paymentMethod && paymentStatus && deliveryMethod;
+
+  const today = React.useMemo(() => new Date(), []);
+
+  useEffect(() => {
+    if (!watch("details.dateReceived")) {
+      setValue("details.dateReceived", today.toISOString());
+    }
+
+    if (!watch("details.deliveryDate")) {
+      setValue("details.deliveryDate", today.toISOString());
+    }
+  }, [setValue, today, watch]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -55,17 +69,22 @@ export function BuySettlement() {
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <FormField
+            <AmountField
               id="details.expectedAmount"
               label="Expected Amount"
+              value={customerPays}
+              readOnly
+              currencySymbol={customerPaysCurrency === "NGN" ? "₦" : "$"}
               placeholder="Enter amount"
-              register={register}
+              inputClassName="pl-6"
             />
-            <FormField
+            <AmountField
               id="details.amountReceived"
               label="Amount Received"
+              value={customerPays}
               placeholder="Enter amount"
-              register={register}
+              currencySymbol={customerPaysCurrency === "NGN" ? "₦" : "$"}
+              inputClassName="pl-6"
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -96,14 +115,8 @@ export function BuySettlement() {
             <DateField
               id="details.dateReceived"
               label="Date Received"
-              value={
-                watch("details.dateReceived")
-                  ? new Date(watch("details.dateReceived"))
-                  : undefined
-              }
-              onChange={(date) =>
-                setValue("details.dateReceived", date ? date.toISOString() : "")
-              }
+              value={today}
+              disabled
             />
           </div>
         </CardLayout>
@@ -134,17 +147,22 @@ export function BuySettlement() {
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <FormField
+            <AmountField
               id="details.deliveryExpectedAmount"
               label="Expected Amount"
-              placeholder="Enter amount"
-              register={register}
+              value={customerReceivesAmount}
+              readOnly
+              currency={`${customerReceivesCurrency}`}
+              placeholder=" 1500.00"
+              inputClassName="pl-6"
             />
-            <FormField
+            <AmountField
               id="details.deliveryAmountReceived"
               label="Amount Received"
-              placeholder="Enter amount"
-              register={register}
+              value={customerReceivesAmount}
+              placeholder="Enter amount delivered"
+              currency={`${customerReceivesCurrency}`}
+              inputClassName="pl-6"
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -159,7 +177,7 @@ export function BuySettlement() {
             <SelectFieldLayout
               id="details.deliverySource"
               label="Delivery Source"
-              options={["Luno Wallet"]}
+              options={DELIVERY_SOURCES}
               placeholder="Select source"
               value={deliverySource}
               onChange={(v) => setValue("details.deliverySource", v)}
@@ -191,21 +209,15 @@ export function BuySettlement() {
             <DateField
               id="details.deliveryDate"
               label="Delivery Date"
-              value={
-                watch("details.deliveryDate")
-                  ? new Date(watch("details.deliveryDate"))
-                  : undefined
-              }
-              onChange={(date) =>
-                setValue("details.deliveryDate", date ? date.toISOString() : "")
-              }
+              value={today}
+              disabled
             />
           </div>
         </CardLayout>
       </div>
 
       {/* Attachments */}
-      <div>
+      <div className="py-5 border-y border-[#E5E3E3] space-y-2">
         <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-2">
           Attachments
         </h3>
@@ -225,12 +237,17 @@ export function BuySettlement() {
         <button
           type="button"
           onClick={() => fileRef.current?.click()}
-          className="w-full border border-dashed border-[var(--grey-border)] rounded-lg p-6 flex flex-col items-center gap-2 text-xs text-[var(--text-secondary)] hover:bg-[var(--grey-light)] transition"
+          className="w-full border border-dashed h-[104px] border-[var(--grey-border)] rounded-lg py-4 px-12 flex flex-col items-center gap-2 text-xs text-[var(--text-secondary)] hover:bg-[var(--grey-light)] transition"
         >
-          <Upload className="h-5 w-5" />
-          <span>JPG, PNG OR PDF • Max 5MB</span>
+          <Upload size={24} className="text-secondary-text" />
+          <span className="font-normal text-[12px] leading-[16px] text-secondary-text">
+            Upload screenshot, receipt, or proof document
+          </span>
+          <span className="font-normal text-[12px] leading-[16px] text-secondary-text">
+            JPG, PNG OR PDF • Max 5MB
+          </span>
         </button>
-        {attachment &&(
+        {attachment && (
           <div className="flex items-center gap-2 py-2 px-4 h-14 rounded-[8px] border border-background-alt-neutral-grey bg-background-base text-xs">
             <File className="h-4 w-4 text-text-secondary" />
             <span className="flex-1 truncate text-text-primary">

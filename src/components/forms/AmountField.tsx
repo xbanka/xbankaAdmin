@@ -16,6 +16,8 @@ interface AmountFieldProps {
   currency?: string;
   currencySymbol?: string;
   inputClassName?: string;
+  readOnly?: boolean;
+  value?: string;
 }
 
 /**
@@ -32,9 +34,12 @@ export function AmountField({
   currency,
   currencySymbol,
   inputClassName,
+  readOnly = false,
+  value,
 }: AmountFieldProps) {
   const { watch, setValue } = useFormContext();
-  const raw = watch(id) ?? "";
+  const formValue = watch(id) ?? "";
+  const displayValue = value !== undefined ? value : formValue;
 
   return (
     <div className={`space-y-2 w-full ${className ?? ""}`}>
@@ -54,7 +59,8 @@ export function AmountField({
           inputMode="decimal"
           placeholder={placeholder}
           className={cn("px-3 focus:border-[var(--abstractCyan)]", inputClassName)}
-          value={formatAmountInput(raw)}
+          readOnly={readOnly}
+          value={formatAmountInput(displayValue)}
           onChange={(e) =>
             setValue(id, parseNumber(e.target.value), {
               shouldValidate: true,

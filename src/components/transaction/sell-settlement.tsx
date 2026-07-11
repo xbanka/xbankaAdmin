@@ -5,31 +5,42 @@ import { SelectFieldLayout } from "../forms/SelectFieldLayout";
 import { useFormContext } from "react-hook-form";
 import FormField from "../forms/FormField";
 import { CardLayout } from "../ui/card-layout";
+import { AmountField } from "../forms/AmountField";
+import { DateField } from "../ui/date-field";
 
-const PAYMENT_METHODS = ["Bank Transfer", "Cash", "USDT Transfer", "Card"];
+const PAYMENT_METHODS = ["Bank Transfer"];
 const PAYMENT_STATUSES = ["Payment Received", "Pending", "Failed"];
+const CRYPTO_NETWORKS = ["TRC20", "ERC20", "BEP20", "Bitcoin Network"];
 const XBANKA_ACCOUNTS = ["Stanbic Account", "GTB Account", "Zenith Account"];
-const DELIVERY_METHODS = [
-  "Customer Wallet",
-  "Bank Transfer",
-  "Exchange Wallet",
-];
-const DELIVERY_ASSETS = ["USDT", "BTC", "ETH", "NGN"];
-const DELIVERY_SOURCES = ["Luno Wallet", "Binance Wallet", "Quidax Wallet"];
+const BENEFICIARY_ACCOUNTS = ["GTB Account"];
+const DELIVERY_METHODS = ["External Wallet Transfer", "Xbanka Wallet"];
+const DELIVERY_ASSETS = ["USDT", "BTC", "ETH"];
 const DELIVERY_STATUSES = ["Delivered", "Pending", "Failed"];
+const DELIVERY_SOURCES = ["Luno Wallet", "Rayosh", "Obiex", "Salmnine", "GredoEx"];
 
 export function SellSettlement() {
   const { watch, setValue, register } = useFormContext();
   const fileRef = useRef<HTMLInputElement>(null);
 
   const paymentMethod = watch("details.paymentMethod") ?? "";
+  const paymentAsset = watch("details.paymentAsset") ?? "";
+  const paymentNetwork = watch("details.paymentNetwork") ?? "";
   const paymentStatus = watch("details.paymentStatus") ?? "";
+  const receivedInto = watch("details.receivedInto") ?? "";
+  const beneficiaryBank = watch("details.beneficiaryBank") ?? "";
   const xbankaAccount = watch("details.xbankaAccount") ?? "";
   const deliveryMethod = watch("details.deliveryMethod") ?? "";
+  const paidFrom = watch("details.paidFrom") ?? "";
   const deliveryAsset = watch("details.deliveryAsset") ?? "";
   const deliverySource = watch("details.deliverySource") ?? "";
   const deliveryStatus = watch("details.deliveryStatus") ?? "";
+  const customerPays = watch("details.customerPays") ?? "";
+  const customerReceivesAmount = watch("details.customerReceives") ?? "";
+  const customerPaysCurrency = watch("details.customerPaysCurrency") ?? "NGN";
+  const customerReceivesCurrency =
+    watch("details.customerReceivesCurrency") ?? "USDT";
   const attachment = watch("details.attachment");
+  const today = React.useMemo(() => new Date(), []);
 
   const isValid = paymentMethod && paymentStatus && deliveryMethod;
 
@@ -38,7 +49,7 @@ export function SellSettlement() {
       {/* Customer Payment */}
       <div>
         <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
-          Customer Payment sell
+          Customer Payment
         </h3>
         <CardLayout className="space-y-3">
           <div className="grid grid-cols-2 gap-3">
@@ -53,34 +64,38 @@ export function SellSettlement() {
             <SelectFieldLayout
               id="details.paymentAsset"
               label="Asset"
-              options={PAYMENT_STATUSES}
-              placeholder="Select status"
-              value={paymentStatus}
-              onChange={(v) => setValue("details.paymentStatus", v)}
+              options={DELIVERY_ASSETS}
+              placeholder="Select asset"
+              value={paymentAsset}
+              onChange={(v) => setValue("details.paymentAsset", v)}
             />
           </div>
           <SelectFieldLayout
             id="details.paymentNetwork"
             label="Network"
-            options={PAYMENT_STATUSES}
-            placeholder="Select status"
-            value={paymentStatus}
-            onChange={(v) => setValue("details.paymentStatus", v)}
+            options={CRYPTO_NETWORKS}
+            placeholder="Select network"
+            value={paymentNetwork}
+            onChange={(v) => setValue("details.paymentNetwork", v)}
           />
           <div className="grid grid-cols-2 gap-3">
-            <FormField
-             id="details.expectedAmount"
+            <AmountField
+              id="details.expectedAmount"
               label="Expected Amount"
-              register={register}
+              currency={`${customerReceivesCurrency}`}
+              value={customerPays}
               placeholder="GTB-TRF-882910"
+              readOnly
+              inputClassName="pl-6"
             />
-            <SelectFieldLayout
+            <AmountField
               id="details.amountReceived"
               label="Amount Received"
-              options={XBANKA_ACCOUNTS}
-              placeholder="Select account"
-              value={xbankaAccount}
-              onChange={(v) => setValue("details.xbankaAccount", v)}
+              currency={`${customerReceivesCurrency}`}
+              value={customerPays}
+              placeholder="GTB-TRF-882910"
+              readOnly
+              inputClassName="pl-6"
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -89,8 +104,8 @@ export function SellSettlement() {
               label="Received Into"
               options={XBANKA_ACCOUNTS}
               placeholder="Select account"
-              value={xbankaAccount}
-              onChange={(v) => setValue("details.xbankaAccount", v)}
+              value={receivedInto}
+              onChange={(v) => setValue("details.receivedInto", v)}
             />
             <FormField
               id="details.paymentReference"
@@ -106,31 +121,27 @@ export function SellSettlement() {
               register={register}
               placeholder="GTB-TRF-882910"
             />
-            <SelectFieldLayout
+            <FormField
               id="details.transactionHash"
               label="Transaction Hash"
-              options={XBANKA_ACCOUNTS}
-              placeholder="Select account"
-              value={xbankaAccount}
-              onChange={(v) => setValue("details.xbankaAccount", v)}
+              register={register}
+              placeholder="GTB-TRF-882910"
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <SelectFieldLayout
               id="details.paymentStatus"
               label="Settlement Status"
-              options={XBANKA_ACCOUNTS}
-              placeholder="Select account"
-              value={xbankaAccount}
-              onChange={(v) => setValue("details.xbankaAccount", v)}
+              options={DELIVERY_STATUSES}
+              placeholder="Select status"
+              value={paymentStatus}
+              onChange={(v) => setValue("details.paymentStatus", v)}
             />
-            <SelectFieldLayout
+            <DateField
               id="details.dateReceived"
               label="Date Received"
-              options={XBANKA_ACCOUNTS}
-              placeholder="Select account"
-              value={xbankaAccount}
-              onChange={(v) => setValue("details.xbankaAccount", v)}
+              value={today}
+              disabled
             />
           </div>
         </CardLayout>
@@ -151,37 +162,44 @@ export function SellSettlement() {
               value={deliveryMethod}
               onChange={(v) => setValue("details.deliveryMethod", v)}
             />
-            <SelectFieldLayout
+            <AmountField
               id="details.expectedNgnAmount"
               label="Expected NGN Amount"
-              options={DELIVERY_ASSETS}
-              placeholder="Select asset"
-              value={deliveryAsset}
-              onChange={(v) => setValue("details.deliveryAsset", v)}
+              value={customerReceivesAmount}
+              placeholder="Enter amount"
+              currencySymbol={customerPaysCurrency === "NGN" ? "₦" : "$"}
+              inputClassName="pl-6"
+              readOnly
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <FormField
-               id="details.amountPaid"
+            <AmountField
+              id="details.amountPaid"
               label="Amount Paid"
-              register={register}
-              placeholder="WAL-CREDIT-00921"
+              value={customerReceivesAmount}
+              placeholder="Enter amount"
+              currencySymbol={customerPaysCurrency === "NGN" ? "₦" : "$"}
+              inputClassName="pl-6"
+              readOnly
             />
+
             <SelectFieldLayout
               id="details.paidFrom"
               label="Paid From"
-              options={DELIVERY_ASSETS}
+              options={XBANKA_ACCOUNTS}
               placeholder="Select asset"
-              value={deliveryAsset}
-              onChange={(v) => setValue("details.deliveryAsset", v)}
+              value={paidFrom}
+              onChange={(v) => setValue("details.paidFrom", v)}
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <FormField
-             id="details.beneficiaryBank"
+            <SelectFieldLayout
+              id="details.beneficiaryBank"
               label="Beneficiary Bank"
-              register={register}
-              placeholder="WAL-CREDIT-00921"
+              options={BENEFICIARY_ACCOUNTS}
+              placeholder="Select asset"
+              value={beneficiaryBank}
+              onChange={(v) => setValue("details.beneficiaryBank", v)}
             />
             <FormField
               id="details.accountName"
@@ -197,29 +215,27 @@ export function SellSettlement() {
               register={register}
               placeholder="WAL-CREDIT-00921"
             />
-              <SelectFieldLayout
-                id="details.deliveryStatus"
-                label="Payment Status"
-                options={DELIVERY_SOURCES}
-                placeholder="Select source"
-                value={deliverySource}
-                onChange={(v) => setValue("details.deliverySource", v)}
-              />
+            <SelectFieldLayout
+              id="details.deliveryStatus"
+              label="Payment Status"
+              options={DELIVERY_SOURCES}
+              placeholder="Select source"
+              value={deliverySource}
+              onChange={(v) => setValue("details.deliverySource", v)}
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
-           <FormField
+            <FormField
               id="details.deliveryReference"
               label="Delivery Reference"
               register={register}
               placeholder="WAL-CREDIT-00921"
             />
-            <SelectFieldLayout
+            <DateField
               id="details.deliveryDate"
-              label="Date Received"
-              options={DELIVERY_STATUSES}
-              placeholder="Select status"
-              value={deliveryStatus}
-              onChange={(v) => setValue("details.deliveryStatus", v)}
+              label="Delivery Date"
+              value={today}
+              disabled
             />
           </div>
         </CardLayout>
@@ -260,10 +276,15 @@ export function SellSettlement() {
           <button
             type="button"
             onClick={() => fileRef.current?.click()}
-            className="w-full border border-dashed border-[var(--grey-border)] rounded-lg p-6 flex flex-col items-center gap-2 text-xs text-[var(--text-secondary)] hover:bg-[var(--grey-light)] transition"
+            className="w-full border border-dashed h-[104px] border-[var(--grey-border)] rounded-lg py-4 px-12 flex flex-col items-center gap-2 text-xs text-[var(--text-secondary)] hover:bg-[var(--grey-light)] transition"
           >
-            <Upload className="h-5 w-5" />
-            <span>JPG, PNG OR PDF • Max 5MB</span>
+            <Upload size={24} className="text-secondary-text" />
+            <span className="font-normal text-[12px] leading-[16px] text-secondary-text">
+              Upload screenshot, receipt, or proof document
+            </span>
+            <span className="font-normal text-[12px] leading-[16px] text-secondary-text">
+              JPG, PNG OR PDF • Max 5MB
+            </span>
           </button>
         )}
       </div>

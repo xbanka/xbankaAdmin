@@ -61,7 +61,7 @@ export const useCreateTransaction = () => {
 
       // ✅ Invalidate individual transaction queries
       queryClient.invalidateQueries({
-        queryKey: ["transaction"],
+        queryKey: ["transactions"],
       });
     },
     onError: (err) => {

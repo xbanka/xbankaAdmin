@@ -12,7 +12,7 @@ export function StatusBadge({ status }: { status: string }) {
             : "bg-gray-100 text-gray-600";
   return (
     <span
-      className={`capitalize px-3 py-[8px] rounded-full text-xs font-medium leading-[16px] ${cls}`}
+      className={`px-3 py-[8px] rounded-full text-xs font-medium leading-[16px] ${cls}`}
     >
       {status}
     </span>
