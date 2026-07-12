@@ -7,6 +7,7 @@ import FormField from "../forms/FormField";
 import { CardLayout } from "../ui/card-layout";
 import { AmountField } from "../forms/AmountField";
 import { DateField } from "../ui/date-field";
+import { FilePreview } from "../ui/file-preview";
 
 const PAYMENT_METHODS = ["Bank Transfer"];
 const PAYMENT_STATUSES = ["Payment Received", "Pending", "Failed"];
@@ -16,7 +17,13 @@ const BENEFICIARY_ACCOUNTS = ["GTB Account"];
 const DELIVERY_METHODS = ["External Wallet Transfer", "Xbanka Wallet"];
 const DELIVERY_ASSETS = ["USDT", "BTC", "ETH"];
 const DELIVERY_STATUSES = ["Delivered", "Pending", "Failed"];
-const DELIVERY_SOURCES = ["Luno Wallet", "Rayosh", "Obiex", "Salmnine", "GredoEx"];
+const DELIVERY_SOURCES = [
+  "Luno Wallet",
+  "Rayosh",
+  "Obiex",
+  "Salmnine",
+  "GredoEx",
+];
 
 export function SellSettlement() {
   const { watch, setValue, register } = useFormContext();
@@ -259,33 +266,24 @@ export function SellSettlement() {
             if (file) setValue("details.attachment", file.name);
           }}
         />
-        {attachment ? (
-          <div className="flex items-center gap-2 p-2 rounded border border-[var(--border-default)] bg-[var(--grey-light)] text-xs">
-            <span className="flex-1 truncate text-[var(--text-primary)]">
-              {attachment}
-            </span>
-            <button
-              type="button"
-              className="text-[var(--text-secondary)] hover:text-[var(--mainRed)]"
-              onClick={() => setValue("details.attachment", null)}
-            >
-              ✕
-            </button>
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={() => fileRef.current?.click()}
-            className="w-full border border-dashed h-[104px] border-[var(--grey-border)] rounded-lg py-4 px-12 flex flex-col items-center gap-2 text-xs text-[var(--text-secondary)] hover:bg-[var(--grey-light)] transition"
-          >
-            <Upload size={24} className="text-secondary-text" />
-            <span className="font-normal text-[12px] leading-[16px] text-secondary-text">
-              Upload screenshot, receipt, or proof document
-            </span>
-            <span className="font-normal text-[12px] leading-[16px] text-secondary-text">
-              JPG, PNG OR PDF • Max 5MB
-            </span>
-          </button>
+        <button
+          type="button"
+          onClick={() => fileRef.current?.click()}
+          className="w-full border border-dashed h-[104px] border-[var(--grey-border)] rounded-lg py-4 px-12 flex flex-col items-center gap-2 text-xs text-[var(--text-secondary)] hover:bg-[var(--grey-light)] transition"
+        >
+          <Upload size={24} className="text-secondary-text" />
+          <span className="font-normal text-[12px] leading-[16px] text-secondary-text">
+            Upload screenshot, receipt, or proof document
+          </span>
+          <span className="font-normal text-[12px] leading-[16px] text-secondary-text">
+            JPG, PNG OR PDF • Max 5MB
+          </span>
+        </button>
+        {attachment && (
+          <FilePreview
+            fileName={attachment}
+            onRemove={() => setValue("details.attachment", null)}
+          />
         )}
       </div>
     </div>

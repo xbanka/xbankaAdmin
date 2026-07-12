@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowUpRight, Loader2 } from "lucide-react";
 import { useCreateManualTransaction } from "@/lib/services/transaction.service";
 import { toast } from "sonner";
+import { FilePreview } from "../ui/file-preview";
 
 interface Props {
   onClose: () => void;
@@ -47,21 +48,23 @@ function SummarySection({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-[var(--grey-light)] rounded-xl p-4">
-      <div className="flex items-center justify-between mb-4">
-        <h4 className="text-sm font-semibold text-[var(--text-primary)]">
+    <div className="">
+      <div className="bg-card-secondary border-x border-t border-card-border-secondary flex items-center justify-between rounded-tl-[20px] rounded-tr-[20px] py-3 px-5">
+        <h4 className="text-sm font-medium leading-5 text-text-primary">
           {title}
         </h4>
         {onEdit && (
           <button
             onClick={onEdit}
-            className="flex items-center gap-1 text-xs font-medium text-[var(--text-teal)] hover:underline"
+            className="flex items-center gap-1 text-xs font-medium text-text-teal hover:underline"
           >
             Edit <ArrowUpRight className="h-3.5 w-3.5" />
           </button>
         )}
       </div>
-      <div className="grid grid-cols-2 gap-x-6 gap-y-4">{children}</div>
+      <div className="bg-card-primary border border-card-border-secondary rounded-bl-[20px] rounded-br-[20px] py-4 px-5 grid grid-cols-2 gap-x-6 gap-y-4">
+        {children}
+      </div>
     </div>
   );
 }
@@ -195,85 +198,77 @@ export function CryptoStepFour({ onClose, onBack, goToStep }: Props) {
         </div>
       )}
 
-      {/* <SummarySection title="Trade Summary" onEdit={() => goToStep(2)}>
-        <SummaryItem
-          label="Customer Pays"
-          value={
-            customerPays
-              ? `${paysCurrency} ${customerPays.toLocaleString()}`
-              : undefined
-          }
-        />
-        <SummaryItem
-          label="Customer Receives"
-          value={
-            customerReceives
-              ? `${customerReceives.toLocaleString()} ${receivesCurrency}`
-              : undefined
-          }
-        />
-        <SummaryItem
-          label="Partner Rate"
-          value={
-            partnerRate
-              ? `₦${partnerRate.toLocaleString()} / ${rateUnit}`
-              : undefined
-          }
-        />
-        <SummaryItem
-          label="Xbanka Rate"
-          value={
-            xbankaRate
-              ? `₦${xbankaRate.toLocaleString()} / ${rateUnit}`
-              : undefined
-          }
-        />
-        <SummaryItem
-          label="Partner Cost"
-          value={partnerCost ? `₦${partnerCost.toLocaleString()}` : undefined}
-        />
-        <SummaryItem
-          label="Total Margin"
-          value={
-            totalMargin
-              ? `₦${totalMargin.toLocaleString()} (${marginPct})`
-              : undefined
-          }
-          highlight
-        />
-      </SummarySection> */}
-
-      <SummarySection title="Settlement" onEdit={() => goToStep(3)}>
+      <div>
         {isBuy ? (
-          <>
-            <SummarySection title="Customer Payment" onEdit={() => goToStep(3)}>
-              <SummaryItem label="Payment Method" value={d.paymentMethod} />
-              <SummaryItem label="Expected Amount" value={d.expectedAmount} />
-              <SummaryItem label="Amount Received" value={d.amountReceived} />
-              <SummaryItem label="Payment Status" value={d.paymentStatus} />
-              <SummaryItem label="Received Into" value={d.receivedInto} />
+          <div className="space-y-4">
+            <SummarySection title="Trade Summary" onEdit={() => goToStep(2)}>
               <SummaryItem
-                label="Payment Reference"
-                value={d.paymentReference}
+                label="Customer Pays"
+                value={
+                  customerPays
+                    ? `${paysCurrency} ${customerPays.toLocaleString()}`
+                    : undefined
+                }
               />
-              <SummaryItem label="Date Received" value={d.dateReceived} />
+              <SummaryItem
+                label="Customer Receives"
+                value={
+                  customerReceives
+                    ? `${customerReceives.toLocaleString()} ${receivesCurrency}`
+                    : undefined
+                }
+              />
+              <SummaryItem
+                label="Partner Rate"
+                value={
+                  partnerRate
+                    ? `₦${partnerRate.toLocaleString()} / ${rateUnit}`
+                    : undefined
+                }
+              />
+              <SummaryItem
+                label="Xbanka Rate"
+                value={
+                  xbankaRate
+                    ? `₦${xbankaRate.toLocaleString()} / ${rateUnit}`
+                    : undefined
+                }
+              />
+              <SummaryItem
+                label="Partner Cost"
+                value={
+                  partnerCost ? `₦${partnerCost.toLocaleString()}` : undefined
+                }
+              />
+              <SummaryItem
+                label="Total Margin"
+                value={
+                  d.totalMargin
+                    ? `₦${d.totalMargin.toLocaleString()} (${d.marginPct})`
+                    : undefined
+                }
+                highlight
+              />
             </SummarySection>
 
-            <SummarySection title="Xbanka Delivery" onEdit={() => goToStep(3)}>
+            <SummarySection title="Settlement" onEdit={() => goToStep(3)}>
+              <SummaryItem label="Payment Method" value={d.paymentMethod} />
+
+              <SummaryItem label="Payment Status" value={d.paymentStatus} />
+
+              <SummaryItem label="Received Into" value={d.receivedInto} />
+
+              <SummaryItem label="Payment Ref" value={d.paymentReference} />
+
               <SummaryItem label="Delivery Method" value={d.deliveryMethod} />
-              <SummaryItem label="Asset" value={d.deliveryAsset} />
-              <SummaryItem label="Network" value={d.deliveryNetwork} />
-              <SummaryItem
-                label="Expected Amount"
-                value={d.expectedDeliveryAmount}
-              />
-              <SummaryItem label="Amount Delivered" value={d.amountDelivered} />
-              <SummaryItem label="Delivery Source" value={d.deliverySource} />
+
               <SummaryItem label="Delivery Status" value={d.deliveryStatus} />
+
+              <SummaryItem label="Delivery Source" value={d.deliverySource} />
             </SummarySection>
-          </>
+          </div>
         ) : (
-          <>
+          <div className="space-y-4">
             <SummarySection title="Customer Payment" onEdit={() => goToStep(3)}>
               <SummaryItem label="Payment Method" value={d.paymentMethod} />
               <SummaryItem label="Asset" value={d.paymentAsset} />
@@ -309,23 +304,16 @@ export function CryptoStepFour({ onClose, onBack, goToStep }: Props) {
               <SummaryItem label="Paid From" value={d.deliverySource} />
               <SummaryItem label="Payment Status" value={d.deliveryStatus} />
             </SummarySection>
-          </>
+          </div>
         )}
-      </SummarySection>
+      </div>
 
       {d?.attachment && (
         <div>
           <h4 className="text-sm font-semibold text-[var(--text-primary)] mb-2">
             Proof of Payment
           </h4>
-          <div className="bg-[var(--grey-light)] rounded-lg p-3 flex items-center justify-between">
-            <span className="text-xs text-[var(--text-primary)] truncate">
-              {d.attachment}
-            </span>
-            <span className="text-xs text-[var(--text-teal)] cursor-pointer">
-              View
-            </span>
-          </div>
+          <FilePreview fileName={d.attachment} btnClass="" />
         </div>
       )}
 
