@@ -6,6 +6,7 @@ import FormField from "../forms/FormField";
 import { CardLayout } from "../ui/card-layout";
 import { DateField } from "../ui/date-field";
 import { AmountField } from "../forms/AmountField";
+import { FilePreview } from "../ui/file-preview";
 
 const PAYMENT_METHODS = ["Bank Transfer"];
 const PAYMENT_STATUSES = ["Payment Received", "Pending", "Failed"];
@@ -248,19 +249,10 @@ export function BuySettlement() {
           </span>
         </button>
         {attachment && (
-          <div className="flex items-center gap-2 py-2 px-4 h-14 rounded-[8px] border border-background-alt-neutral-grey bg-background-base text-xs">
-            <File className="h-4 w-4 text-text-secondary" />
-            <span className="flex-1 truncate text-text-primary">
-              {attachment}
-            </span>
-            <button
-              type="button"
-              className="text-[var(--text-secondary)] hover:text-[var(--mainRed)]"
-              onClick={() => setValue("details.attachment", null)}
-            >
-              <Trash className="h-4 w-4 text-alert-error-text" />
-            </button>
-          </div>
+          <FilePreview
+            fileName={attachment}
+            onRemove={() => setValue("details.attachment", null)}
+          />
         )}
       </div>
     </div>

@@ -14,7 +14,6 @@ import { TransactionFormValues } from "@/lib/schema/transaction.schema";
 import { useUserStore } from "@/store/userStore";
 import {
   CustomerAccountItem,
-  CustomerProps,
   CustomerSearchSidebarProps,
 } from "@/lib/types/customer";
 import { SidebarView, UserSummaryItem } from "./transaction-data";
@@ -61,22 +60,6 @@ export function CustomerSearchSidebar({
       });
     }
   }, [user, setValue]);
-
-  // const handleCustomerSelect = (customer: Customer) => {
-  //   const assignedRep = user ? `${user.first_name} ${user.last_name}` : "";
-
-  //   setValue(
-  //     "customer",
-  //     {
-  //       id: customer.id,
-  //       name: customer.profile?.firstName,
-  //       email: customer.email,
-  //       phone: customer.profile?.phoneNumber,
-  //       assignedRep, // ✅ injected automatically
-  //     },
-  //     { shouldValidate: true }
-  //   );
-  // };
 
   const { data, isLoading: customerLoading } = useGetCustomer(searchQuery);
   console.log("CUSTOMER API RESPONSE", data);
@@ -357,12 +340,12 @@ export function CustomerSearchSidebar({
         <div className="flex-1 overflow-y-auto px-6 pt-4">
           {/* No customer found state */}
           {noResultsFound && !activeCustomer ? (
-            <div className="flex flex-col items-center justify-center h-48 gap-3">
-              <User className="h-10 w-10 text-gray-300" />
-              <p className="text-sm font-medium text-gray-700">No Customer Found</p>
+            <div className="flex flex-col items-center justify-center h-48 my-14 gap-3">
+              <User className="h-10 w-10 text-text-secondary" />
+              <p className="text-[24px] text-text-primary font-[600]">No Customer Found</p>
               <button
                 onClick={() => setView("new-user")}
-                className="flex items-center gap-1 text-sm text-[var(--text-teal)] hover:underline font-medium"
+                className="flex items-center gap-1 text-[12px] text-text-teal hover:underline font-medium cursor-pointer"
               >
                 Create New Customer <ArrowUpRight className="h-3.5 w-3.5" />
               </button>
