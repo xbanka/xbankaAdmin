@@ -9,7 +9,6 @@ export async function refreshAccessToken(): Promise<string> {
   }
 
   refreshPromise = (async () => {
-
     const { data } = await axios.post(
       `${process.env.NEXT_PUBLIC_API_URL}/api/auth/erp/refresh`,
       {},

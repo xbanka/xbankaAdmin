@@ -3,6 +3,7 @@
 import {
   Calendar,
   Edit,
+  Eye,
   Pencil,
   Plus,
   Search,
@@ -17,13 +18,19 @@ import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { DashboardLayout } from "../layout/dashboard-layout";
 import { EmptySpreadSchedule } from "./empty-spread-schedule";
-import { useGetCryptoRates, useUpdateBuyAndSpreadRates } from "@/lib/services/rates.service";
+import {
+  useGetCryptoRates,
+  useUpdateBuyAndSpreadRates,
+} from "@/lib/services/rates.service";
 import { CryptoCurrencyTypes } from "@/lib/types/rates-types";
 import { formatDate } from "@/lib/formatDate";
 import { Input } from "../ui/input";
 import { SelectFieldLayout } from "../forms/SelectFieldLayout";
 import { SEGMENT_TYPES } from "./mock";
 import { Badge } from "./badge";
+import { SPREAD_HISTORY_MOCK, SpreadHistoryEntry } from "./types";
+import { AffectedAssetsBadge, ScopeBadge } from "./scope-badge";
+import { SpreadChangeDetailsDrawer } from "./spread-change-details-change-drawer";
 
 export default function RateManagement() {
   const [activeTab, setActiveTab] = useState<"schedule" | "history">(
@@ -36,7 +43,9 @@ export default function RateManagement() {
   const { mutate: updateCryptoRate } = useUpdateBuyAndSpreadRates();
   const [selectedTransactionType, setSelectedTransactionType] =
     useState<string>("");
-  console.log("rates", data);
+  const [selectedHistoryEntry, setSelectedHistoryEntry] =
+    useState<SpreadHistoryEntry | null>(null);
+  const historyData = SPREAD_HISTORY_MOCK;
   const ratesData = data?.data;
   console.log(ratesData);
 
@@ -173,6 +182,108 @@ export default function RateManagement() {
     },
   ];
 
+  const historyColumns = [
+    {
+      key: "dateTime",
+      header: "Date & Time",
+      render: (row: SpreadHistoryEntry) => {
+        const d = new Date(row.dateTime);
+        return (
+          <div>
+            <div className="text-[12px] text-[#111827]">
+              {d.toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })}
+            </div>
+            <div className="text-[11px] text-[#9CA3AF]">
+              {d.toLocaleTimeString("en-US", {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      key: "scope",
+      header: "Scope",
+      render: (row: SpreadHistoryEntry) => <ScopeBadge scope={row.scope} />,
+    },
+    {
+      key: "target",
+      header: "Target",
+      render: (row: SpreadHistoryEntry) => (
+        <div>
+          <div className="text-[13px] font-medium text-[#111827]">
+            {row.targetName}
+          </div>
+          <div className="text-[11px] text-[#9CA3AF]">{row.targetSubLabel}</div>
+        </div>
+      ),
+    },
+    {
+      key: "changeType",
+      header: "Change Type",
+      render: (row: SpreadHistoryEntry) => (
+        <div className="text-[13px] text-[#111827]">{row.changeType}</div>
+      ),
+    },
+    {
+      key: "previousConfig",
+      header: "Previous Configuration",
+      render: (row: SpreadHistoryEntry) => (
+        <div className="text-[13px] text-[#111827]">
+          Buy: {row.previousConfig.buy.toFixed(2)}%
+          <br />
+          Sell: {row.previousConfig.sell.toFixed(2)}%
+        </div>
+      ),
+    },
+    {
+      key: "newConfig",
+      header: "New Configuration",
+      render: (row: SpreadHistoryEntry) => (
+        <div className="text-[13px] text-[#111827]">
+          Buy: {row.newConfig.buy.toFixed(2)}%
+          <br />
+          Sell: {row.newConfig.sell.toFixed(2)}%
+        </div>
+      ),
+    },
+    {
+      key: "affectedAssetsCount",
+      header: "Affected Asset",
+      render: (row: SpreadHistoryEntry) => (
+        <AffectedAssetsBadge count={row.affectedAssetsCount} />
+      ),
+    },
+    {
+      key: "updatedBy",
+      header: "Update by",
+      render: (row: SpreadHistoryEntry) => (
+        <div>
+          <div className="text-[12px] text-[#111827]">{row.updatedBy.name}</div>
+          <div className="text-[11px] text-[#9CA3AF]">{row.updatedBy.role}</div>
+        </div>
+      ),
+    },
+    {
+      key: "actions",
+      header: "",
+      render: (row: SpreadHistoryEntry) => (
+        <button
+          onClick={() => setSelectedHistoryEntry(row)}
+          className="flex items-center gap-1 text-[13px] text-[#0D9488] font-medium hover:opacity-70 transition-opacity"
+        >
+          <Eye size={14} /> View
+        </button>
+      ),
+    },
+  ];
+
   return (
     <DashboardLayout
       isPending={false}
@@ -242,15 +353,27 @@ export default function RateManagement() {
                   </button>
                 </div>
 
-                <DataTableLayout
-                  data={ratesData}
-                  columns={columns}
-                  rowKey={(row) => row.id}
-                  itemsPerPage={10}
-                  totalCount={ratesData?.length}
-                  emptyMessage="No spreads configured yet."
-                  isLoading={isPending}
-                />
+                {activeTab === "schedule" ? (
+                  <DataTableLayout
+                    data={ratesData}
+                    columns={columns}
+                    rowKey={(row) => row.id}
+                    itemsPerPage={10}
+                    totalCount={ratesData?.length}
+                    emptyMessage="No spreads configured yet."
+                    isLoading={isPending}
+                  />
+                ) : (
+                  <DataTableLayout
+                    data={historyData}
+                    columns={historyColumns}
+                    rowKey={(row) => row.id}
+                    itemsPerPage={10}
+                    totalCount={historyData?.length}
+                    emptyMessage="No spread changes recorded yet."
+                    isLoading={false}
+                  />
+                )}
               </main>
             )
           ) : (
@@ -269,6 +392,10 @@ export default function RateManagement() {
             }}
           />
         )}
+        <SpreadChangeDetailsDrawer
+          entry={selectedHistoryEntry}
+          onClose={() => setSelectedHistoryEntry(null)}
+        />
 
         {/* Create Wizard */}
       </div>
