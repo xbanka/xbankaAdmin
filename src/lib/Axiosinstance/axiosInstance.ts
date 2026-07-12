@@ -73,11 +73,21 @@ AxiosInstance.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const newAccessToken = await refreshAccessToken();
-        originalRequest.headers = {
-          ...(originalRequest.headers || {}),
-          Authorization: `Bearer ${newAccessToken}`,
-        };
+        const refreshResponse = await AxiosInstance.post(
+          "/api/auth/erp/refresh",
+          {},
+          { withCredentials: true }
+        );
+
+        const newAccessToken = refreshResponse.data?.access_token;
+        if (newAccessToken) {
+          authToken.set(newAccessToken);
+          // originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+          originalRequest.headers = {
+            ...(originalRequest.headers || {}),
+            Authorization: `Bearer ${newAccessToken}`,
+          };
+        }
         return AxiosInstance(originalRequest);
       } catch (refreshError) {
         if (typeof window !== "undefined") {

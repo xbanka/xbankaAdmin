@@ -24,16 +24,16 @@ interface Notification {
   amount: number;
   method: string;
   affiliate: {
-    id: "3fa85f64-5717-4562-b3fc-2c963f66afa6";
-    first_name: "string";
-    last_name: "string";
-    email: "string";
-    username: "string";
-    phone_no: "string";
-    bank: "string";
-    account_no: "string";
-    ref_code: "string";
-    custom_refcode: "string";
+    id: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+    username: string;
+    phone_no: string;
+    bank: string;
+    account_no: string;
+    ref_code: string;
+    custom_refcode: string;
   };
 }
 
