@@ -8,7 +8,7 @@ import { SelectFieldLayout } from "../forms/SelectFieldLayout";
 const TRANSACTION_TYPES = ["Crypto Trade"];
 const TRADE_DIRECTIONS = ["Buy Crypto", "Sell Crypto", "Convert Crypto"];
 // const TRADE_DIRECTIONS = ["NGN-USDT", "USDT-NGN", "BTC-NGN", "NGN-BTC", "ETH-NGN", "NGN-ETH"];
-const CHANNEL_ORIGINS = ["WhatsApp", "Web App", "Walk-in", "Phone Call"];
+const CHANNEL_ORIGINS = ["WhatsApp"];
 
 interface Props {
   onContinue: () => void;

@@ -7,9 +7,11 @@ import { SelectFieldLayout } from "../forms/SelectFieldLayout";
 import FormField from "../forms/FormField";
 import { AmountField } from "../forms/AmountField";
 import { useMemo } from "react";
+import { CardLayout } from "../ui/card-layout";
 
-const PARTNERS = ["Luno", "Quidax", "Bybit", "Obiex", "Binance"];
+const PARTNERS = ["Luno"];
 const CRYPTO_CURRENCIES = ["USDT", "BTC", "ETH", "NGN"];
+const DELIVERY_SOURCES = ["Luno Wallet", "Rayosh", "Obiex", "Salmnine", "GredoEx"];
 
 interface Props {
   onContinue: () => void;
@@ -19,71 +21,103 @@ interface Props {
 export function CryptoStepTwo({ onContinue, onBack }: Props) {
   const { watch, setValue, register } = useFormContext();
 
+  const tradeDirection = watch("details.tradeDirection");
+  const isBuy = tradeDirection === "Buy Crypto";
+
   const customerPays = watch("details.customerPays") ?? "";
-  const customerPaysCurrency = watch("details.customerPaysCurrency") ?? "NGN";
-  const customerReceivesCurrency = watch("details.customerReceivesCurrency") ?? "USDT";
+  const customerPaysCurrency =
+    watch("details.customerPaysCurrency") ?? (isBuy ? "NGN" : "USDT");
+  const customerReceivesCurrency =
+    watch("details.customerReceivesCurrency") ?? (isBuy ? "USDT" : "NGN");
   const partnerRate = watch("details.partnerRate") ?? "";
   const xbankaRate = watch("details.xbankaRate") ?? "";
 
-  // Auto-calculate margin per unit and totals
-  const marginPerUnit = useMemo(() => {
-    const pr = parseFloat(partnerRate);
-    const xr = parseFloat(xbankaRate);
-    if (!isNaN(pr) && !isNaN(xr)) return (xr - pr).toFixed(2);
-    return "";
-  }, [partnerRate, xbankaRate]);
+  const customerPaysAmount = parseFloat(watch("details.customerPays") || "0");
+  const customerReceivesAmount = parseFloat(
+    watch("details.customerReceives") || "0",
+  );
+
+  const partnerRateValue = parseFloat(partnerRate || "0");
+  const xbankaRateValue = parseFloat(xbankaRate || "0");
+
+  const calculations = useMemo(() => {
+    if (
+      isNaN(customerPaysAmount) ||
+      isNaN(customerReceivesAmount) ||
+      isNaN(partnerRateValue) ||
+      isNaN(xbankaRateValue)
+    ) {
+      return {
+        partnerCost: 0,
+        marginPerUnit: 0,
+        grossMargin: 0,
+        marginPercentage: 0,
+      };
+    }
+
+    const partnerCost = customerReceivesAmount * partnerRateValue;
+
+    const marginPerUnit = xbankaRateValue - partnerRateValue;
+
+    const grossMargin = customerPaysAmount - partnerCost;
+
+    const marginPercentage =
+      partnerCost > 0 ? (grossMargin / partnerCost) * 100 : 0;
+
+    return {
+      partnerCost,
+      marginPerUnit,
+      grossMargin,
+      marginPercentage,
+    };
+  }, [
+    customerPaysAmount,
+    customerReceivesAmount,
+    partnerRateValue,
+    xbankaRateValue,
+  ]);
 
   const totalMargin = useMemo(() => {
     const pays = parseFloat(customerPays);
-    const mg = parseFloat(marginPerUnit);
+    const mg = calculations?.marginPerUnit ?? 0;
     if (!isNaN(pays) && !isNaN(mg)) return (pays * mg).toFixed(2); // simplified
     return "";
-  }, [customerPays, marginPerUnit]);
+  }, [customerPays, calculations.marginPerUnit]);
 
   const isValid = customerPays && partnerRate && xbankaRate;
 
   return (
     <div className="flex flex-col gap-4">
       {/* Trade Amount */}
-      <div>
-        <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
+      <div className="space-y-2">
+        <h3 className="text-sm font-medium leading-5 text-text-primary-font-color ">
           Trade Amount
         </h3>
         <div className="flex flex-col gap-3">
           {/* Customer Pays row with currency select + amount */}
-          <div className="space-y-1">
-            <label className="text-xs text-[var(--text-secondary)]">Customer Pays</label>
-            <div className="flex gap-2">
-              <SelectFieldLayout
-                id="details.customerPaysCurrency"
-                options={CRYPTO_CURRENCIES}
-                value={customerPaysCurrency}
-                onChange={(v) => setValue("details.customerPaysCurrency", v)}
-                className="w-28"
-              />
-              <AmountField
-                id="details.customerPays"
-                placeholder="1,000,000"
-              />
-            </div>
-          </div>
+          <CardLayout className="flex gap-2 items-end">
+            <SelectFieldLayout
+              label="Customer Pays"
+              id="details.customerPaysCurrency"
+              options={CRYPTO_CURRENCIES}
+              value={customerPaysCurrency}
+              onChange={(v) => setValue("details.customerPaysCurrency", v)}
+              className="w-28"
+            />
+            <AmountField id="details.customerPays" placeholder="1,000,000" />
+          </CardLayout>
           {/* Customer Receives */}
-          <div className="space-y-1">
-            <label className="text-xs text-[var(--text-secondary)]">Customer Receives</label>
-            <div className="flex gap-2">
-              <SelectFieldLayout
-                id="details.customerReceivesCurrency"
-                options={CRYPTO_CURRENCIES}
-                value={customerReceivesCurrency}
-                onChange={(v) => setValue("details.customerReceivesCurrency", v)}
-                className="w-28"
-              />
-              <AmountField
-                id="details.customerReceives"
-                placeholder="2,000"
-              />
-            </div>
-          </div>
+          <CardLayout className="flex gap-2 items-end">
+            <SelectFieldLayout
+              label="Customer Receives"
+              id="details.customerReceivesCurrency"
+              options={CRYPTO_CURRENCIES}
+              value={customerReceivesCurrency}
+              onChange={(v) => setValue("details.customerReceivesCurrency", v)}
+              className="w-28"
+            />
+            <AmountField id="details.customerReceives" placeholder="2,000" />
+          </CardLayout>
         </div>
       </div>
 
@@ -96,39 +130,93 @@ export function CryptoStepTwo({ onContinue, onBack }: Props) {
           <SelectFieldLayout
             id="details.partner"
             label="Partner"
-            options={PARTNERS}
+            options={DELIVERY_SOURCES}
             placeholder="Select partner"
             value={watch("details.partner") ?? ""}
             onChange={(v) => setValue("details.partner", v)}
           />
-          {/* Rates row */}
-          <div className="grid grid-cols-2 gap-3">
-            <AmountField
-              id="details.partnerRate"
-              label="Partner Rate"
-              placeholder="$ 1,500.00"
-            />
-            <AmountField
-              id="details.xbankaRate"
-              label="Xbanka Rate"
-              placeholder="$ 1,518.00"
-            />
-          </div>
-          {/* Margin summary */}
-          {marginPerUnit && (
-            <div className="bg-[var(--grey-light)] rounded-lg p-3 text-xs flex flex-col gap-1">
-              <div className="flex justify-between">
-                <span className="text-[var(--text-secondary)]">Margin per USDT</span>
-                <span className="text-[var(--text-teal)] font-medium">+${marginPerUnit}</span>
-              </div>
-              {totalMargin && (
-                <div className="flex justify-between">
-                  <span className="text-[var(--text-secondary)]">Total Margin</span>
-                  <span className="text-[var(--text-teal)] font-semibold">₦{totalMargin}</span>
-                </div>
-              )}
+          <CardLayout className="space-y-2">
+            {/* Rates row */}
+            <div className="grid grid-cols-2 gap-3">
+              <AmountField
+                id="details.partnerRate"
+                label="Partner Rate"
+                placeholder=" 1,500.00"
+                currencySymbol="₦"
+                currency="/USDT"
+                inputClassName="pl-6"
+              />
+              <AmountField
+                id="details.xbankaRate"
+                label="Xbanka Rate"
+                placeholder=" 1,500.00"
+                currencySymbol="₦"
+                currency="/USDT"
+                inputClassName="pl-6"
+              />
             </div>
-          )}
+            {/* Margin summary */}
+            <div className="text-xs flex flex-col gap-1">
+              <div className="flex justify-between">
+                <span className="font-medium leading-[20px] text-secondary-text">
+                  Partners cost
+                </span>
+                {calculations?.partnerCost > 0 ? (
+                  <span className="font-normal text-[16px] text-text-teal leading-[24px]">
+                    ₦{calculations.partnerCost.toLocaleString()}
+                  </span>
+                ) : (
+                  <span className="font-normal text-[16px] text-text-teal leading-[24px]">
+                    ₦0.00
+                  </span>
+                )}
+              </div>
+
+              <div className="flex justify-between">
+                <span className="font-medium leading-[20px] text-secondary-text">
+                  Margin per USDT
+                </span>
+                {calculations?.marginPerUnit > 0 ? (
+                  <span className="font-normal text-[16px] text-text-teal leading-[24px]">
+                    +₦{calculations.marginPerUnit.toLocaleString()}
+                  </span>
+                ) : (
+                  <span className="font-normal text-[16px] text-text-teal leading-[24px]">
+                    ₦0.00
+                  </span>
+                )}
+              </div>
+
+                <div className="flex justify-between">
+                  <span className="font-medium leading-[20px] text-secondary-text">
+                    Gross Margin
+                  </span>
+                  {calculations?.grossMargin > 0 ? (
+                    <span className="font-normal text-[16px] text-text-teal leading-[24px]">
+                      +₦{calculations.grossMargin.toLocaleString()}
+                    </span>
+                  ) : (
+                    <span className="font-normal text-[16px] text-text-teal leading-[24px]">
+                      ₦0.00
+                    </span>
+                  )}
+                </div>
+              <div className="flex justify-between">
+                <span className="font-medium leading-[20px] text-secondary-text">
+                  Margin percentage
+                </span>
+                {calculations?.marginPercentage > 0 ? (
+                  <span className="font-normal text-[16px] text-text-teal leading-[24px]">
+                    {calculations.marginPercentage.toFixed(2)}%
+                  </span>
+                ) : (
+                  <span className="font-normal text-[16px] text-text-teal leading-[24px]">
+                    0.00%
+                  </span>
+                )}
+              </div>
+            </div>
+          </CardLayout>
         </div>
       </div>
 
@@ -137,12 +225,15 @@ export function CryptoStepTwo({ onContinue, onBack }: Props) {
         <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
           Additional Info
         </h3>
-        <FormField
-          id="details.internalNotes"
-          label="Internal Notes (Optional)"
-          register={register}
-          placeholder="Add internal notes..."
-        />
+        <CardLayout>
+          <FormField
+            id="details.internalNotes"
+            label="Internal Notes (Optional)"
+            register={register}
+            placeholder="Add internal notes..."
+            inputClassName="h-20"
+          />
+        </CardLayout>
       </div>
 
       <div className="flex gap-3 pt-4 border-t border-[var(--border-default)] mt-auto">

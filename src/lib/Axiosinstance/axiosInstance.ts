@@ -1,5 +1,6 @@
 import axios from "axios";
 import { authToken } from "../authToken";
+import { refreshAccessToken } from "../refresh-token";
 
 const AxiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -20,7 +21,7 @@ AxiosInstance.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 // Response interceptor: handle errors globally
@@ -140,7 +141,7 @@ AxiosInstance.interceptors.response.use(
     // };
 
     return Promise.reject(customError);
-  }
+  },
 );
 
 export default AxiosInstance;
