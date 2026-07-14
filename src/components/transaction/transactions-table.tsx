@@ -66,7 +66,6 @@ export function TransactionsTable({
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [sourceFilter, setSourceFilter] = useState("");
-  const [searchInput, setSearchInput] = useState("");
   const [transactionTypeFilter, setTransactionTypeFilter] = useState("");
   const [detailTransactionId, setDetailTransactionId] = useState<string | null>(
     null,
@@ -82,13 +81,6 @@ export function TransactionsTable({
   );
 
   const {
-    data: transactionData,
-    isPending,
-    isError,
-    error,
-  } = useTransactions(page, 10);
-
-  const {
     data: allTransactions,
     isPending: isPendingTransactions,
     isError: isErrorTransactions,
@@ -102,8 +94,6 @@ export function TransactionsTable({
     search: searchQuery || undefined,
   });
 
-  // const transactions = transactionData?.data?.data ?? [];
-  const transactionsBody = transactionData?.data;
   const transactions: TransactionRecord[] = allTransactions?.data?.items ?? [];
   const meta = allTransactions?.data?.meta;
   console.log("meta:", meta);
@@ -122,7 +112,7 @@ export function TransactionsTable({
     {
       key: "reference",
       header: "Txn ID",
-      className: "md:w-[140px]",
+      className: "md:w-[230px]",
       render: (item: TransactionRecord) => (
         <span
           className="text-text-teal font-500 text-[14px] leading-[16px] truncate block"
@@ -135,7 +125,7 @@ export function TransactionsTable({
     {
       key: "createdAt",
       header: "Date",
-      className: "md:w-[110px]",
+      className: "md:w-[130px]",
       render: (item: TransactionRecord) => (
         <span className="font-500 text-[14px] leading-[18px] text-[#111827]">
           {formatDate(item.createdAt)}
@@ -147,12 +137,6 @@ export function TransactionsTable({
       header: "Customer",
       className: "md:w-[140px]",
       render: (item: TransactionRecord) => (
-        // <div className="cursor-pointer">
-        //   <span className="text-[var(--text-teal)] text-sm font-medium hover:underline block">
-        //     {item.customer?.firstName} {item.customer?.lastName}
-        //   </span>
-        //   <span className="text-xs text-gray-500">{item.customer?.email}</span>
-        // </div>
         <div className="text-text-teal text-sm font-medium leading-5 hover:underline block">
           {item?.customer?.firstName} {item?.customer?.lastName}
         </div>
@@ -182,7 +166,7 @@ export function TransactionsTable({
     {
       key: "details",
       header: "Details",
-      className: "md:w-[200px]",
+      className: "md:w-[230px]",
       render: (item: TransactionRecord) => (
         <div className="flex flex-col">
           <span className="text-[14px] font-medium text-[#111827]">
@@ -195,7 +179,7 @@ export function TransactionsTable({
     {
       key: "amount",
       header: "Amount",
-      className: "md:w-[120px]",
+      className: "md:w-[150px]",
       render: (item: TransactionRecord) => (
         <span className="text-[14px] font-medium text-[#111827] leading-[18px]">
           {item.currency} {moneyFmt(item.amount)}
@@ -205,13 +189,13 @@ export function TransactionsTable({
     {
       key: "status",
       header: "Status",
-      className: "md:w-[110px]",
+      className: "md:w-[150px]",
       render: (item: TransactionRecord) => <StatusBadge status={item.status} />,
     },
     {
       key: "action",
       header: "",
-      className: "md:w-[110px]",
+      className: "md:w-[140px]",
       render: (item: TransactionRecord) => (
         <div
           onClick={() => setDetailTransactionId(item.id)}
@@ -229,7 +213,7 @@ export function TransactionsTable({
     {
       key: "type",
       header: "Type",
-      className: "md:w-[110px]",
+      className: "md:w-[150px]",
       render: (item: TransactionRecord) => (
         <span className="capitalize">{item.type?.toLowerCase()}</span>
       ),
@@ -237,7 +221,7 @@ export function TransactionsTable({
     {
       key: "direction",
       header: "Direction",
-      className: "md:w-[90px]",
+      className: "md:w-[150px]",
       render: (item: TransactionRecord) => {
         const credit = item.type === "DEPOSIT";
         return (
@@ -248,7 +232,7 @@ export function TransactionsTable({
     {
       key: "amount",
       header: "Amount",
-      className: "md:w-[120px]",
+      className: "md:w-[150px]",
       render: (item: TransactionRecord) => (
         <span className="text-xs font-medium text-gray-800">
           {item.currency} {moneyFmt(item.amount)}
@@ -258,7 +242,7 @@ export function TransactionsTable({
     {
       key: "channel",
       header: "Channel",
-      className: "md:w-[140px]",
+      className: "md:w-[150px]",
       render: (item: TransactionRecord) => (
         <span className="text-xs text-gray-600">
           {item.tradeDetails?.deliveryMethod ?? "—"}
@@ -268,7 +252,7 @@ export function TransactionsTable({
     {
       key: "provider",
       header: "Provider",
-      className: "md:w-[110px]",
+      className: "md:w-[150px]",
       render: (item: TransactionRecord) => (
         <span className="text-xs text-gray-600">
           {item.tradeDetails?.partner ?? "—"}
@@ -278,7 +262,7 @@ export function TransactionsTable({
     {
       key: "status",
       header: "Status",
-      className: "md:w-[110px]",
+      className: "md:w-[150px]",
       render: (item: TransactionRecord) => <StatusBadge status={item.status} />,
     },
     {
@@ -291,7 +275,7 @@ export function TransactionsTable({
           className="text-text-teal flex items-center gap-2 font-[500] text-[14px] leading-[22px] cursor-pointer"
         >
           <Eye size={16} />
-          view more
+          view
         </div>
       ),
     },
@@ -319,7 +303,7 @@ export function TransactionsTable({
     {
       key: "type",
       header: "Type",
-      className: "md:w-[120px]",
+      className: "md:w-[160px]",
       render: (item: TransactionRecord) => (
         <span className="text-xs text-gray-700">{item.displayType}</span>
       ),
@@ -349,7 +333,7 @@ export function TransactionsTable({
     {
       key: "customer_receives",
       header: "Customer Receives",
-      className: "md:w-[140px]",
+      className: "md:w-[160px]",
       render: (item: TransactionRecord) => (
         <span className="text-xs text-gray-800">
           {moneyFmt(item.tradeDetails?.payoutAmount)}{" "}
@@ -360,7 +344,7 @@ export function TransactionsTable({
     {
       key: "status",
       header: "Status",
-      className: "md:w-[110px]",
+      className: "md:w-[150px]",
       render: (item: TransactionRecord) => <StatusBadge status={item.status} />,
     },
     {
@@ -373,7 +357,7 @@ export function TransactionsTable({
           className="text-text-teal flex items-center gap-2 font-[500] text-[14px] leading-[22px] cursor-pointer"
         >
           <Eye size={16} />
-          view more
+          view
         </div>
       ),
     },
@@ -472,7 +456,7 @@ export function TransactionsTable({
           className="text-text-teal flex items-center gap-2 font-[500] text-[14px] leading-[22px] cursor-pointer"
         >
           <Eye size={16} />
-          View more
+          View
         </span>
       ),
     },
@@ -523,8 +507,8 @@ export function TransactionsTable({
               "Fiat",
               "Crypto",
               "Manual",
-              "Gift Cards",
-              "Bill Payments",
+              // "Gift Cards",
+              // "Bill Payments",
             ]}
             value={activeFilter}
             onChange={handleTabChange}
@@ -594,18 +578,6 @@ export function TransactionsTable({
               setSourceFilter={setSourceFilter}
             />
           )}
-          {/* <SelectFieldLayout
-                id="statusFilter"
-                options={["COMPLETED", "PENDING", "FAILED", "PROCESSING"]}
-                placeholder="Status: All"
-                value={statusFilter}
-                onChange={(v) => {
-                  setStatusFilter(v);
-                  setPage(1);
-                }}
-                className="w-40"
-                selectClassName="border border-gray-300"
-              /> */}
         </div>
       </div>
       <div className="w-full md:max-w-[700px] lg:min-w-[100%] xl:min-w-full min-h-screen">
@@ -613,10 +585,10 @@ export function TransactionsTable({
           data={transactions}
           columns={activeColumns}
           rowKey={(item) => item.id}
-          isError={isError}
-          isLoading={isPending}
+          isError={isErrorTransactions}
+          isLoading={isPendingTransactions}
           emptyMessage="No transactions found."
-          errorMessage={error?.message ?? "Failed to load customers"}
+          errorMessage={errorTransactions?.message ?? "Failed to load customers"}
           totalCount={meta?.totalItems}
           itemsPerPage={meta?.itemsPerPage}
           currentPage={page}

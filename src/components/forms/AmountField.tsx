@@ -4,12 +4,20 @@ import { useFormContext } from "react-hook-form";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { formatAmountInput, parseNumber } from "@/lib/utils/formatNumber";
+import { LucideIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface AmountFieldProps {
   id: string;
   label?: string;
   placeholder?: string;
   className?: string;
+  icon?: LucideIcon;
+  currency?: string;
+  currencySymbol?: string;
+  inputClassName?: string;
+  readOnly?: boolean;
+  value?: string;
 }
 
 /**
@@ -22,27 +30,52 @@ export function AmountField({
   label,
   placeholder,
   className,
+  icon: Icon,
+  currency,
+  currencySymbol,
+  inputClassName,
+  readOnly = false,
+  value,
 }: AmountFieldProps) {
   const { watch, setValue } = useFormContext();
-  const raw = watch(id) ?? "";
+  const formValue = watch(id) ?? "";
+  const displayValue = value !== undefined ? value : formValue;
 
   return (
     <div className={`space-y-2 w-full ${className ?? ""}`}>
       {label && <Label htmlFor={id}>{label}</Label>}
-      <Input
-        id={id}
-        type="text"
-        inputMode="decimal"
-        placeholder={placeholder}
-        className="px-3 focus:border-[var(--abstractCyan)]"
-        value={formatAmountInput(raw)}
-        onChange={(e) =>
-          setValue(id, parseNumber(e.target.value), {
-            shouldValidate: true,
-            shouldDirty: true,
-          })
+      <div className="relative">
+        {Icon && (
+          <Icon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground" />
+        )}
+        {currencySymbol && (
+          <p className="absolute left-3 top-1/2 flex items-center -translate-y-1/2 h-4 w-4 text-foreground">
+            {currencySymbol}
+          </p>
+        )}
+        <Input
+          id={id}
+          type="text"
+          inputMode="decimal"
+          placeholder={placeholder}
+          className={cn("px-3 focus:border-[var(--abstractCyan)]", inputClassName)}
+          readOnly={readOnly}
+          value={formatAmountInput(displayValue)}
+          onChange={(e) =>
+            setValue(id, parseNumber(e.target.value), {
+              shouldValidate: true,
+              shouldDirty: true,
+            })
+          }
+        />
+        {
+          currency && (
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-[var(--text-secondary)]">
+              {currency}
+            </span>
+          ) 
         }
-      />
+      </div>
     </div>
   );
 }
