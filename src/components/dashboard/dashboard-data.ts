@@ -1,4 +1,11 @@
-import { AlertTriangle, CheckSquare, Hourglass, Repeat, Users, Wallet } from "lucide-react";
+import {
+  AlertTriangle,
+  CheckSquare,
+  Hourglass,
+  Repeat,
+  Users,
+  Wallet,
+} from "lucide-react";
 
 // ── Metric cards ──────────────────────────────────────────
 export const metrics = [
@@ -6,51 +13,43 @@ export const metrics = [
     title: "Transaction",
     icon: Repeat,
     value: 132,
-    stats: [
-      { label: "Success", value: 100, tone: "success" },
-      { label: "Pending", value: 20, tone: "warning" },
-      { label: "Failed", value: 12, tone: "danger" },
-    ],
+    success: 100,
+    pending: 20,
+    failed: 12,
   },
   {
     title: "Customers",
     icon: Users,
     value: 50,
-    stats: [
-      { label: "New Today", value: 30, tone: "success" },
-      { label: "KYC Pending", value: 15, tone: "warning" },
-      { label: "Flagged", value: 5, tone: "danger" },
-    ],
+    success: 100,
+    pending: 20,
+    failed: 12,
   },
   {
     title: "Tasks",
     icon: CheckSquare,
     value: 100,
-    stats: [
-      { label: "Open", value: 60, tone: "neutral" },
-      { label: "In progress", value: 30, tone: "warning" },
-      { label: "Overdue", value: 10, tone: "danger" },
-    ],
+    success: 100,
+    pending: 20,
+    failed: 12,
   },
   {
     title: "Finance",
     icon: Wallet,
     value: 47,
-    stats: [
-      { label: "Pending", value: 30, tone: "warning" },
-      { label: "On hold", value: 10, tone: "neutral" },
-      { label: "Flagged", value: 7, tone: "danger" },
-    ],
+    success: 100,
+    pending: 20,
+    failed: 12,
   },
-]
- 
+];
+
 export const statToneClass: Record<string, string> = {
   success: "text-main-green",
   warning: "text-yellow-600",
   danger: "text-main-red",
   neutral: "text-deep-blue",
-}
- 
+};
+
 // ── Workflow health ───────────────────────────────────────
 export const workflowHealth = [
   {
@@ -83,18 +82,18 @@ export const workflowHealth = [
     detailSecondary: "2 flagged · 3 declined",
     trend: "+12% vs yesterday",
   },
-]
- 
+];
+
 export const workflowIconClass: Record<string, string> = {
   danger: "bg-red-50 text-main-red",
   warning: "bg-yellow-50 text-yellow-600",
-}
- 
+};
+
 export const workflowBarClass: Record<string, string> = {
   danger: "bg-main-red",
   warning: "bg-yellow-500",
-}
- 
+};
+
 // ── Needs urgent attention ────────────────────────────────
 export const urgentAttention = [
   {
@@ -124,10 +123,17 @@ export const urgentAttention = [
     action: "Assign Tasks",
     href: "/tasks",
   },
-]
- 
-export const urgentStyles: Record<string, { bg: string; border: string; text: string }> = {
+];
+
+export const urgentStyles: Record<
+  string,
+  { bg: string; border: string; text: string }
+> = {
   danger: { bg: "bg-red-50", border: "border-main-red", text: "text-main-red" },
-  warning: { bg: "bg-yellow-50", border: "border-yellow-500", text: "text-yellow-700" },
+  warning: {
+    bg: "bg-yellow-50",
+    border: "border-yellow-500",
+    text: "text-yellow-700",
+  },
   info: { bg: "bg-blue-50", border: "border-blue-500", text: "text-blue-700" },
-}
+};
