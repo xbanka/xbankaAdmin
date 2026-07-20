@@ -33,7 +33,9 @@ export function SpreadChangeDetailsDrawer({ entry, onClose }: Props) {
       header: "Asset",
       render: (row: AffectedAsset) => (
         <div>
-          <div className="text-[13px] font-medium text-[#111827]">{row.name}</div>
+          <div className="text-[13px] font-medium text-[#111827]">
+            {row.name}
+          </div>
           <div className="text-[11px] text-[#9CA3AF]">{row.ticker}</div>
         </div>
       ),
@@ -63,7 +65,9 @@ export function SpreadChangeDetailsDrawer({ entry, onClose }: Props) {
     {
       key: "status",
       header: "Status",
-      render: (row: AffectedAsset) => <UpdatedStatusBadge status={row.status} />,
+      render: (row: AffectedAsset) => (
+        <UpdatedStatusBadge status={row.status} />
+      ),
     },
   ];
 
@@ -78,12 +82,19 @@ export function SpreadChangeDetailsDrawer({ entry, onClose }: Props) {
         <div className="flex items-start justify-between p-6 border-b border-[#E5E7EB] flex-shrink-0">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <h2 className="text-lg font-semibold text-[#111827]">Spread Change Details</h2>
+              <h2 className="text-lg font-semibold text-[#111827]">
+                Spread Change Details
+              </h2>
               <ScopeBadge scope={entry.scope} />
             </div>
-            <p className="text-[13px] text-[#9CA3AF]">{formatDate(entry.dateTime)}</p>
+            <p className="text-[13px] text-[#9CA3AF]">
+              {formatDate(entry.dateTime)}
+            </p>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -91,18 +102,30 @@ export function SpreadChangeDetailsDrawer({ entry, onClose }: Props) {
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
           {/* Change Summary */}
-          <div>
-            <h3 className="text-sm font-semibold text-[#111827] mb-2">Change Summary</h3>
-            <p className="text-[13px] text-[#6B7280] leading-relaxed">{entry.changeSummary}</p>
+          <div className="space-y-1 py-4 px-5">
+            <h3 className="text-sm font-normal text-text-secondary">
+              Change Summary
+            </h3>
+            <p className="text-[14px] font-medium leading-5 text-text-secondary">
+              {entry.changeSummary}
+            </p>
           </div>
 
           {/* Target Information */}
           <div>
-            <h3 className="text-sm font-semibold text-[#111827] mb-2">Target Information</h3>
-            <div className="bg-[#F9FAFB] rounded-lg px-4">
-              <InfoRow label="Scope" value={entry.scope === "segment" ? "Segment" : "Asset"} />
+            <h3 className="text-sm font-medium leading-5 text-text-primary py-3 px-5 border border-card-border-secondary bg-card-secondary rounded-tl-[20px] rounded-tr-[20px]">
+              Target Information
+            </h3>
+            <div className="bg-[#F9FAFB] rounded-lg py-4 px-5">
+              <InfoRow
+                label="Scope"
+                value={entry.scope === "segment" ? "Segment" : "Asset"}
+              />
               <InfoRow label="Target" value={entry.targetName} />
-              <InfoRow label="Affected Assets" value={`${entry.affectedAssetsCount} Assets`} />
+              <InfoRow
+                label="Affected Assets"
+                value={`${entry.affectedAssetsCount} Assets`}
+              />
               <InfoRow
                 label="Previous Configuration"
                 value={`Buy: ${entry.previousConfig.buy.toFixed(2)}% · Sell: ${entry.previousConfig.sell.toFixed(2)}%`}
@@ -115,7 +138,13 @@ export function SpreadChangeDetailsDrawer({ entry, onClose }: Props) {
               <InfoRow
                 label="Status"
                 value={
-                  <span className={entry.status === "Active" ? "text-[#059669]" : "text-[#6B7280]"}>
+                  <span
+                    className={
+                      entry.status === "Active"
+                        ? "text-[#059669]"
+                        : "text-[#6B7280]"
+                    }
+                  >
                     {entry.status}
                   </span>
                 }
@@ -125,7 +154,9 @@ export function SpreadChangeDetailsDrawer({ entry, onClose }: Props) {
 
           {/* Affected Assets */}
           <div>
-            <h3 className="text-sm font-semibold text-[#111827] mb-2">Affected Assets</h3>
+            <h3 className="text-sm font-semibold text-[#111827] mb-2">
+              Affected Assets
+            </h3>
             <DataTableLayout
               data={entry.affectedAssets}
               columns={affectedAssetColumns}
@@ -138,7 +169,9 @@ export function SpreadChangeDetailsDrawer({ entry, onClose }: Props) {
 
           {/* Changed by */}
           <div>
-            <h3 className="text-sm font-semibold text-[#111827] mb-2">Changed by</h3>
+            <h3 className="text-sm font-semibold text-[#111827] mb-2">
+              Changed by
+            </h3>
             <div className="flex items-center gap-3 bg-[#F9FAFB] rounded-lg p-3">
               <div className="w-9 h-9 rounded-full bg-[#E5E7EB] flex items-center justify-center text-[12px] font-semibold text-[#374151]">
                 {entry.updatedBy.name
@@ -149,7 +182,9 @@ export function SpreadChangeDetailsDrawer({ entry, onClose }: Props) {
                   .toUpperCase()}
               </div>
               <div>
-                <div className="text-[13px] font-medium text-[#111827]">{entry.updatedBy.name}</div>
+                <div className="text-[13px] font-medium text-[#111827]">
+                  {entry.updatedBy.name}
+                </div>
                 <div className="text-[11px] text-[#9CA3AF]">
                   {entry.updatedBy.role} · {formatDate(entry.dateTime)}
                 </div>

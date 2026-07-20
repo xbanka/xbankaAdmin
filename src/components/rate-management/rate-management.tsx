@@ -20,6 +20,7 @@ import { DashboardLayout } from "../layout/dashboard-layout";
 import { EmptySpreadSchedule } from "./empty-spread-schedule";
 import {
   useGetCryptoRates,
+  UseGetRateProposals,
   useUpdateBuyAndSpreadRates,
 } from "@/lib/services/rates.service";
 import { CryptoCurrencyTypes } from "@/lib/types/rates-types";
@@ -40,6 +41,7 @@ export default function RateManagement() {
   const [editRow, setEditRow] = useState<CryptoCurrencyTypes | null>(null);
   const [view, setView] = useState<"list" | "wizard">("list");
   const { data, isPending, error } = useGetCryptoRates();
+  const { data: rateProposalData, isPending: rateProposalIsPending, error: rateProposalError } = UseGetRateProposals();
   const { mutate: updateCryptoRate } = useUpdateBuyAndSpreadRates();
   const [selectedTransactionType, setSelectedTransactionType] =
     useState<string>("");
@@ -148,7 +150,7 @@ export default function RateManagement() {
       ),
     },
     {
-      key: "actions",
+      key: "",
       header: "",
       render: (row: CryptoCurrencyTypes) => (
         <div className="flex items-center justify-between gap-4">
@@ -190,14 +192,10 @@ export default function RateManagement() {
         const d = new Date(row.dateTime);
         return (
           <div>
-            <div className="text-[12px] text-[#111827]">
-              {d.toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-              })}
+            <div className="text-[14px] font-medium leading-5 text-text-primary">
+              {formatDate(row.dateTime)}
             </div>
-            <div className="text-[11px] text-[#9CA3AF]">
+            <div className="text-[12px] font-normal leading-[18px] text-[#9CA3AF]">
               {d.toLocaleTimeString("en-US", {
                 hour: "2-digit",
                 minute: "2-digit",
@@ -210,11 +208,13 @@ export default function RateManagement() {
     {
       key: "scope",
       header: "Scope",
+      className: "w-[150px]",
       render: (row: SpreadHistoryEntry) => <ScopeBadge scope={row.scope} />,
     },
     {
       key: "target",
       header: "Target",
+      className: "w-[130px]",
       render: (row: SpreadHistoryEntry) => (
         <div>
           <div className="text-[13px] font-medium text-[#111827]">
@@ -227,6 +227,7 @@ export default function RateManagement() {
     {
       key: "changeType",
       header: "Change Type",
+      className: "w-[150px]",
       render: (row: SpreadHistoryEntry) => (
         <div className="text-[13px] text-[#111827]">{row.changeType}</div>
       ),
@@ -256,6 +257,7 @@ export default function RateManagement() {
     {
       key: "affectedAssetsCount",
       header: "Affected Asset",
+      className: "w-[150px]",
       render: (row: SpreadHistoryEntry) => (
         <AffectedAssetsBadge count={row.affectedAssetsCount} />
       ),
@@ -271,12 +273,12 @@ export default function RateManagement() {
       ),
     },
     {
-      key: "actions",
+      key: "",
       header: "",
       render: (row: SpreadHistoryEntry) => (
         <button
           onClick={() => setSelectedHistoryEntry(row)}
-          className="flex items-center gap-1 text-[13px] text-[#0D9488] font-medium hover:opacity-70 transition-opacity"
+          className="flex items-center gap-1 text-[13px] text-[#0D9488] font-medium hover:opacity-70 transition-opacity curso"
         >
           <Eye size={14} /> View
         </button>
