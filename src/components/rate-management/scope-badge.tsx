@@ -12,8 +12,10 @@ export function ScopeBadge({ scope }: { scope: SpreadScope }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium",
-        isSegment ? "bg-[#EEF2FF] text-[#4F46E5]" : "bg-[#FFFBEB] text-[#B45309]",
+        "inline-flex items-center border gap-1 px-[18px] py-2 rounded-full text-[11px] font-medium",
+        isSegment
+          ? "bg-teal-light border-teal-border text-teal-text"
+          : "bg-blue-light border-teal-border text-teal-text",
       )}
     >
       <Icon size={12} />
@@ -24,7 +26,7 @@ export function ScopeBadge({ scope }: { scope: SpreadScope }) {
 
 export function AffectedAssetsBadge({ count }: { count: number }) {
   return (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#F3F4F6] text-[#374151]">
+    <span className="inline-flex items-center border gap-1 px-[18px] py-2 rounded-full font-medium bg-grey-light border-grey-border text-[12px] text-grey-text">
       <Boxes size={12} />
       {count} {count === 1 ? "Asset" : "Assets"}
     </span>
