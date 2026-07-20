@@ -232,3 +232,25 @@ export const SPREAD_HISTORY_MOCK: SpreadHistoryEntry[] = [
     affectedAssets: [sharedAffectedAssets[4]],
   },
 ];
+
+export interface AuditUser {
+  first_name: string;
+  last_name: string;
+  role: string; // e.g., "Super Admin"
+}
+
+export interface AuditLogItem {
+  id: string; // UUID v4
+  change_type: 'ASSET_UPDATE' | 'SEGMENT_ASSIGNMENT' | string; // Literal union with string fallback
+  target_id: string; // UUID v4
+  requested_by_id: string; // UUID v4
+  requested_by: AuditUser;
+  status: 'APPROVED' | 'PENDING' | 'REJECTED' | string; 
+  target: string; // e.g., "Binance Coin", "Major coins"
+  target_currency: string; // e.g., "BNB" or ""
+  previous_configuration: string[];
+  new_configuration: string[];
+  affected_assets: number;
+  created_at: string; // ISO 8601 Timestamp
+  updated_at: string; // ISO 8601 Timestamp
+}
