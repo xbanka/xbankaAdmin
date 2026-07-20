@@ -19,6 +19,7 @@ export const customerBaseSchema = z.object({
       lastName: z.string(),
       email: z.string().email(),
       phoneNumber: z.string(),
+      kycDocuments: z.array(z.instanceof(File)).optional(),
     })
     .optional(),
 });

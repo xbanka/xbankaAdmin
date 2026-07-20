@@ -113,7 +113,20 @@ export function CryptoStepFour({ onClose, onBack, goToStep }: Props) {
       }),
 
       ...(customer?.isNewUser
-        ? { newUserData: customer.newUserData }
+        ? {
+            newUserData: {
+              firstName: customer.newUserData?.firstName,
+              lastName: customer.newUserData?.lastName,
+              email: customer.newUserData?.email,
+              phoneNumber: customer.newUserData?.phoneNumber,
+
+              // TODO: replace with uploaded file URLs after upload
+              kycDocuments:
+                customer.newUserData?.kycDocuments?.map(
+                  (file: File) => file.name,
+                ) ?? [],
+            },
+          }
         : { userId: customer?.id }),
 
       tradeDirection: isBuy ? "BUY" : "SELL",
