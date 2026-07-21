@@ -1,10 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CurrencyConfig, UpdateCryptoRatesArgs } from "../types/rates-types";
 import {
+  approveRateProposal,
   bulkAssignSegment,
   getAllSegments,
   getCryptoRates,
+  getRateLogs,
+  getRateProposals,
   postCryptoRates,
+  rejectRateProposal,
   UpdateAllSegments,
   updateBuyAndSpreadRates,
 } from "../actions/rates";
@@ -124,6 +128,84 @@ export const useBulkAssignSegment = () => {
     },
     onError: (error) => {
       handleApiError(error);
+    },
+  });
+};
+
+export const UseGetRateProposals = () => {
+  return useQuery({
+    queryKey: ["rate-proposals"],
+    queryFn: async () => {
+      try {
+        const response = await getRateProposals();
+        return response;
+      } catch (error) {
+        handleApiError(error);
+      }
+    },
+  });
+};
+
+export const useApproveRateProposal = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (proposalId: string) =>
+      approveRateProposal(proposalId),
+
+    onSuccess: (result) => {
+      toast.success(result.data.message);
+
+      queryClient.invalidateQueries({
+        queryKey: ["rate-proposals"],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["rate-logs"],
+      });
+    },
+
+    onError: (err) => {
+      handleApiError(err);
+    },
+  });
+};
+
+export const useRejectRateProposal = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (proposalId: string) =>
+      rejectRateProposal(proposalId),
+
+    onSuccess: (result) => {
+      toast.success(result.data.message);
+
+      queryClient.invalidateQueries({
+        queryKey: ["rate-proposals"],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["rate-logs"],
+      });
+    },
+
+    onError: (err) => {
+      handleApiError(err);
+    },
+  });
+};
+
+export const UseGetRateLogs = () => {
+  return useQuery({
+    queryKey: ["rate-logs"],
+    queryFn: async () => {
+      try {
+        const response = await getRateLogs();
+        return response;
+      } catch (error) {
+        handleApiError(error);
+      }
     },
   });
 };

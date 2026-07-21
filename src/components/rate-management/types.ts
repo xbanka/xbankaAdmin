@@ -151,8 +151,8 @@ export const SPREAD_HISTORY_MOCK: SpreadHistoryEntry[] = [
     id: "sh-1",
     dateTime: "2026-10-24T14:30:00",
     scope: "segment",
-    targetName: "Major coin",
-    targetSubLabel: "Segment",
+    targetName: "Ethereum",
+    targetSubLabel: "ETH",
     changeType: "Segment spread updated",
     previousConfig: { buy: 2.0, sell: 1.75 },
     newConfig: { buy: 2.5, sell: 2.25 },
@@ -232,3 +232,25 @@ export const SPREAD_HISTORY_MOCK: SpreadHistoryEntry[] = [
     affectedAssets: [sharedAffectedAssets[4]],
   },
 ];
+
+export interface AuditUser {
+  first_name: string;
+  last_name: string;
+  role: string; // e.g., "Super Admin"
+}
+
+export interface AuditLogItem {
+  id: string; // UUID v4
+  change_type: 'ASSET_UPDATE' | 'SEGMENT_ASSIGNMENT' | string; // Literal union with string fallback
+  target_id: string; // UUID v4
+  requested_by_id: string; // UUID v4
+  requested_by: AuditUser;
+  status: 'APPROVED' | 'PENDING' | 'REJECTED' | string; 
+  target: string; // e.g., "Binance Coin", "Major coins"
+  target_currency: string; // e.g., "BNB" or ""
+  previous_configuration: string[];
+  new_configuration: string[];
+  affected_assets: number;
+  created_at: string; // ISO 8601 Timestamp
+  updated_at: string; // ISO 8601 Timestamp
+}

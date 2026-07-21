@@ -20,6 +20,8 @@ import { DashboardLayout } from "../layout/dashboard-layout";
 import { EmptySpreadSchedule } from "./empty-spread-schedule";
 import {
   useGetCryptoRates,
+  UseGetRateLogs,
+  UseGetRateProposals,
   useUpdateBuyAndSpreadRates,
 } from "@/lib/services/rates.service";
 import { CryptoCurrencyTypes } from "@/lib/types/rates-types";
@@ -28,7 +30,7 @@ import { Input } from "../ui/input";
 import { SelectFieldLayout } from "../forms/SelectFieldLayout";
 import { SEGMENT_TYPES } from "./mock";
 import { Badge } from "./badge";
-import { SPREAD_HISTORY_MOCK, SpreadHistoryEntry } from "./types";
+import { AuditLogItem, SPREAD_HISTORY_MOCK, SpreadHistoryEntry } from "./types";
 import { AffectedAssetsBadge, ScopeBadge } from "./scope-badge";
 import { SpreadChangeDetailsDrawer } from "./spread-change-details-change-drawer";
 
@@ -40,14 +42,25 @@ export default function RateManagement() {
   const [editRow, setEditRow] = useState<CryptoCurrencyTypes | null>(null);
   const [view, setView] = useState<"list" | "wizard">("list");
   const { data, isPending, error } = useGetCryptoRates();
+  const {
+    data: ratesLogData,
+    isPending: ratesLogisPending,
+    error: ratesLogError,
+  } = UseGetRateLogs();
+  const {
+    data: rateProposalData,
+    isPending: rateProposalIsPending,
+    error: rateProposalError,
+  } = UseGetRateProposals();
   const { mutate: updateCryptoRate } = useUpdateBuyAndSpreadRates();
   const [selectedTransactionType, setSelectedTransactionType] =
     useState<string>("");
   const [selectedHistoryEntry, setSelectedHistoryEntry] =
-    useState<SpreadHistoryEntry | null>(null);
-  const historyData = SPREAD_HISTORY_MOCK;
+    useState<AuditLogItem | null>(null);
+  const historyData = ratesLogData?.logs;
   const ratesData = data?.data;
   console.log(ratesData);
+  console.log("historyData", historyData, ratesLogData);
 
   const columns = [
     {
@@ -148,7 +161,7 @@ export default function RateManagement() {
       ),
     },
     {
-      key: "actions",
+      key: "",
       header: "",
       render: (row: CryptoCurrencyTypes) => (
         <div className="flex items-center justify-between gap-4">
@@ -186,18 +199,14 @@ export default function RateManagement() {
     {
       key: "dateTime",
       header: "Date & Time",
-      render: (row: SpreadHistoryEntry) => {
-        const d = new Date(row.dateTime);
+      render: (row: AuditLogItem) => {
+        const d = new Date(row.created_at);
         return (
           <div>
-            <div className="text-[12px] text-[#111827]">
-              {d.toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-              })}
+            <div className="text-[14px] font-medium leading-5 text-text-primary">
+              {formatDate(row.created_at)}
             </div>
-            <div className="text-[11px] text-[#9CA3AF]">
+            <div className="text-[12px] font-normal leading-[18px] text-[#9CA3AF]">
               {d.toLocaleTimeString("en-US", {
                 hour: "2-digit",
                 minute: "2-digit",
@@ -207,76 +216,108 @@ export default function RateManagement() {
         );
       },
     },
-    {
-      key: "scope",
-      header: "Scope",
-      render: (row: SpreadHistoryEntry) => <ScopeBadge scope={row.scope} />,
-    },
+    // {
+    //   key: "scope",
+    //   header: "Scope",
+    //   className: "w-[150px]",
+    //   render: (row: AuditLogItem) => <ScopeBadge scope={row.scope} />,
+    // },
     {
       key: "target",
       header: "Target",
-      render: (row: SpreadHistoryEntry) => (
+      className: "w-[130px]",
+      render: (row: AuditLogItem) => (
         <div>
           <div className="text-[13px] font-medium text-[#111827]">
-            {row.targetName}
+            {row.target}
           </div>
-          <div className="text-[11px] text-[#9CA3AF]">{row.targetSubLabel}</div>
+          <div className="text-[11px] text-[#9CA3AF]">
+            {row.target_currency}
+          </div>
         </div>
       ),
     },
     {
       key: "changeType",
       header: "Change Type",
-      render: (row: SpreadHistoryEntry) => (
-        <div className="text-[13px] text-[#111827]">{row.changeType}</div>
+      className: "w-[150px]",
+      render: (row: AuditLogItem) => (
+        <div className="text-[13px] text-[#111827]">{row.change_type}</div>
       ),
     },
     {
       key: "previousConfig",
       header: "Previous Configuration",
-      render: (row: SpreadHistoryEntry) => (
+      render: (row: AuditLogItem) => (
         <div className="text-[13px] text-[#111827]">
-          Buy: {row.previousConfig.buy.toFixed(2)}%
+          Buy:{" "}
+          {Number(
+            row.previous_configuration
+              ?.find((c: string) => c.startsWith("Buy:"))
+              ?.replace("Buy:", "")
+              ?.replace("%", "")
+              ?.trim(),
+          ) || 0}
           <br />
-          Sell: {row.previousConfig.sell.toFixed(2)}%
+          Sell:{" "}
+          {Number(
+            row.previous_configuration
+              ?.find((c: string) => c.startsWith("Sell:"))
+              ?.replace("Sell:", "")
+              ?.replace("%", "")
+              ?.trim(),
+          ) || 0}
         </div>
       ),
     },
     {
       key: "newConfig",
       header: "New Configuration",
-      render: (row: SpreadHistoryEntry) => (
+      render: (row: AuditLogItem) => (
         <div className="text-[13px] text-[#111827]">
-          Buy: {row.newConfig.buy.toFixed(2)}%
+          Buy: {Number(
+          row.new_configuration
+            ?.find((c: string) => c.startsWith("Buy:"))
+            ?.replace("Buy:", "")
+            ?.replace("%", "")
+            ?.trim(),
+        ) || 0}
           <br />
-          Sell: {row.newConfig.sell.toFixed(2)}%
+          Sell: {Number(
+          row.new_configuration
+            ?.find((c: string) => c.startsWith("Sell:"))
+            ?.replace("Sell:", "")
+            ?.replace("%", "")
+            ?.trim(),
+        ) || 0}
         </div>
       ),
     },
     {
       key: "affectedAssetsCount",
       header: "Affected Asset",
-      render: (row: SpreadHistoryEntry) => (
-        <AffectedAssetsBadge count={row.affectedAssetsCount} />
+      className: "w-[150px]",
+      render: (row: AuditLogItem) => (
+        <AffectedAssetsBadge count={row.affected_assets} />
       ),
     },
     {
       key: "updatedBy",
       header: "Update by",
-      render: (row: SpreadHistoryEntry) => (
+      render: (row: AuditLogItem) => (
         <div>
-          <div className="text-[12px] text-[#111827]">{row.updatedBy.name}</div>
-          <div className="text-[11px] text-[#9CA3AF]">{row.updatedBy.role}</div>
+          <div className="text-[12px] text-[#111827]">{row.requested_by.first_name + " " + row.requested_by.last_name}</div>
+          <div className="text-[11px] text-[#9CA3AF]">{row.requested_by.role}</div>
         </div>
       ),
     },
     {
-      key: "actions",
+      key: "",
       header: "",
-      render: (row: SpreadHistoryEntry) => (
+      render: (row: AuditLogItem) => (
         <button
           onClick={() => setSelectedHistoryEntry(row)}
-          className="flex items-center gap-1 text-[13px] text-[#0D9488] font-medium hover:opacity-70 transition-opacity"
+          className="flex items-center gap-1 text-[13px] text-[#0D9488] font-medium hover:opacity-70 transition-opacity curso"
         >
           <Eye size={14} /> View
         </button>
@@ -370,8 +411,8 @@ export default function RateManagement() {
                     rowKey={(row) => row.id}
                     itemsPerPage={10}
                     totalCount={historyData?.length}
-                    emptyMessage="No spread changes recorded yet."
-                    isLoading={false}
+                    emptyMessage="No spread history recorded yet."
+                    isLoading={ratesLogisPending}
                   />
                 )}
               </main>
@@ -392,10 +433,10 @@ export default function RateManagement() {
             }}
           />
         )}
-        <SpreadChangeDetailsDrawer
+        {/* <SpreadChangeDetailsDrawer
           entry={selectedHistoryEntry}
           onClose={() => setSelectedHistoryEntry(null)}
-        />
+        /> */}
 
         {/* Create Wizard */}
       </div>
