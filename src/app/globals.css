@@ -15,6 +15,8 @@
   --color-teal-light: var(--teal-light);
   --color-teal-text: var(--teal-text);
   --color-teal-border: var(--teal-border);
+  --color-blue-light: var(--blue-light);
+  --color-blue-border: var(--blue-border);
   --color-text-primary-font-color: var(--text-primary-font-color);
   --color-card-secondary: var(--card-secondary);
   --color-card-primary: var(--card-primary);
@@ -92,6 +94,8 @@
   --teal-border: #99F6E4;
   --teal-light: #F0FDFA;
   --teal-text: #0F766E;
+  --blue-border: #B7DBFF;
+  --blue-light: #F0F7FF;
   --input-border-focus: #2DD4BF;
   --text-primary-font-color: #111827;
   --card-secondary: #F9F9F9;
