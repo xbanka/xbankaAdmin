@@ -38,14 +38,6 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
   const [staffData, setStaffData] = useState<InviteStaffDraft>({});
   const { mutate: inviteStaff, isPending } = useInviteStaff();
   const [selectedRole, setSelectedRole] = useState<Role | undefined>();
-  
-  const handleClose = () => {
-    setStep(1);
-    onClose();
-    reset1();
-    reset2();
-  };
-
   // Step 1: Invite Employee
   const {
     register: registerStep1,
@@ -55,8 +47,9 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
   } = useForm<stepOneFormData>({
     resolver: zodResolver(StepOneStaffSchema),
   });
+
   const roleValue = selectedRole;
-  
+
   // Step 2: Assign Role & Permissions (combined)
   const {
     control,
@@ -66,12 +59,18 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
     reset: reset2,
   } = useForm<stepTwoFormData>({
     resolver: zodResolver(StepTwoStaffSchema),
-    defaultValues: roleValue
-    ? getRolePermissionDefaults(roleValue)
-    : {},
+    defaultValues: roleValue ? getRolePermissionDefaults(roleValue) : {},
     shouldUnregister: false,
   });
-  
+
+  const watchedPermissions = watchStep2();
+
+  const handleClose = () => {
+    setStep(1);
+    onClose();
+    reset1();
+    reset2();
+  };
 
   // Compute which permissions are auto-checked, disabled, etc.
   const permissionState = useMemo(() => {
@@ -117,14 +116,14 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
 
     type UiPermissionKey = keyof typeof UI_TO_API_PERMISSION_MAP;
     const selectedPermissions = Object.keys(data).filter(
-      (key) => data[key] === true
+      (key) => data[key] === true,
     ) as UiPermissionKey[];
 
     const apiPermissions = selectedPermissions.map(
-      (perm) => UI_TO_API_PERMISSION_MAP[perm]
+      (perm) => UI_TO_API_PERMISSION_MAP[perm],
     );
 
-    console.log("Raw data", data)
+    console.log("Raw data", data);
 
     const payload = {
       email: staffData.email,
@@ -231,7 +230,7 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
                   {Object.entries(PERMISSION_CATEGORIES).map(
                     ([category, permissions]) => {
                       const allowedPermissions = permissions.filter((perm) =>
-                        permissionState.allPermissions.includes(perm)
+                        permissionState.allPermissions.includes(perm),
                       );
 
                       if (!allowedPermissions.length) return null;
@@ -240,6 +239,11 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
                         <CollapsiblePermissionSection
                           key={category}
                           title={category}
+                          checkedCount={
+                            allowedPermissions.filter(
+                              (perm) => watchedPermissions?.[perm] === true,
+                            ).length
+                          }
                         >
                           <div className="flex gap-[32px] flex-wrap">
                             {allowedPermissions.map((permId) => {
@@ -247,7 +251,7 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
                                 permissionState.defaultPerms.includes(permId);
                               const isNeverAllowed =
                                 permissionState.neverAllowedPerms.includes(
-                                  permId
+                                  permId,
                                 );
 
                               const rawLabel =
@@ -274,7 +278,7 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
                           </div>
                         </CollapsiblePermissionSection>
                       );
-                    }
+                    },
                   )}
                 </div>
               )}
