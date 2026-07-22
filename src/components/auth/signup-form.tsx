@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -11,28 +12,51 @@ import { Mail, Lock, User } from "lucide-react";
 import FormField from "../forms/FormField";
 import PasswordField from "../ui/PasswordField";
 import { useSignup } from "@/lib/services/signup.service";
-import { useState } from "react";
 import { SignupFormData, signupSchema } from "@/lib/schema/signup.schema";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function SignupForm() {
   const [showSuccess, setShowSuccess] = useState(false);
+  const { data, error, mutate, isSuccess, isPending } = useSignup();
+
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const emailFromUrl = searchParams.get("email") || "";
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
+    setValue,
   } = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
+    defaultValues: {
+      email: emailFromUrl,
+    },
   });
 
-  const { data, error, mutate, isSuccess, isPending } = useSignup();
+  useEffect(() => {
+    if (emailFromUrl) {
+      setValue("email", emailFromUrl);
+    }
+  }, [emailFromUrl, setValue]);
 
   const onSubmit = async (data: SignupFormData) => {
     mutate(data, {
       onSuccess: () => {
-        reset(), 
-        setShowSuccess(true);
+        (reset(), setShowSuccess(true));
+        // router.push(
+        //   `/signup/success?role=${encodeURIComponent(
+        //     response?.role || "Admin",
+        //   )}&email=${encodeURIComponent(emailFromUrl)}`,
+        // );
+        router.push(
+          `/signup/success?role=${encodeURIComponent(
+            "Admin",
+          )}&email=${encodeURIComponent(emailFromUrl)}`,
+        );
       },
     });
   };
@@ -52,10 +76,7 @@ export default function SignupForm() {
               Your account has been created successfully
             </p>
             <Link href="/signin">
-              <Button
-                className="w-full"
-                size="sm"
-              >
+              <Button className="w-full" size="sm">
                 Ok
               </Button>
             </Link>
@@ -70,8 +91,12 @@ export default function SignupForm() {
       <div className="px-[25px] md:px-0">
         <Card className="w-full max-w-[600px] mx-auto">
           <CardHeader>
-            <CardTitle className="font-[700] text-[36px] leading-[44px] text-[#1B1D20] text-center">Complete Sign Up</CardTitle>
-            <CardTitle className="font-[400] text-[14px] leading-[24px] text-[#1B1D20] text-center">Enter name and password to complete sign up process</CardTitle>
+            <CardTitle className="font-[700] text-[36px] leading-[44px] text-[#1B1D20] text-center">
+              Complete Sign Up
+            </CardTitle>
+            <CardTitle className="font-[400] text-[14px] leading-[24px] text-[#1B1D20] text-center">
+              Enter name and password to complete sign up process
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <form onSubmit={handleSubmit(onSubmit)}>
@@ -95,11 +120,12 @@ export default function SignupForm() {
 
                 <FormField
                   id="email"
-                  type="text" 
+                  type="text"
                   placeholder="Work Email address"
                   icon={Mail}
                   register={register}
                   error={errors.email}
+                  disabled
                 />
 
                 <PasswordField
