@@ -21,6 +21,7 @@ interface FormFieldProps {
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   value?: string;
   inputClassName?: string;
+  disabled?: boolean
 }
 
 const FormField = ({
@@ -35,7 +36,8 @@ const FormField = ({
   error,
   onChange,
   value,
-  inputClassName
+  inputClassName,
+  disabled= false
 }: FormFieldProps) => {
   return (
     <div className="space-y-2 w-full">
@@ -52,6 +54,7 @@ const FormField = ({
           readOnly={readOnly}
           onChange={onChange}
           value={value}
+          disabled={disabled}
           {...(register ? register(id) : {})}
           {...inputProps}
         />
