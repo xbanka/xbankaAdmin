@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -61,30 +60,30 @@ export default function SignupForm() {
     });
   };
 
-  if (showSuccess && isSuccess && data?.success) {
-    return (
-      <Card className="w-full max-w-sm mx-auto p-[40px] rounded-[20px]">
-        <CardContent className="p-0">
-          <div className="text-center space-y-3">
-            <div className="w-10 h-10 bg-[var(--customCyan)] rounded-full flex items-center justify-center mx-auto">
-              <Mail className="w-5 h-5 text-[var(--abstractCyan)]" />
-            </div>
-            <h2 className="text-[20px] font-bold text-[#1B1D20]">
-              Go to sign in page
-            </h2>
-            <p className="text-[#4B5563] font-[400] text-[16px]">
-              Your account has been created successfully
-            </p>
-            <Link href="/signin">
-              <Button className="w-full" size="sm">
-                Ok
-              </Button>
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+  // if (showSuccess && isSuccess && data?.success) {
+  //   return (
+  //     <Card className="w-full max-w-sm mx-auto p-[40px] rounded-[20px]">
+  //       <CardContent className="p-0">
+  //         <div className="text-center space-y-3">
+  //           <div className="w-10 h-10 bg-[var(--customCyan)] rounded-full flex items-center justify-center mx-auto">
+  //             <Mail className="w-5 h-5 text-[var(--abstractCyan)]" />
+  //           </div>
+  //           <h2 className="text-[20px] font-bold text-[#1B1D20]">
+  //             Go to sign in page
+  //           </h2>
+  //           <p className="text-[#4B5563] font-[400] text-[16px]">
+  //             Your account has been created successfully
+  //           </p>
+  //           <Link href="/signin">
+  //             <Button className="w-full" size="sm">
+  //               Ok
+  //             </Button>
+  //           </Link>
+  //         </div>
+  //       </CardContent>
+  //     </Card>
+  //   );
+  // }
 
   return (
     <div>

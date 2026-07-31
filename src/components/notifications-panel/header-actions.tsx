@@ -12,9 +12,10 @@ import { NotificationsPanel } from "./notifications-panel";
 import { useUserStore } from "@/store/userStore";
 import { Skeleton } from "../ui/skeleton";
 import { useProfile } from "@/lib/services/profile.service";
+import { useNotificationStore } from "@/store/useNotificationStore";
 
 export function HeaderActions() {
-  const [showNotifications, setShowNotifications] = useState(false);
+  const {toggle, isOpen} = useNotificationStore();
   const notificationsRef = useRef<HTMLDivElement>(null);
 
   const setAffiliate = useUserStore((s) => s.setUser);
@@ -34,7 +35,7 @@ export function HeaderActions() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => setShowNotifications(!showNotifications)}
+          onClick={toggle}
           className="relative"
         >
           <Bell className="w-5 h-5" />
@@ -42,9 +43,9 @@ export function HeaderActions() {
         </Button>
 
         {/* Notifications Dropdown */}
-        {showNotifications && (
+        {isOpen && (
           <div className="absolute right-0 top-full mt-2 z-50">
-            <NotificationsPanel onClose={() => setShowNotifications(false)} />
+            <NotificationsPanel onClose={toggle} />
           </div>
         )}
       </div>

@@ -20,6 +20,7 @@ import { DashboardLayout } from "../layout/dashboard-layout";
 import { EmptySpreadSchedule } from "./empty-spread-schedule";
 import {
   useGetCryptoRates,
+  UseGetRateLogDetails,
   UseGetRateLogs,
   UseGetRateProposals,
   useUpdateBuyAndSpreadRates,
@@ -42,6 +43,7 @@ export default function RateManagement() {
   const [editRow, setEditRow] = useState<CryptoCurrencyTypes | null>(null);
   const [view, setView] = useState<"list" | "wizard">("list");
   const { data, isPending, error } = useGetCryptoRates();
+
   const {
     data: ratesLogData,
     isPending: ratesLogisPending,
@@ -57,6 +59,9 @@ export default function RateManagement() {
     useState<string>("");
   const [selectedHistoryEntry, setSelectedHistoryEntry] =
     useState<AuditLogItem | null>(null);
+  const { data: rateLogDetails, isPending: rateLogDetailsPending } =
+    UseGetRateLogDetails(selectedHistoryEntry?.id);
+  console.log("Rate Log Details", rateLogDetails?.log);
   const historyData = ratesLogData?.logs;
   const ratesData = data?.data;
   console.log(ratesData);
@@ -275,21 +280,23 @@ export default function RateManagement() {
       header: "New Configuration",
       render: (row: AuditLogItem) => (
         <div className="text-[13px] text-[#111827]">
-          Buy: {Number(
-          row.new_configuration
-            ?.find((c: string) => c.startsWith("Buy:"))
-            ?.replace("Buy:", "")
-            ?.replace("%", "")
-            ?.trim(),
-        ) || 0}
+          Buy:{" "}
+          {Number(
+            row.new_configuration
+              ?.find((c: string) => c.startsWith("Buy:"))
+              ?.replace("Buy:", "")
+              ?.replace("%", "")
+              ?.trim(),
+          ) || 0}
           <br />
-          Sell: {Number(
-          row.new_configuration
-            ?.find((c: string) => c.startsWith("Sell:"))
-            ?.replace("Sell:", "")
-            ?.replace("%", "")
-            ?.trim(),
-        ) || 0}
+          Sell:{" "}
+          {Number(
+            row.new_configuration
+              ?.find((c: string) => c.startsWith("Sell:"))
+              ?.replace("Sell:", "")
+              ?.replace("%", "")
+              ?.trim(),
+          ) || 0}
         </div>
       ),
     },
@@ -306,8 +313,12 @@ export default function RateManagement() {
       header: "Update by",
       render: (row: AuditLogItem) => (
         <div>
-          <div className="text-[12px] text-[#111827]">{row.requested_by.first_name + " " + row.requested_by.last_name}</div>
-          <div className="text-[11px] text-[#9CA3AF]">{row.requested_by.role}</div>
+          <div className="text-[12px] text-[#111827]">
+            {row.requested_by.first_name + " " + row.requested_by.last_name}
+          </div>
+          <div className="text-[11px] text-[#9CA3AF]">
+            {row.requested_by.role}
+          </div>
         </div>
       ),
     },
@@ -433,10 +444,11 @@ export default function RateManagement() {
             }}
           />
         )}
-        {/* <SpreadChangeDetailsDrawer
-          entry={selectedHistoryEntry}
+        <SpreadChangeDetailsDrawer
+          entry={rateLogDetails?.log}
+          // isLoading={rateLogDetailsPending}
           onClose={() => setSelectedHistoryEntry(null)}
-        /> */}
+        />
 
         {/* Create Wizard */}
       </div>

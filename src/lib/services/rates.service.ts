@@ -5,6 +5,7 @@ import {
   bulkAssignSegment,
   getAllSegments,
   getCryptoRates,
+  getRateLogDetails,
   getRateLogs,
   getRateProposals,
   postCryptoRates,
@@ -202,6 +203,21 @@ export const UseGetRateLogs = () => {
     queryFn: async () => {
       try {
         const response = await getRateLogs();
+        return response;
+      } catch (error) {
+        handleApiError(error);
+      }
+    },
+  });
+};
+
+export const UseGetRateLogDetails = (id?: string) => {
+  return useQuery({
+    queryKey: ["rate-log-details", id],
+    enabled: !!id,
+    queryFn: async () => {
+      try {
+        const response = await getRateLogDetails(id!);
         return response;
       } catch (error) {
         handleApiError(error);
