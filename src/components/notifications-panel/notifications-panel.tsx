@@ -13,6 +13,8 @@ import LoaderSpinner from "../ui/loaderSpinner";
 import { usePayoutSidebarStore } from "@/store/usePayoutSidebarStore";
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 import { cn } from "@/lib/utils";
+import { dummySpreadApproval } from "./dummy-spread";
+import { useNotificationDrawerStore } from "@/store/useNotificationDrawerStore";
 
 interface Notification {
   id: string;
@@ -47,8 +49,7 @@ const formatMethod = (m?: string) =>
 const formatAmount = (a?: number) =>
   a == null ? "—" : `₦${Number(a).toLocaleString()}`;
 
-const withAt = (u?: string) =>
-  !u ? "—" : u.startsWith("@") ? u : `@${u}`;
+const withAt = (u?: string) => (!u ? "—" : u.startsWith("@") ? u : `@${u}`);
 
 function timeAgo(iso?: string) {
   if (!iso) return "";
@@ -81,6 +82,37 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
   const { openDetailsSidebar } = usePayoutSidebarStore();
 
   const notifications: Notification[] = data?.data || [];
+  const { open } = useNotificationDrawerStore();
+
+const handleReview = () => {
+
+    open({
+        id: "spread-demo",
+
+        type: "spread-approval",
+
+        title: "Spread Approval Required",
+
+        data: dummySpreadApproval,
+    });
+
+    onClose();
+};
+  const allNotifications: Notification[] | any = [
+    {
+      id: "spread-demo",
+
+      type: "spread-approval",
+
+      title: "Spread Approval Required",
+
+      description: "Spread configuration awaiting approval.",
+
+      createdAt: new Date(),
+      is_read: false,
+    },
+    ...notifications
+  ];
   const allCount = notifications.length;
   const archivedCount = 0;
   const unreadCount = notifications.filter((n) => !n.is_read).length;
@@ -97,7 +129,7 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
     openDetailsSidebar(id);
   };
 
-  const filteredNotifications = notifications.filter((n) => {
+  const filteredNotifications = allNotifications.filter((n: any) => {
     if (activeTab === "unread") return !n.is_read;
     if (activeTab === "archived") return false;
     return true;
@@ -115,7 +147,9 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
       <aside className="absolute top-0 right-0 flex h-screen w-full flex-col border-l border-[#E5E3E3] bg-white shadow-2xl sm:w-[440px] animate-in slide-in-from-right duration-200">
         {/* Header */}
         <div className="flex flex-shrink-0 items-center justify-between border-b border-[#E5E3E3] px-5 py-4">
-          <h2 className="text-[20px] font-bold text-[#111827]">Notifications</h2>
+          <h2 className="text-[20px] font-bold text-[#111827]">
+            Notifications
+          </h2>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700"
@@ -171,19 +205,21 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
               </div>
             )}
 
-            {!isPending && !error && filteredNotifications.length === 0 && (
+            {!isPending && !error && allNotifications.length === 0 && (
               <div className="flex flex-col items-center justify-center gap-3 px-6 py-20 text-center text-gray-400">
                 <Bell className="h-10 w-10 text-gray-300" />
                 <p className="text-sm font-medium text-gray-500">
                   No notifications
                 </p>
-                <p className="text-xs text-gray-400">You&apos;re all caught up.</p>
+                <p className="text-xs text-gray-400">
+                  You&apos;re all caught up.
+                </p>
               </div>
             )}
 
-            {!isPending && !error && filteredNotifications.length > 0 && (
+            {!isPending && !error && allNotifications.length > 0 && (
               <ul className="divide-y divide-[#F0F0F0]">
-                {filteredNotifications.map((notification) => {
+                {allNotifications.map((notification:any) => {
                   const unread = !notification.is_read;
                   return (
                     <li
@@ -206,23 +242,23 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
                         {/* Content */}
                         <div className="flex min-w-0 flex-1 flex-col">
                           <p className="text-[15px] font-semibold text-[#111827]">
-                            {notification.message}
+                            {notification?.message}
                           </p>
 
                           <p className="mt-1 text-[13px] leading-[18px] text-[#4B5563]">
                             <span className="text-[#6B7280]">Affiliate:</span>{" "}
-                            {withAt(notification.affiliate.username)}
+                            {withAt(notification?.affiliate?.username)}
                             <span className="mx-2 text-gray-300">|</span>
                             <span className="text-[#6B7280]">Amount:</span>{" "}
                             <span className="font-medium text-[#111827]">
-                              {formatAmount(notification.amount)}
+                              {formatAmount(notification?.amount)}
                             </span>
                           </p>
                           <p className="mt-0.5 text-[13px] leading-[18px] text-[#4B5563]">
                             <span className="text-[#6B7280]">Method:</span>{" "}
-                            {formatMethod(notification.method)}
-                            {notification.affiliate.bank
-                              ? ` (${notification.affiliate.bank})`
+                            {formatMethod(notification?.method)}
+                            {notification?.affiliate?.bank
+                              ? ` (${notification?.affiliate?.bank})`
                               : ""}
                           </p>
 
@@ -232,14 +268,14 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
                               className="h-9 w-fit rounded-lg bg-[#17E1C5] px-4 text-[13px] font-semibold text-[#06251F] hover:bg-[#13C9B0]"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleViewRequest(notification.id);
+                                handleViewRequest(notification?.id);
                               }}
                             >
                               View Request
                             </Button>
                             <span className="text-[12px] text-[#9CA3AF]">
                               {timeAgo(
-                                notification.created_at ?? notification.read_at,
+                                notification?.created_at ?? notification?.read_at,
                               )}
                             </span>
                           </div>

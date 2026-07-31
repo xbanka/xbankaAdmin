@@ -6,10 +6,27 @@ import { DataTableLayout } from "../DataTableLayout/DataTableLayout";
 import { ScopeBadge, UpdatedStatusBadge } from "./scope-badge";
 import { formatDate } from "@/lib/formatDate";
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
-import { AffectedAsset, SpreadHistoryEntry } from "./types";
+import { AffectedAsset } from "./types";
+
+interface RateLogDetails {
+  id: string;
+  change_type: string;
+  target: string;
+  target_currency: string;
+  status: string;
+  affected_assets: number;
+  previous_configuration: string[];
+  new_configuration: string[];
+  created_at: string;
+  requested_by: {
+    first_name: string;
+    last_name: string;
+    role: string;
+  };
+}
 
 interface Props {
-  entry: SpreadHistoryEntry | null;
+  entry: RateLogDetails | null;
   onClose: () => void;
 }
 
@@ -23,6 +40,7 @@ function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
 }
 
 export function SpreadChangeDetailsDrawer({ entry, onClose }: Props) {
+  console.log(entry)
   useBodyScrollLock(!!entry);
 
   if (!entry) return null;
@@ -85,10 +103,14 @@ export function SpreadChangeDetailsDrawer({ entry, onClose }: Props) {
               <h2 className="text-lg font-semibold text-[#111827]">
                 Spread Change Details
               </h2>
-              <ScopeBadge scope={entry.scope} />
+              <ScopeBadge
+                scope={
+                  entry.change_type.includes("SEGMENT") ? "segment" : "asset"
+                }
+              />
             </div>
             <p className="text-[13px] text-[#9CA3AF]">
-              {formatDate(entry.dateTime)}
+              {formatDate(entry.created_at)}
             </p>
           </div>
           <button
@@ -107,7 +129,9 @@ export function SpreadChangeDetailsDrawer({ entry, onClose }: Props) {
               Change Summary
             </h3>
             <p className="text-[14px] font-medium leading-5 text-text-secondary">
-              {entry.changeSummary}
+              {entry.change_type === "SEGMENT_ASSIGNMENT"
+                ? `${entry.target} configuration was updated.`
+                : `${entry.change_type.replaceAll("_", " ")} completed.`}
             </p>
           </div>
 
@@ -119,30 +143,48 @@ export function SpreadChangeDetailsDrawer({ entry, onClose }: Props) {
             <div className="bg-[#F9FAFB] rounded-lg py-4 px-5">
               <InfoRow
                 label="Scope"
-                value={entry.scope === "segment" ? "Segment" : "Asset"}
+                value={
+                  entry.change_type.includes("SEGMENT") ? "Segment" : "Asset"
+                }
               />
-              <InfoRow label="Target" value={entry.targetName} />
+              <InfoRow label="Target" value={entry.target} />
               <InfoRow
                 label="Affected Assets"
-                value={`${entry.affectedAssetsCount} Assets`}
+                value={`${entry.affected_assets} Assets`}
               />
               <InfoRow
                 label="Previous Configuration"
-                value={`Buy: ${entry.previousConfig.buy.toFixed(2)}% · Sell: ${entry.previousConfig.sell.toFixed(2)}%`}
+                value={
+                  <div className="text-right">
+                    {entry.previous_configuration.length
+                      ? entry.previous_configuration.map((item) => (
+                          <div key={item}>{item}</div>
+                        ))
+                      : "-"}
+                  </div>
+                }
               />
               <InfoRow
                 label="New Configuration"
-                value={`Buy: ${entry.newConfig.buy.toFixed(2)}% · Sell: ${entry.newConfig.sell.toFixed(2)}%`}
+                value={
+                  <div className="text-right">
+                    {entry.new_configuration.length
+                      ? entry.new_configuration.map((item) => (
+                          <div key={item}>{item}</div>
+                        ))
+                      : "-"}
+                  </div>
+                }
               />
-              <InfoRow label="Effective Until" value={entry.effectiveUntil} />
+              {/* <InfoRow label="Effective Until" value={entry.effectiveUntil} /> */}
               <InfoRow
                 label="Status"
                 value={
                   <span
                     className={
-                      entry.status === "Active"
-                        ? "text-[#059669]"
-                        : "text-[#6B7280]"
+                      entry.status === "APPROVED"
+                        ? "text-green-600"
+                        : "text-orange-600"
                     }
                   >
                     {entry.status}
@@ -157,14 +199,14 @@ export function SpreadChangeDetailsDrawer({ entry, onClose }: Props) {
             <h3 className="text-sm font-semibold text-[#111827] mb-2">
               Affected Assets
             </h3>
-            <DataTableLayout
+            {/* <DataTableLayout
               data={entry.affectedAssets}
               columns={affectedAssetColumns}
               rowKey={(row) => row.id}
               itemsPerPage={entry.affectedAssets.length || 1}
               totalCount={entry.affectedAssets.length}
               emptyMessage="No assets affected."
-            />
+            /> */}
           </div>
 
           {/* Changed by */}
@@ -174,7 +216,7 @@ export function SpreadChangeDetailsDrawer({ entry, onClose }: Props) {
             </h3>
             <div className="flex items-center gap-3 bg-[#F9FAFB] rounded-lg p-3">
               <div className="w-9 h-9 rounded-full bg-[#E5E7EB] flex items-center justify-center text-[12px] font-semibold text-[#374151]">
-                {entry.updatedBy.name
+                {`${entry.requested_by.first_name} ${entry.requested_by.last_name}`
                   .split(" ")
                   .map((p) => p[0])
                   .join("")
@@ -183,10 +225,10 @@ export function SpreadChangeDetailsDrawer({ entry, onClose }: Props) {
               </div>
               <div>
                 <div className="text-[13px] font-medium text-[#111827]">
-                  {entry.updatedBy.name}
+                  {`${entry.requested_by.first_name} ${entry.requested_by.last_name}`}
                 </div>
                 <div className="text-[11px] text-[#9CA3AF]">
-                  {entry.updatedBy.role} · {formatDate(entry.dateTime)}
+                  {entry.requested_by.role} · {formatDate(entry.created_at)}
                 </div>
               </div>
             </div>
