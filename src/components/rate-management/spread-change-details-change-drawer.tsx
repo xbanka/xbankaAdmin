@@ -1,4 +1,3 @@
-// components/rate-management/spread-change-details-drawer.tsx
 "use client";
 
 import { X } from "lucide-react";
@@ -8,26 +7,48 @@ import { formatDate } from "@/lib/formatDate";
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 import { AffectedAsset } from "./types";
 
-interface RateLogDetails {
+export interface AffectedAssetDetail {
   id: string;
-  change_type: string;
-  target: string;
-  target_currency: string;
-  status: string;
-  affected_assets: number;
+  name: string;
+  currency: string;
   previous_configuration: string[];
   new_configuration: string[];
+  status: string;
+}
+
+export interface RequestedBy {
+  first_name: string;
+  last_name: string;
+  role: string;
+}
+
+export interface RateLogDetails {
+  id: string;
+  change_type: string;
+  target_id: string;
+  target: string;
+  target_currency: string | null;
+  status: string;
+  affected_assets: number;
+  affected_assets_detail: AffectedAssetDetail[] | null;
+  previous_configuration: string[];
+  new_configuration: string[];
+  requested_by_id: string;
+  requested_by: RequestedBy;
   created_at: string;
-  requested_by: {
-    first_name: string;
-    last_name: string;
-    role: string;
-  };
+  updated_at: string;
 }
 
 interface Props {
   entry: RateLogDetails | null;
   onClose: () => void;
+}
+
+function getConfigValue(configList: string[] = [], prefix: string): string {
+  const match = configList.find((item) =>
+    item.toLowerCase().startsWith(prefix.toLowerCase())
+  );
+  return match ? match.split(":")[1]?.trim() ?? "-" : "-";
 }
 
 function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
@@ -49,45 +70,47 @@ export function SpreadChangeDetailsDrawer({ entry, onClose }: Props) {
     {
       key: "asset",
       header: "Asset",
-      render: (row: AffectedAsset) => (
+      render: (row: AffectedAssetDetail) => (
         <div>
           <div className="text-[13px] font-medium text-[#111827]">
             {row.name}
           </div>
-          <div className="text-[11px] text-[#9CA3AF]">{row.ticker}</div>
+          <div className="text-[11px] text-[#9CA3AF]">{row.currency}</div>
         </div>
       ),
     },
     {
       key: "previousSpread",
       header: "Previous Spread",
-      render: (row: AffectedAsset) => (
+      render: (row: AffectedAssetDetail) => (
         <div className="text-[13px] text-[#111827]">
-          Buy: {row.previousSpread.buy.toFixed(2)}%
+          Buy: {getConfigValue(row.previous_configuration, "Buy")}
           <br />
-          Sell: {row.previousSpread.sell.toFixed(2)}%
+          Sell: {getConfigValue(row.previous_configuration, "Sell")}
         </div>
       ),
     },
     {
       key: "newSpread",
       header: "New Spread",
-      render: (row: AffectedAsset) => (
+      render: (row: AffectedAssetDetail) => (
         <div className="text-[13px] text-[#111827]">
-          Buy: {row.newSpread.buy.toFixed(2)}%
+          Buy: {getConfigValue(row.new_configuration, "Buy")}
           <br />
-          Sell: {row.newSpread.sell.toFixed(2)}%
+          Sell: {getConfigValue(row.new_configuration, "Sell")}
         </div>
       ),
     },
     {
       key: "status",
       header: "Status",
-      render: (row: AffectedAsset) => (
-        <UpdatedStatusBadge status={row.status} />
+      render: (row: AffectedAssetDetail) => (
+        <UpdatedStatusBadge status={row?.status} />
       ),
     },
   ];
+
+  const affectedAssetsList = entry.affected_assets_detail ?? [];
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
@@ -199,14 +222,14 @@ export function SpreadChangeDetailsDrawer({ entry, onClose }: Props) {
             <h3 className="text-sm font-semibold text-[#111827] mb-2">
               Affected Assets
             </h3>
-            {/* <DataTableLayout
-              data={entry.affectedAssets}
+            <DataTableLayout
+              data={affectedAssetsList}
               columns={affectedAssetColumns}
               rowKey={(row) => row.id}
-              itemsPerPage={entry.affectedAssets.length || 1}
-              totalCount={entry.affectedAssets.length}
+              itemsPerPage={5}
+              totalCount={affectedAssetsList?.length}
               emptyMessage="No assets affected."
-            /> */}
+            />
           </div>
 
           {/* Changed by */}
