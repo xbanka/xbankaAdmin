@@ -2,7 +2,16 @@
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowUp, Download, RefreshCw, ArrowRight } from "lucide-react";
+import {
+  ArrowUp,
+  Download,
+  RefreshCw,
+  ArrowRight,
+  Banknote,
+  UsersIcon,
+  WalletIcon,
+  ListTodo,
+} from "lucide-react";
 import Link from "next/link";
 import {
   metrics,
@@ -14,8 +23,114 @@ import {
 } from "./dashboard-data";
 import { CardLayout } from "../ui/card-layout";
 import { DetailCard } from "./detail-card";
+import {
+  useGetCustomerMetrics,
+  useGetTransactionMetrics,
+} from "@/lib/services/dashboard.service";
 
 export const DashboardHomePage = () => {
+  const { data: transactionMetrics, isLoading: transactionLoading } =
+    useGetTransactionMetrics();
+  console.log("Transaction Metrics:", transactionMetrics);
+
+  const { data: customerMetrics, isLoading: customerLoading } =
+    useGetCustomerMetrics();
+
+  const dashboardMetrics = [
+    {
+      title: "Transaction",
+      icon: Banknote,
+      value: transactionMetrics?.data.total ?? 0,
+      trend: "12% vs last week",
+      stats: [
+        {
+          label: "Success",
+          value: transactionMetrics?.data.success ?? 0,
+          valueClassName: "text-main-green",
+        },
+        {
+          label: "Pending",
+          value: transactionMetrics?.data.pending ?? 0,
+          valueClassName: "text-warning-text",
+        },
+        {
+          label: "Failed",
+          value: transactionMetrics?.data.failed ?? 0,
+          valueClassName: "text-red-500",
+        },
+      ],
+    },
+
+    {
+      title: "Customers",
+      icon: UsersIcon,
+      value: customerMetrics?.data.total ?? 0,
+      trend: "12% vs last week",
+      stats: [
+        {
+          label: "New Today",
+          value: customerMetrics?.data.newToday ?? 0,
+        },
+        {
+          label: "KYC Pending",
+          value: customerMetrics?.data.kycPending ?? 0,
+        },
+        {
+          label: "Flagged",
+          value: customerMetrics?.data.flagged ?? 0,
+          valueClassName: "text-red-500",
+        },
+      ],
+    },
+
+    // Dummy Finance
+
+    {
+      title: "Finance",
+      icon: WalletIcon,
+      value: 47,
+      trend: "12% vs last week",
+      stats: [
+        {
+          label: "Pending",
+          value: 30,
+        },
+        {
+          label: "On Hold",
+          value: 10,
+        },
+        {
+          label: "Flagged",
+          value: 7,
+          valueClassName: "text-red-500",
+        },
+      ],
+    },
+
+    // Dummy Tasks
+
+    {
+      title: "Tasks",
+      icon: ListTodo,
+      value: 100,
+      trend: "12% vs last week",
+      stats: [
+        {
+          label: "Open",
+          value: 60,
+        },
+        {
+          label: "In Progress",
+          value: 30,
+        },
+        {
+          label: "Overdue",
+          value: 10,
+          valueClassName: "text-red-500",
+        },
+      ],
+    },
+  ];
   return (
     <DashboardLayout title="Dashboard">
       <div className="p-4 space-y-6">
@@ -50,17 +165,16 @@ export const DashboardHomePage = () => {
 
         {/* Metric cards */}
         <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-          {metrics.map((metric) => {
-            const Icon = metric.icon;
-            return (
-              <DetailCard
-                title={metric.title}
-                Icon={metric.icon}
-                value={metric.value}
-                label={metric.title}
-              />
-            );
-          })}
+          {dashboardMetrics.map((metric) => (
+            <DetailCard
+              key={metric.title}
+              title={metric.title}
+              Icon={metric.icon}
+              value={metric.value}
+              trend={metric.trend}
+              stats={metric.stats}
+            />
+          ))}
         </div>
 
         {/* Workflow Health + Needs Urgent Attention */}
