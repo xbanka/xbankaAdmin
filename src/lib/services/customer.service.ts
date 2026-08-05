@@ -4,6 +4,7 @@ import {
   getAllCustomers,
   getCustomerAssets,
   getCustomerById,
+  getCustomerKyc,
   getCustomers,
   getCustomerTransactions,
   getCustomerVerification,
@@ -197,5 +198,19 @@ export const useToggleCustomerStatus = () => {
     onError: (error) => {
       handleApiError(error);
     },
+  });
+};
+
+export const useGetCustomerKyc = (customerId: string) => {
+  return useQuery({
+    queryKey: ["customer-kyc", customerId],
+    queryFn: async () => {
+      try {
+        return await getCustomerKyc(customerId);
+      } catch (error) {
+        handleApiError(error);
+      }
+    },
+    enabled: !!customerId,
   });
 };

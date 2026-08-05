@@ -5,6 +5,7 @@ import Image from "next/image";
 import {
   useGetCustomerAssets,
   useGetCustomerById,
+  useGetCustomerKyc,
   useGetCustomerTransactions,
   useGetCustomerVerification,
 } from "@/lib/services/customer.service";
@@ -31,6 +32,8 @@ export default function CustomerDetailsSidebar({
   const [activeTab, setActiveTab] = useState<Tab>("profile");
   const { data, isLoading } = useGetCustomerById(customerId || "");
   const { data: verificationData } = useGetCustomerVerification(customerId || "",);
+  const { data: kycData, isLoading: isKycLoading, error: kycError } = useGetCustomerKyc(customerId || "");
+  console.log("kycData", kycData);
 
   const { data: walletData } = useGetCustomerAssets(customerId || "");
 
@@ -145,7 +148,7 @@ export default function CustomerDetailsSidebar({
                     <TransactionsTab transactions={transactionData?.data} />
                   )}
                   {activeTab === "verification" && (
-                    <VerificationTab customer={verificationData?.data} />
+                    <VerificationTab customer={verificationData?.data} kyc={kycData?.data} />
                   )}
                 </>
               )}
