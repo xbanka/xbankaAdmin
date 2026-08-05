@@ -152,3 +152,14 @@ export const toggleCustomerStatus = async (customerId: string) => {
 
   return response.data;
 };
+
+export const getCustomerKyc = async (customerId: string) => {
+  const response = await AxiosInstance.get(
+    `/api/customers/${customerId}/kyc`,
+    {
+      withCredentials: true,
+    }
+  );
+
+  return response.data;
+};

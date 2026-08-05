@@ -6,12 +6,18 @@ import { Button } from "@/components/ui/button";
 import { SelectFieldLayout } from "../forms/SelectFieldLayout";
 import FormField from "../forms/FormField";
 import { AmountField } from "../forms/AmountField";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { CardLayout } from "../ui/card-layout";
 
 const PARTNERS = ["Luno"];
 const CRYPTO_CURRENCIES = ["USDT", "BTC", "ETH", "NGN"];
-const DELIVERY_SOURCES = ["Luno Wallet", "Rayosh", "Obiex", "Salmnine", "GredoEx"];
+const DELIVERY_SOURCES = [
+  "Luno Wallet",
+  "Rayosh",
+  "Obiex",
+  "Salmnine",
+  "GredoEx",
+];
 
 interface Props {
   onContinue: () => void;
@@ -39,6 +45,21 @@ export function CryptoStepTwo({ onContinue, onBack }: Props) {
 
   const partnerRateValue = parseFloat(partnerRate || "0");
   const xbankaRateValue = parseFloat(xbankaRate || "0");
+
+  const customerPaysCurrencies = useMemo(() => {
+    if (isBuy) {
+      return CRYPTO_CURRENCIES;
+    }
+
+    // Sell Crypto: remove NGN from Customer Pays
+    return CRYPTO_CURRENCIES.filter((currency) => currency !== "NGN");
+  }, [isBuy]);
+
+  useEffect(() => {
+  if (!isBuy && customerPaysCurrency === "NGN") {
+    setValue("details.customerPaysCurrency", "USDT");
+  }
+}, [isBuy, customerPaysCurrency, setValue]);
 
   const calculations = useMemo(() => {
     if (
@@ -99,7 +120,7 @@ export function CryptoStepTwo({ onContinue, onBack }: Props) {
             <SelectFieldLayout
               label="Customer Pays"
               id="details.customerPaysCurrency"
-              options={CRYPTO_CURRENCIES}
+              options={customerPaysCurrencies}
               value={customerPaysCurrency}
               onChange={(v) => setValue("details.customerPaysCurrency", v)}
               className="w-28"
@@ -187,20 +208,20 @@ export function CryptoStepTwo({ onContinue, onBack }: Props) {
                 )}
               </div>
 
-                <div className="flex justify-between">
-                  <span className="font-medium leading-[20px] text-secondary-text">
-                    Gross Margin
+              <div className="flex justify-between">
+                <span className="font-medium leading-[20px] text-secondary-text">
+                  Gross Margin
+                </span>
+                {calculations?.grossMargin > 0 ? (
+                  <span className="font-normal text-[16px] text-text-teal leading-[24px]">
+                    +₦{calculations.grossMargin.toLocaleString()}
                   </span>
-                  {calculations?.grossMargin > 0 ? (
-                    <span className="font-normal text-[16px] text-text-teal leading-[24px]">
-                      +₦{calculations.grossMargin.toLocaleString()}
-                    </span>
-                  ) : (
-                    <span className="font-normal text-[16px] text-text-teal leading-[24px]">
-                      ₦0.00
-                    </span>
-                  )}
-                </div>
+                ) : (
+                  <span className="font-normal text-[16px] text-text-teal leading-[24px]">
+                    ₦0.00
+                  </span>
+                )}
+              </div>
               <div className="flex justify-between">
                 <span className="font-medium leading-[20px] text-secondary-text">
                   Margin percentage

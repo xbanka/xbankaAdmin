@@ -116,11 +116,24 @@ export interface CustomerCryptoAsset {
   addresses: any[]; // Kept as any[] per your request
 }
 
+export interface BankAddress {
+  accountName: string;
+  accountNumber: string;
+  bankName: string;
+}
+
+export interface FiatAsset {
+  id: string;
+  currency: string;
+  balance: number;
+  addresses: BankAddress[] | null;
+}
+
 export interface CustomerWalletData {
   userId: string;
   totalWallets: number;
   cryptoAssets: CustomerCryptoAsset[];
-  fiatAssets: any[]; // Kept as any[] per your request
+  fiatAssets: FiatAsset[]; // Kept as any[] per your request
 }
 
 export interface GetCustomersParams {
@@ -130,4 +143,25 @@ export interface GetCustomersParams {
   status?: string;
   startDate?: string;
   endDate?: string;
+}
+
+export type CustomerKycStatus = "PENDING" | "APPROVED" | "REJECTED" | string; // Add or adjust statuses as needed
+
+export type StepStatus = "completed" | "in_progress" | "pending"; // Add or adjust statuses as needed
+
+export interface OnboardingProgressItem {
+  id: OnboardingStep;
+  label: string;
+  status: StepStatus;
+  isCompleted: boolean;
+}
+
+export interface UserOnboardingData {
+  currentStep: OnboardingStep;
+  completedOnboardingSteps: OnboardingStep[];
+  emailVerified: boolean;
+  phoneVerified: boolean;
+  kycStatus: CustomerKycStatus;
+  tierLevel: number;
+  progress: OnboardingProgressItem[];
 }

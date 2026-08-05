@@ -23,6 +23,8 @@ import {
 import { usePayoutSidebarStore } from "@/store/usePayoutSidebarStore";
 import { useState } from "react";
 import { LucideIcon } from "lucide-react";
+import { useNotificationDrawerStore } from "@/store/useNotificationDrawerStore";
+import { SpreadApprovalDrawer } from "../notifications-panel/spread-approval-drawer";
 
 interface DashboardLayoutProps {
   children?: React.ReactNode;
@@ -42,10 +44,11 @@ export function DashboardLayout({
   error,
   icon: Icon,
   id,
-  href
+  href,
 }: DashboardLayoutProps) {
   const [openModal, setOpenModal] = useState(false);
   const [rejectModal, setRejectModal] = useState(false);
+  const { notification, close } = useNotificationDrawerStore();
   const {
     isDetailsOpen,
     isConfirmOpen,
@@ -165,6 +168,11 @@ export function DashboardLayout({
           {!isPending && !error && (
             <div className="block w-full max-w-full min-w-0">{children}</div>
           )}
+
+          {/* {notification?.type === "spread-approval" && (
+            <SpreadApprovalDrawer notification={notification} onClose={close} />
+          )} */}
+
           {payout && (
             <PayoutDetailsSidebar
               isOpen={isDetailsOpen}
