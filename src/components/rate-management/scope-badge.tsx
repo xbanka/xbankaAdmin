@@ -36,7 +36,7 @@ export function AffectedAssetsBadge({ count }: { count: number }) {
 export function UpdatedStatusBadge({
   status,
 }: {
-  status: "Updated" | "Unchanged" | "Deactivated";
+  status: string;
 }) {
   const styles: Record<typeof status, string> = {
     Updated: "bg-[#ECFDF5] text-[#059669]",

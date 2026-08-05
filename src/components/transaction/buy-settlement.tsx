@@ -187,8 +187,8 @@ export function BuySettlement() {
           <div className="grid grid-cols-2 gap-3">
             <FormField
               id="details.deliveryDestination"
-              label="Destination"
-              placeholder="Enter delivery destination"
+              label="Destination (Wallet Address)"
+              placeholder="Enter destination wallet address"
               register={register}
             />
             <SelectFieldLayout

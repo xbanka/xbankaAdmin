@@ -80,3 +80,9 @@ export const getRateLogs = async () => {
 
   return response.data
 };
+
+export const getRateLogDetails = async (id: string) => {
+  const response = await AxiosInstance.get(`api/rates/logs/${id}`);
+
+  return response.data;
+};
