@@ -11,7 +11,9 @@ interface WalletTabProps {
 
 export function WalletTab({ wallet }: WalletTabProps) {
   // Placeholder — no wallet data from UserProfileData yet
-  const totalCryptoBalance = getTotalCryptoBalance(wallet.cryptoAssets ?? []);
+  const totalCryptoBalance = getTotalCryptoBalance(wallet?.cryptoAssets ?? []);
+  const primaryFiatAsset = wallet?.fiatAssets?.[0];
+  const primaryAddress = primaryFiatAsset?.addresses?.[0];
   return (
     <div className="p-6 flex flex-col gap-5">
       {/* Wallet Summary */}
@@ -19,7 +21,7 @@ export function WalletTab({ wallet }: WalletTabProps) {
         <SectionTitle>Wallet Summary</SectionTitle>
         <div className="grid grid-cols-3 gap-3 bg-card-primary py-4 px-5">
           {[
-            { label: "Total NGN Balance", value: "₦0" },
+            { label: "Total NGN Balance", value: wallet?.fiatAssets[0]?.balance },
             { label: "Crypto Asset Held", value: wallet.totalWallets },
             { label: "Total Crypto Balance", value: totalCryptoBalance },
           ].map((s) => (
@@ -37,7 +39,7 @@ export function WalletTab({ wallet }: WalletTabProps) {
         </SectionTitle>
         <SectionCard>
           <div className="grid grid-cols-3 gap-4">
-            <DetailField label="Available Balance" value="₦0" />
+            <DetailField label="Available Balance" value={wallet?.fiatAssets[0]?.balance} />
             <DetailField label="Wallet ID" value={wallet.userId} />
             <DetailField label="Provider" value="—" />
           </div>
@@ -49,9 +51,9 @@ export function WalletTab({ wallet }: WalletTabProps) {
         <SectionTitle>Dedicated Funding Account</SectionTitle>
         <SectionCard>
           <div className="grid grid-cols-3 gap-4">
-            <DetailField label="Account Name" value="—" />
-            <DetailField label="Account Number" value="—" />
-            <DetailField label="Account Status" value="—" />
+            <DetailField label="Account Name" value={primaryAddress?.accountName ?? "—"} />
+            <DetailField label="Account Number" value={primaryAddress?.accountNumber ?? "—"} />
+            <DetailField label="Bank Name" value={primaryAddress?.bankName ?? "—"} />
           </div>
         </SectionCard>
       </div>

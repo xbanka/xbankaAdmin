@@ -1,44 +1,47 @@
 import {
   CustomerVerificationData,
-  UserProfileData,
+  UserOnboardingData,
 } from "@/lib/types/customer";
 import { DetailField } from "./detail-field";
 import { SectionCard } from "./section-card";
 import { SectionTitle } from "./section-title";
 import { TierBadge } from "./tier-badge";
-import { VerificationRequirementsBadge, VerificationStatusBadge } from "./verification-status-badge";
+import {
+  VerificationRequirementsBadge,
+  VerificationStatusBadge,
+} from "./verification-status-badge";
 import Image from "next/image";
 import { tierImages } from "@/lib/utils/tier-images";
 
-export function VerificationTab({
-  customer,
-}: {
-  customer: CustomerVerificationData;
-}) {
-  const { kycStatus, isActive } = customer;
+export function VerificationTab({ customer, kyc }: { kyc: UserOnboardingData; customer: CustomerVerificationData }) {
+  const { completedOnboardingSteps, tierLevel } = kyc;
+  const { kycStatus: customerKycFlow } = customer;
+  console.log("tierLevel", tierLevel)
+  console.log("customer", customer)
+
+  const completed = new Set(completedOnboardingSteps ?? []);
+
+  const hasStep = (step: string) => completed.has(step);
 
   const verificationRequirements = [
     {
       requirement: "BVN Verification",
       tier: 1,
-      status: kycStatus?.bvnVerified,
+      status: customerKycFlow?.bvnVerified,
     },
     {
       requirement: "ID & Liveness Verification",
       tier: 2,
-      status:
-        kycStatus?.idStatus === null && false
+      status: customerKycFlow?.idStatus === null && false,
     },
     {
       requirement: "Proof of Address",
       tier: 3,
-      status:
-        kycStatus?.addressStatus === null && false
+      status: customerKycFlow?.addressStatus === null && false,
     },
   ];
 
   // const tier = customer.kycStatus.bvnVerified ?? 0;
-  const tier = 1;
 
   return (
     <div className="p-6 flex flex-col gap-5">
@@ -52,8 +55,8 @@ export function VerificationTab({
                 Current Tier
               </p>
               <Image
-                src={tierImages[tier] || "/Tier0.svg"}
-                alt={`Tier ${tier}`}
+                src={tierImages[tierLevel] || "/Tier0.svg"}
+                alt={`Tier ${tierLevel}`}
                 width={67}
                 height={24}
               />
@@ -62,7 +65,7 @@ export function VerificationTab({
               <p className="text-xs text-[var(--text-secondary)]">
                 Verification Status
               </p>
-              <VerificationStatusBadge status={isActive} />
+              <VerificationStatusBadge status={false} />
             </div>
             <DetailField label="Date Verified" value={"-"} />
           </div>
@@ -134,7 +137,7 @@ export function VerificationTab({
               </tr>
             </thead>
             <tbody>
-              {kycStatus?.idStatus ? (
+                   {customerKycFlow?.idStatus ? (
                 <tr className="border-b border-[var(--border-default)] last:border-0">
                   <td className="px-4 py-3 text-[var(--text-primary)]">
                     National ID
@@ -150,7 +153,7 @@ export function VerificationTab({
                     <TierBadge tier={2} />
                   </td>
                   <td className="px-4 py-3">
-                    <VerificationStatusBadge status={isActive} />
+                    {/* <VerificationStatusBadge status={isActive} /> */}
                   </td>
                   <td className="px-4 py-3">
                     <button className="text-[var(--text-teal)] hover:underline text-xs">

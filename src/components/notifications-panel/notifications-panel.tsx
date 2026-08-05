@@ -16,27 +16,26 @@ import { cn } from "@/lib/utils";
 import { dummySpreadApproval } from "./dummy-spread";
 import { useNotificationDrawerStore } from "@/store/useNotificationDrawerStore";
 
+interface Affiliate {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  username: string;
+  created_at: string;
+}
+
 interface Notification {
   id: string;
   message: string;
   type: string;
   is_read: boolean;
-  read_at: string;
+  read_at: string | null;
   created_at?: string;
   amount: number;
   method: string;
-  affiliate: {
-    id: string;
-    first_name: string;
-    last_name: string;
-    email: string;
-    username: string;
-    phone_no: string;
-    bank: string;
-    account_no: string;
-    ref_code: string;
-    custom_refcode: string;
-  };
+  reference_id: string;
+  affiliate: Affiliate | null;
 }
 
 const formatMethod = (m?: string) =>
@@ -49,7 +48,17 @@ const formatMethod = (m?: string) =>
 const formatAmount = (a?: number) =>
   a == null ? "—" : `₦${Number(a).toLocaleString()}`;
 
-const withAt = (u?: string) => (!u ? "—" : u.startsWith("@") ? u : `@${u}`);
+const getAffiliateName = (affiliate?: Affiliate | null) => {
+  if (!affiliate) return "System";
+
+  if (affiliate.username) {
+    return affiliate.username.startsWith("@")
+      ? affiliate.username
+      : `@${affiliate.username}`;
+  }
+
+  return `${affiliate.first_name} ${affiliate.last_name}`;
+};
 
 function timeAgo(iso?: string) {
   if (!iso) return "";
@@ -84,20 +93,19 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
   const notifications: Notification[] = data?.data || [];
   const { open } = useNotificationDrawerStore();
 
-const handleReview = () => {
-
+  const handleReview = () => {
     open({
-        id: "spread-demo",
+      id: "spread-demo",
 
-        type: "spread-approval",
+      type: "spread-approval",
 
-        title: "Spread Approval Required",
+      title: "Spread Approval Required",
 
-        data: dummySpreadApproval,
+      data: dummySpreadApproval,
     });
 
     onClose();
-};
+  };
   const allNotifications: Notification[] | any = [
     {
       id: "spread-demo",
@@ -111,7 +119,7 @@ const handleReview = () => {
       createdAt: new Date(),
       is_read: false,
     },
-    ...notifications
+    ...notifications,
   ];
   const allCount = notifications.length;
   const archivedCount = 0;
@@ -219,7 +227,7 @@ const handleReview = () => {
 
             {!isPending && !error && allNotifications.length > 0 && (
               <ul className="divide-y divide-[#F0F0F0]">
-                {allNotifications.map((notification:any) => {
+                {allNotifications.map((notification: any) => {
                   const unread = !notification.is_read;
                   return (
                     <li
@@ -247,7 +255,7 @@ const handleReview = () => {
 
                           <p className="mt-1 text-[13px] leading-[18px] text-[#4B5563]">
                             <span className="text-[#6B7280]">Affiliate:</span>{" "}
-                            {withAt(notification?.affiliate?.username)}
+                            {getAffiliateName(notification.affiliate)}
                             <span className="mx-2 text-gray-300">|</span>
                             <span className="text-[#6B7280]">Amount:</span>{" "}
                             <span className="font-medium text-[#111827]">
@@ -275,7 +283,8 @@ const handleReview = () => {
                             </Button>
                             <span className="text-[12px] text-[#9CA3AF]">
                               {timeAgo(
-                                notification?.created_at ?? notification?.read_at,
+                                notification?.created_at ??
+                                  notification?.read_at,
                               )}
                             </span>
                           </div>
