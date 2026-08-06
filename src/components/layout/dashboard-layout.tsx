@@ -24,7 +24,6 @@ import { usePayoutSidebarStore } from "@/store/usePayoutSidebarStore";
 import { useState } from "react";
 import { LucideIcon } from "lucide-react";
 import { useNotificationDrawerStore } from "@/store/useNotificationDrawerStore";
-import { SpreadApprovalDrawer } from "../notifications-panel/spread-approval-drawer";
 
 interface DashboardLayoutProps {
   children?: React.ReactNode;

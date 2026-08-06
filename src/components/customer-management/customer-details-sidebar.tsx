@@ -145,7 +145,7 @@ export default function CustomerDetailsSidebar({
                     <WalletTab wallet={walletData?.data} />
                   )}
                   {activeTab === "transactions" && (
-                    <TransactionsTab transactions={transactionData?.data} />
+                    <TransactionsTab transactions={transactionData?.data} wallet={walletData?.data} />
                   )}
                   {activeTab === "verification" && (
                     <VerificationTab customer={verificationData?.data} kyc={kycData?.data} />
