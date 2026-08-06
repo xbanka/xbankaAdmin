@@ -4,6 +4,7 @@ import { DetailField } from "./detail-field";
 import { SectionCard } from "./section-card";
 import { SectionTitle } from "./section-title";
 import { getTotalCryptoBalance } from "@/lib/getCryptoBalance";
+import { formatNGN } from "@/lib/utils/formatNGN";
 
 interface WalletTabProps {
   wallet: CustomerWalletData;
@@ -21,8 +22,8 @@ export function WalletTab({ wallet }: WalletTabProps) {
         <SectionTitle>Wallet Summary</SectionTitle>
         <div className="grid grid-cols-3 gap-3 bg-card-primary py-4 px-5">
           {[
-            { label: "Total NGN Balance", value: wallet?.fiatAssets[0]?.balance },
-            { label: "Crypto Asset Held", value: wallet.totalWallets },
+            { label: "Total NGN Balance", value: formatNGN(wallet?.fiatAssets[0]?.balance) },
+            { label: "Crypto Asset Held", value: wallet?.totalWallets },
             { label: "Total Crypto Balance", value: totalCryptoBalance },
           ].map((s) => (
             <DetailField key={s.label} label={s.label} value={s.value} />
@@ -39,7 +40,7 @@ export function WalletTab({ wallet }: WalletTabProps) {
         </SectionTitle>
         <SectionCard>
           <div className="grid grid-cols-3 gap-4">
-            <DetailField label="Available Balance" value={wallet?.fiatAssets[0]?.balance} />
+            <DetailField label="Available Balance" value={formatNGN(wallet?.fiatAssets[0]?.balance)} />
             <DetailField label="Wallet ID" value={wallet.userId} />
             <DetailField label="Provider" value="—" />
           </div>

@@ -16,15 +16,15 @@ export interface CustomerProps {
   createdAt: string; // ISO Date String
 }
 
-export type OnboardingStep = 
-  | "SIGNUP" 
-  | "EMAIL_VERIFIED" 
-  | "BASIC_INFO" 
-  | "BVN" 
-  | "IDENTITY" 
-  | "SELFIE" 
-  | "ADDRESS" 
-  | "COMPLETED" 
+export type OnboardingStep =
+  | "SIGNUP"
+  | "EMAIL_VERIFIED"
+  | "BASIC_INFO"
+  | "BVN"
+  | "IDENTITY"
+  | "SELFIE"
+  | "ADDRESS"
+  | "COMPLETED"
   | string;
 
 export interface UserKycStatus {
@@ -55,7 +55,7 @@ export interface UserProfileData {
   updatedAt: string; // ISO 8601 Date String
 }
 
-export interface CustomerUserProfile{
+export interface CustomerUserProfile {
   firstName: string;
   lastName: string;
   phoneNumber: string; // Stored as a string to preserve leading zeros like '0808...'
@@ -76,7 +76,7 @@ export interface CustomerSearchSidebarProps {
 }
 
 export interface SelectedCustomer {
-   affiliate: string;
+  affiliate: string;
   email: string;
   id: string;
   joinedAt: string;
@@ -134,6 +134,9 @@ export interface CustomerWalletData {
   totalWallets: number;
   cryptoAssets: CustomerCryptoAsset[];
   fiatAssets: FiatAsset[]; // Kept as any[] per your request
+  totalTransactions: number;
+  pendingTransactions: number;
+  failedTransactions: number;
 }
 
 export interface GetCustomersParams {

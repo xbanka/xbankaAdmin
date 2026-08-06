@@ -15,28 +15,7 @@ import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 import { cn } from "@/lib/utils";
 import { dummySpreadApproval } from "./dummy-spread";
 import { useNotificationDrawerStore } from "@/store/useNotificationDrawerStore";
-
-interface Affiliate {
-  id: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  username: string;
-  created_at: string;
-}
-
-interface Notification {
-  id: string;
-  message: string;
-  type: string;
-  is_read: boolean;
-  read_at: string | null;
-  created_at?: string;
-  amount: number;
-  method: string;
-  reference_id: string;
-  affiliate: Affiliate | null;
-}
+import { Affiliate, PayoutNotification } from "./notifications";
 
 const formatMethod = (m?: string) =>
   (m ?? "")
@@ -90,7 +69,7 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
   });
   const { openDetailsSidebar } = usePayoutSidebarStore();
 
-  const notifications: Notification[] = data?.data || [];
+  const notifications: PayoutNotification[] = data?.data || [];
   const { open } = useNotificationDrawerStore();
 
   const handleReview = () => {
@@ -106,7 +85,7 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
 
     onClose();
   };
-  const allNotifications: Notification[] | any = [
+  const allNotifications: PayoutNotification[] | any = [
     {
       id: "spread-demo",
 
@@ -123,7 +102,7 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
   ];
   const allCount = notifications.length;
   const archivedCount = 0;
-  const unreadCount = notifications.filter((n) => !n.is_read).length;
+  const unreadCount = notifications.filter((n: PayoutNotification) => !n.is_read).length;
 
   const markReadMutation = useMutation({
     mutationFn: markAsReadNotification,
@@ -227,12 +206,12 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
 
             {!isPending && !error && allNotifications.length > 0 && (
               <ul className="divide-y divide-[#F0F0F0]">
-                {allNotifications.map((notification: any) => {
+                {allNotifications.map((notification: PayoutNotification) => {
                   const unread = !notification.is_read;
                   return (
                     <li
                       key={notification.id}
-                      onClick={() => handleViewRequest(notification.id)}
+                      onClick={() => handleViewRequest(notification.affiliate?.id ?? "")}
                       className={cn(
                         "relative cursor-pointer px-5 py-4 transition-colors hover:bg-[#F9FAFB]",
                         "before:absolute before:left-0 before:top-0 before:h-full before:w-[3px] before:content-['']",
@@ -265,9 +244,6 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
                           <p className="mt-0.5 text-[13px] leading-[18px] text-[#4B5563]">
                             <span className="text-[#6B7280]">Method:</span>{" "}
                             {formatMethod(notification?.method)}
-                            {notification?.affiliate?.bank
-                              ? ` (${notification?.affiliate?.bank})`
-                              : ""}
                           </p>
 
                           <div className="mt-3 flex items-center justify-between gap-2">
@@ -276,14 +252,14 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
                               className="h-9 w-fit rounded-lg bg-[#17E1C5] px-4 text-[13px] font-semibold text-[#06251F] hover:bg-[#13C9B0]"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleViewRequest(notification?.id);
+                                handleViewRequest(notification?.affiliate?.id ?? "");
                               }}
                             >
                               View Request
                             </Button>
                             <span className="text-[12px] text-[#9CA3AF]">
                               {timeAgo(
-                                notification?.created_at ??
+                                notification?.affiliate?.created_at ??
                                   notification?.read_at,
                               )}
                             </span>
