@@ -77,7 +77,7 @@ export default function CustomerDetailsSidebar({
         ) : (
           <>
             {/* Header */}
-            <div className="border-b p-6 flex justify-between items-start">
+            <div className="py-4 px-6 flex justify-between items-start">
               <div className="flex items-center gap-4">
                 <div className="h-14 w-14 rounded-full bg-gray-200" />
 
@@ -88,18 +88,20 @@ export default function CustomerDetailsSidebar({
                     </h2>
 
                     <Image
-                      src={tierImages[tier]}
-                      alt={`Tier ${tier}`}
+                      src={tierImages[kycData?.data?.tierLevel] || "/Tier0.svg"}
+                      alt={`Tier ${kycData?.data?.tierLevel}`}
                       width={67}
                       height={24}
                     />
                   </div>
 
-                  <div className="text-sm text-gray-500">
-                    UID: {customer?.userId}
-                  </div>
+                  <div className="flex gap-1 items-center">
+                    <div className="text-[12px] leading-[22px] font-normal text-text-secondary">
+                      UID: {customer?.userId}
+                    </div>
 
-                  <div className="text-sm text-gray-500">{customer?.email}</div>
+                    <div className="text-sm leading-[24px] font-normal">{customer?.email}</div>
+                  </div>
                 </div>
               </div>
 
@@ -116,8 +118,8 @@ export default function CustomerDetailsSidebar({
                   onClick={() => setActiveTab(tab.key)}
                   className={`text-sm py-3 px-4 font-medium border-b-2 transition-colors ${
                     activeTab === tab.key
-                      ? "border-[var(--abstractCyan)] text-[var(--abstractCyan)]"
-                      : "border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                      ? "border-text-teal text-text-primary"
+                      : "border-transparent text-text-secondary hover:text-text-primary"
                   }`}
                 >
                   {tab.label}
