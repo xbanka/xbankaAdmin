@@ -13,7 +13,6 @@ import LoaderSpinner from "../ui/loaderSpinner";
 import { usePayoutSidebarStore } from "@/store/usePayoutSidebarStore";
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 import { cn } from "@/lib/utils";
-import { dummySpreadApproval } from "./dummy-spread";
 import { useNotificationDrawerStore } from "@/store/useNotificationDrawerStore";
 import { Affiliate, PayoutNotification } from "./notifications";
 
@@ -70,39 +69,14 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
   const { openDetailsSidebar } = usePayoutSidebarStore();
 
   const notifications: PayoutNotification[] = data?.data || [];
+  console.log("notifications", notifications);
   const { open } = useNotificationDrawerStore();
 
-  const handleReview = () => {
-    open({
-      id: "spread-demo",
-
-      type: "spread-approval",
-
-      title: "Spread Approval Required",
-
-      data: dummySpreadApproval,
-    });
-
-    onClose();
-  };
-  const allNotifications: PayoutNotification[] | any = [
-    {
-      id: "spread-demo",
-
-      type: "spread-approval",
-
-      title: "Spread Approval Required",
-
-      description: "Spread configuration awaiting approval.",
-
-      createdAt: new Date(),
-      is_read: false,
-    },
-    ...notifications,
-  ];
   const allCount = notifications.length;
   const archivedCount = 0;
-  const unreadCount = notifications.filter((n: PayoutNotification) => !n.is_read).length;
+  const unreadCount = notifications.filter(
+    (n: PayoutNotification) => !n.is_read,
+  ).length;
 
   const markReadMutation = useMutation({
     mutationFn: markAsReadNotification,
@@ -111,12 +85,24 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
     },
   });
 
-  const handleViewRequest = (id: string) => {
-    markReadMutation.mutate({ id });
-    openDetailsSidebar(id);
+  const handleViewRequest = (notification: PayoutNotification) => {
+    const referenceId = notification.reference_id;
+
+    if (!referenceId) {
+      console.error("Notification has no reference_id", notification);
+      return;
+    }
+
+    console.log("Opening payout:", referenceId);
+
+    markReadMutation.mutate({
+      id: notification.id,
+    });
+
+    openDetailsSidebar(referenceId);
   };
 
-  const filteredNotifications = allNotifications.filter((n: any) => {
+  const filteredNotifications = notifications.filter((n: any) => {
     if (activeTab === "unread") return !n.is_read;
     if (activeTab === "archived") return false;
     return true;
@@ -192,7 +178,7 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
               </div>
             )}
 
-            {!isPending && !error && allNotifications.length === 0 && (
+            {!isPending && !error && filteredNotifications.length === 0 && (
               <div className="flex flex-col items-center justify-center gap-3 px-6 py-20 text-center text-gray-400">
                 <Bell className="h-10 w-10 text-gray-300" />
                 <p className="text-sm font-medium text-gray-500">
@@ -204,14 +190,14 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
               </div>
             )}
 
-            {!isPending && !error && allNotifications.length > 0 && (
+            {!isPending && !error && filteredNotifications.length > 0 && (
               <ul className="divide-y divide-[#F0F0F0]">
-                {allNotifications.map((notification: PayoutNotification) => {
+                {filteredNotifications.map((notification: PayoutNotification) => {
                   const unread = !notification.is_read;
                   return (
                     <li
                       key={notification.id}
-                      onClick={() => handleViewRequest(notification.affiliate?.id ?? "")}
+                      onClick={() => handleViewRequest(notification)}
                       className={cn(
                         "relative cursor-pointer px-5 py-4 transition-colors hover:bg-[#F9FAFB]",
                         "before:absolute before:left-0 before:top-0 before:h-full before:w-[3px] before:content-['']",
@@ -252,7 +238,7 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
                               className="h-9 w-fit rounded-lg bg-[#17E1C5] px-4 text-[13px] font-semibold text-[#06251F] hover:bg-[#13C9B0]"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleViewRequest(notification?.affiliate?.id ?? "");
+                                handleViewRequest(notification);
                               }}
                             >
                               View Request
