@@ -15,6 +15,9 @@ export function WalletTab({ wallet }: WalletTabProps) {
   const totalCryptoBalance = getTotalCryptoBalance(wallet?.cryptoAssets ?? []);
   const primaryFiatAsset = wallet?.fiatAssets?.[0];
   const primaryAddress = primaryFiatAsset?.addresses?.[0];
+  const visibleCryptoAssets = wallet?.cryptoAssets?.filter(
+    (asset) => Number(asset.balance) > 0,
+  );
   return (
     <div className="p-6 flex flex-col gap-5">
       {/* Wallet Summary */}
@@ -22,7 +25,10 @@ export function WalletTab({ wallet }: WalletTabProps) {
         <SectionTitle>Wallet Summary</SectionTitle>
         <div className="grid grid-cols-3 gap-3 bg-card-primary py-4 px-5">
           {[
-            { label: "Total NGN Balance", value: formatNGN(wallet?.fiatAssets[0]?.balance) },
+            {
+              label: "Total NGN Balance",
+              value: formatNGN(wallet?.fiatAssets[0]?.balance),
+            },
             { label: "Crypto Asset Held", value: wallet?.totalWallets },
             { label: "Total Crypto Balance", value: totalCryptoBalance },
           ].map((s) => (
@@ -40,8 +46,11 @@ export function WalletTab({ wallet }: WalletTabProps) {
         </SectionTitle>
         <SectionCard>
           <div className="grid grid-cols-3 gap-4">
-            <DetailField label="Available Balance" value={formatNGN(wallet?.fiatAssets[0]?.balance)} />
-            <DetailField label="Wallet ID" value={wallet.userId} />
+            <DetailField
+              label="Available Balance"
+              value={formatNGN(wallet?.fiatAssets[0]?.balance)}
+            />
+            <DetailField label="Wallet ID" value={wallet?.userId} />
             <DetailField label="Provider" value="—" />
           </div>
         </SectionCard>
@@ -52,9 +61,18 @@ export function WalletTab({ wallet }: WalletTabProps) {
         <SectionTitle>Dedicated Funding Account</SectionTitle>
         <SectionCard>
           <div className="grid grid-cols-3 gap-4">
-            <DetailField label="Account Name" value={primaryAddress?.accountName ?? "—"} />
-            <DetailField label="Account Number" value={primaryAddress?.accountNumber ?? "—"} />
-            <DetailField label="Bank Name" value={primaryAddress?.bankName ?? "—"} />
+            <DetailField
+              label="Account Name"
+              value={primaryAddress?.accountName ?? "—"}
+            />
+            <DetailField
+              label="Account Number"
+              value={primaryAddress?.accountNumber ?? "—"}
+            />
+            <DetailField
+              label="Bank Name"
+              value={primaryAddress?.bankName ?? "—"}
+            />
           </div>
         </SectionCard>
       </div>
@@ -77,8 +95,8 @@ export function WalletTab({ wallet }: WalletTabProps) {
               </tr>
             </thead>
             <tbody>
-              {wallet?.cryptoAssets?.length ? (
-                wallet?.cryptoAssets?.map((asset) => (
+              {visibleCryptoAssets?.length ? (
+                visibleCryptoAssets.map((asset) => (
                   <tr
                     key={asset.id}
                     className="border-b border-card-border-secondary last:border-0"
@@ -106,14 +124,6 @@ export function WalletTab({ wallet }: WalletTabProps) {
                         <span className="h-1.5 w-1.5 rounded-full bg-current" />
                         {asset.addresses.length > 0 ? "Active" : "Inactive"}
                       </span>
-                    </td>
-
-                    <td className="px-3 py-3 text-right">
-                      {asset.addresses.length > 0 ? (
-                        <button className="text-text-teal hover:underline">
-                          View
-                        </button>
-                      ) : null}
                     </td>
                   </tr>
                 ))
