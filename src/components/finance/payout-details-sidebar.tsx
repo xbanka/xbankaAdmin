@@ -22,7 +22,7 @@ export function PayoutDetailsSidebar({
 
   if (!isOpen) return null;
 
-  const showContent = !loading && !error;
+  const showContent = !loading && !error && !!payout;
 
   return (
     <>
@@ -80,24 +80,24 @@ export function PayoutDetailsSidebar({
                   <div className="grid grid-cols-3 gap-4 bg-white rounded-[8px] p-3">
                     <CustomDetailsName
                       title="Name"
-                      body={payout.affiliate.first_name}
+                      body={payout?.affiliate?.first_name || "-"}
                     />
                     <CustomDetailsName
                       title="Username"
-                      body={payout.affiliate.username}
+                      body={payout?.affiliate?.username || "-"}
                     />
-                    <CustomDetailsName title="Status" body={payout.status} />
+                    <CustomDetailsName title="Status" body={payout?.status ?? "-"} />
                     <CustomDetailsName
                       title="Commission rate"
-                      body={`${payout.amount}%`}
+                      body={`${payout?.amount}%`}
                     />
                     <CustomDetailsName
                       title="Total payout"
-                      body={`₦${payout.amount.toLocaleString()}`}
+                      body={`₦${payout?.amount?.toLocaleString()}`}
                     />
                     <CustomDetailsName
                       title="Joined"
-                      body={formatDate(payout.affiliate.created_at)}
+                      body={formatDate(payout?.affiliate?.created_at ?? "-")}
                     />
                   </div>
                 </div>
@@ -115,7 +115,7 @@ export function PayoutDetailsSidebar({
                       title="Amount"
                       content={
                         <div className="font-[500] text-[14px] leading-[18px]">
-                          {payout.amount}
+                          {payout?.amount}
                         </div>
                       }
                     />
@@ -131,7 +131,7 @@ export function PayoutDetailsSidebar({
                       title="Bank Details"
                       content={
                         <div className="font-[500] text-[14px] leading-[18px]">
-                          {payout.affiliate.account_no}
+                          {payout?.affiliate?.account_no}
                         </div>
                       }
                     />
@@ -155,10 +155,10 @@ export function PayoutDetailsSidebar({
           {showContent && (
             <div className="sticky bottom-0 bg-white border-t border-gray-200 py-[16px] px-[20px] flex flex-col md:flex-row gap-4">
               <Button
-              variant={payout.status === "rejected" ? "outline" : "secondary"}
-                disabled={payout.status === "rejected"}
+                variant={payout?.status === "rejected" ? "outline" : "secondary"}
+                disabled={payout?.status === "rejected"}
                 className={
-                  payout.status === "rejected"
+                  payout?.status === "rejected"
                     ? "cursor-not-allowed flex-1 bg-transparent border !border-[#FFB3AF] !text-destructive font-[500] text-[14px] leading-[18px]"
                     : "flex-1"
                 }
@@ -175,10 +175,10 @@ export function PayoutDetailsSidebar({
                 Hold/Flag Payout
               </Button>
               <Button
-                variant={payout.status === "paid" ? "outline" : "default"}
-                disabled={payout.status === "paid"}
+                variant={payout?.status === "paid" ? "outline" : "default"}
+                disabled={payout?.status === "paid"}
                 className={
-                  payout.status === "paid"
+                  payout?.status === "paid"
                     ? "flex-1 cursor-not-allowed bg-gray-300 text-gray-500 border border-gray-300"
                     : "flex-1"
                 }

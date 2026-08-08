@@ -172,7 +172,7 @@ export function DashboardLayout({
             <SpreadApprovalDrawer notification={notification} onClose={close} />
           )} */}
 
-          {payout && (
+      
             <PayoutDetailsSidebar
               isOpen={isDetailsOpen}
               onClose={closeDetailsSidebar}
@@ -182,9 +182,7 @@ export function DashboardLayout({
               loading={individualPayoutPending}
               error={individualPayoutError?.message || ""}
             />
-          )}
 
-          {payout && (
             <ConfirmPayoutSidebar
               isOpen={isConfirmOpen}
               onClose={closeConfirmSidebar}
@@ -193,7 +191,6 @@ export function DashboardLayout({
               loading={false}
               error={""}
             />
-          )}
 
           <DialogLayout
             open={openModal}
