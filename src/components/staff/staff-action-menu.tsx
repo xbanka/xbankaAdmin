@@ -12,13 +12,11 @@ import {
 import { StaffUser } from "@/lib/types/staffTypes";
 
 interface CustomerActionMenuProps {
-  staff: StaffUser;
   onEdit?: () => void;
   onDelete?: () => void;
 }
 
 export default function StaffActionMenu({
-  staff,
   onEdit,
   onDelete,
 }: CustomerActionMenuProps) {
