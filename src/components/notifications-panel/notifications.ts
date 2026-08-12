@@ -16,6 +16,6 @@ export interface PayoutNotification {
   is_read: boolean;
   read_at: string | null;
   reference_id: string | null;
-  reference_type: string;
+  reference_type: "PAYOUT" | "RATE_PROPOSAL";
   affiliate: Affiliate;
 }
