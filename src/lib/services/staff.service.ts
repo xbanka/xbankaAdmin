@@ -5,6 +5,8 @@ import {
   getAllStaff,
   getStaff,
   inviteStaff,
+  updateStaffRolesPermissions,
+  UpdateStaffRolesPermissionsPayload,
 } from "../actions/staff";
 import { toast } from "sonner";
 import { StaffPayload } from "../types/staffTypes";
@@ -65,6 +67,32 @@ export const useDeleteStaff = () => {
     },
     onError: (err) => {
       handleApiError(err);
+    },
+  });
+};
+
+export const useUpdateStaffRolesPermissions = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      staffId,
+      payload,
+    }: {
+      staffId: string;
+      payload: UpdateStaffRolesPermissionsPayload;
+    }) => updateStaffRolesPermissions(staffId, payload),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["getAllStaff"],
+      });
+
+      toast.success("Staff role and permissions updated successfully");
+    },
+
+    onError: (error) => {
+      handleApiError(error);
     },
   });
 };

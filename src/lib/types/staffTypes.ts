@@ -33,8 +33,28 @@ export type StaffUser = {
   role: StaffRole;
 };
 
+export interface MemberRole {
+  id: string;
+  name: string;
+  allowed_permissions: string[];
+}
+
+export interface StaffMember {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  created_at: string; // ISO 8601 date string
+  role: MemberRole;
+}
+
+export interface StaffResponse {
+  count: number;
+  staff: StaffMember[];
+}
+
 export interface DeleteStaffModalProps {
   isOpen: boolean
   onClose: () => void
-  staff: StaffUser | null
+  staff: StaffMember | null
 }

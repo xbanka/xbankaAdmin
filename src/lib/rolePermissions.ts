@@ -592,6 +592,15 @@ export const UI_TO_API_PERMISSION_MAP: Record<Permission, string> = {
   staff_createSuperAdmin: "",
 };
 
+export const API_TO_UI_PERMISSION_MAP: Record<string, Permission> =
+  Object.fromEntries(
+    Object.entries(UI_TO_API_PERMISSION_MAP)
+      .filter(([, apiPermission]) => apiPermission)
+      .map(([uiPermission, apiPermission]) => [
+        apiPermission,
+        uiPermission,
+      ]),
+  ) as Record<string, Permission>;
 export const normalizePermissionsFromApi = (perms: string[]): Set<string> => {
   return new Set(perms);
 };

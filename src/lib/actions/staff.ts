@@ -40,3 +40,22 @@ export const deleteStaff = async (staff_id: string) => {
     status: response.status,
   };
 };
+
+export interface UpdateStaffRolesPermissionsPayload {
+  role: string;
+  permissions: string[];
+}
+export const updateStaffRolesPermissions = async (
+  staffId: string,
+  payload: UpdateStaffRolesPermissionsPayload,
+) => {
+  const response = await AxiosInstance.patch(
+    `/api/staff/${staffId}/roles-permissions`,
+    payload,
+    {
+      withCredentials: true,
+    },
+  );
+
+  return response.data;
+};
