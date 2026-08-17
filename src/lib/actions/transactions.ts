@@ -126,6 +126,18 @@ export const getAllTransactions = async (params: GetTransactionsParams) => {
   return response.data;
 };
 
+export const exportTransactions = async (
+  params: Pick<GetTransactionsParams, "search" | "status" | "category">,
+) => {
+  const response = await AxiosInstance.get("/api/transactions/export", {
+    params,
+    responseType: "blob",
+    withCredentials: true,
+  });
+
+  return response.data as Blob;
+};
+
 export const getTransactionById = async (transactionId: string) => {
   const response = await AxiosInstance.get(`/api/transactions/${transactionId}`);
   return response.data;

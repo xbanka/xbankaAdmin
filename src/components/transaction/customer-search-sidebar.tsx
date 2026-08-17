@@ -11,7 +11,7 @@ import { useFormContext } from "react-hook-form";
 import FormField from "../forms/FormField";
 import { ActiveCustomer, Customer } from "../../lib/types/transactionTypes";
 import { TransactionFormValues } from "@/lib/schema/transaction.schema";
-import { useUserStore } from "@/store/userStore";
+import { useProfile } from "@/lib/services/profile.service";
 import {
   CustomerAccountItem,
   CustomerSearchSidebarProps,
@@ -54,7 +54,8 @@ export function CustomerSearchSidebar({
     formState: { errors },
   } = useFormContext<TransactionFormValues>();
 
-  const user = useUserStore((state) => state.user);
+  const { data: profile } = useProfile();
+  const user = profile?.data;
 
   useBodyScrollLock(isOpen);
 

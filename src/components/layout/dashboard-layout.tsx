@@ -28,6 +28,7 @@ import {
 } from "@/lib/services/rates.service";
 import { usePayoutSidebarStore } from "@/store/usePayoutSidebarStore";
 import { useRateProposalSidebarStore } from "@/store/useRateProposalSidebarStore";
+import { usePermissions } from "@/hooks/usePermissions";
 import { useState } from "react";
 import { LucideIcon } from "lucide-react";
 import { RateLogDetails } from "../rate-management/spread-change-details-change-drawer";
@@ -100,6 +101,7 @@ export function DashboardLayout({
 }: DashboardLayoutProps) {
   const [openModal, setOpenModal] = useState(false);
   const [rejectModal, setRejectModal] = useState(false);
+  const { hasPermission } = usePermissions();
   const {
     isDetailsOpen,
     isConfirmOpen,
@@ -257,6 +259,9 @@ export function DashboardLayout({
               onProcess={handleProcessPayout}
               loading={individualPayoutPending}
               error={individualPayoutError?.message || ""}
+              canApprove={hasPermission("finance:approve_payments")}
+              canReject={hasPermission("finance:reject_payments")}
+              canFlag={hasPermission("finance:flag_payments")}
             />
 
             <ConfirmPayoutSidebar

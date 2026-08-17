@@ -1,6 +1,7 @@
 import {
   createCustomer,
   DeleteCustomer,
+  exportCustomers,
   getAllCustomers,
   getCustomerAssets,
   getCustomerById,
@@ -15,6 +16,7 @@ import { useDebounce } from "../../hooks/useDebounce";
 import { toast } from "sonner";
 import { handleApiError } from "../errors/handleApiError";
 import { GetCustomersParams } from "../types/customer";
+import { downloadBlob } from "../utils/downloadBlob";
 
 export const useGetAllCustomers = ({
   page = 1,
@@ -193,6 +195,21 @@ export const useToggleCustomerStatus = () => {
       });
 
       toast.success("Customer status updated successfully");
+    },
+
+    onError: (error) => {
+      handleApiError(error);
+    },
+  });
+};
+
+export const useExportCustomers = () => {
+  return useMutation({
+    mutationFn: exportCustomers,
+
+    onSuccess: (blob) => {
+      downloadBlob(blob, "customers.xlsx");
+      toast.success("Export started");
     },
 
     onError: (error) => {

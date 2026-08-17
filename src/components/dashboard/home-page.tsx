@@ -109,27 +109,27 @@ export const DashboardHomePage = () => {
 
     // Dummy Tasks
 
-    {
-      title: "Tasks",
-      icon: ListTodo,
-      value: 100,
-      trend: "12% vs last week",
-      stats: [
-        {
-          label: "Open",
-          value: 60,
-        },
-        {
-          label: "In Progress",
-          value: 30,
-        },
-        {
-          label: "Overdue",
-          value: 10,
-          valueClassName: "text-red-500",
-        },
-      ],
-    },
+    // {
+    //   title: "Tasks",
+    //   icon: ListTodo,
+    //   value: 100,
+    //   trend: "12% vs last week",
+    //   stats: [
+    //     {
+    //       label: "Open",
+    //       value: 60,
+    //     },
+    //     {
+    //       label: "In Progress",
+    //       value: 30,
+    //     },
+    //     {
+    //       label: "Overdue",
+    //       value: 10,
+    //       valueClassName: "text-red-500",
+    //     },
+    //   ],
+    // },
   ];
   return (
     <DashboardLayout title="Dashboard">

@@ -53,14 +53,14 @@ export const useUpdateBuyAndSpreadRates = () => {
   return useMutation({
     mutationFn: ({ rateId, payload }: UpdateCryptoRatesArgs) =>
       updateBuyAndSpreadRates(rateId, payload),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({
         queryKey: ["get-crypto-rates"],
       });
       queryClient.invalidateQueries({
         queryKey: ["get-all-segments"],
       });
-      toast.success("Status updated successfully");
+      toast.success(data?.message || "Status updated successfully");
     },
     onError: (err) => {
       handleApiError(err);

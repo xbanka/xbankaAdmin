@@ -26,7 +26,7 @@ import Link from "next/link";
 import { Button } from "./ui/button";
 import { DialogLayout } from "./layout/modalLayout";
 import { useLogout } from "@/lib/services/logout.service";
-import { useUserStore } from "@/store/userStore";
+import { usePermissions } from "@/hooks/usePermissions";
 import { canAccessRoute } from "@/lib/canAccessRoute";
 import { ROUTE_PERMISSIONS } from "@/lib/routePermission";
 
@@ -74,9 +74,7 @@ const data = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [open, setOpen] = React.useState(false);
   const pathname = usePathname();
-  const user = useUserStore((s) => s.user);
-
-  const userPermissions = user?.role?.allowed_permissions ?? [];
+  const { permissions: userPermissions } = usePermissions();
 
   const { mutate, isPending } = useLogout();
 
