@@ -3,19 +3,17 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Eye, Search, Upload } from "lucide-react";
+import { Download, Eye, Search } from "lucide-react";
 import { DataTableLayout } from "../DataTableLayout/DataTableLayout";
 import { FilterTabs } from "../ui/FilterTabs";
 import { TransactionsTableProps } from "@/lib/types/transactionTypes";
 import {
+  useExportTransactions,
   useGetAllTransactions,
   useTransactions,
 } from "@/lib/services/transaction.service";
 import Header from "../ui/Header";
-import {
-  hasPermission,
-  normalizePermissionsFromApi,
-} from "@/lib/rolePermissions";
+import { usePermissions } from "@/hooks/usePermissions";
 import { formatDate } from "@/lib/formatDate";
 import { AllTabFilters } from "./all-tab-filters";
 import { ManualTabFilters } from "./manual-tab-filters";
@@ -24,7 +22,6 @@ import { CryptoTabFilters } from "./crypto-tab-filters";
 import { TransactionRecord } from "@/lib/types/transaction-types";
 import { TierBadge } from "./tier-badge";
 import { StatusBadge } from "./badge";
-import { useProfile } from "@/lib/services/profile.service";
 import Image from "next/image";
 import { tierImages } from "@/lib/utils/tier-images";
 import { TransactionDetailSidebar } from "./transaction-detail-sidebar";
@@ -71,14 +68,7 @@ export function TransactionsTable({
     null,
   );
   const [page, setPage] = useState(1);
-  const {
-    data: userData,
-    isPending: isPendingData,
-    error: errorData,
-  } = useProfile();
-  const apiPermissionSet = normalizePermissionsFromApi(
-    userData?.data.role.allowed_permissions ?? [],
-  );
+  const { hasPermission } = usePermissions();
 
   const {
     data: allTransactions,
@@ -93,6 +83,8 @@ export function TransactionsTable({
     category: CATEGORY_MAP[activeFilter],
     search: searchQuery || undefined,
   });
+
+  const exportTransactions = useExportTransactions();
 
   const transactions: TransactionRecord[] = allTransactions?.data?.items ?? [];
   const meta = allTransactions?.data?.meta;
@@ -202,7 +194,7 @@ export function TransactionsTable({
           className="text-text-teal flex items-center gap-2 font-[500] text-[14px] leading-[22px] cursor-pointer"
         >
           <Eye size={16} />
-          view more
+          view
         </div>
       ),
     },
@@ -482,11 +474,19 @@ export function TransactionsTable({
             size="sm"
             variant="outline"
             className="text-[#111827] py-2 px-3"
+            onClick={() =>
+              exportTransactions.mutate({
+                status: statusFilter || undefined,
+                category: CATEGORY_MAP[activeFilter],
+                search: searchQuery || undefined,
+              })
+            }
+            disabled={exportTransactions.isPending}
           >
-            <Upload className="h-4 w-4 mr-2" />
-            Export
+            <Download className="h-4 w-4 mr-2" />
+            {exportTransactions.isPending ? "Exporting..." : "Export"}
           </Button>
-          {hasPermission(apiPermissionSet, "transactions:create") && (
+          {hasPermission("transactions:create") && (
             <Button
               size="sm"
               className="text-white py-2 px-3"

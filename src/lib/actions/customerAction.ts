@@ -49,6 +49,30 @@ export const getAllCustomers = async ({
   };
 };
 
+export const exportCustomers = async ({
+  search,
+  status,
+  startDate,
+  endDate,
+}: Omit<GetCustomersParams, "page" | "limit">) => {
+  const params = new URLSearchParams();
+
+  if (search) params.append("search", search);
+  if (status) params.append("status", status);
+  if (startDate) params.append("startDate", startDate);
+  if (endDate) params.append("endDate", endDate);
+
+  const response = await AxiosInstance.get(
+    `${BASE_URL}/export?${params.toString()}`,
+    {
+      responseType: "blob",
+      withCredentials: true,
+    },
+  );
+
+  return response.data as Blob;
+};
+
 export const getCustomerById = async (customerId: string) => {
   const response = await AxiosInstance.get(`${BASE_URL}/${customerId}`, {
     withCredentials: true,

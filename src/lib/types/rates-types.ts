@@ -60,3 +60,8 @@ export interface UpdateSegmentPayload {
   sellFeeType: FeeType;
   sellSpread: number;
 }
+
+export interface UpdateSegmentsBulkPayload {
+  setupNote: string;
+  segments: UpdateSegmentPayload[];
+}

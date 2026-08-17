@@ -34,6 +34,7 @@ import { Badge } from "./badge";
 import { AuditLogItem, SPREAD_HISTORY_MOCK, SpreadHistoryEntry } from "./types";
 import { AffectedAssetsBadge, ScopeBadge } from "./scope-badge";
 import { SpreadChangeDetailsDrawer } from "./spread-change-details-change-drawer";
+import { usePermissions } from "@/hooks/usePermissions";
 
 export default function RateManagement() {
   const [activeTab, setActiveTab] = useState<"schedule" | "history">(
@@ -42,6 +43,11 @@ export default function RateManagement() {
   const [searchQuery, setSearchQuery] = useState("");
   const [editRow, setEditRow] = useState<CryptoCurrencyTypes | null>(null);
   const [view, setView] = useState<"list" | "wizard">("list");
+  const { hasPermission } = usePermissions();
+  const canEditSpread =
+    hasPermission("rates:propose_changes") ||
+    hasPermission("rates:approve_changes") ||
+    hasPermission("rates:change_override");
   const { data, isPending, error } = useGetCryptoRates();
 
   const {
@@ -64,7 +70,7 @@ export default function RateManagement() {
   console.log("Rate Log Details", rateLogDetails?.log);
   const historyData = ratesLogData?.logs;
   const ratesData = data?.data;
-  console.log(ratesData);
+  console.log("ratesData", ratesData);
   console.log("historyData", historyData, ratesLogData);
 
   const columns = [
@@ -198,7 +204,7 @@ export default function RateManagement() {
         </div>
       ),
     },
-  ];
+  ].filter((column) => column.key !== "actions" || canEditSpread);
 
   const historyColumns = [
     {

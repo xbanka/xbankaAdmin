@@ -13,10 +13,14 @@ import { formatDate } from "@/lib/formatDate";
 import StaffActionMenu from "@/components/staff/staff-action-menu";
 import DeleteStaffModal from "@/components/staff/delete-staff-modal";
 import { EditStaffSidebar } from "@/components/staff/edit-staff-sidebar";
+import { usePermissions } from "@/hooks/usePermissions";
 
 export default function StaffPage() {
   const [filter, setFilter] = useState("all");
   const [isAddStaffOpen, setIsAddStaffOpen] = useState(false);
+  const { hasPermission } = usePermissions();
+  const canAddStaff = hasPermission("staff:add");
+  const canEditRoles = hasPermission("staff:edit_roles");
 
   // const { data, error, isLoading } = useGetStaff(role)
   const { data, isError, error, isPending } = useGetAllStaff();
@@ -82,6 +86,7 @@ export default function StaffPage() {
       header: "",
       render: (item: StaffMember) => (
         <StaffActionMenu
+          canEditRoles={canEditRoles}
           onEdit={() => {
             setSelectedStaff(item);
             setEditOpen(true);
@@ -103,10 +108,12 @@ export default function StaffPage() {
             <div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">Staff</h1>
             </div>
-            <Button onClick={() => setIsAddStaffOpen(true)}>
-              <Plus className="w-4 h-4" />
-              Add Staff
-            </Button>
+            {canAddStaff && (
+              <Button onClick={() => setIsAddStaffOpen(true)}>
+                <Plus className="w-4 h-4" />
+                Add Staff
+              </Button>
+            )}
           </div>
 
           <div className="mb-6">

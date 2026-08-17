@@ -81,6 +81,9 @@ export interface PayoutDetailsSidebarProps {
   onProcess: () => void;
   loading: boolean;
   error: string | null;
+  canApprove: boolean;
+  canReject: boolean;
+  canFlag: boolean;
 }
 
 export interface HeaderProps{

@@ -3,6 +3,7 @@ import { handleApiError } from "../errors/handleApiError";
 import {
   createManualTransaction,
   createTransactionAction,
+  exportTransactions,
   getAllTransactions,
   getAllTransactionsAction,
   getAllTransactionsByCustomer,
@@ -13,6 +14,7 @@ import {
 } from "../actions/transactions";
 import { toast } from "sonner";
 import { CreateTransactionPayload } from "@/components/transaction/transaction-data";
+import { downloadBlob } from "../utils/downloadBlob";
 
 export const useTransactions = (page = 1, limit = 10) => {
   return useQuery({
@@ -119,6 +121,21 @@ export const useGetTransactionById = (transactionId: string | null) => {
       }
     },
     enabled: !!transactionId, // only fires when an ID is passed
+  });
+};
+
+export const useExportTransactions = () => {
+  return useMutation({
+    mutationFn: exportTransactions,
+
+    onSuccess: (blob) => {
+      downloadBlob(blob, "transactions.xlsx");
+      toast.success("Export started");
+    },
+
+    onError: (error) => {
+      handleApiError(error);
+    },
   });
 };
 

@@ -14,6 +14,7 @@ import Image from "next/image";
 import { tierImages } from "@/lib/utils/tier-images";
 
 export function VerificationTab({ customer, kyc }: { kyc: UserOnboardingData; customer: CustomerVerificationData }) {
+  console.log("kyc", kyc);
   const { completedOnboardingSteps, tierLevel } = kyc;
   const { kycStatus: customerKycFlow } = customer;
 

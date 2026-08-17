@@ -143,6 +143,9 @@ export const ROLE_CONFIG: Record<
       "systemSettings_editSettings",
       "system_viewSettings",
       "records_deleteRecords",
+      "rates_proposeChanges",
+      "rates_approveChanges",
+      "rates_changeOverride",
     ],
     optionalPermissions: [],
     neverAllowedPermissions: [],
@@ -256,6 +259,7 @@ export const ROLE_CONFIG: Record<
       "tasks_updateTaskStatus",
       "tasks_commentTasks",
       "tasks_attachDocuments",
+      "rates_proposeChanges",
     ],
     optionalPermissions: [
       "transactions_mergeTransactions",
@@ -457,6 +461,12 @@ export const PERMISSION_CATEGORIES = {
 
   Reconciliation: ["reconciliation_viewRecords"],
 
+  Rates: [
+    "rates_proposeChanges",
+    "rates_approveChanges",
+    "rates_changeOverride",
+  ],
+
   Dashboards: ["dashboards_viewReadOnly"],
 
   SystemSettings: ["systemSettings_editSettings", "system_viewSettings"],
@@ -466,7 +476,7 @@ export const PERMISSION_CATEGORIES = {
 
 export function getRolePermissionDefaults(role: Role) {
   if (!role) return {};
-  
+
   const config = ROLE_CONFIG[role];
 
   if (!config) {
@@ -580,6 +590,11 @@ export const UI_TO_API_PERMISSION_MAP: Record<Permission, string> = {
   // Reconciliation
   reconciliation_viewRecords: "reconciliation:view",
 
+  // Rates
+  rates_proposeChanges: "rates:propose_changes",
+  rates_approveChanges: "rates:approve_changes",
+  rates_changeOverride: "rates:change_override",
+
   // Dashboard
   dashboards_viewReadOnly: "dashboard:view",
 
@@ -596,10 +611,7 @@ export const API_TO_UI_PERMISSION_MAP: Record<string, Permission> =
   Object.fromEntries(
     Object.entries(UI_TO_API_PERMISSION_MAP)
       .filter(([, apiPermission]) => apiPermission)
-      .map(([uiPermission, apiPermission]) => [
-        apiPermission,
-        uiPermission,
-      ]),
+      .map(([uiPermission, apiPermission]) => [apiPermission, uiPermission]),
   ) as Record<string, Permission>;
 export const normalizePermissionsFromApi = (perms: string[]): Set<string> => {
   return new Set(perms);
@@ -607,7 +619,7 @@ export const normalizePermissionsFromApi = (perms: string[]): Set<string> => {
 
 export const hasPermission = (
   permissionSet: Set<string>,
-  required: string
+  required: string,
 ): boolean => {
   return permissionSet.has(required);
 };
