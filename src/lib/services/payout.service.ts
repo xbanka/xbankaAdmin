@@ -7,14 +7,7 @@ import { handleApiError } from "../errors/handleApiError";
 export const useIndividualPayout = (payoutId: string | null) => {
   return useQuery({
    queryKey: ["individualPayout", payoutId],
-    queryFn: async({ queryKey }) => {
-      try{
-        const response = await getIndividualPayout(queryKey[1]!)
-        return response
-      }catch(error){
-        handleApiError(error)
-      }
-    },
+    queryFn: () => getIndividualPayout(payoutId!),
     enabled: !!payoutId,
   });
 };

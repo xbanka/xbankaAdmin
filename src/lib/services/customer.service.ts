@@ -1,6 +1,7 @@
 import {
   createCustomer,
   DeleteCustomer,
+  exportCustomers,
   getAllCustomers,
   getCustomerAssets,
   getCustomerById,
@@ -15,6 +16,7 @@ import { useDebounce } from "../../hooks/useDebounce";
 import { toast } from "sonner";
 import { handleApiError } from "../errors/handleApiError";
 import { GetCustomersParams } from "../types/customer";
+import { downloadBlob } from "../utils/downloadBlob";
 
 export const useGetAllCustomers = ({
   page = 1,
@@ -36,21 +38,15 @@ export const useGetAllCustomers = ({
       startDate,
       endDate,
     ],
-    queryFn: () => {
-      try {
-        const response = getAllCustomers({
-          page,
-          limit,
-          search: debouncedSearch || undefined,
-          status,
-          startDate,
-          endDate,
-        });
-        return response;
-      } catch (error) {
-        handleApiError(error);
-      }
-    },
+    queryFn: () =>
+      getAllCustomers({
+        page,
+        limit,
+        search: debouncedSearch || undefined,
+        status,
+        startDate,
+        endDate,
+      }),
   });
 };
 
@@ -58,14 +54,7 @@ export const useGetCustomer = (search: string) => {
   const debouncedSearch = useDebounce(search, 500);
   return useQuery({
     queryKey: ["customers", debouncedSearch],
-    queryFn: () => {
-      try {
-        const response = getCustomers(debouncedSearch);
-        return response;
-      } catch (error) {
-        handleApiError(error);
-      }
-    },
+    queryFn: () => getCustomers(debouncedSearch),
     enabled: debouncedSearch !== undefined,
   });
 };
@@ -73,13 +62,7 @@ export const useGetCustomer = (search: string) => {
 export const useGetCustomerById = (customerId?: string) => {
   return useQuery({
     queryKey: ["customer", customerId],
-    queryFn: async () => {
-      try {
-        return await getCustomerById(customerId!);
-      } catch (error) {
-        handleApiError(error);
-      }
-    },
+    queryFn: () => getCustomerById(customerId!),
     enabled: !!customerId,
   });
 };
@@ -138,13 +121,7 @@ export const useDeleteCustomer = () => {
 export const useGetCustomerVerification = (customerId: string) => {
   return useQuery({
     queryKey: ["customer-verification", customerId],
-    queryFn: async () => {
-      try {
-        return await getCustomerVerification(customerId!);
-      } catch (error) {
-        handleApiError(error);
-      }
-    },
+    queryFn: () => getCustomerVerification(customerId!),
     enabled: !!customerId,
   });
 };
@@ -152,13 +129,7 @@ export const useGetCustomerVerification = (customerId: string) => {
 export const useGetCustomerAssets = (customerId: string) => {
   return useQuery({
     queryKey: ["customer-assets", customerId],
-    queryFn: async () => {
-      try {
-        return await getCustomerAssets(customerId!);
-      } catch (error) {
-        handleApiError(error);
-      }
-    },
+    queryFn: () => getCustomerAssets(customerId!),
     enabled: !!customerId,
   });
 };
@@ -166,13 +137,7 @@ export const useGetCustomerAssets = (customerId: string) => {
 export const useGetCustomerTransactions = (customerId: string, limit = 1) => {
   return useQuery({
     queryKey: ["customer-transactions", customerId, limit],
-    queryFn: async () => {
-      try {
-        return await getCustomerTransactions(customerId!);
-      } catch (error) {
-        handleApiError(error);
-      }
-    },
+    queryFn: () => getCustomerTransactions(customerId!),
     enabled: !!customerId,
   });
 };
@@ -201,16 +166,25 @@ export const useToggleCustomerStatus = () => {
   });
 };
 
+export const useExportCustomers = () => {
+  return useMutation({
+    mutationFn: exportCustomers,
+
+    onSuccess: (blob) => {
+      downloadBlob(blob, "customers.xlsx");
+      toast.success("Export started");
+    },
+
+    onError: (error) => {
+      handleApiError(error);
+    },
+  });
+};
+
 export const useGetCustomerKyc = (customerId: string) => {
   return useQuery({
     queryKey: ["customer-kyc", customerId],
-    queryFn: async () => {
-      try {
-        return await getCustomerKyc(customerId);
-      } catch (error) {
-        handleApiError(error);
-      }
-    },
+    queryFn: () => getCustomerKyc(customerId),
     enabled: !!customerId,
   });
 };

@@ -11,7 +11,7 @@ export function DetailField({
         {label}
       </p>
       <p
-        className="text-base font-medium text-[#111827] truncate"
+        className="text-sm leading-[24px] font-normal text-[#111827] truncate"
         title={value?.toString()}
       >
         {value ?? "—"}

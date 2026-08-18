@@ -8,16 +8,20 @@ import { FilterTabs } from "@/components/ui/FilterTabs";
 import { AddStaffSidebar } from "@/components/staff/add-staff-sidebar";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { useGetAllStaff } from "@/lib/services/staff.service";
-import { StaffUser } from "@/lib/types/staffTypes";
+import { StaffMember, StaffUser } from "@/lib/types/staffTypes";
 import { formatDate } from "@/lib/formatDate";
 import StaffActionMenu from "@/components/staff/staff-action-menu";
 import DeleteStaffModal from "@/components/staff/delete-staff-modal";
+import { EditStaffSidebar } from "@/components/staff/edit-staff-sidebar";
+import { usePermissions } from "@/hooks/usePermissions";
 
 export default function StaffPage() {
   const [filter, setFilter] = useState("all");
   const [isAddStaffOpen, setIsAddStaffOpen] = useState(false);
+  const { hasPermission } = usePermissions();
+  const canAddStaff = hasPermission("staff:add");
+  const canEditRoles = hasPermission("staff:edit_roles");
 
-  const role = "Admin";
   // const { data, error, isLoading } = useGetStaff(role)
   const { data, isError, error, isPending } = useGetAllStaff();
   // const { data, isError, error, isPending } = useDeleteStaff();
@@ -26,23 +30,24 @@ export default function StaffPage() {
   //   filter === "all"
   //     ? data?.data?.staff
   //     : data?.data?.staff.filter((staff: StaffUser) => staff.status === filter);
-  const filteredStaff = data?.data?.staff ?? []
-   const [selectedCustomer, setSelectedCustomer] =
-      useState<StaffUser | null>(null);
-    const [editOpen, setEditOpen] = useState(false);
-    const [deleteOpen, setDeleteOpen] = useState(false);
+  const filteredStaff = data?.data?.staff ?? [];
+  const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null);
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   const columns = [
     {
       key: "name" as const,
       header: "Staff name",
-      render: (staff: StaffUser) => (
+      render: (staff: StaffMember) => (
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-purple-200 flex items-center justify-center text-sm font-semibold text-purple-700">
             {staff.first_name.charAt(0).toUpperCase()}
             {staff.last_name.charAt(0).toUpperCase()}
           </div>
-          <span>{staff.first_name} {staff.last_name}</span>
+          <span>
+            {staff.first_name} {staff.last_name}
+          </span>
         </div>
       ),
     },
@@ -57,7 +62,7 @@ export default function StaffPage() {
     {
       key: "role" as const,
       header: "Role",
-      render: (staff: StaffUser) => (
+      render: (staff: StaffMember) => (
         <div className="">
           <span>{staff.role.name}</span>
         </div>
@@ -66,7 +71,7 @@ export default function StaffPage() {
     {
       key: "created_at" as const,
       header: "Date joined",
-      render: (staff: StaffUser) => (
+      render: (staff: StaffMember) => (
         <div className="">
           <span>{formatDate(staff.created_at)}</span>
         </div>
@@ -77,22 +82,22 @@ export default function StaffPage() {
     //   header: "Last Login",
     // },
     {
-          key: "actions",
-          header: "",
-          render: (item: StaffUser) => (
-            <StaffActionMenu
-              staff={item}
-              onEdit={() => {
-                setSelectedCustomer(item);
-                setEditOpen(true);
-              }}
-              onDelete={() => {
-                setSelectedCustomer(item);
-                setDeleteOpen(true);
-              }}
-            />
-          ),
-        },
+      key: "actions",
+      header: "",
+      render: (item: StaffMember) => (
+        <StaffActionMenu
+          canEditRoles={canEditRoles}
+          onEdit={() => {
+            setSelectedStaff(item);
+            setEditOpen(true);
+          }}
+          onDelete={() => {
+            setSelectedStaff(item);
+            setDeleteOpen(true);
+          }}
+        />
+      ),
+    },
   ];
 
   return (
@@ -103,10 +108,12 @@ export default function StaffPage() {
             <div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">Staff</h1>
             </div>
-            <Button onClick={() => setIsAddStaffOpen(true)}>
-              <Plus className="w-4 h-4" />
-              Add Staff
-            </Button>
+            {canAddStaff && (
+              <Button onClick={() => setIsAddStaffOpen(true)}>
+                <Plus className="w-4 h-4" />
+                Add Staff
+              </Button>
+            )}
           </div>
 
           <div className="mb-6">
@@ -132,17 +139,17 @@ export default function StaffPage() {
           isOpen={isAddStaffOpen}
           onClose={() => setIsAddStaffOpen(false)}
         />
-        {/* <EditCustomerModal
+        <EditStaffSidebar
                 isOpen={editOpen}
                 onClose={() => setEditOpen(false)}
-                customer={selectedCustomer}
-              /> */}
-        
-              <DeleteStaffModal
-                isOpen={deleteOpen}
-                onClose={() => setDeleteOpen(false)}
-                staff={selectedCustomer}
+                staff={selectedStaff}
               />
+
+        <DeleteStaffModal
+          isOpen={deleteOpen}
+          onClose={() => setDeleteOpen(false)}
+          staff={selectedStaff}
+        />
       </div>
     </DashboardLayout>
   );

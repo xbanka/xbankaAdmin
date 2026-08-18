@@ -5,6 +5,8 @@ import {
   getAllStaff,
   getStaff,
   inviteStaff,
+  updateStaffRolesPermissions,
+  UpdateStaffRolesPermissionsPayload,
 } from "../actions/staff";
 import { toast } from "sonner";
 import { StaffPayload } from "../types/staffTypes";
@@ -12,28 +14,14 @@ import { StaffPayload } from "../types/staffTypes";
 export const useGetAllStaff = () => {
   return useQuery({
     queryKey: ["getAllStaff"],
-    queryFn: async () => {
-      try {
-        const response = await getAllStaff();
-        return response;
-      } catch (error) {
-        handleApiError(error);
-      }
-    },
+    queryFn: getAllStaff,
   });
 };
 
 export const useGetStaff = (role: string) => {
   return useQuery({
     queryKey: ["getStaff"],
-    queryFn: async () => {
-      try {
-        const response = await getStaff(role);
-        return response;
-      } catch (error) {
-        handleApiError(error);
-      }
-    },
+    queryFn: () => getStaff(role),
   });
 };
 
@@ -65,6 +53,32 @@ export const useDeleteStaff = () => {
     },
     onError: (err) => {
       handleApiError(err);
+    },
+  });
+};
+
+export const useUpdateStaffRolesPermissions = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      staffId,
+      payload,
+    }: {
+      staffId: string;
+      payload: UpdateStaffRolesPermissionsPayload;
+    }) => updateStaffRolesPermissions(staffId, payload),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["getAllStaff"],
+      });
+
+      toast.success("Staff role and permissions updated successfully");
+    },
+
+    onError: (error) => {
+      handleApiError(error);
     },
   });
 };

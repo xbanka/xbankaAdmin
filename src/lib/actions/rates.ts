@@ -3,7 +3,7 @@ import {
   ActiveConfig,
   CurrencyConfig,
   SegmentConfig,
-  UpdateSegmentPayload,
+  UpdateSegmentsBulkPayload,
 } from "../types/rates-types";
 
 export const getCryptoRates = async () => {
@@ -32,7 +32,7 @@ export const getAllSegments = async () => {
   return response.data;
 };
 
-export const UpdateAllSegments = async (payload: UpdateSegmentPayload[]) => {
+export const UpdateAllSegments = async (payload: UpdateSegmentsBulkPayload) => {
   const response = await AxiosInstance.put(`/api/rates/segments/bulk`, payload);
   return response.data;
 };
@@ -54,6 +54,14 @@ export const bulkAssignSegment = async (
 
 export const getRateProposals = async () => {
   const response = await AxiosInstance.get("api/rates/proposals");
+
+  return response.data;
+};
+
+export const getRateProposalDetails = async (proposalId: string) => {
+  const response = await AxiosInstance.get(
+    `api/rates/proposals/${proposalId}`,
+  );
 
   return response.data;
 };
