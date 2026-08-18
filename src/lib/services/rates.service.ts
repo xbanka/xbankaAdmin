@@ -7,6 +7,7 @@ import {
   getCryptoRates,
   getRateLogDetails,
   getRateLogs,
+  getRateProposalDetails,
   getRateProposals,
   postCryptoRates,
   rejectRateProposal,
@@ -19,14 +20,7 @@ import { toast } from "sonner";
 export const useGetCryptoRates = () => {
   return useQuery({
     queryKey: ["get-crypto-rates"],
-    queryFn: async () => {
-      try {
-        const response = await getCryptoRates();
-        return response;
-      } catch (error) {
-        handleApiError(error);
-      }
-    },
+    queryFn: getCryptoRates,
   });
 };
 
@@ -71,14 +65,7 @@ export const useUpdateBuyAndSpreadRates = () => {
 export const useGetAllSegments = () => {
   return useQuery({
     queryKey: ["get-all-segments"],
-    queryFn: async () => {
-      try {
-        const response = await getAllSegments();
-        return response;
-      } catch (error) {
-        handleApiError(error);
-      }
-    },
+    queryFn: getAllSegments,
   });
 };
 
@@ -136,14 +123,15 @@ export const useBulkAssignSegment = () => {
 export const UseGetRateProposals = () => {
   return useQuery({
     queryKey: ["rate-proposals"],
-    queryFn: async () => {
-      try {
-        const response = await getRateProposals();
-        return response;
-      } catch (error) {
-        handleApiError(error);
-      }
-    },
+    queryFn: getRateProposals,
+  });
+};
+
+export const UseGetRateProposalDetails = (id?: string) => {
+  return useQuery({
+    queryKey: ["rate-proposal-details", id],
+    enabled: !!id,
+    queryFn: () => getRateProposalDetails(id!),
   });
 };
 
@@ -200,14 +188,7 @@ export const useRejectRateProposal = () => {
 export const UseGetRateLogs = () => {
   return useQuery({
     queryKey: ["rate-logs"],
-    queryFn: async () => {
-      try {
-        const response = await getRateLogs();
-        return response;
-      } catch (error) {
-        handleApiError(error);
-      }
-    },
+    queryFn: getRateLogs,
   });
 };
 
@@ -215,13 +196,6 @@ export const UseGetRateLogDetails = (id?: string) => {
   return useQuery({
     queryKey: ["rate-log-details", id],
     enabled: !!id,
-    queryFn: async () => {
-      try {
-        const response = await getRateLogDetails(id!);
-        return response;
-      } catch (error) {
-        handleApiError(error);
-      }
-    },
+    queryFn: () => getRateLogDetails(id!),
   });
 };

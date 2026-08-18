@@ -89,10 +89,7 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
   });
 
   const handleViewRequest = (notification: PayoutNotification) => {
-    const referenceId =
-      notification.reference_type === "RATE_PROPOSAL"
-        ? notification.id
-        : notification.reference_id;
+    const referenceId = notification.reference_id;
 
     if (!referenceId) {
       console.error("Notification has no reference_id", notification);

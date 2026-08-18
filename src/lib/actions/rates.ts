@@ -58,6 +58,14 @@ export const getRateProposals = async () => {
   return response.data;
 };
 
+export const getRateProposalDetails = async (proposalId: string) => {
+  const response = await AxiosInstance.get(
+    `api/rates/proposals/${proposalId}`,
+  );
+
+  return response.data;
+};
+
 export const approveRateProposal = async (proposalId: string) => {
   const response = await AxiosInstance.post(
     `api/rates/proposals/${proposalId}/approve`

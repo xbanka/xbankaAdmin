@@ -23,25 +23,42 @@ import {
 } from "./dashboard-data";
 import { CardLayout } from "../ui/card-layout";
 import { DetailCard } from "./detail-card";
+import { cn } from "@/lib/utils";
 import {
   useGetCustomerMetrics,
   useGetTransactionMetrics,
 } from "@/lib/services/dashboard.service";
 
 export const DashboardHomePage = () => {
-  const { data: transactionMetrics, isLoading: transactionLoading } =
-    useGetTransactionMetrics();
+  const {
+    data: transactionMetrics,
+    isLoading: transactionLoading,
+    refetch: refetchTransactionMetrics,
+    isFetching: isRefetchingTransactionMetrics,
+  } = useGetTransactionMetrics();
   console.log("Transaction Metrics:", transactionMetrics);
 
-  const { data: customerMetrics, isLoading: customerLoading } =
-    useGetCustomerMetrics();
+  const {
+    data: customerMetrics,
+    isLoading: customerLoading,
+    refetch: refetchCustomerMetrics,
+    isFetching: isRefetchingCustomerMetrics,
+  } = useGetCustomerMetrics();
+
+  const isRefreshing =
+    isRefetchingTransactionMetrics || isRefetchingCustomerMetrics;
+
+  const handleRefresh = () => {
+    refetchTransactionMetrics();
+    refetchCustomerMetrics();
+  };
 
   const dashboardMetrics = [
     {
       title: "Transaction",
       icon: Banknote,
       value: transactionMetrics?.data.total ?? 0,
-      trend: "12% vs last week",
+      // trend: "12% vs last week",
       stats: [
         {
           label: "Success",
@@ -65,7 +82,7 @@ export const DashboardHomePage = () => {
       title: "Customers",
       icon: UsersIcon,
       value: customerMetrics?.data.total ?? 0,
-      trend: "12% vs last week",
+      // trend: "12% vs last week",
       stats: [
         {
           label: "New Today",
@@ -89,7 +106,7 @@ export const DashboardHomePage = () => {
       title: "Finance",
       icon: WalletIcon,
       value: 47,
-      trend: "12% vs last week",
+      // trend: "12% vs last week",
       stats: [
         {
           label: "Pending",
@@ -156,9 +173,13 @@ export const DashboardHomePage = () => {
             <Button
               size="sm"
               className="flex items-center gap-2 py-[10px] px-3"
+              onClick={handleRefresh}
+              disabled={isRefreshing}
             >
-              <RefreshCw className="h-4 w-4" />
-              Refresh Data
+              <RefreshCw
+                className={cn("h-4 w-4", isRefreshing && "animate-spin")}
+              />
+              {isRefreshing ? "Refreshing..." : "Refresh Data"}
             </Button>
           </div>
         </div>
@@ -171,7 +192,7 @@ export const DashboardHomePage = () => {
               title={metric.title}
               Icon={metric.icon}
               value={metric.value}
-              trend={metric.trend}
+              // trend={metric.trend}
               stats={metric.stats}
             />
           ))}
