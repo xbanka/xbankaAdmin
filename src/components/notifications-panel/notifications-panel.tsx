@@ -11,6 +11,7 @@ import {
 } from "@/lib/actions/notificationsActions";
 import LoaderSpinner from "../ui/loaderSpinner";
 import { usePayoutSidebarStore } from "@/store/usePayoutSidebarStore";
+import { useRateProposalSidebarStore } from "@/store/useRateProposalSidebarStore";
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 import { cn } from "@/lib/utils";
 import { useNotificationDrawerStore } from "@/store/useNotificationDrawerStore";
@@ -67,6 +68,8 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
     queryFn: () => getNotifications(),
   });
   const { openDetailsSidebar } = usePayoutSidebarStore();
+  const { openSidebar: openRateProposalSidebar } =
+    useRateProposalSidebarStore();
 
   const notifications: PayoutNotification[] = data?.data || [];
   console.log("notifications", notifications);
@@ -93,13 +96,15 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
       return;
     }
 
-    console.log("Opening payout:", referenceId);
-
     markReadMutation.mutate({
       id: notification.id,
     });
 
-    openDetailsSidebar(referenceId);
+    if (notification.reference_type === "RATE_PROPOSAL") {
+      openRateProposalSidebar(referenceId);
+    } else {
+      openDetailsSidebar(referenceId);
+    }
   };
 
   const filteredNotifications = notifications.filter((n: any) => {

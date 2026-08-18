@@ -1,20 +1,19 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { logoutAction } from "../actions/actions";
 import { toast } from "sonner";
-import { useUserStore } from "@/store/userStore";
 import { useRouter } from "next/navigation";
 import { handleApiError } from "../errors/handleApiError";
 import { authToken } from "../authToken";
 
 
 export const useLogout = () => {
-  const clearUser = useUserStore((s) => s.clearUser);
   const router = useRouter();
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: () => logoutAction(),
     onSuccess: (result) => {
-      clearUser();
       authToken.remove();
+      queryClient.removeQueries({ queryKey: ["userProfile"] });
       router.push("/signin");
       toast.success(result.data.message)
     },

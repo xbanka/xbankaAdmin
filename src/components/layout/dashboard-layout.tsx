@@ -15,15 +15,69 @@ import { DialogLayout } from "./modalLayout";
 import { Button } from "../ui/button";
 import { ConfirmPayoutSidebar } from "../finance/confirm-payout-sidebar";
 import { PayoutDetailsSidebar } from "../finance/payout-details-sidebar";
+import { SpreadApprovalDrawer } from "../notifications-panel/spread-approval-drawer";
 import {
   useIndividualPayout,
   useProcessPayout,
   useRejectPayout,
 } from "@/lib/services/payout.service";
+import {
+  useApproveRateProposal,
+  useRejectRateProposal,
+  UseGetRateProposalDetails,
+} from "@/lib/services/rates.service";
 import { usePayoutSidebarStore } from "@/store/usePayoutSidebarStore";
+import { useRateProposalSidebarStore } from "@/store/useRateProposalSidebarStore";
+import { usePermissions } from "@/hooks/usePermissions";
 import { useState } from "react";
 import { LucideIcon } from "lucide-react";
-import { useNotificationDrawerStore } from "@/store/useNotificationDrawerStore";
+import { RateLogDetails } from "../rate-management/spread-change-details-change-drawer";
+
+const dummyRateLogDetails: RateLogDetails = {
+  id: "rlog-001",
+  change_type: "SEGMENT_ASSIGNMENT",
+  target_id: "seg-major-coins",
+  target: "Major Coins Segment",
+  target_currency: null,
+  status: "PENDING",
+  affected_assets: 3,
+  affected_assets_detail: [
+    {
+      id: "btc",
+      name: "Bitcoin",
+      currency: "BTC",
+      previous_configuration: ["Buy: 2.00%", "Sell: 1.75%"],
+      new_configuration: ["Buy: 2.50%", "Sell: 2.25%"],
+      status: "Updated",
+    },
+    {
+      id: "eth",
+      name: "Ethereum",
+      currency: "ETH",
+      previous_configuration: ["Buy: 2.00%", "Sell: 1.75%"],
+      new_configuration: ["Buy: 2.50%", "Sell: 2.25%"],
+      status: "Updated",
+    },
+    {
+      id: "usdt",
+      name: "Tether",
+      currency: "USDT",
+      previous_configuration: ["Buy: 1.00%", "Sell: 0.90%"],
+      new_configuration: ["Buy: 1.00%", "Sell: 0.90%"],
+      status: "Unchanged",
+    },
+  ],
+  previous_configuration: ["Buy: 2.00%", "Sell: 1.75%"],
+  new_configuration: ["Buy: 2.50%", "Sell: 2.25%"],
+  requested_by_id: "user-042",
+  requested_by: {
+    first_name: "John",
+    last_name: "Doe",
+    role: "Operations Manager",
+  },
+  created_at: "2026-08-10T09:42:00Z",
+  updated_at: "2026-08-10T09:42:00Z",
+};
 
 interface DashboardLayoutProps {
   children?: React.ReactNode;
@@ -47,7 +101,7 @@ export function DashboardLayout({
 }: DashboardLayoutProps) {
   const [openModal, setOpenModal] = useState(false);
   const [rejectModal, setRejectModal] = useState(false);
-  const { notification, close } = useNotificationDrawerStore();
+  const { hasPermission } = usePermissions();
   const {
     isDetailsOpen,
     isConfirmOpen,
@@ -68,6 +122,33 @@ export function DashboardLayout({
     useProcessPayout();
   const { mutate: rejectPayoutMutation, isPending: rejectingPayout } =
     useRejectPayout();
+
+  const {
+    isOpen: isRateProposalOpen,
+    selectedProposalId,
+    closeSidebar: closeRateProposalSidebar,
+  } = useRateProposalSidebarStore();
+  const { data: rateProposalDetails } = UseGetRateProposalDetails(
+    selectedProposalId ?? undefined,
+  );
+  const { mutate: approveRateProposalMutation, isPending: approvingProposal } =
+    useApproveRateProposal();
+  const { mutate: rejectRateProposalMutation, isPending: decliningProposal } =
+    useRejectRateProposal();
+
+  const handleApproveProposal = () => {
+    if (!selectedProposalId) return;
+    approveRateProposalMutation(selectedProposalId, {
+      onSuccess: () => closeRateProposalSidebar(),
+    });
+  };
+
+  const handleDeclineProposal = () => {
+    if (!selectedProposalId) return;
+    rejectRateProposalMutation(selectedProposalId, {
+      onSuccess: () => closeRateProposalSidebar(),
+    });
+  };
 
   const handleProcessPayout = () => {
     closeDetailsSidebar();
@@ -168,11 +249,8 @@ export function DashboardLayout({
             <div className="block w-full max-w-full min-w-0">{children}</div>
           )}
 
-          {/* {notification?.type === "spread-approval" && (
-            <SpreadApprovalDrawer notification={notification} onClose={close} />
-          )} */}
 
-      
+
             <PayoutDetailsSidebar
               isOpen={isDetailsOpen}
               onClose={closeDetailsSidebar}
@@ -181,6 +259,9 @@ export function DashboardLayout({
               onProcess={handleProcessPayout}
               loading={individualPayoutPending}
               error={individualPayoutError?.message || ""}
+              canApprove={hasPermission("finance:approve_payments")}
+              canReject={hasPermission("finance:reject_payments")}
+              canFlag={hasPermission("finance:flag_payments")}
             />
 
             <ConfirmPayoutSidebar
@@ -190,6 +271,19 @@ export function DashboardLayout({
               onConfirm={handleConfirmPayout}
               loading={false}
               error={""}
+            />
+
+            <SpreadApprovalDrawer
+              entry={
+                isRateProposalOpen
+                  ? rateProposalDetails?.proposal ?? null
+                  : null
+              }
+              onClose={closeRateProposalSidebar}
+              onApprove={handleApproveProposal}
+              onDecline={handleDeclineProposal}
+              isApproving={approvingProposal}
+              isDeclining={decliningProposal}
             />
 
           <DialogLayout

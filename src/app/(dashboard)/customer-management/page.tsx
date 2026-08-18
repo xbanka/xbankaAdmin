@@ -1,7 +1,11 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useGetAllCustomers, useGetCustomer } from "@/lib/services/customer.service";
+import {
+  useExportCustomers,
+  useGetAllCustomers,
+  useGetCustomer,
+} from "@/lib/services/customer.service";
 import { Input } from "@/components/ui/input";
 import { DataTableLayout } from "@/components/DataTableLayout/DataTableLayout";
 import { useState } from "react";
@@ -62,6 +66,8 @@ export default function CustomerManagement() {
   endDate: dateTo || undefined,
 });
 
+  const exportCustomers = useExportCustomers();
+
   const customers: CustomerProps[] = data?.data?.data?.items ?? [];
   const meta = data?.data?.data?.meta;
 
@@ -100,37 +106,6 @@ export default function CustomerManagement() {
     setDateTo("");
     setSortOrder("");
     setAdvOpen(false);
-  };
-
-  const handleExport = () => {
-    if (displayedCustomers.length === 0) return;
-    const rows = displayedCustomers.map((c) => ({
-      "Full Name": `${c.firstName ?? ""} ${c.lastName ?? ""}`.trim() || "-",
-      Email: c.email ?? "",
-      "Phone Number": c.phoneNumber ?? "",
-      "KYC Tier": c.tier ?? 0,
-      Status: c.isEmailVerified ? "Active" : "Unverified",
-      "Date Joined": formatDate(c.createdAt),
-    }));
-    const headers = Object.keys(rows[0]);
-    const csv = [
-      headers.join(","),
-      ...rows.map((r) =>
-        headers
-          .map(
-            (h) =>
-              `"${String(r[h as keyof typeof r] ?? "").replace(/"/g, '""')}"`,
-          )
-          .join(","),
-      ),
-    ].join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "customers.csv";
-    a.click();
-    URL.revokeObjectURL(url);
   };
 
   const handleClose = () => {
@@ -216,12 +191,12 @@ export default function CustomerManagement() {
           <div className="flex items-center justify-between mb-[24px]">
             <Header text="Customer Overview" />
 
-            <Button
+            {/* <Button
               className="text-[#FFFFFF]"
               onClick={() => setOpenModal(true)}
             >
               + Add Customer
-            </Button>
+            </Button> */}
           </div>
 
           {/* Toolbar */}
@@ -381,9 +356,21 @@ export default function CustomerManagement() {
             </div>
 
             {/* Export */}
-            <Button onClick={handleExport} className="ml-auto h-10 text-white">
+            <Button
+              onClick={() =>
+                exportCustomers.mutate({
+                  search,
+                  status: statusFilter === "all" ? undefined : statusFilter,
+                  startDate: dateFrom || undefined,
+                  endDate: dateTo || undefined,
+                })
+              }
+              disabled={exportCustomers.isPending}
+              variant="outline"
+              className="ml-auto text-[#111827] py-2 px-3"
+            >
               <Download className="h-4 w-4" />
-              Export
+              {exportCustomers.isPending ? "Exporting..." : "Export"}
             </Button>
           </div>
 

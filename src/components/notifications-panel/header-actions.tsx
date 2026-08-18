@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import { Bell, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { NotificationsPanel } from "./notifications-panel";
-import { useUserStore } from "@/store/userStore";
 import { Skeleton } from "../ui/skeleton";
 import { useProfile } from "@/lib/services/profile.service";
 import { useNotificationStore } from "@/store/useNotificationStore";
@@ -18,15 +17,8 @@ export function HeaderActions() {
   const {toggle, isOpen} = useNotificationStore();
   const notificationsRef = useRef<HTMLDivElement>(null);
 
-  const setAffiliate = useUserStore((s) => s.setUser);
-  const user = useUserStore((state) => state.user);
-  const { data, isLoading } = useProfile()
-
-  useEffect(() => {
-    if (data) {
-      setAffiliate(data?.data); // access actual payload
-    }
-  }, [data]);
+  const { data, isLoading } = useProfile();
+  const user = data?.data;
 
   return (
     <div className="flex absolute right-2 items-center gap-4">

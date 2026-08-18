@@ -71,7 +71,7 @@ export function CreateSpreadWizard({ onClose }: { onClose: () => void }) {
   };
 
   const handleSaveSegments = () => {
-    const payload = segments
+    const segmentsPayload = segments
       .filter((segment) => segment.selected)
       .map((segment) => ({
         id: segment.id,
@@ -83,11 +83,14 @@ export function CreateSpreadWizard({ onClose }: { onClose: () => void }) {
         sellSpread: segment.sellSpread,
       }));
 
-    updateSegments(payload, {
-      onSuccess: () => {
-        setStep(3);
+    updateSegments(
+      { setupNote, segments: segmentsPayload },
+      {
+        onSuccess: () => {
+          setStep(3);
+        },
       },
-    });
+    );
   };
 
   useEffect(() => {

@@ -1,4 +1,3 @@
-// components/rate-management/spread-change-details-drawer.tsx
 "use client";
 
 import { X } from "lucide-react";
@@ -6,13 +5,28 @@ import { DataTableLayout } from "../DataTableLayout/DataTableLayout";
 
 import { formatDate } from "@/lib/formatDate";
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
-import { AffectedAsset, SpreadHistoryEntry } from "../rate-management/types";
 import { Button } from "../ui/button";
 import { ScopeBadge, UpdatedStatusBadge } from "../rate-management/scope-badge";
+import type {
+  AffectedAssetDetail,
+  RateLogDetails,
+} from "../rate-management/spread-change-details-change-drawer";
+import { NameInfo } from "./name-info";
 
 interface Props {
-  entry: SpreadHistoryEntry | null;
+  entry: RateLogDetails | null;
   onClose: () => void;
+  onApprove: () => void;
+  onDecline: () => void;
+  isApproving?: boolean;
+  isDeclining?: boolean;
+}
+
+function getConfigValue(configList: string[] = [], prefix: string): string {
+  const match = configList.find((item) =>
+    item.toLowerCase().startsWith(prefix.toLowerCase()),
+  );
+  return match ? match.split(":")[1]?.trim() ?? "-" : "-";
 }
 
 function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
@@ -24,50 +38,61 @@ function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
-export function SpreadApprovalDrawer({ entry, onClose }: Props) {
+export function SpreadApprovalDrawer({
+  entry,
+  onClose,
+  onApprove,
+  onDecline,
+  isApproving,
+  isDeclining,
+}: Props) {
   useBodyScrollLock(!!entry);
 
   if (!entry) return null;
+  console.log("SpreadApprovalDrawer entry:", entry);
+
+  const isPending = entry.status === "PENDING";
+  const affectedAssetsList = entry.affected_assets_detail ?? [];
 
   const affectedAssetColumns = [
     {
       key: "asset",
       header: "Asset",
-      render: (row: AffectedAsset) => (
+      render: (row: AffectedAssetDetail) => (
         <div>
           <div className="text-[13px] font-medium text-[#111827]">
             {row.name}
           </div>
-          <div className="text-[11px] text-[#9CA3AF]">{row.ticker}</div>
+          <div className="text-[11px] text-[#9CA3AF]">{row.currency}</div>
         </div>
       ),
     },
     {
       key: "previousSpread",
       header: "Previous Spread",
-      render: (row: AffectedAsset) => (
+      render: (row: AffectedAssetDetail) => (
         <div className="text-[13px] text-[#111827]">
-          Buy: {row.previousSpread.buy.toFixed(2)}%
+          Buy: {getConfigValue(row.previous_configuration, "Buy")}
           <br />
-          Sell: {row.previousSpread.sell.toFixed(2)}%
+          Sell: {getConfigValue(row.previous_configuration, "Sell")}
         </div>
       ),
     },
     {
       key: "newSpread",
       header: "New Spread",
-      render: (row: AffectedAsset) => (
+      render: (row: AffectedAssetDetail) => (
         <div className="text-[13px] text-[#111827]">
-          Buy: {row.newSpread.buy.toFixed(2)}%
+          Buy: {getConfigValue(row.new_configuration, "Buy")}
           <br />
-          Sell: {row.newSpread.sell.toFixed(2)}%
+          Sell: {getConfigValue(row.new_configuration, "Sell")}
         </div>
       ),
     },
     {
       key: "status",
       header: "Status",
-      render: (row: AffectedAsset) => (
+      render: (row: AffectedAssetDetail) => (
         <UpdatedStatusBadge status={row.status} />
       ),
     },
@@ -81,16 +106,21 @@ export function SpreadApprovalDrawer({ entry, onClose }: Props) {
       {/* Drawer */}
       <div className="w-full md:w-[602px] bg-white shadow-lg flex flex-col h-full">
         {/* Header */}
-        <div className="flex items-start justify-between p-6 border-b border-[#E5E7EB] flex-shrink-0">
+        <div className="flex items-start justify-between py-4 px-6 bg-[#FFFFFF] flex-shrink-0">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <h2 className="text-lg font-semibold text-[#111827]">
+              <h2 className="text-[24px] font-semibold text-text-primary">
                 Spread Change Details
               </h2>
-              <ScopeBadge scope={entry.scope} />
+              <ScopeBadge
+                scope={
+                  entry.change_type.includes("SEGMENT") ? "segment" : "asset"
+                }
+              />
             </div>
             <p className="text-[13px] text-[#9CA3AF]">
-              {formatDate(entry.dateTime)}
+              {/* {formatDate(entry.created_at)} */}
+              Review the proposed configuration changes before approving or declining.
             </p>
           </div>
           <button
@@ -104,47 +134,69 @@ export function SpreadApprovalDrawer({ entry, onClose }: Props) {
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
           {/* Change Summary */}
-          <div className="space-y-1 py-4 px-5">
-            <h3 className="text-sm font-normal text-text-secondary">
-              Change Summary
-            </h3>
-            <p className="text-[14px] font-medium leading-5 text-text-secondary">
-              {entry.changeSummary}
-            </p>
-          </div>
 
           {/* Target Information */}
           <div>
             <h3 className="text-sm font-medium leading-5 text-text-primary py-3 px-5 border border-card-border-secondary bg-card-secondary rounded-tl-[20px] rounded-tr-[20px]">
-              Target Information
+              Request Information
             </h3>
-            <div className="bg-[#F9FAFB] rounded-lg py-4 px-5">
+            <div className="bg-[#FFFFFF] py-4 px-5 border-x border-b grid grid-cols-2 rounded-bl-[20px] rounded-br-[20px]">
+              <NameInfo title="Submitted by" value={entry.requested_by.first_name + " " + entry.requested_by.last_name} />
+              <NameInfo title="Role" value={entry.requested_by.role} />
+              <NameInfo title="Submitted on" value={formatDate(entry.created_at)} />
+              <NameInfo title="Request Type" value={entry.change_type} />
+            </div>
+          </div>
+          <div>
+            <h3 className="text-sm font-medium leading-5 text-text-primary py-3 px-5 border border-card-border-secondary bg-card-secondary rounded-tl-[20px] rounded-tr-[20px]">
+              Request Information
+            </h3>
+            <div className="bg-[#FFFFFF] py-4 px-5 border-x border-b rounded-bl-[20px] rounded-br-[20px]">
               <InfoRow
                 label="Scope"
-                value={entry.scope === "segment" ? "Segment" : "Asset"}
+                value={
+                  entry.change_type.includes("SEGMENT") ? "Segment" : "Asset"
+                }
               />
-              <InfoRow label="Target" value={entry.targetName} />
+              <InfoRow label="Target" value={entry.target} />
               <InfoRow
                 label="Affected Assets"
-                value={`${entry.affectedAssetsCount} Assets`}
+                value={`${entry.affected_assets} Assets`}
               />
               <InfoRow
                 label="Previous Configuration"
-                value={`Buy: ${entry.previousConfig.buy.toFixed(2)}% · Sell: ${entry.previousConfig.sell.toFixed(2)}%`}
+                value={
+                  <div className="text-right">
+                    {entry.previous_configuration.length
+                      ? entry.previous_configuration.map((item) => (
+                          <div key={item}>{item}</div>
+                        ))
+                      : "-"}
+                  </div>
+                }
               />
               <InfoRow
                 label="New Configuration"
-                value={`Buy: ${entry.newConfig.buy.toFixed(2)}% · Sell: ${entry.newConfig.sell.toFixed(2)}%`}
+                value={
+                  <div className="text-right">
+                    {entry.new_configuration.length
+                      ? entry.new_configuration.map((item) => (
+                          <div key={item}>{item}</div>
+                        ))
+                      : "-"}
+                  </div>
+                }
               />
-              <InfoRow label="Effective Until" value={entry.effectiveUntil} />
               <InfoRow
                 label="Status"
                 value={
                   <span
                     className={
-                      entry.status === "Active"
+                      entry.status === "APPROVED"
                         ? "text-[#059669]"
-                        : "text-[#6B7280]"
+                        : entry.status === "REJECTED"
+                          ? "text-red-600"
+                          : "text-orange-600"
                     }
                   >
                     {entry.status}
@@ -160,51 +212,43 @@ export function SpreadApprovalDrawer({ entry, onClose }: Props) {
               Affected Assets
             </h3>
             <DataTableLayout
-              data={entry.affectedAssets}
+              data={affectedAssetsList}
               columns={affectedAssetColumns}
               rowKey={(row) => row.id}
-              itemsPerPage={entry.affectedAssets.length || 1}
-              totalCount={entry.affectedAssets.length}
+              itemsPerPage={affectedAssetsList.length || 1}
+              totalCount={affectedAssetsList.length}
               emptyMessage="No assets affected."
             />
           </div>
+        </div>
 
-          {/* Changed by */}
-          <div>
-            <h3 className="text-sm font-semibold text-[#111827] mb-2">
-              Changed by
-            </h3>
-            <div className="flex items-center gap-3 bg-[#F9FAFB] rounded-lg p-3">
-              <div className="w-9 h-9 rounded-full bg-[#E5E7EB] flex items-center justify-center text-[12px] font-semibold text-[#374151]">
-                {entry.updatedBy.name
-                  .split(" ")
-                  .map((p) => p[0])
-                  .join("")
-                  .slice(0, 2)
-                  .toUpperCase()}
-              </div>
-              <div>
-                <div className="text-[13px] font-medium text-[#111827]">
-                  {entry.updatedBy.name}
-                </div>
-                <div className="text-[11px] text-[#9CA3AF]">
-                  {entry.updatedBy.role} · {formatDate(entry.dateTime)}
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="flex gap-3 border-t p-6">
-            <Button variant="outline" onClick={close}>
+        {isPending && (
+          <div className="flex justify-between border-t py-4 px-8 flex-shrink-0">
+            <Button variant="outline" onClick={onClose}>
               Cancel
             </Button>
 
-            <Button variant="outline" className="text-red-600">
-              Decline
-            </Button>
+            <div className="flex gap-4">
+              <Button
+                variant="outline"
+                className="text-text-primary"
+                onClick={onDecline}
+                disabled={isApproving || isDeclining}
+              >
+                {isDeclining ? "Declining..." : "Decline"}
+              </Button>
 
-            <Button>Approve</Button>
+              <Button
+                onClick={onApprove}
+                disabled={isApproving || isDeclining}
+              >
+                {isApproving ? "Approving..." : "Approve"}
+              </Button>
+
+            </div>
+
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

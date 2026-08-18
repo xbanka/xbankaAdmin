@@ -108,6 +108,24 @@ AxiosInstance.interceptors.response.use(
     } else if (!error.response) {
       apiMessage = "Network error. Please check your internet connection.";
       status = 503;
+    } else if (
+      error.response.data instanceof Blob &&
+      error.response.data.type.includes("json")
+    ) {
+      // responseType: 'blob' requests get their error body blob-encoded too,
+      // so it has to be read back out as text before it can be parsed as JSON.
+      try {
+        const text = await error.response.data.text();
+        const parsed = JSON.parse(text);
+        apiMessage =
+          parsed?.message ||
+          parsed?.error ||
+          parsed?.detail ||
+          parsed?.errors?.[0] ||
+          "Something went wrong";
+      } catch {
+        apiMessage = error.message || "Something went wrong";
+      }
     } else {
       apiMessage =
         error.response?.data?.message ||

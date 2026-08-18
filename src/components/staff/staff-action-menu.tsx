@@ -12,15 +12,15 @@ import {
 import { StaffUser } from "@/lib/types/staffTypes";
 
 interface CustomerActionMenuProps {
-  staff: StaffUser;
   onEdit?: () => void;
   onDelete?: () => void;
+  canEditRoles?: boolean;
 }
 
 export default function StaffActionMenu({
-  staff,
   onEdit,
   onDelete,
+  canEditRoles = false,
 }: CustomerActionMenuProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   return (
@@ -32,14 +32,16 @@ export default function StaffActionMenu({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem
-            onClick={() => {
-              setMenuOpen(false);
-              onEdit?.();
-            }}
-          >
-            Edit Staff Role
-          </DropdownMenuItem>
+          {canEditRoles && (
+            <DropdownMenuItem
+              onClick={() => {
+                setMenuOpen(false);
+                onEdit?.();
+              }}
+            >
+              Edit Staff Role
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem
             onClick={() => {
               setMenuOpen(false);
