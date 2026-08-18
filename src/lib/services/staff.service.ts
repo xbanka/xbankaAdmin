@@ -14,28 +14,14 @@ import { StaffPayload } from "../types/staffTypes";
 export const useGetAllStaff = () => {
   return useQuery({
     queryKey: ["getAllStaff"],
-    queryFn: async () => {
-      try {
-        const response = await getAllStaff();
-        return response;
-      } catch (error) {
-        handleApiError(error);
-      }
-    },
+    queryFn: getAllStaff,
   });
 };
 
 export const useGetStaff = (role: string) => {
   return useQuery({
     queryKey: ["getStaff"],
-    queryFn: async () => {
-      try {
-        const response = await getStaff(role);
-        return response;
-      } catch (error) {
-        handleApiError(error);
-      }
-    },
+    queryFn: () => getStaff(role),
   });
 };
 

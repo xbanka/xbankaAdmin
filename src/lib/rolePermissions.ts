@@ -56,6 +56,17 @@ export type Permission =
 // export type ApiPermission =
 //   (typeof UI_TO_API_PERMISSION_MAP)[keyof typeof UI_TO_API_PERMISSION_MAP];
 
+// Roles assignable to a staff member from the UI. Super Admin is
+// deliberately excluded — there is only ever one, and it can only be
+// provisioned from the backend, never created or reassigned here.
+export const ASSIGNABLE_ROLES: Role[] = [
+  Role.ADMIN,
+  Role.MANAGER,
+  Role.FINANCE,
+  Role.OPERATIONS,
+  Role.CUSTOMER_REP,
+];
+
 export const ROLE_CONFIG: Record<
   Role,
   {

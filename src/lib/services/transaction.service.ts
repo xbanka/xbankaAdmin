@@ -19,42 +19,21 @@ import { downloadBlob } from "../utils/downloadBlob";
 export const useTransactions = (page = 1, limit = 10) => {
   return useQuery({
     queryKey: ["transactions", page, limit],
-    queryFn: async () => {
-      try {
-        const response = await getAllTransactionsAction({ page, limit });
-        return response;
-      } catch (err) {
-        handleApiError(err);
-      }
-    },
+    queryFn: () => getAllTransactionsAction({ page, limit }),
   });
 };
 
 export const useTransaction = (transactionId: string) => {
   return useQuery({
     queryKey: ["transaction", transactionId],
-    queryFn: async () => {
-      try {
-        const response = await getTransactionByIdAction(transactionId);
-        return response;
-      } catch (err) {
-        handleApiError(err);
-      }
-    },
+    queryFn: () => getTransactionByIdAction(transactionId),
     enabled: !!transactionId,
   });
 };
 export const useGetTransactionByCustomer = (customer_id: string) => {
   return useQuery({
     queryKey: ["transaction", customer_id],
-    queryFn: async () => {
-      try {
-        const response = await getAllTransactionsByCustomer(customer_id);
-        return response;
-      } catch (err) {
-        handleApiError(err);
-      }
-    },
+    queryFn: () => getAllTransactionsByCustomer(customer_id),
     enabled: !!customer_id,
   });
 };
@@ -97,14 +76,7 @@ export const useUploadTransactionAttachment = () => {
 export const useGetAllTransactions = (params: GetTransactionsParams) => {
   return useQuery({
     queryKey: ["get-all-transactions", params],
-    queryFn: async () => {
-      try {
-        const response = await getAllTransactions(params);
-        return response;
-      } catch (error) {
-        handleApiError(error);
-      }
-    },
+    queryFn: () => getAllTransactions(params),
     placeholderData: (previousData) => previousData, // keep old page while fetching next
   });
 };
@@ -112,14 +84,7 @@ export const useGetAllTransactions = (params: GetTransactionsParams) => {
 export const useGetTransactionById = (transactionId: string | null) => {
   return useQuery({
     queryKey: ["get-transaction", transactionId],
-    queryFn: async () => {
-      try {
-        const response = await getTransactionById(transactionId!);
-        return response;
-      } catch (error) {
-        handleApiError(error);
-      }
-    },
+    queryFn: () => getTransactionById(transactionId!),
     enabled: !!transactionId, // only fires when an ID is passed
   });
 };

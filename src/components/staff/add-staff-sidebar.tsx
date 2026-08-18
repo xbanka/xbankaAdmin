@@ -19,6 +19,7 @@ import {
 import { useInviteStaff } from "@/lib/services/staff.service";
 import { InviteStaffDraft } from "@/lib/types/staffTypes";
 import {
+  ASSIGNABLE_ROLES,
   getRolePermissionDefaults,
   Permission,
   PERMISSION_CATEGORIES,
@@ -207,7 +208,7 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
                 id="role"
                 label="Enter Job Role"
                 placeholder="Select job role"
-                options={Object.values(Role)}
+                options={ASSIGNABLE_ROLES}
                 value={selectedRole}
                 onChange={(value) => {
                   const role = value as Role; // safe: options come from Role enum

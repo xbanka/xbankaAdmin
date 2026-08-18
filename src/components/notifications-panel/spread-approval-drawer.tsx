@@ -49,6 +49,7 @@ export function SpreadApprovalDrawer({
   useBodyScrollLock(!!entry);
 
   if (!entry) return null;
+  console.log("SpreadApprovalDrawer entry:", entry);
 
   const isPending = entry.status === "PENDING";
   const affectedAssetsList = entry.affected_assets_detail ?? [];
@@ -140,10 +141,10 @@ export function SpreadApprovalDrawer({
               Request Information
             </h3>
             <div className="bg-[#FFFFFF] py-4 px-5 border-x border-b grid grid-cols-2 rounded-bl-[20px] rounded-br-[20px]">
-              <NameInfo title="Submitted by" value={"John doe"} />
-              <NameInfo title="Role" value={"Operation Manager"} />
-              <NameInfo title="Submitted on" value={"24 Jul 2026 • 09:42 AM"} />
-              <NameInfo title="Submitted on" value={"24 Jul 2026 • 09:42 AM"} />
+              <NameInfo title="Submitted by" value={entry.requested_by.first_name + " " + entry.requested_by.last_name} />
+              <NameInfo title="Role" value={entry.requested_by.role} />
+              <NameInfo title="Submitted on" value={formatDate(entry.created_at)} />
+              <NameInfo title="Request Type" value={entry.change_type} />
             </div>
           </div>
           <div>

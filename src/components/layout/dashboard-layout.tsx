@@ -24,7 +24,7 @@ import {
 import {
   useApproveRateProposal,
   useRejectRateProposal,
-  UseGetRateLogDetails,
+  UseGetRateProposalDetails,
 } from "@/lib/services/rates.service";
 import { usePayoutSidebarStore } from "@/store/usePayoutSidebarStore";
 import { useRateProposalSidebarStore } from "@/store/useRateProposalSidebarStore";
@@ -128,7 +128,7 @@ export function DashboardLayout({
     selectedProposalId,
     closeSidebar: closeRateProposalSidebar,
   } = useRateProposalSidebarStore();
-  const { data: rateLogDetails } = UseGetRateLogDetails(
+  const { data: rateProposalDetails } = UseGetRateProposalDetails(
     selectedProposalId ?? undefined,
   );
   const { mutate: approveRateProposalMutation, isPending: approvingProposal } =
@@ -274,7 +274,11 @@ export function DashboardLayout({
             />
 
             <SpreadApprovalDrawer
-              entry={isRateProposalOpen ? rateLogDetails?.log ?? null : null}
+              entry={
+                isRateProposalOpen
+                  ? rateProposalDetails?.proposal ?? null
+                  : null
+              }
               onClose={closeRateProposalSidebar}
               onApprove={handleApproveProposal}
               onDecline={handleDeclineProposal}

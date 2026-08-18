@@ -1,7 +1,7 @@
 "use client";
 // @ts-nocheck
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SelectFieldLayout } from "../forms/SelectFieldLayout";
@@ -9,6 +9,7 @@ import { CheckboxField } from "../ui/CheckboxField";
 import { CollapsiblePermissionSection } from "./collapsible-permission-section";
 import { useForm } from "react-hook-form";
 import {
+  ASSIGNABLE_ROLES,
   getRolePermissionDefaults,
   Permission,
   PERMISSION_CATEGORIES,
@@ -29,7 +30,6 @@ interface EditStaffSidebarProps {
 }
 
 interface EditStaffFormData {
-  role: Role;
   [key: string]: any;
 }
 
@@ -51,8 +51,16 @@ export function EditStaffSidebar({
     shouldUnregister: false,
   });
 
-  const selectedRole = watch("role") as Role | undefined;
+  const [selectedRole, setSelectedRole] = useState<Role | undefined>();
   const watchedPermissions = watch();
+
+  // Super Admin (and any other role outside the assignable set) isn't
+  // selectable going forward, but if that's the staff member's current
+  // role it still needs to show up so the dropdown isn't left empty.
+  const roleOptions =
+    selectedRole && !ASSIGNABLE_ROLES.includes(selectedRole)
+      ? [selectedRole, ...ASSIGNABLE_ROLES]
+      : ASSIGNABLE_ROLES;
 
   /**
    * Populate the form whenever the selected staff changes.
@@ -76,13 +84,12 @@ export function EditStaffSidebar({
         existingPermissions.includes(apiPermission);
     });
 
-    reset({
-      role: roleName,
-      ...permissionValues,
-    });
+    setSelectedRole(roleName);
+    reset(permissionValues);
   }, [staff, isOpen, reset]);
 
   const handleClose = () => {
+    setSelectedRole(undefined);
     reset({});
     onClose();
   };
@@ -123,21 +130,17 @@ export function EditStaffSidebar({
   const handleRoleChange = (value: string) => {
     const role = value as Role;
 
-    reset({
-      role,
-      ...getRolePermissionDefaults(role),
-    });
+    setSelectedRole(role);
+    reset(getRolePermissionDefaults(role));
   };
 
   const handleSubmitForm = (data: EditStaffFormData) => {
-    if (!staff) return;
+    if (!staff || !selectedRole) return;
 
     type UiPermissionKey = keyof typeof UI_TO_API_PERMISSION_MAP;
 
     const selectedPermissions = Object.keys(data).filter(
-      (key) =>
-        key !== "role" &&
-        data[key] === true,
+      (key) => data[key] === true,
     ) as UiPermissionKey[];
 
     const apiPermissions = selectedPermissions.map(
@@ -145,7 +148,7 @@ export function EditStaffSidebar({
     );
 
     const payload = {
-      role: data.role,
+      role: selectedRole,
       permissions: apiPermissions,
     };
 
@@ -196,11 +199,17 @@ export function EditStaffSidebar({
           </button>
         </div>
 
-        {/* Form */}
-        <form
-          onSubmit={handleSubmit(handleSubmitForm)}
-          className="flex-1 flex flex-col min-h-0"
-        >
+        {/*
+          Not a <form>: nesting the role <Select> inside a <form> makes
+          Radix render a hidden native <select> mirror for form
+          compatibility. That mirror re-syncs on every value change, and
+          since the role is pre-filled programmatically the instant this
+          sidebar opens (before the matching <option> finishes
+          registering), the native sync reads back an empty value and
+          immediately clears the role we just set. handleSubmit works
+          the same without a real <form> element.
+        */}
+        <div className="flex-1 flex flex-col min-h-0">
           <div className="flex-1 overflow-y-auto p-6 space-y-4">
             {/* Staff information */}
             <div className="rounded-lg bg-gray-50 p-4">
@@ -227,7 +236,7 @@ export function EditStaffSidebar({
               id="role"
               label="Job Role"
               placeholder="Select job role"
-              options={Object.values(Role)}
+              options={roleOptions}
               value={selectedRole}
               onChange={handleRoleChange}
             />
@@ -318,13 +327,14 @@ export function EditStaffSidebar({
 
             <Button
               disabled={!selectedRole || isPending}
-              type="submit"
+              type="button"
+              onClick={handleSubmit(handleSubmitForm)}
               className="flex-3"
             >
               {isPending ? "Saving..." : "Save Changes"}
             </Button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );
