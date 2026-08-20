@@ -27,6 +27,13 @@ const formatMethod = (m?: string) =>
 const formatAmount = (a?: number) =>
   a == null ? "—" : `₦${Number(a).toLocaleString()}`;
 
+const formatReferenceType = (referenceType?: string) =>
+  (referenceType ?? "")
+    .split("_")
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(" ");
+
 const getAffiliateName = (affiliate?: Affiliate | null) => {
   if (!affiliate) return "System";
 
@@ -223,19 +230,38 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
                             {notification?.message}
                           </p>
 
-                          <p className="mt-1 text-[13px] leading-[18px] text-[#4B5563]">
-                            <span className="text-[#6B7280]">Affiliate:</span>{" "}
-                            {getAffiliateName(notification.affiliate)}
-                            <span className="mx-2 text-gray-300">|</span>
-                            <span className="text-[#6B7280]">Amount:</span>{" "}
-                            <span className="font-medium text-[#111827]">
-                              {formatAmount(notification?.amount)}
-                            </span>
-                          </p>
-                          <p className="mt-0.5 text-[13px] leading-[18px] text-[#4B5563]">
-                            <span className="text-[#6B7280]">Method:</span>{" "}
-                            {formatMethod(notification?.method)}
-                          </p>
+                          {notification.reference_type === "RATE_PROPOSAL" ? (
+                            <p className="mt-1 text-[13px] leading-[18px] text-[#4B5563]">
+                              <span className="text-[#6B7280]">
+                                Reference:
+                              </span>{" "}
+                              {formatReferenceType(
+                                notification.reference_type,
+                              )}
+                            </p>
+                          ) : (
+                            <>
+                              <p className="mt-1 text-[13px] leading-[18px] text-[#4B5563]">
+                                <span className="text-[#6B7280]">
+                                  Affiliate:
+                                </span>{" "}
+                                {getAffiliateName(notification.affiliate)}
+                                <span className="mx-2 text-gray-300">|</span>
+                                <span className="text-[#6B7280]">
+                                  Amount:
+                                </span>{" "}
+                                <span className="font-medium text-[#111827]">
+                                  {formatAmount(notification?.amount)}
+                                </span>
+                              </p>
+                              <p className="mt-0.5 text-[13px] leading-[18px] text-[#4B5563]">
+                                <span className="text-[#6B7280]">
+                                  Method:
+                                </span>{" "}
+                                {formatMethod(notification?.method)}
+                              </p>
+                            </>
+                          )}
 
                           <div className="mt-3 flex items-center justify-between gap-2">
                             <Button
@@ -246,7 +272,9 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
                                 handleViewRequest(notification);
                               }}
                             >
-                              View Request
+                              {notification.reference_type === "RATE_PROPOSAL"
+                                ? "Review"
+                                : "View Request"}
                             </Button>
                             <span className="text-[12px] text-[#9CA3AF]">
                               {timeAgo(

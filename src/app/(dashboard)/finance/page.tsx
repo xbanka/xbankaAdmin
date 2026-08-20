@@ -15,6 +15,7 @@ import { FilterTabs } from "@/components/ui/FilterTabs";
 import { getStatusStyles } from "@/lib/utils/statusStyles";
 import { SelectFieldLayout } from "@/components/forms/SelectFieldLayout";
 import { formatDate } from "@/lib/formatDate";
+import { usePermissions } from "@/hooks/usePermissions";
 
 export default function FinancePage() {
   const [activeFilter, setActiveFilter] = useState("all");
@@ -35,6 +36,7 @@ export default function FinancePage() {
   });
 
   const { openDetailsSidebar } = usePayoutSidebarStore();
+  const { hasPermission } = usePermissions();
 
   const uniqueDates = Array.from(
     new Set(
@@ -130,10 +132,12 @@ export default function FinancePage() {
       <div className="w-full p-4 max-w-full overflow-x-hidden">
         <div className="flex items-center justify-between mb-[24px]">
           <Header text="Finance Overview" />
-          <Button className="text-[#111827]" size="sm" variant={"outline"}>
-            <Upload />
-            Export
-          </Button>
+          {hasPermission("finance:export_reports") && (
+            <Button className="text-[#111827]" size="sm" variant={"outline"}>
+              <Upload />
+              Export
+            </Button>
+          )}
         </div>
 
         <div className="flex flex-col gap-2 md:gap-0 md:flex-row md:items-center md:justify-between mb-[24px]">

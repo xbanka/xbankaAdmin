@@ -28,6 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useCustomerSidebarStore } from "@/store/customer-sidebar-store";
+import { usePermissions } from "@/hooks/usePermissions";
 
 const fmtShort = (d: string) =>
   d
@@ -56,6 +57,7 @@ export default function CustomerManagement() {
     null,
   );
   const { openCustomer } = useCustomerSidebarStore();
+  const { hasPermission } = usePermissions();
   // const { data, isLoading, isError, error } = useGetCustomer(search, page);
   const { data, isLoading, error, isError } = useGetAllCustomers({
   page,
@@ -70,28 +72,6 @@ export default function CustomerManagement() {
 
   const customers: CustomerProps[] = data?.data?.data?.items ?? [];
   const meta = data?.data?.data?.meta;
-
-  // Client-side filtering + sorting on the loaded page.
-  const displayedCustomers = customers
-    .filter((c) => {
-      if (tierFilter !== "all" && (c.tier ?? 0) !== Number(tierFilter))
-        return false;
-      if (statusFilter === "active" && !c.isEmailVerified) return false;
-      if (statusFilter === "unverified" && c.isEmailVerified) return false;
-      if (dateFrom && new Date(c.createdAt) < new Date(dateFrom)) return false;
-      if (dateTo) {
-        const end = new Date(dateTo);
-        end.setHours(23, 59, 59, 999);
-        if (new Date(c.createdAt) > end) return false;
-      }
-      return true;
-    })
-    .sort((a, b) => {
-      if (!sortOrder) return 0;
-      const da = new Date(a.createdAt).getTime();
-      const db = new Date(b.createdAt).getTime();
-      return sortOrder === "oldest" ? da - db : db - da;
-    });
 
   const dateLabel =
     dateFrom || dateTo
@@ -356,27 +336,29 @@ export default function CustomerManagement() {
             </div>
 
             {/* Export */}
-            <Button
-              onClick={() =>
-                exportCustomers.mutate({
-                  search,
-                  status: statusFilter === "all" ? undefined : statusFilter,
-                  startDate: dateFrom || undefined,
-                  endDate: dateTo || undefined,
-                })
-              }
-              disabled={exportCustomers.isPending}
-              variant="outline"
-              className="ml-auto text-[#111827] py-2 px-3"
-            >
-              <Download className="h-4 w-4" />
-              {exportCustomers.isPending ? "Exporting..." : "Export"}
-            </Button>
+            {hasPermission("customers:export") && (
+              <Button
+                onClick={() =>
+                  exportCustomers.mutate({
+                    search,
+                    status: statusFilter === "all" ? undefined : statusFilter,
+                    startDate: dateFrom || undefined,
+                    endDate: dateTo || undefined,
+                  })
+                }
+                disabled={exportCustomers.isPending}
+                variant="outline"
+                className="ml-auto text-[#111827] py-2 px-3"
+              >
+                <Download className="h-4 w-4" />
+                {exportCustomers.isPending ? "Exporting..." : "Export"}
+              </Button>
+            )}
           </div>
 
           {/* Table */}
           <DataTableLayout<CustomerProps>
-            data={displayedCustomers}
+            data={customers}
             columns={columns}
             rowKey={(item) => item.userId}
             isLoading={isLoading}
