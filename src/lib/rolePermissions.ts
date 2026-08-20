@@ -387,6 +387,7 @@ export const PERMISSION_CATEGORIES = {
     "transactions_recommendReversal",
     "transactions_refund",
     "transactions_edit",
+    "transactions_exportTransactions",
   ],
 
   Finance: [
@@ -418,6 +419,7 @@ export const PERMISSION_CATEGORIES = {
     "customers_updateCustomerInfo",
     "customers_editDetails",
     "customers_addCustomer",
+    "customers_exportCustomers",
   ],
 
   KYC: [
@@ -525,6 +527,7 @@ export const UI_TO_API_PERMISSION_MAP: Record<Permission, string> = {
   transactions_viewLimitedTransactions: "transactions:view_limited",
   transactions_refund: "transactions:refund",
   transactions_edit: "transactions:edit",
+  transactions_exportTransactions: "transactions:export",
 
   // Customers
   customers_viewCustomers: "customers:view",
@@ -533,6 +536,7 @@ export const UI_TO_API_PERMISSION_MAP: Record<Permission, string> = {
   customers_editDetails: "customers:edit",
   customers_updateCustomerInfo: "customers:update",
   customers_addCustomer: "customers:add",
+  customers_exportCustomers: "customers:export",
 
   // Finance
   finance_viewPayments: "finance:view_payments",

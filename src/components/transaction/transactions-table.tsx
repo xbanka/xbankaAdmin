@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Download, Eye, Search } from "lucide-react";
+import { Calendar, Download, Eye, Search } from "lucide-react";
 import { DataTableLayout } from "../DataTableLayout/DataTableLayout";
 import { FilterTabs } from "../ui/FilterTabs";
+import { SelectFieldLayout } from "../forms/SelectFieldLayout";
 import { TransactionsTableProps } from "@/lib/types/transactionTypes";
 import {
   useExportTransactions,
@@ -34,6 +35,28 @@ const TRANSACTION_TYPES = [
   "NGN-USDT",
   "NGN-BTC",
 ];
+
+// Same currency set used elsewhere for manual transactions (crypto-step-two.tsx).
+const TRANSACTION_CURRENCIES = ["USDT", "BTC", "ETH", "NGN"];
+
+// UI filter labels -> backend enum values.
+const STATUS_MAP: Record<string, string | undefined> = {
+  All: undefined,
+  Successful: "COMPLETED",
+  Pending: "PENDING",
+  Failed: "FAILED",
+};
+
+const TYPE_MAP: Record<string, string | undefined> = {
+  All: undefined,
+  Deposit: "DEPOSIT",
+  Withdrawal: "WITHDRAWAL",
+};
+
+const fmtShort = (d: string) =>
+  d
+    ? new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "short" })
+    : "Any";
 
 export type ActiveTab =
   | "all"
@@ -64,6 +87,10 @@ export function TransactionsTable({
   const [statusFilter, setStatusFilter] = useState("");
   const [sourceFilter, setSourceFilter] = useState("");
   const [transactionTypeFilter, setTransactionTypeFilter] = useState("");
+  const [currencyFilter, setCurrencyFilter] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [dateOpen, setDateOpen] = useState(false);
   const [detailTransactionId, setDetailTransactionId] = useState<string | null>(
     null,
   );
@@ -79,10 +106,19 @@ export function TransactionsTable({
   } = useGetAllTransactions({
     page,
     limit: 10,
-    status: statusFilter || undefined,
+    status: STATUS_MAP[statusFilter],
     category: CATEGORY_MAP[activeFilter],
+    type: TYPE_MAP[transactionTypeFilter],
+    currency: currencyFilter || undefined,
+    startDate: dateFrom || undefined,
+    endDate: dateTo || undefined,
     search: searchQuery || undefined,
   });
+
+  const dateLabel =
+    dateFrom || dateTo
+      ? `${fmtShort(dateFrom)} – ${fmtShort(dateTo)}`
+      : "Date From – Date To";
 
   const exportTransactions = useExportTransactions();
 
@@ -98,6 +134,9 @@ export function TransactionsTable({
     setStatusFilter("");
     setSourceFilter("");
     setTransactionTypeFilter("");
+    setCurrencyFilter("");
+    setDateFrom("");
+    setDateTo("");
     setPage(1);
   };
   const baseColumns = [
@@ -470,22 +509,28 @@ export function TransactionsTable({
         <Header text="Transaction Management" />
 
         <div className="flex gap-3">
-          <Button
-            size="sm"
-            variant="outline"
-            className="text-[#111827] py-2 px-3"
-            onClick={() =>
-              exportTransactions.mutate({
-                status: statusFilter || undefined,
-                category: CATEGORY_MAP[activeFilter],
-                search: searchQuery || undefined,
-              })
-            }
-            disabled={exportTransactions.isPending}
-          >
-            <Download className="h-4 w-4 mr-2" />
-            {exportTransactions.isPending ? "Exporting..." : "Export"}
-          </Button>
+          {hasPermission("transactions:export") && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="text-[#111827] py-2 px-3"
+              onClick={() =>
+                exportTransactions.mutate({
+                  status: STATUS_MAP[statusFilter],
+                  category: CATEGORY_MAP[activeFilter],
+                  type: TYPE_MAP[transactionTypeFilter],
+                  currency: currencyFilter || undefined,
+                  startDate: dateFrom || undefined,
+                  endDate: dateTo || undefined,
+                  search: searchQuery || undefined,
+                })
+              }
+              disabled={exportTransactions.isPending}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              {exportTransactions.isPending ? "Exporting..." : "Export"}
+            </Button>
+          )}
           {hasPermission("transactions:create") && (
             <Button
               size="sm"
@@ -525,7 +570,7 @@ export function TransactionsTable({
             </div>
           </div>
         </div>
-        <div className="flex flex-col items-center md:flex-row gap-3">
+        <div className="flex flex-col items-start md:flex-row gap-3">
           {/* Per-tab filter bar */}
           {activeFilter === "all" && (
             <AllTabFilters
@@ -578,6 +623,80 @@ export function TransactionsTable({
               setSourceFilter={setSourceFilter}
             />
           )}
+
+          {/* Currency filter — applies across every tab */}
+          <SelectFieldLayout
+            id="currencyFilter"
+            options={["All", ...TRANSACTION_CURRENCIES]}
+            placeholder="Currency: All"
+            value={currencyFilter || "All"}
+            onChange={(v) => setCurrencyFilter(v === "All" ? "" : v)}
+            className="w-36"
+            selectClassName="border border-gray-300"
+          />
+
+          {/* Date range — applies across every tab */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setDateOpen((o) => !o)}
+              className="inline-flex h-10 items-center gap-2 rounded-lg border border-gray-300 px-3 text-[14px] text-[#374151] hover:bg-gray-50"
+            >
+              <Calendar className="h-4 w-4 text-gray-400" />
+              {dateLabel}
+            </button>
+            {dateOpen && (
+              <>
+                <div
+                  className="fixed inset-0 z-10"
+                  onClick={() => setDateOpen(false)}
+                />
+                <div className="absolute right-0 top-12 z-20 w-[260px] space-y-3 rounded-lg border border-[#E5E7EB] bg-white p-4 shadow-lg">
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-medium text-gray-500">
+                      From
+                    </label>
+                    <input
+                      type="date"
+                      value={dateFrom}
+                      max={dateTo || undefined}
+                      onChange={(e) => setDateFrom(e.target.value)}
+                      className="w-full rounded-md border border-[#E5E7EB] px-2 py-1.5 text-sm outline-none focus:border-[#2DD4BF]"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-medium text-gray-500">
+                      To
+                    </label>
+                    <input
+                      type="date"
+                      value={dateTo}
+                      min={dateFrom || undefined}
+                      onChange={(e) => setDateTo(e.target.value)}
+                      className="w-full rounded-md border border-[#E5E7EB] px-2 py-1.5 text-sm outline-none focus:border-[#2DD4BF]"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between pt-1">
+                    <button
+                      onClick={() => {
+                        setDateFrom("");
+                        setDateTo("");
+                      }}
+                      className="text-[12px] text-gray-500 hover:underline"
+                    >
+                      Clear
+                    </button>
+                    <button
+                      onClick={() => setDateOpen(false)}
+                      className="text-[12px] font-medium text-abstractCyan hover:underline"
+                    >
+                      Apply
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
       <div className="w-full md:max-w-[700px] lg:min-w-[100%] xl:min-w-full min-h-screen">

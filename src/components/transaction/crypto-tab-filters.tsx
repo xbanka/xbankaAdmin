@@ -29,7 +29,7 @@ export function CryptoTabFilters({
           className="w-36"
           selectClassName="border border-gray-300"
         />
-        <SelectFieldLayout
+        {/* <SelectFieldLayout
           id="sourceFilter"
           options={["All", "Web App", "WhatsApp", "Manual"]}
           placeholder="Source: All"
@@ -37,7 +37,7 @@ export function CryptoTabFilters({
           onChange={setSourceFilter}
           className="w-36"
           selectClassName="border border-gray-300"
-        />
+        /> */}
       </div>
     </div>
   );
