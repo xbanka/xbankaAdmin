@@ -106,6 +106,8 @@ export interface GetTransactionsParams {
   limit?: number;
   status?: "COMPLETED" | "PENDING" | "FAILED" | "PROCESSING" | string;
   category?: "CRYPTO" | "FIAT" | "GIFT_CARD" | "BILL_PAYMENT" | "MANUAL" | string;
+  type?: "DEPOSIT" | "WITHDRAWAL" | string;
+  currency?: string;
   startDate?: string; // ISO date string
   endDate?: string;
   search?: string;
@@ -118,6 +120,8 @@ export const getAllTransactions = async (params: GetTransactionsParams) => {
       limit: params.limit,
       status: params.status,
       category: params.category,
+      type: params.type,
+      currency: params.currency,
       startDate: params.startDate,
       endDate: params.endDate,
       search: params.search,
@@ -127,7 +131,10 @@ export const getAllTransactions = async (params: GetTransactionsParams) => {
 };
 
 export const exportTransactions = async (
-  params: Pick<GetTransactionsParams, "search" | "status" | "category">,
+  params: Pick<
+    GetTransactionsParams,
+    "search" | "status" | "category" | "type" | "currency" | "startDate" | "endDate"
+  >,
 ) => {
   const response = await AxiosInstance.get("/api/transactions/export", {
     params,
