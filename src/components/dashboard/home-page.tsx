@@ -3,14 +3,12 @@ import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
-  ArrowUp,
   Download,
   RefreshCw,
   ArrowRight,
   Banknote,
   UsersIcon,
   WalletIcon,
-  ListTodo,
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -25,9 +23,11 @@ import { CardLayout } from "../ui/card-layout";
 import { DetailCard } from "./detail-card";
 import { cn } from "@/lib/utils";
 import {
+  useExportDashboardMetrics,
   useGetCustomerMetrics,
   useGetTransactionMetrics,
 } from "@/lib/services/dashboard.service";
+import { usePermissions } from "@/hooks/usePermissions";
 
 export const DashboardHomePage = () => {
   const {
@@ -52,6 +52,9 @@ export const DashboardHomePage = () => {
     refetchTransactionMetrics();
     refetchCustomerMetrics();
   };
+
+  const exportDashboardMetrics = useExportDashboardMetrics();
+  const { hasPermission } = usePermissions();
 
   const dashboardMetrics = [
     {
@@ -162,14 +165,20 @@ export const DashboardHomePage = () => {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-2 bg-transparent py-[10px] px-3"
-            >
-              <Download className="h-4 w-4" />
-              Export Report
-            </Button>
+            {hasPermission("reports:export_operational") && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2 bg-transparent py-[10px] px-3"
+                onClick={() => exportDashboardMetrics.mutate()}
+                disabled={exportDashboardMetrics.isPending}
+              >
+                <Download className="h-4 w-4" />
+                {exportDashboardMetrics.isPending
+                  ? "Exporting..."
+                  : "Export Report"}
+              </Button>
+            )}
             <Button
               size="sm"
               className="flex items-center gap-2 py-[10px] px-3"

@@ -143,7 +143,7 @@ export const useApproveRateProposal = () => {
       approveRateProposal(proposalId),
 
     onSuccess: (result) => {
-      toast.success(result.data.message);
+      toast.success(result.message);
 
       queryClient.invalidateQueries({
         queryKey: ["rate-proposals"],
@@ -168,7 +168,7 @@ export const useRejectRateProposal = () => {
       rejectRateProposal(proposalId),
 
     onSuccess: (result) => {
-      toast.success(result.data.message);
+      toast.success(result.message);
 
       queryClient.invalidateQueries({
         queryKey: ["rate-proposals"],
