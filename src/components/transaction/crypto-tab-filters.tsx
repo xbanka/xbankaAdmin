@@ -18,7 +18,7 @@ export function CryptoTabFilters({
   setSourceFilter: (v: string) => void;
 }) {
   return (
-    <div className="flex flex-col md:flex-row gap-3 mb-6 items-start md:items-center justify-between">
+    <div className="flex flex-col md:flex-row gap-3 items-start md:items-end justify-between">
       <div className="flex gap-2">
         <SelectFieldLayout
           id="statusFilter"

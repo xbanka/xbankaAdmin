@@ -13,10 +13,9 @@ import {
 import Image from "next/image";
 import { tierImages } from "@/lib/utils/tier-images";
 
-export function VerificationTab({ customer, kyc }: { kyc: UserOnboardingData; customer: CustomerVerificationData }) {
-  console.log("kyc", kyc);
-  const { completedOnboardingSteps, tierLevel } = kyc;
-  const { kycStatus: customerKycFlow } = customer;
+export function VerificationTab({ customer, kyc }: { kyc?: UserOnboardingData; customer?: CustomerVerificationData }) {
+  const { completedOnboardingSteps, tierLevel } = kyc ?? {};
+  const { kycStatus: customerKycFlow } = customer ?? {};
 
   const completed = new Set(completedOnboardingSteps ?? []);
 
@@ -26,7 +25,7 @@ export function VerificationTab({ customer, kyc }: { kyc: UserOnboardingData; cu
     {
       requirement: "BVN Verification",
       tier: 1,
-      status: customerKycFlow?.bvnVerified,
+      status: customerKycFlow?.bvnVerified ?? false,
     },
     {
       requirement: "ID & Liveness Verification",
@@ -54,8 +53,8 @@ export function VerificationTab({ customer, kyc }: { kyc: UserOnboardingData; cu
                 Current Tier
               </p>
               <Image
-                src={tierImages[tierLevel] || "/Tier0.svg"}
-                alt={`Tier ${tierLevel}`}
+                src={tierImages[tierLevel ?? 0] || "/Tier0.svg"}
+                alt={`Tier ${tierLevel ?? 0}`}
                 width={67}
                 height={24}
               />
@@ -74,10 +73,10 @@ export function VerificationTab({ customer, kyc }: { kyc: UserOnboardingData; cu
       {/* Verification Requirements */}
       <div>
         <SectionTitle>Verification Requirements</SectionTitle>
-        <div className="rounded-xl border border-[var(--border-default)] overflow-hidden">
+        <SectionCard>
           <table className="w-full text-xs">
             <thead>
-              <tr className="bg-[var(--grey-light)] border-b border-[var(--border-default)]">
+              <tr className="border-b border-[var(--border-default)]">
                 <th className="text-left px-4 py-3 text-[var(--text-secondary)] font-medium">
                   Requirement
                 </th>
@@ -113,13 +112,13 @@ export function VerificationTab({ customer, kyc }: { kyc: UserOnboardingData; cu
               ))}
             </tbody>
           </table>
-        </div>
+        </SectionCard>
       </div>
 
       {/* Submitted Documents */}
       <div>
         <SectionTitle>Submitted Documents</SectionTitle>
-        <div className="rounded-xl border border-[var(--border-default)] overflow-hidden">
+        <SectionCard>
           <table className="w-full text-xs">
             <thead>
               <tr className="bg-[var(--grey-light)] border-b border-[var(--border-default)]">
@@ -142,11 +141,12 @@ export function VerificationTab({ customer, kyc }: { kyc: UserOnboardingData; cu
                     National ID
                   </td>
                   <td className="px-4 py-3 text-[var(--text-secondary)]">
-                    {new Date(customer.updatedAt).toLocaleDateString("en-GB", {
-                      day: "2-digit",
-                      month: "long",
-                      year: "numeric",
-                    })}
+                    {customer?.updatedAt
+                      ? new Date(customer.updatedAt).toLocaleDateString(
+                          "en-GB",
+                          { day: "2-digit", month: "long", year: "numeric" },
+                        )
+                      : "-"}
                   </td>
                   <td className="px-4 py-3">
                     <TierBadge tier={2} />
@@ -172,7 +172,7 @@ export function VerificationTab({ customer, kyc }: { kyc: UserOnboardingData; cu
               )}
             </tbody>
           </table>
-        </div>
+        </SectionCard>
       </div>
     </div>
   );
