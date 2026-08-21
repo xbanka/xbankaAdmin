@@ -128,9 +128,10 @@ export function DashboardLayout({
     selectedProposalId,
     closeSidebar: closeRateProposalSidebar,
   } = useRateProposalSidebarStore();
-  const { data: rateProposalDetails } = UseGetRateProposalDetails(
-    selectedProposalId ?? undefined,
-  );
+  const {
+    data: rateProposalDetails,
+    isPending: rateProposalDetailsPending,
+  } = UseGetRateProposalDetails(selectedProposalId ?? undefined);
   const { mutate: approveRateProposalMutation, isPending: approvingProposal } =
     useApproveRateProposal();
   const { mutate: rejectRateProposalMutation, isPending: decliningProposal } =
@@ -274,11 +275,13 @@ export function DashboardLayout({
             />
 
             <SpreadApprovalDrawer
+              isOpen={isRateProposalOpen}
               entry={
                 isRateProposalOpen
                   ? rateProposalDetails?.proposal ?? null
                   : null
               }
+              isLoading={isRateProposalOpen && rateProposalDetailsPending}
               onClose={closeRateProposalSidebar}
               onApprove={handleApproveProposal}
               onDecline={handleDeclineProposal}

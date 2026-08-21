@@ -10,6 +10,7 @@ import {
   useGetCustomerVerification,
 } from "@/lib/services/customer.service";
 import { tierImages } from "@/lib/utils/tier-images";
+import { truncate } from "@/lib/utils/truncate";
 import { Tab, TABS } from "./data";
 import { useState } from "react";
 import { ProfileTab } from "./profile-tab";
@@ -95,12 +96,17 @@ export default function CustomerDetailsSidebar({
                     />
                   </div>
 
-                  <div className="flex gap-1 items-center">
-                    <div className="text-[12px] leading-[22px] font-normal text-text-secondary">
-                      UID: {customer?.userId}
+                  <div className="flex gap-1 items-center min-w-0">
+                    <div className="text-[12px] leading-[22px] font-normal text-text-secondary shrink-0">
+                      UID: {truncate(customer?.userId, 8)}
                     </div>
 
-                    <div className="text-sm leading-[24px] font-normal">{customer?.email}</div>
+                    <div
+                      className="text-sm leading-[24px] font-normal truncate min-w-0"
+                      title={customer?.email}
+                    >
+                      {customer?.email}
+                    </div>
                   </div>
                 </div>
               </div>

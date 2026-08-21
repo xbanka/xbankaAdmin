@@ -207,7 +207,7 @@ export default function CustomerManagement() {
             </Select>
 
             {/* Status filter */}
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
+            {/* <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="h-10 w-[140px] border-[#E5E7EB] text-[#374151]">
                 <SelectValue placeholder="All Status" />
               </SelectTrigger>
@@ -216,7 +216,7 @@ export default function CustomerManagement() {
                 <SelectItem value="active">Active</SelectItem>
                 <SelectItem value="unverified">Unverified</SelectItem>
               </SelectContent>
-            </Select>
+            </Select> */}
 
             {/* Date range */}
             <div className="relative">
