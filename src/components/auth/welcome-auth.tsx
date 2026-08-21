@@ -3,6 +3,7 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { toast } from "sonner";
 
 export const WelcomePage = () => {
   const searchParams = useSearchParams();
@@ -11,7 +12,12 @@ export const WelcomePage = () => {
   const email = searchParams.get("email");
 
   const handleContinue = () => {
-    if (!email) return;
+    if (!email) {
+      toast.error(
+        "This link is invalid or expired. You need a valid invite link to sign up.",
+      );
+      return;
+    }
 
     router.push(
       `/signup/complete?email=${encodeURIComponent(email)}`
