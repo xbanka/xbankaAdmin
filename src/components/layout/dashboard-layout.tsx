@@ -29,9 +29,12 @@ import {
 import { usePayoutSidebarStore } from "@/store/usePayoutSidebarStore";
 import { useRateProposalSidebarStore } from "@/store/useRateProposalSidebarStore";
 import { usePermissions } from "@/hooks/usePermissions";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LucideIcon } from "lucide-react";
 import { RateLogDetails } from "../rate-management/spread-change-details-change-drawer";
+import { usePathname, useRouter } from "next/navigation";
+import { canAccessRoute } from "@/lib/canAccessRoute";
+import { ROUTE_PERMISSIONS } from "@/lib/routePermission";
 
 const dummyRateLogDetails: RateLogDetails = {
   id: "rlog-001",
@@ -101,7 +104,28 @@ export function DashboardLayout({
 }: DashboardLayoutProps) {
   const [openModal, setOpenModal] = useState(false);
   const [rejectModal, setRejectModal] = useState(false);
-  const { hasPermission } = usePermissions();
+  const {
+    permissions,
+    hasPermission,
+    isLoading: isProfileLoading,
+    isError: isProfileError,
+  } = usePermissions();
+  const pathname = usePathname();
+  const router = useRouter();
+  const isRouteAllowed = canAccessRoute(
+    permissions,
+    ROUTE_PERMISSIONS[pathname] ?? [],
+  );
+
+  useEffect(() => {
+    if (!isProfileLoading && !isProfileError && !isRouteAllowed) {
+      router.replace("/");
+    }
+  }, [isProfileLoading, isProfileError, isRouteAllowed, router]);
+
+  const isBodyLoading =
+    isPending || isProfileLoading || (!isProfileError && !isRouteAllowed);
+  const isBodyError = !isBodyLoading && (!!error || isProfileError);
   const {
     isDetailsOpen,
     isConfirmOpen,
@@ -231,22 +255,24 @@ export function DashboardLayout({
           <HeaderActions />
         </header>
         <div className="w-full bg-off-white min-w-0 min-h-screen">
-          {/* Handle loading */}
-          {isPending && (
+          {/* Handle loading (page data and/or permission check) */}
+          {isBodyLoading && (
             <div className="flex flex-1 items-center justify-center text-gray-500">
               Loading...
             </div>
           )}
 
-          {/* Handle error */}
-          {error && !isPending && (
+          {/* Handle error (page data or permission fetch) */}
+          {isBodyError && (
             <div className="flex flex-1 items-center justify-center text-red-500">
-              {error || "Something went wrong"}
+              {isProfileError
+                ? "Failed to load your permissions. Please try again."
+                : error || "Something went wrong"}
             </div>
           )}
 
-          {/* Render children only if no error and not loading */}
-          {!isPending && !error && (
+          {/* Render children only once we know it's safe to */}
+          {!isBodyLoading && !isBodyError && (
             <div className="block w-full max-w-full min-w-0">{children}</div>
           )}
 
