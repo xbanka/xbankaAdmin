@@ -6,6 +6,7 @@ import { DataTableLayout } from "../DataTableLayout/DataTableLayout";
 import { formatDate } from "@/lib/formatDate";
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 import { Button } from "../ui/button";
+import { Skeleton } from "../ui/skeleton";
 import { ScopeBadge, UpdatedStatusBadge } from "../rate-management/scope-badge";
 import type {
   AffectedAssetDetail,
@@ -14,7 +15,9 @@ import type {
 import { NameInfo } from "./name-info";
 
 interface Props {
+  isOpen: boolean;
   entry: RateLogDetails | null;
+  isLoading?: boolean;
   onClose: () => void;
   onApprove: () => void;
   onDecline: () => void;
@@ -38,21 +41,81 @@ function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
+function RequestInformationSkeleton() {
+  return (
+    <div>
+      <h3 className="text-sm font-medium leading-5 text-text-primary py-3 px-5 border border-card-border-secondary bg-card-secondary rounded-tl-[20px] rounded-tr-[20px]">
+        Request Information
+      </h3>
+      <div className="bg-[#FFFFFF] py-4 px-5 border-x border-b grid grid-cols-2 gap-4 rounded-bl-[20px] rounded-br-[20px]">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="space-y-1.5">
+            <Skeleton className="h-3 w-16" />
+            <Skeleton className="h-4 w-24" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function RequestDetailsSkeleton() {
+  return (
+    <div>
+      <h3 className="text-sm font-medium leading-5 text-text-primary py-3 px-5 border border-card-border-secondary bg-card-secondary rounded-tl-[20px] rounded-tr-[20px]">
+        Request Information
+      </h3>
+      <div className="bg-[#FFFFFF] py-4 px-5 border-x border-b rounded-bl-[20px] rounded-br-[20px]">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div
+            key={i}
+            className="flex items-center justify-between py-2.5 border-b border-[#F3F4F6] last:border-b-0"
+          >
+            <Skeleton className="h-3 w-20" />
+            <Skeleton className="h-3 w-28" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function AffectedAssetsSkeleton() {
+  return (
+    <div>
+      <h3 className="text-sm font-semibold text-[#111827] mb-2">
+        Affected Assets
+      </h3>
+      <div className="space-y-2 rounded-[12px] border border-[#F3F4F6] p-4">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="flex items-center gap-4">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-4 w-16" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function SpreadApprovalDrawer({
+  isOpen,
   entry,
+  isLoading,
   onClose,
   onApprove,
   onDecline,
   isApproving,
   isDeclining,
 }: Props) {
-  useBodyScrollLock(!!entry);
+  useBodyScrollLock(isOpen);
 
-  if (!entry) return null;
-  console.log("SpreadApprovalDrawer entry:", entry);
+  if (!isOpen) return null;
 
-  const isPending = entry.status === "PENDING";
-  const affectedAssetsList = entry.affected_assets_detail ?? [];
+  const isPending = entry?.status === "PENDING";
+  const affectedAssetsList = entry?.affected_assets_detail ?? [];
 
   const affectedAssetColumns = [
     {
@@ -112,11 +175,17 @@ export function SpreadApprovalDrawer({
               <h2 className="text-[24px] font-semibold text-text-primary">
                 Spread Change Details
               </h2>
-              <ScopeBadge
-                scope={
-                  entry.change_type.includes("SEGMENT") ? "segment" : "asset"
-                }
-              />
+              {entry ? (
+                <ScopeBadge
+                  scope={
+                    entry.change_type.includes("SEGMENT")
+                      ? "segment"
+                      : "asset"
+                  }
+                />
+              ) : (
+                <Skeleton className="h-5 w-16 rounded-full" />
+              )}
             </div>
             <p className="text-[13px] text-[#9CA3AF]">
               {/* {formatDate(entry.created_at)} */}
@@ -133,93 +202,103 @@ export function SpreadApprovalDrawer({
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
-          {/* Change Summary */}
-
-          {/* Target Information */}
-          <div>
-            <h3 className="text-sm font-medium leading-5 text-text-primary py-3 px-5 border border-card-border-secondary bg-card-secondary rounded-tl-[20px] rounded-tr-[20px]">
-              Request Information
-            </h3>
-            <div className="bg-[#FFFFFF] py-4 px-5 border-x border-b grid grid-cols-2 rounded-bl-[20px] rounded-br-[20px]">
-              <NameInfo title="Submitted by" value={entry.requested_by.first_name + " " + entry.requested_by.last_name} />
-              <NameInfo title="Role" value={entry.requested_by.role} />
-              <NameInfo title="Submitted on" value={formatDate(entry.created_at)} />
-              <NameInfo title="Request Type" value={entry.change_type} />
-            </div>
-          </div>
-          <div>
-            <h3 className="text-sm font-medium leading-5 text-text-primary py-3 px-5 border border-card-border-secondary bg-card-secondary rounded-tl-[20px] rounded-tr-[20px]">
-              Request Information
-            </h3>
-            <div className="bg-[#FFFFFF] py-4 px-5 border-x border-b rounded-bl-[20px] rounded-br-[20px]">
-              <InfoRow
-                label="Scope"
-                value={
-                  entry.change_type.includes("SEGMENT") ? "Segment" : "Asset"
-                }
-              />
-              <InfoRow label="Target" value={entry.target} />
-              <InfoRow
-                label="Affected Assets"
-                value={`${entry.affected_assets} Assets`}
-              />
-              <InfoRow
-                label="Previous Configuration"
-                value={
-                  <div className="text-right">
-                    {entry.previous_configuration.length
-                      ? entry.previous_configuration.map((item) => (
-                          <div key={item}>{item}</div>
-                        ))
-                      : "-"}
-                  </div>
-                }
-              />
-              <InfoRow
-                label="New Configuration"
-                value={
-                  <div className="text-right">
-                    {entry.new_configuration.length
-                      ? entry.new_configuration.map((item) => (
-                          <div key={item}>{item}</div>
-                        ))
-                      : "-"}
-                  </div>
-                }
-              />
-              <InfoRow
-                label="Status"
-                value={
-                  <span
-                    className={
-                      entry.status === "APPROVED"
-                        ? "text-[#059669]"
-                        : entry.status === "REJECTED"
-                          ? "text-red-600"
-                          : "text-orange-600"
+          {entry && !isLoading ? (
+            <>
+              {/* Target Information */}
+              <div>
+                <h3 className="text-sm font-medium leading-5 text-text-primary py-3 px-5 border border-card-border-secondary bg-card-secondary rounded-tl-[20px] rounded-tr-[20px]">
+                  Request Information
+                </h3>
+                <div className="bg-[#FFFFFF] py-4 px-5 border-x border-b grid grid-cols-2 rounded-bl-[20px] rounded-br-[20px]">
+                  <NameInfo title="Submitted by" value={entry.requested_by.first_name + " " + entry.requested_by.last_name} />
+                  <NameInfo title="Role" value={entry.requested_by.role} />
+                  <NameInfo title="Submitted on" value={formatDate(entry.created_at)} />
+                  <NameInfo title="Request Type" value={entry.change_type} />
+                </div>
+              </div>
+              <div>
+                <h3 className="text-sm font-medium leading-5 text-text-primary py-3 px-5 border border-card-border-secondary bg-card-secondary rounded-tl-[20px] rounded-tr-[20px]">
+                  Request Information
+                </h3>
+                <div className="bg-[#FFFFFF] py-4 px-5 border-x border-b rounded-bl-[20px] rounded-br-[20px]">
+                  <InfoRow
+                    label="Scope"
+                    value={
+                      entry.change_type.includes("SEGMENT")
+                        ? "Segment"
+                        : "Asset"
                     }
-                  >
-                    {entry.status}
-                  </span>
-                }
-              />
-            </div>
-          </div>
+                  />
+                  <InfoRow label="Target" value={entry.target} />
+                  <InfoRow
+                    label="Affected Assets"
+                    value={`${entry.affected_assets} Assets`}
+                  />
+                  <InfoRow
+                    label="Previous Configuration"
+                    value={
+                      <div className="text-right">
+                        {entry.previous_configuration.length
+                          ? entry.previous_configuration.map((item) => (
+                              <div key={item}>{item}</div>
+                            ))
+                          : "-"}
+                      </div>
+                    }
+                  />
+                  <InfoRow
+                    label="New Configuration"
+                    value={
+                      <div className="text-right">
+                        {entry.new_configuration.length
+                          ? entry.new_configuration.map((item) => (
+                              <div key={item}>{item}</div>
+                            ))
+                          : "-"}
+                      </div>
+                    }
+                  />
+                  <InfoRow
+                    label="Status"
+                    value={
+                      <span
+                        className={
+                          entry.status === "APPROVED"
+                            ? "text-[#059669]"
+                            : entry.status === "REJECTED"
+                              ? "text-red-600"
+                              : "text-orange-600"
+                        }
+                      >
+                        {entry.status}
+                      </span>
+                    }
+                  />
+                </div>
+              </div>
 
-          {/* Affected Assets */}
-          <div>
-            <h3 className="text-sm font-semibold text-[#111827] mb-2">
-              Affected Assets
-            </h3>
-            <DataTableLayout
-              data={affectedAssetsList}
-              columns={affectedAssetColumns}
-              rowKey={(row) => row.id}
-              itemsPerPage={affectedAssetsList.length || 1}
-              totalCount={affectedAssetsList.length}
-              emptyMessage="No assets affected."
-            />
-          </div>
+              {/* Affected Assets */}
+              <div>
+                <h3 className="text-sm font-semibold text-[#111827] mb-2">
+                  Affected Assets
+                </h3>
+                <DataTableLayout
+                  data={affectedAssetsList}
+                  columns={affectedAssetColumns}
+                  rowKey={(row) => row.id}
+                  itemsPerPage={affectedAssetsList.length || 1}
+                  totalCount={affectedAssetsList.length}
+                  emptyMessage="No assets affected."
+                />
+              </div>
+            </>
+          ) : (
+            <>
+              <RequestInformationSkeleton />
+              <RequestDetailsSkeleton />
+              <AffectedAssetsSkeleton />
+            </>
+          )}
         </div>
 
         {isPending && (

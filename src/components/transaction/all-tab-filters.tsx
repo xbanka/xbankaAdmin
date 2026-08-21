@@ -18,7 +18,7 @@ export function AllTabFilters({
   setSourceFilter: (v: string) => void;
 }) {
   return (
-    <div className="flex flex-col md:flex-row gap-3 mb-6 items-center md:items-center justify-between">
+    <div className="flex flex-col md:flex-row gap-3 items-center md:items-end justify-between">
       <div className="flex gap-2">
         <SelectFieldLayout
           id="statusFilter"
