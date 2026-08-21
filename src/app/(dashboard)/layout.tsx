@@ -5,10 +5,10 @@ import React from 'react'
 
 const DashboardLayout = ({children}: { children: React.ReactNode}) => {
   return (
-    <AuthGuardDashboard>
-      <SidebarLayout>{children}</SidebarLayout>
+    <SidebarLayout>
+      <AuthGuardDashboard>{children}</AuthGuardDashboard>
       <GlobalCustomerSidebar />
-    </AuthGuardDashboard>
+    </SidebarLayout>
   )
 }
 

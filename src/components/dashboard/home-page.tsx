@@ -61,6 +61,7 @@ export const DashboardHomePage = () => {
       title: "Transaction",
       icon: Banknote,
       value: transactionMetrics?.data.total ?? 0,
+      isLoading: transactionLoading,
       // trend: "12% vs last week",
       stats: [
         {
@@ -85,6 +86,7 @@ export const DashboardHomePage = () => {
       title: "Customers",
       icon: UsersIcon,
       value: customerMetrics?.data.total ?? 0,
+      isLoading: customerLoading,
       // trend: "12% vs last week",
       stats: [
         {
@@ -105,27 +107,27 @@ export const DashboardHomePage = () => {
 
     // Dummy Finance
 
-    {
-      title: "Finance",
-      icon: WalletIcon,
-      value: 47,
-      // trend: "12% vs last week",
-      stats: [
-        {
-          label: "Pending",
-          value: 30,
-        },
-        {
-          label: "On Hold",
-          value: 10,
-        },
-        {
-          label: "Flagged",
-          value: 7,
-          valueClassName: "text-red-500",
-        },
-      ],
-    },
+    // {
+    //   title: "Finance",
+    //   icon: WalletIcon,
+    //   value: 47,
+    //   // trend: "12% vs last week",
+    //   stats: [
+    //     {
+    //       label: "Pending",
+    //       value: 30,
+    //     },
+    //     {
+    //       label: "On Hold",
+    //       value: 10,
+    //     },
+    //     {
+    //       label: "Flagged",
+    //       value: 7,
+    //       valueClassName: "text-red-500",
+    //     },
+    //   ],
+    // },
 
     // Dummy Tasks
 
@@ -203,6 +205,7 @@ export const DashboardHomePage = () => {
               value={metric.value}
               // trend={metric.trend}
               stats={metric.stats}
+              isLoading={metric.isLoading}
             />
           ))}
         </div>

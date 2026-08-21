@@ -29,6 +29,7 @@ import { useLogout } from "@/lib/services/logout.service";
 import { usePermissions } from "@/hooks/usePermissions";
 import { canAccessRoute } from "@/lib/canAccessRoute";
 import { ROUTE_PERMISSIONS } from "@/lib/routePermission";
+import { Skeleton } from "./ui/skeleton";
 
 const data = {
   versions: ["1.0.1", "1.1.0-alpha", "2.0.0-beta1"],
@@ -74,7 +75,8 @@ const data = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [open, setOpen] = React.useState(false);
   const pathname = usePathname();
-  const { permissions: userPermissions } = usePermissions();
+  const { permissions: userPermissions, isLoading: isPermissionsLoading } =
+    usePermissions();
 
   const { mutate, isPending } = useLogout();
 
@@ -109,40 +111,46 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent className="bg-[#FFFFFF]">
         {/* We create a SidebarGroup for each parent. */}
         <SidebarMenu className="h-screen">
-          {data.navMain
-            .filter((item) =>
-              canAccessRoute(
-                userPermissions,
-                ROUTE_PERMISSIONS[item.url] ?? [],
-              ),
-            )
-            .map((item) => {
-              const isActive = pathname === item.url;
-
-              return (
-                <SidebarMenuItem className="pr-2" key={item.title}>
-                  <SidebarMenuButton
-                    className="py-5 px-5 rounded-tl-none rounded-bl-none rounded-tr-[36px] rounded-br-[36px] cursor-pointer"
-                    asChild
-                    isActive={isActive}
-                    tooltip={item.title}
-                  >
-                    <Link href={item.url}>
-                      {item.icon && (
-                        <item.icon
-                          className={`w-4 h-4 ${isActive ? "text-[#FFFFFF]" : "text-[#4B5563]"}`}
-                        />
-                      )}
-                      <span
-                        className={`${isActive ? "text-[#FFFFFF]" : "text-[#4B5563]"}`}
-                      >
-                        {item.title}
-                      </span>
-                    </Link>
-                  </SidebarMenuButton>
+          {isPermissionsLoading
+            ? data.navMain.map((item) => (
+                <SidebarMenuItem className="pr-2 px-5 py-2.5" key={item.title}>
+                  <Skeleton className="h-5 w-full rounded-full" />
                 </SidebarMenuItem>
-              );
-            })}
+              ))
+            : data.navMain
+                .filter((item) =>
+                  canAccessRoute(
+                    userPermissions,
+                    ROUTE_PERMISSIONS[item.url] ?? [],
+                  ),
+                )
+                .map((item) => {
+                  const isActive = pathname === item.url;
+
+                  return (
+                    <SidebarMenuItem className="pr-2" key={item.title}>
+                      <SidebarMenuButton
+                        className="py-5 px-5 rounded-tl-none rounded-bl-none rounded-tr-[36px] rounded-br-[36px] cursor-pointer"
+                        asChild
+                        isActive={isActive}
+                        tooltip={item.title}
+                      >
+                        <Link href={item.url}>
+                          {item.icon && (
+                            <item.icon
+                              className={`w-4 h-4 ${isActive ? "text-[#FFFFFF]" : "text-[#4B5563]"}`}
+                            />
+                          )}
+                          <span
+                            className={`${isActive ? "text-[#FFFFFF]" : "text-[#4B5563]"}`}
+                          >
+                            {item.title}
+                          </span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
 
           <SidebarMenuItem className="px-2 mt-[70px]">
             <SidebarMenuButton

@@ -1,6 +1,7 @@
 import React from "react";
 import { CardLayout } from "../ui/card-layout";
 import { ArrowUp } from "lucide-react";
+import { Skeleton } from "../ui/skeleton";
 
 type StatItem = {
   label: string;
@@ -14,6 +15,7 @@ export interface DetailCardProps {
   value: number | string;
   trend?: string;
   stats: StatItem[];
+  isLoading?: boolean;
 }
 
 export const DetailCard = ({
@@ -22,6 +24,7 @@ export const DetailCard = ({
   value,
   trend,
   stats,
+  isLoading,
 }: DetailCardProps) => {
   return (
     <CardLayout className="bg-white space-y-4">
@@ -34,9 +37,13 @@ export const DetailCard = ({
       </div>
 
       <div className="flex items-center gap-2">
-        <span className="text-2xl font-semibold text-text-primary-font-color">
-          {value}
-        </span>
+        {isLoading ? (
+          <Skeleton className="h-7 w-16" />
+        ) : (
+          <span className="text-2xl font-semibold text-text-primary-font-color">
+            {value}
+          </span>
+        )}
 
         {trend && (
           <span className="text-xs text-main-green">
@@ -52,9 +59,15 @@ export const DetailCard = ({
               {item.label}
             </p>
 
-            <p className={`text-base font-medium ${item.valueClassName ?? ""}`}>
-              {item.value}
-            </p>
+            {isLoading ? (
+              <Skeleton className="mt-1 h-4 w-10" />
+            ) : (
+              <p
+                className={`text-base font-medium ${item.valueClassName ?? ""}`}
+              >
+                {item.value}
+              </p>
+            )}
           </div>
         ))}
       </div>
