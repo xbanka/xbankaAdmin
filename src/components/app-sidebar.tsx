@@ -58,11 +58,11 @@ const data = {
       url: "/rate-management",
       icon: PercentSquare,
     },
-    {
-      title: "Support Center",
-      url: "/customer-support",
-      icon: HelpCircle,
-    },
+    // {
+    //   title: "Support Center",
+    //   url: "/customer-support",
+    //   icon: HelpCircle,
+    // },
     {
       title: "Staff",
       url: "/staff",

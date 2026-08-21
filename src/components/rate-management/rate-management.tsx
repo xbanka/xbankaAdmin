@@ -380,10 +380,12 @@ export default function RateManagement() {
                       </button>
                     ))}
                   </div>
-                  <Button onClick={() => setView("wizard")}>
-                    <Edit />
-                    Edit Spread
-                  </Button>
+                  {canEditSpread && (
+                    <Button onClick={() => setView("wizard")}>
+                      <Edit />
+                      Edit Spread
+                    </Button>
+                  )}
                 </div>
 
                 {/* Toolbar */}
@@ -430,6 +432,10 @@ export default function RateManagement() {
                     totalCount={historyData?.length}
                     emptyMessage="No spread history recorded yet."
                     isLoading={ratesLogisPending}
+                    isError={!!ratesLogError}
+                    errorMessage={
+                      ratesLogError?.message || "Failed to load spread history."
+                    }
                   />
                 )}
               </main>

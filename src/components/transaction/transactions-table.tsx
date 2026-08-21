@@ -503,7 +503,7 @@ export function TransactionsTable({
           : allColumns;
 
   return (
-    <div className="">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <Header text="Transaction Management" />
@@ -545,7 +545,7 @@ export function TransactionsTable({
 
       {/* Filter Buttons */}
       <div className="md:flex items-end justify-between w-full">
-        <div className="flex flex-col flex-wrap gap-2 mb-6 ">
+        <div className="space-y-4 w-[40%]">
           <FilterTabs
             filters={[
               "All",
@@ -570,7 +570,7 @@ export function TransactionsTable({
             </div>
           </div>
         </div>
-        <div className="flex flex-col items-start md:flex-row gap-3">
+        <div className="flex flex-col items-end md:flex-row gap-3">
           {/* Per-tab filter bar */}
           {activeFilter === "all" && (
             <AllTabFilters
