@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Mail } from "lucide-react";
 import { DataTableLayout } from "@/components/DataTableLayout/DataTableLayout";
 import { FilterTabs } from "@/components/ui/FilterTabs";
 import { AddStaffSidebar } from "@/components/staff/add-staff-sidebar";
@@ -39,17 +39,35 @@ export default function StaffPage() {
     {
       key: "name" as const,
       header: "Staff name",
-      render: (staff: StaffMember) => (
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-purple-200 flex items-center justify-center text-sm font-semibold text-purple-700">
-            {staff.first_name.charAt(0).toUpperCase()}
-            {staff.last_name.charAt(0).toUpperCase()}
+      render: (staff: StaffMember) => {
+        const isInvitePending = !staff.first_name && !staff.last_name;
+
+        if (isInvitePending) {
+          return (
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-warning-light flex items-center justify-center">
+                <Mail className="w-4 h-4 text-warning-text" />
+              </div>
+              <span className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full bg-warning-light text-warning-text">
+                <span className="h-1.5 w-1.5 rounded-full bg-warning-text" />
+                Invite pending
+              </span>
+            </div>
+          );
+        }
+
+        return (
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-purple-200 flex items-center justify-center text-sm font-semibold text-purple-700">
+              {staff.first_name.charAt(0).toUpperCase()}
+              {staff.last_name.charAt(0).toUpperCase()}
+            </div>
+            <span>
+              {staff.first_name} {staff.last_name}
+            </span>
           </div>
-          <span>
-            {staff.first_name} {staff.last_name}
-          </span>
-        </div>
-      ),
+        );
+      },
     },
     {
       key: "email" as const,
