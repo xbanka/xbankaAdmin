@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, Bell } from "lucide-react";
+import { X, Bell, UserPlus, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -96,6 +96,13 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
   });
 
   const handleViewRequest = (notification: PayoutNotification) => {
+    if (notification.reference_type === "STAFF_ACCOUNT") {
+      markReadMutation.mutate({
+        id: notification.id,
+      });
+      return;
+    }
+
     const referenceId = notification.reference_id;
 
     if (!referenceId) {
@@ -206,6 +213,15 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
               <ul className="divide-y divide-[#F0F0F0]">
                 {filteredNotifications.map((notification: PayoutNotification) => {
                   const unread = !notification.is_read;
+                  const isResolved = notification.status === "RESOLVED";
+                  const isConfirming =
+                    markReadMutation.isPending &&
+                    markReadMutation.variables?.id === notification.id;
+                  const showConfirmCta = !(
+                    isResolved &&
+                    (notification.reference_type === "STAFF_ACCOUNT" ||
+                      notification.reference_type === "RATE_PROPOSAL")
+                  );
                   return (
                     <li
                       key={notification.id}
@@ -219,9 +235,13 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
                       )}
                     >
                       <div className="flex gap-3">
-                        {/* Naira icon */}
-                        <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#F0F0F0] text-[16px] font-bold text-abstractCyan">
-                          ₦
+                        {/* Type icon */}
+                        <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#F0F0F0] text-abstractCyan">
+                          {notification.reference_type === "STAFF_ACCOUNT" ? (
+                            <UserPlus className="h-5 w-5" />
+                          ) : (
+                            <span className="text-[16px] font-bold">₦</span>
+                          )}
                         </span>
 
                         {/* Content */}
@@ -230,7 +250,8 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
                             {notification?.message}
                           </p>
 
-                          {notification.reference_type === "RATE_PROPOSAL" ? (
+                          {notification.reference_type === "RATE_PROPOSAL" ||
+                          notification.reference_type === "STAFF_ACCOUNT" ? (
                             <p className="mt-1 text-[13px] leading-[18px] text-[#4B5563]">
                               <span className="text-[#6B7280]">
                                 Reference:
@@ -264,19 +285,41 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
                           )}
 
                           <div className="mt-3 flex items-center justify-between gap-2">
-                            <Button
-                              size="sm"
-                              className="h-9 w-fit rounded-lg bg-[#17E1C5] px-4 text-[13px] font-semibold text-[#06251F] hover:bg-[#13C9B0]"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleViewRequest(notification);
-                              }}
+                            <div className="flex items-center gap-2">
+                              {showConfirmCta && (
+                                <Button
+                                  size="sm"
+                                  disabled={isConfirming}
+                                  className="h-9 w-fit rounded-lg bg-[#17E1C5] px-4 text-[13px] font-semibold text-[#06251F] hover:bg-[#13C9B0] disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400 disabled:hover:bg-gray-200"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleViewRequest(notification);
+                                  }}
+                                >
+                                  {notification.reference_type ===
+                                  "RATE_PROPOSAL"
+                                    ? "Review"
+                                    : notification.reference_type ===
+                                        "STAFF_ACCOUNT"
+                                      ? "Confirm"
+                                      : "View Request"}
+                                </Button>
+                              )}
+                              {notification.reference_type ===
+                                "RATE_PROPOSAL" &&
+                                isResolved && (
+                                  <span className="inline-flex items-center gap-1 rounded-full border border-success-border bg-success-light px-3 py-1.5 text-xs font-medium text-success-text">
+                                    <Check className="h-3 w-3" />
+                                    Resolved
+                                  </span>
+                                )}
+                            </div>
+                            <span
+                              className={cn(
+                                "text-[12px] text-[#9CA3AF]",
+                                !showConfirmCta && "ml-auto",
+                              )}
                             >
-                              {notification.reference_type === "RATE_PROPOSAL"
-                                ? "Review"
-                                : "View Request"}
-                            </Button>
-                            <span className="text-[12px] text-[#9CA3AF]">
                               {timeAgo(
                                 notification?.affiliate?.created_at ??
                                   notification?.read_at,
