@@ -163,7 +163,7 @@ export function EditSpreadModal({
               </span>
             </div>
             <p className="text-[12px] font-normal text-text-secondary mt-1">
-              Added above Oblex buy rate when customers buy crypto.
+              Added above Obiex buy rate when customers buy crypto.
             </p>
           </div>
 
