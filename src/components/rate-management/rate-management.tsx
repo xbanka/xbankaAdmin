@@ -70,8 +70,6 @@ export default function RateManagement() {
   console.log("Rate Log Details", rateLogDetails?.log);
   const historyData = ratesLogData?.logs;
   const ratesData = data?.data;
-  console.log("ratesData", ratesData);
-  console.log("historyData", historyData, ratesLogData);
 
   const columns = [
     {
@@ -172,7 +170,7 @@ export default function RateManagement() {
       ),
     },
     {
-      key: "",
+      key: "toggle",
       header: "",
       render: (row: CryptoCurrencyTypes) => (
         <div className="flex items-center justify-between gap-4">
@@ -204,7 +202,15 @@ export default function RateManagement() {
         </div>
       ),
     },
-  ].filter((column) => column.key !== "actions" || canEditSpread);
+  ].filter((column) => {
+    const restrictedColumns = ["actions", "toggle"];
+
+    if (restrictedColumns.includes(column.key)) {
+      return canEditSpread;
+    }
+
+    return true;
+  });
 
   const historyColumns = [
     {
