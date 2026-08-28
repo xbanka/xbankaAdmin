@@ -8,12 +8,13 @@ import { FilterTabs } from "@/components/ui/FilterTabs";
 import { AddStaffSidebar } from "@/components/staff/add-staff-sidebar";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { useGetAllStaff } from "@/lib/services/staff.service";
-import { StaffMember, StaffUser } from "@/lib/types/staffTypes";
+import { StaffMember } from "@/lib/types/staffTypes";
 import { formatDate } from "@/lib/formatDate";
 import StaffActionMenu from "@/components/staff/staff-action-menu";
 import DeleteStaffModal from "@/components/staff/delete-staff-modal";
 import { EditStaffSidebar } from "@/components/staff/edit-staff-sidebar";
 import { usePermissions } from "@/hooks/usePermissions";
+import { ActiveBadge } from "@/components/customer-management/active-badge";
 
 export default function StaffPage() {
   const [filter, setFilter] = useState("all");
@@ -26,11 +27,10 @@ export default function StaffPage() {
   const { data, isError, error, isPending } = useGetAllStaff();
   // const { data, isError, error, isPending } = useDeleteStaff();
 
-  // const filteredStaff =
-  //   filter === "all"
-  //     ? data?.data?.staff
-  //     : data?.data?.staff.filter((staff: StaffUser) => staff.status === filter);
-  const filteredStaff = data?.data?.staff ?? [];
+  const filteredStaff = (data?.data?.staff ?? []).filter((staff: StaffMember) => {
+    if (filter === "all") return true;
+    return filter === "active" ? staff.verified : !staff.verified;
+  });
   const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -45,11 +45,11 @@ export default function StaffPage() {
         if (isInvitePending) {
           return (
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-warning-light flex items-center justify-center">
+              <div className="w-8 h-8 shrink-0 rounded-full bg-warning-light flex items-center justify-center">
                 <Mail className="w-4 h-4 text-warning-text" />
               </div>
-              <span className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full bg-warning-light text-warning-text">
-                <span className="h-1.5 w-1.5 rounded-full bg-warning-text" />
+              <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-xs font-medium px-3 py-1.5 rounded-full bg-warning-light text-warning-text">
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-warning-text" />
                 Invite pending
               </span>
             </div>
@@ -58,11 +58,11 @@ export default function StaffPage() {
 
         return (
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-purple-200 flex items-center justify-center text-sm font-semibold text-purple-700">
+            <div className="w-8 h-8 shrink-0 rounded-full bg-purple-200 flex items-center justify-center text-sm font-semibold text-purple-700">
               {staff.first_name.charAt(0).toUpperCase()}
               {staff.last_name.charAt(0).toUpperCase()}
             </div>
-            <span>
+            <span className="whitespace-nowrap">
               {staff.first_name} {staff.last_name}
             </span>
           </div>
@@ -85,6 +85,11 @@ export default function StaffPage() {
           <span>{staff.role.name}</span>
         </div>
       ),
+    },
+    {
+      key: "verified" as const,
+      header: "Status",
+      render: (staff: StaffMember) => <ActiveBadge active={staff.verified} />,
     },
     {
       key: "created_at" as const,
