@@ -12,10 +12,24 @@ import { NotificationsPanel } from "./notifications-panel";
 import { Skeleton } from "../ui/skeleton";
 import { useProfile } from "@/lib/services/profile.service";
 import { useNotificationStore } from "@/store/useNotificationStore";
+import { useQuery } from "@tanstack/react-query";
+import { getNotifications } from "@/lib/actions/notificationsActions";
+import { PayoutNotification } from "./notifications";
 
 export function HeaderActions() {
-  const {toggle, isOpen} = useNotificationStore();
+  const { toggle, isOpen } = useNotificationStore();
   const notificationsRef = useRef<HTMLDivElement>(null);
+
+  const { data: notificationsData } = useQuery({
+    queryKey: ["allNotification"],
+    queryFn: getNotifications,
+  });
+
+  const notifications = notificationsData?.data ?? [];
+
+  const hasUnreadNotifications = notifications.some(
+    (notification: PayoutNotification) => !notification.is_read,
+  );
 
   const { data, isLoading } = useProfile();
   const user = data?.data;
@@ -31,7 +45,9 @@ export function HeaderActions() {
           className="relative"
         >
           <Bell className="w-5 h-5" />
-          <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-blue-500 rounded-full"></span>
+          {hasUnreadNotifications && (
+            <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-blue-500 rounded-full" />
+          )}
         </Button>
 
         {/* Notifications Dropdown */}
