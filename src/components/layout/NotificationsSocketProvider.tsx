@@ -3,6 +3,7 @@
 
 import { useNotificationsSocket } from "@/hooks/useNotificationsSocket";
 import { authToken } from "@/lib/authToken";
+import { toast } from "sonner";
 
 export function NotificationsSocketProvider({
   children,
@@ -14,7 +15,7 @@ export function NotificationsSocketProvider({
   useNotificationsSocket({
     token,
     onNewNotification: (n) => {
-      // optional: toast, sound, browser Notification API, etc.
+      toast(n.message);
     },
   });
 
