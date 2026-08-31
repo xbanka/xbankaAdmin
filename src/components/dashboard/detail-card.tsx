@@ -16,6 +16,7 @@ export interface DetailCardProps {
   trend?: string;
   stats: StatItem[];
   isLoading?: boolean;
+  error?: string | null;
 }
 
 export const DetailCard = ({
@@ -25,6 +26,7 @@ export const DetailCard = ({
   trend,
   stats,
   isLoading,
+  error,
 }: DetailCardProps) => {
   return (
     <CardLayout className="bg-white space-y-4">
@@ -36,41 +38,52 @@ export const DetailCard = ({
         <Icon className="h-5 w-5 text-muted-foreground" />
       </div>
 
-      <div className="flex items-center gap-2">
-        {isLoading ? (
-          <Skeleton className="h-7 w-16" />
-        ) : (
-          <span className="text-2xl font-semibold text-text-primary-font-color">
-            {value}
+      {error ? (
+        <div className="flex flex-col gap-0.5 py-1">
+          <span className="text-sm font-medium text-red-500">
+            Failed to load
           </span>
-        )}
-
-        {trend && (
-          <span className="text-xs text-main-green">
-            ↑ {trend}
-          </span>
-        )}
-      </div>
-
-      <div className="grid grid-cols-3 gap-4">
-        {stats.map((item) => (
-          <div key={item.label}>
-            <p className="text-xs text-secondary-text">
-              {item.label}
-            </p>
-
+          <span className="text-xs text-text-secondary">{error}</span>
+        </div>
+      ) : (
+        <>
+          <div className="flex items-center gap-2">
             {isLoading ? (
-              <Skeleton className="mt-1 h-4 w-10" />
+              <Skeleton className="h-7 w-16" />
             ) : (
-              <p
-                className={`text-base font-medium ${item.valueClassName ?? ""}`}
-              >
-                {item.value}
-              </p>
+              <span className="text-2xl font-semibold text-text-primary-font-color">
+                {value}
+              </span>
+            )}
+
+            {trend && (
+              <span className="text-xs text-main-green">
+                ↑ {trend}
+              </span>
             )}
           </div>
-        ))}
-      </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            {stats.map((item) => (
+              <div key={item.label}>
+                <p className="text-xs text-secondary-text">
+                  {item.label}
+                </p>
+
+                {isLoading ? (
+                  <Skeleton className="mt-1 h-4 w-10" />
+                ) : (
+                  <p
+                    className={`text-base font-medium ${item.valueClassName ?? ""}`}
+                  >
+                    {item.value}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </CardLayout>
   );
 };
