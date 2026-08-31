@@ -20,7 +20,7 @@ export const useGetAllStaff = () => {
 
 export const useGetStaff = (role: string) => {
   return useQuery({
-    queryKey: ["getStaff"],
+    queryKey: ["getStaff", role],
     queryFn: () => getStaff(role),
   });
 };
@@ -29,9 +29,9 @@ export const useInviteStaff = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (payload: StaffPayload) => inviteStaff(payload),
-    onSuccess: () => {
+    onSuccess: async() => {
       toast.success("Staff invited successfully");
-      queryClient.invalidateQueries({
+      await queryClient.invalidateQueries({
         queryKey: ["getStaff"],
       });
     },

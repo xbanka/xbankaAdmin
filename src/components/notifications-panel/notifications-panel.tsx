@@ -4,11 +4,9 @@ import { useState } from "react";
 import { X, Bell, UserPlus, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  getNotifications,
-  markAsReadNotification,
-} from "@/lib/actions/notificationsActions";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { markAsReadNotification } from "@/lib/actions/notificationsActions";
+import { useGetNotifications } from "@/lib/services/notification.service";
 import LoaderSpinner from "../ui/loaderSpinner";
 import { usePayoutSidebarStore } from "@/store/usePayoutSidebarStore";
 import { useRateProposalSidebarStore } from "@/store/useRateProposalSidebarStore";
@@ -70,10 +68,7 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
   useBodyScrollLock(true);
   const queryClient = useQueryClient();
 
-  const { data, error, isPending } = useQuery({
-    queryKey: ["allNotification"],
-    queryFn: () => getNotifications(),
-  });
+  const { data, error, isPending } = useGetNotifications();
   const { openDetailsSidebar } = usePayoutSidebarStore();
   const { openSidebar: openRateProposalSidebar } =
     useRateProposalSidebarStore();

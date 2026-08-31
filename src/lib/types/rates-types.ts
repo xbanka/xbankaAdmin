@@ -31,17 +31,19 @@ export interface AssetSegment {
 }
 
 export interface CryptoCurrencyTypes {
-  id: string;                
-  currency: string;            
-  name: string;            
+  id: string;
+  currency: string;
+  name: string;
   isActive: boolean;
   buyFeeType: FeeType;
   buyFeeValue: number;
   sellFeeType: FeeType;
   sellFeeValue: number;
   overrideSegment: boolean;
-  segment: AssetSegment | null;      
+  segment: AssetSegment | null;
   segmentId: string;
+  obiexRate: number;
+  obiexValue: number;
   createdAt: string;
   updatedAt: string;
 }

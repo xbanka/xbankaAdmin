@@ -35,6 +35,8 @@ import { AuditLogItem, SPREAD_HISTORY_MOCK, SpreadHistoryEntry } from "./types";
 import { AffectedAssetsBadge, ScopeBadge } from "./scope-badge";
 import { SpreadChangeDetailsDrawer } from "./spread-change-details-change-drawer";
 import { usePermissions } from "@/hooks/usePermissions";
+import { fmt } from "@/lib/utils/formatNumber";
+import { getXBankaRates } from "@/lib/utils/rates";
 
 export default function RateManagement() {
   const [activeTab, setActiveTab] = useState<"schedule" | "history">(
@@ -98,18 +100,38 @@ export default function RateManagement() {
       ),
     },
     {
-      key: "buyFeeValue",
-      header: "Buy Spread",
+      key: "obiexRate",
+      header: "Obiex Rate",
       render: (row: CryptoCurrencyTypes) => (
-        <div className="">{row.buyFeeValue}%</div>
+        <div className="">{fmt(row.obiexRate ?? 0)}</div>
       ),
     },
     {
-      key: "sellFeeValue",
+      key: "buySpread",
+      header: "Buy Spread",
+      render: (row: CryptoCurrencyTypes) => (
+        <div className="">{row.segment?.buySpread ?? 0}%</div>
+      ),
+    },
+    {
+      key: "sellSpread",
       header: "Sell Spread",
       render: (row: CryptoCurrencyTypes) => (
-        <div className="">{row.sellFeeValue}%</div>
+        <div className="">{row.segment?.sellSpread ?? 0}%</div>
       ),
+    },
+    {
+      key: "xbankaRate",
+      header: "XBanka's Rate",
+      render: (row: CryptoCurrencyTypes) => {
+        const { buy, sell } = getXBankaRates(row);
+        return (
+          <div>
+            <div className="text-[12px] text-[#111827]">Buy: {fmt(buy)}</div>
+            <div className="text-[11px] text-[#9CA3AF]">Sell: {fmt(sell)}</div>
+          </div>
+        );
+      },
     },
     {
       key: "status",
