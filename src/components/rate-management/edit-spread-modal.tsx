@@ -21,10 +21,10 @@ export function EditSpreadModal({
   onSave,
 }: EditSpreadModalProps) {
   const [buySpread, setBuySpread] = useState(
-    spreadData?.buyFeeValue ?? 0,
+    spreadData?.segment?.buySpread ?? 0,
   );
   const [sellSpread, setSellSpread] = useState(
-    spreadData?.sellFeeValue ?? 0,
+    spreadData?.segment?.sellSpread ?? 0,
   );
 
   const [spreadActive, setSpreadActive] = useState(
@@ -35,15 +35,19 @@ export function EditSpreadModal({
   const [outcome, setOutcome] = useState<UpdateOutcome | null>(null);
   const [outcomeMessage, setOutcomeMessage] = useState("");
 
-  const OBLEX_BUY_RATE = 150_000_000;
-  const OBLEX_SELL_RATE = 149_500_000;
+  const OBIEX_BUY_RATE = spreadData?.obiexRate ?? 0;
+  const OBIEX_SELL_RATE = spreadData?.obiexRate ?? 0;
 
-  const buyAmt = OBLEX_BUY_RATE * (buySpread / 100);
-  const customerBuyRate = OBLEX_BUY_RATE + buyAmt;
-  const sellAmt = OBLEX_SELL_RATE * (sellSpread / 100);
-  const customerSellRate = OBLEX_SELL_RATE - sellAmt;
+  const buyAmt = OBIEX_BUY_RATE * (buySpread / 100);
+  const customerBuyRate = OBIEX_BUY_RATE + buyAmt;
+  const sellAmt = OBIEX_SELL_RATE * (sellSpread / 100);
+  const customerSellRate = OBIEX_SELL_RATE - sellAmt;
 
   const handleUpdate = () => {
+    // NOTE: backend hasn't confirmed the update schema yet — mirroring the
+    // existing asset-level fields but marking them explicitly as percentage
+    // spreads, since that's now what buySpread/sellSpread represent here.
+    // Confirm with backend once they share the real update contract.
     mutate(
       {
         rateId: spreadData.id,
@@ -51,9 +55,9 @@ export function EditSpreadModal({
           currency: spreadData.currency,
           name: spreadData.name,
           isActive: spreadActive,
-          buyFeeType: spreadData.buyFeeType,
+          buyFeeType: "PERCENTAGE",
           buyFeeValue: buySpread,
-          sellFeeType: spreadData.sellFeeType,
+          sellFeeType: "PERCENTAGE",
           sellFeeValue: sellSpread,
           segmentId: spreadData.segmentId,
         },
@@ -126,7 +130,7 @@ export function EditSpreadModal({
       />
 
       {/* Body */}
-      <div className="bg-card-primary">
+      <div className="bg-card-primary flex ">
         {/* Left: inputs */}
         <div className="bg-card-primary p-6">
           {/* Buy Spread */}
@@ -163,7 +167,7 @@ export function EditSpreadModal({
               </span>
             </div>
             <p className="text-[12px] font-normal text-text-secondary mt-1">
-              Added above Obiex buy rate when customers buy crypto.
+              Deducted from Obiex sell rate when customers sell crypto.
             </p>
           </div>
 
@@ -198,17 +202,17 @@ export function EditSpreadModal({
         </div>
 
         {/* Right: preview */}
-        {/* <div className="bg-card-secondary border border-card-border-secondary p-6"> */}
-          {/* <div className="text-[16px] font-medium text-text-primary mb-4">
+        <div className="bg-card-secondary border border-card-border-secondary p-6">
+          <div className="text-[16px] font-medium text-text-primary mb-4">
             Customer Rate Preview
-          </div> */}
+          </div>
 
           {/* Buy section */}
-          {/* <div className="mb-4 bg-card-primary p-3 border-l-3 rounded-[12px] border-success-border">
+          <div className="mb-4 bg-card-primary p-3 border-l-3 rounded-[12px] border-success-border">
             <div className="text-[14px] font-medium leading-[20px] text-text-primary uppercase tracking-wide mb-2">
               Buy spread
             </div>
-            <PreviewRow label="Obiex Buy Rate" value={fmt(OBLEX_BUY_RATE)} />
+            <PreviewRow label="Obiex Buy Rate" value={fmt(OBIEX_BUY_RATE)} />
             <PreviewRow
               label="Buy Spread"
               value={`+${buySpread.toFixed(2)}%`}
@@ -226,22 +230,22 @@ export function EditSpreadModal({
                 XBanka buy spread.
               </p>
             </div>
-          </div> */}
+          </div>
 
           {/* Sell section */}
-          {/* <div className="mb-4 bg-card-primary p-3 border-l-3 rounded-[12px] border-error-border">
+          <div className="mb-4 bg-card-primary p-3 border-l-3 rounded-[12px] border-error-border">
             <div className="text-[11px] font-semibold text-[#9CA3AF] uppercase tracking-wide mb-2">
               Sell spread
             </div>
-            <PreviewRow label="Obiex Sell Rate" value={fmt(OBLEX_SELL_RATE)} />
+            <PreviewRow label="Obiex Sell Rate" value={fmt(OBIEX_SELL_RATE)} />
             <PreviewRow
-              label="Buy Spread"
+              label="Sell Spread"
               value={`-${sellSpread.toFixed(2)}%`}
               valueClass="text-[#EF4444]"
             />
             <PreviewRow label="Spread Amount" value={fmt(sellAmt)} />
             <PreviewRow
-              label="Customer Buy Rate"
+              label="Customer Sell Rate"
               value={fmt(customerSellRate)}
               valueClass="text-[15px] text-[#0D9488] font-semibold"
             />
@@ -250,15 +254,15 @@ export function EditSpreadModal({
                 XBanka pays customer Obiex sell rate minus XBanka sell spread.
               </p>
             </div>
-          </div> */}
+          </div>
 
-          {/* <div className="flex items-start gap-1">
+          <div className="flex items-start gap-1">
             <Info size={13} className="text-[#9CA3AF] flex-shrink-0 mt-0.5" />
             <p className="text-[11px] text-[#9CA3AF]">
-              Actual customer rates update automatically as Oblex rates refresh.
+              Actual customer rates update automatically as Obiex rates refresh.
             </p>
-          </div> */}
-        {/* </div> */}
+          </div>
+        </div>
       </div>
 
       <div className="flex items-center p-6 bg-card-secondary rounded-bl-2xl rounded-br-2xl border-t border-card-border-secondary justify-between">

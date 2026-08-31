@@ -65,6 +65,7 @@ export const ASSIGNABLE_ROLES: Role[] = [
   Role.FINANCE,
   Role.OPERATIONS,
   Role.CUSTOMER_REP,
+  Role.COMPLIANCE
 ];
 
 export const ROLE_CONFIG: Record<
