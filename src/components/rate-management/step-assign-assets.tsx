@@ -12,6 +12,8 @@ import {
 } from "@/lib/services/rates.service";
 import { Input } from "../ui/input";
 import { SEGMENT_TYPES } from "./mock";
+import { fmt } from "@/lib/utils/formatNumber";
+import { getXBankaRates } from "@/lib/utils/rates";
 
 export function StepAssignAssets({
   assets,
@@ -128,6 +130,11 @@ export function StepAssignAssets({
       render: (row: CryptoCurrencyTypes) => row.segment?.name,
     },
     {
+      key: "obiexRate",
+      header: "Obiex Rate",
+      render: (row: CryptoCurrencyTypes) => fmt(row.obiexRate ?? 0),
+    },
+    {
       key: "buyFeeValue",
       header: "Buy Rate",
       render: (row: CryptoCurrencyTypes) => `${row.segment?.buySpread}%`,
@@ -136,6 +143,19 @@ export function StepAssignAssets({
       key: "sellFeeValue",
       header: "Sell Rate",
       render: (row: CryptoCurrencyTypes) => `${row.segment?.sellSpread}%`,
+    },
+    {
+      key: "xbankaRate",
+      header: "XBanka's Rate",
+      render: (row: CryptoCurrencyTypes) => {
+        const { buy, sell } = getXBankaRates(row);
+        return (
+          <div>
+            <div className="text-[12px] text-[#111827]">Buy: {fmt(buy)}</div>
+            <div className="text-[11px] text-[#9CA3AF]">Sell: {fmt(sell)}</div>
+          </div>
+        );
+      },
     },
 
     {
