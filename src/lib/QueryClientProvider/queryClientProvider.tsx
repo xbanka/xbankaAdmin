@@ -21,9 +21,9 @@ const QueryProvider = ({ children }: QueryClientProviderTypes) => {
     queryCache: new QueryCache({
       onError: (error) => {
         const err = error as unknown as ApiError;
-        toast.error(err.message || "Something went wrong", {
-          duration: 3000,
-        });
+        // toast.error(err.message || "Something went wrong", {
+        //   duration: 3000,
+        // });
       },
     }),
   });
