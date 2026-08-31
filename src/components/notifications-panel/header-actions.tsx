@@ -12,18 +12,14 @@ import { NotificationsPanel } from "./notifications-panel";
 import { Skeleton } from "../ui/skeleton";
 import { useProfile } from "@/lib/services/profile.service";
 import { useNotificationStore } from "@/store/useNotificationStore";
-import { useQuery } from "@tanstack/react-query";
-import { getNotifications } from "@/lib/actions/notificationsActions";
+import { useGetNotifications } from "@/lib/services/notification.service";
 import { PayoutNotification } from "./notifications";
 
 export function HeaderActions() {
   const { toggle, isOpen } = useNotificationStore();
   const notificationsRef = useRef<HTMLDivElement>(null);
 
-  const { data: notificationsData } = useQuery({
-    queryKey: ["allNotification"],
-    queryFn: getNotifications,
-  });
+  const { data: notificationsData } = useGetNotifications();
 
   const notifications = notificationsData?.data ?? [];
 
