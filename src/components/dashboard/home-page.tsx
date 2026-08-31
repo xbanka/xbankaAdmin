@@ -35,6 +35,7 @@ export const DashboardHomePage = () => {
     isLoading: transactionLoading,
     refetch: refetchTransactionMetrics,
     isFetching: isRefetchingTransactionMetrics,
+    error: errorMetrics
   } = useGetTransactionMetrics();
   console.log("Transaction Metrics:", transactionMetrics);
 
@@ -62,6 +63,7 @@ export const DashboardHomePage = () => {
       icon: Banknote,
       value: transactionMetrics?.data.total ?? 0,
       isLoading: transactionLoading,
+      error: errorMetrics?.message,
       // trend: "12% vs last week",
       stats: [
         {
@@ -206,6 +208,7 @@ export const DashboardHomePage = () => {
               // trend={metric.trend}
               stats={metric.stats}
               isLoading={metric.isLoading}
+              error={metric.error}
             />
           ))}
         </div>
