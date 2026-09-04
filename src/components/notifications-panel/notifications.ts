@@ -7,6 +7,13 @@ export interface Affiliate {
   created_at: string;
 }
 
+export type NotificationReferenceType =
+  | "PAYOUT"
+  | "RATE_PROPOSAL"
+  | "STAFF_ACCOUNT";
+
+export type NotificationStatus = "ACTIVE" | "RESOLVED";
+
 export interface PayoutNotification {
   id: string;
   amount: number;
@@ -15,8 +22,19 @@ export interface PayoutNotification {
   method: string;
   is_read: boolean;
   read_at: string | null;
-  status: "ACTIVE" | "RESOLVED";
+  status: NotificationStatus;
   reference_id: string | null;
-  reference_type: "PAYOUT" | "RATE_PROPOSAL" | "STAFF_ACCOUNT";
+  reference_type: NotificationReferenceType;
   affiliate: Affiliate;
+}
+
+/**
+ * Server-side filters for GET /api/erp/notifications. Any key left out is
+ * "all" for that axis, so the three filters compose freely (e.g. unread,
+ * unresolved rate proposals).
+ */
+export interface NotificationFilters {
+  reference_type?: NotificationReferenceType;
+  status?: NotificationStatus;
+  is_read?: boolean;
 }

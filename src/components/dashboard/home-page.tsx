@@ -214,7 +214,7 @@ export const DashboardHomePage = () => {
         </div>
 
         {/* Workflow Health + Needs Urgent Attention */}
-        <div className="grid gap-6 lg:grid-cols-2">
+        {/* <div className="grid gap-6 lg:grid-cols-2">
           <CardLayout className="space-y-4">
             <div>
               <h1 className="text-text-primary font-medium text-[16px] leading-6">
@@ -307,7 +307,7 @@ export const DashboardHomePage = () => {
               </div>
             </CardContent>
           </Card>
-        </div>
+        </div> */}
       </div>
     </DashboardLayout>
   );

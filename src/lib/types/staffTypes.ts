@@ -46,6 +46,7 @@ export interface StaffMember {
   email: string;
   created_at: string; // ISO 8601 date string
   role: MemberRole;
+  staff_code: string;
   verified: boolean;
 }
 

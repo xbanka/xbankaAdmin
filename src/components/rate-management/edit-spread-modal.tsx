@@ -21,11 +21,13 @@ export function EditSpreadModal({
   onSave,
 }: EditSpreadModalProps) {
   const [buySpread, setBuySpread] = useState(
-    spreadData?.segment?.buySpread ?? 0,
+    String(spreadData?.segment?.buySpread ?? 0),
   );
   const [sellSpread, setSellSpread] = useState(
-    spreadData?.segment?.sellSpread ?? 0,
+    String(spreadData?.segment?.sellSpread ?? 0),
   );
+  const buySpreadValue = Number(buySpread) || 0;
+  const sellSpreadValue = Number(sellSpread) || 0;
 
   const [spreadActive, setSpreadActive] = useState(
     spreadData?.isActive ?? true,
@@ -38,9 +40,9 @@ export function EditSpreadModal({
   const OBIEX_BUY_RATE = spreadData?.obiexRate ?? 0;
   const OBIEX_SELL_RATE = spreadData?.obiexRate ?? 0;
 
-  const buyAmt = OBIEX_BUY_RATE * (buySpread / 100);
+  const buyAmt = OBIEX_BUY_RATE * (buySpreadValue / 100);
   const customerBuyRate = OBIEX_BUY_RATE + buyAmt;
-  const sellAmt = OBIEX_SELL_RATE * (sellSpread / 100);
+  const sellAmt = OBIEX_SELL_RATE * (sellSpreadValue / 100);
   const customerSellRate = OBIEX_SELL_RATE - sellAmt;
 
   const handleUpdate = () => {
@@ -55,10 +57,10 @@ export function EditSpreadModal({
           currency: spreadData.currency,
           name: spreadData.name,
           isActive: spreadActive,
-          buyFeeType: "PERCENTAGE",
-          buyFeeValue: buySpread,
-          sellFeeType: "PERCENTAGE",
-          sellFeeValue: sellSpread,
+          buyFeeType: spreadData.buyFeeType,
+          buyFeeValue: buySpreadValue,
+          sellFeeType: spreadData.sellFeeType,
+          sellFeeValue: sellSpreadValue,
           segmentId: spreadData.segmentId,
         },
       },
@@ -77,7 +79,7 @@ export function EditSpreadModal({
   };
 
   const handleDone = () => {
-    onSave(buySpread, sellSpread);
+    onSave(buySpreadValue, sellSpreadValue);
     onClose();
   };
 
@@ -140,7 +142,7 @@ export function EditSpreadModal({
               <input
                 type="number"
                 value={buySpread}
-                onChange={(e) => setBuySpread(Number(e.target.value))}
+                onChange={(e) => setBuySpread(e.target.value)}
                 className="flex-1 border-none outline-none px-3 py-2.5 text-[14px] font-medium bg-transparent"
               />
               <span className="px-3 py-2.5 text-[#9CA3AF] text-[14px] border-l border-[#E5E7EB]">
@@ -159,7 +161,7 @@ export function EditSpreadModal({
               <input
                 type="number"
                 value={sellSpread}
-                onChange={(e) => setSellSpread(Number(e.target.value))}
+                onChange={(e) => setSellSpread(e.target.value)}
                 className="flex-1 border-none outline-none px-3 py-2.5 text-[14px] font-medium bg-transparent"
               />
               <span className="px-3 py-2.5 text-[#9CA3AF] text-[14px] border-l border-[#E5E7EB]">
@@ -215,7 +217,7 @@ export function EditSpreadModal({
             <PreviewRow label="Obiex Buy Rate" value={fmt(OBIEX_BUY_RATE)} />
             <PreviewRow
               label="Buy Spread"
-              value={`+${buySpread.toFixed(2)}%`}
+              value={`+${buySpreadValue.toFixed(2)}%`}
               valueClass="text-[#059669]"
             />
             <PreviewRow label="Spread Amount" value={fmt(buyAmt)} />
@@ -240,7 +242,7 @@ export function EditSpreadModal({
             <PreviewRow label="Obiex Sell Rate" value={fmt(OBIEX_SELL_RATE)} />
             <PreviewRow
               label="Sell Spread"
-              value={`-${sellSpread.toFixed(2)}%`}
+              value={`${sellSpreadValue.toFixed(2)}%`}
               valueClass="text-[#EF4444]"
             />
             <PreviewRow label="Spread Amount" value={fmt(sellAmt)} />
