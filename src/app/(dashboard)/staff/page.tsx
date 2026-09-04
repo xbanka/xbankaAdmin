@@ -82,7 +82,7 @@ export default function StaffPage() {
       header: "Role",
       render: (staff: StaffMember) => (
         <div className="">
-          <span>{staff.role.name}</span>
+          <span>{staff.staff_code}</span>
         </div>
       ),
     },
