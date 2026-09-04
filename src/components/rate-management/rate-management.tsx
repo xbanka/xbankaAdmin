@@ -36,7 +36,7 @@ import { AffectedAssetsBadge, ScopeBadge } from "./scope-badge";
 import { SpreadChangeDetailsDrawer } from "./spread-change-details-change-drawer";
 import { usePermissions } from "@/hooks/usePermissions";
 import { fmt } from "@/lib/utils/formatNumber";
-import { getXBankaRates } from "@/lib/utils/rates";
+import { getEffectiveSpreads, getXBankaRates } from "@/lib/utils/rates";
 
 export default function RateManagement() {
   const [activeTab, setActiveTab] = useState<"schedule" | "history">(
@@ -109,16 +109,18 @@ export default function RateManagement() {
     {
       key: "buySpread",
       header: "Buy Spread",
-      render: (row: CryptoCurrencyTypes) => (
-        <div className="">{row.segment?.buySpread ?? 0}%</div>
-      ),
+      render: (row: CryptoCurrencyTypes) => {
+        const { buySpread } = getEffectiveSpreads(row);
+        return <div className="">{buySpread}%</div>;
+      },
     },
     {
       key: "sellSpread",
       header: "Sell Spread",
-      render: (row: CryptoCurrencyTypes) => (
-        <div className="">{row.segment?.sellSpread ?? 0}%</div>
-      ),
+      render: (row: CryptoCurrencyTypes) => {
+        const { sellSpread } = getEffectiveSpreads(row);
+        return <div className="">{sellSpread}%</div>;
+      },
     },
     {
       key: "xbankaRate",

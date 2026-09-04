@@ -1,5 +1,12 @@
 import { CryptoCurrencyTypes } from "@/lib/types/rates-types";
 
+export function getEffectiveSpreads(row: CryptoCurrencyTypes) {
+  const buySpread = row.buyFeeValue ?? row.segment?.buySpread ?? 0;
+  const sellSpread = row.sellFeeValue ?? row.segment?.sellSpread ?? 0;
+
+  return { buySpread, sellSpread };
+}
+
 export function getXBankaRates(row: CryptoCurrencyTypes) {
   const obiexRate = row.obiexRate ?? 0;
   const buySpread = row.segment?.buySpread ?? 0;
