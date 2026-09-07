@@ -31,23 +31,24 @@ export default function StaffActionMenu({
             <MoreVertical className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
+        <DropdownMenuContent className="font-[400] text-[14px] text-[#28282B] rounded-[12px] p-3 bg-[#FFFFFF]" align="end">
           {canEditRoles && (
             <DropdownMenuItem
+            className="font-[400] text-[14px] text-[#28282B] py-2 px-3"
               onClick={() => {
                 setMenuOpen(false);
                 onEdit?.();
               }}
             >
-              Edit Staff Role
+              Edit Roles & Permissions
             </DropdownMenuItem>
           )}
           <DropdownMenuItem
+          className="font-[400] text-[14px] text-error-text py-2 px-3"
             onClick={() => {
               setMenuOpen(false);
               onDelete?.();
             }}
-            className="text-red-600"
           >
             Delete Staff
           </DropdownMenuItem>
