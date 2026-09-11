@@ -94,7 +94,7 @@ export function ChangePasswordDialog({
           label="Current password"
           placeholder="Enter current password"
           autoComplete="current-password"
-          register={register("current_password")}
+          register={register}
           error={errors.current_password}
           disabled={isPending}
         />
@@ -103,7 +103,7 @@ export function ChangePasswordDialog({
           label="New password"
           placeholder="Enter new password"
           autoComplete="new-password"
-          register={register("new_password")}
+          register={register}
           error={errors.new_password}
           disabled={isPending}
         />
@@ -112,7 +112,7 @@ export function ChangePasswordDialog({
           label="Confirm new password"
           placeholder="Re-enter new password"
           autoComplete="new-password"
-          register={register("confirm_password")}
+          register={register}
           error={errors.confirm_password}
           disabled={isPending}
         />
