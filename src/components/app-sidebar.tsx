@@ -19,6 +19,7 @@ import {
   Settings,
   HelpCircle,
   PercentSquare,
+  SlidersHorizontal,
 } from "lucide-react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -152,7 +153,29 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   );
                 })}
 
-          <SidebarMenuItem className="px-2 mt-[70px]">
+          {/* Account settings sits above Log out, as in the design. It needs no
+              permission — every signed-in staff member manages their own profile. */}
+          <SidebarMenuItem className="pr-2 mt-[70px]">
+            <SidebarMenuButton
+              className="py-5 px-5 rounded-tl-none rounded-bl-none rounded-tr-[36px] rounded-br-[36px] cursor-pointer"
+              asChild
+              isActive={pathname === "/settings"}
+              tooltip="Settings"
+            >
+              <Link href="/settings">
+                <SlidersHorizontal
+                  className={`w-4 h-4 ${pathname === "/settings" ? "text-[#FFFFFF]" : "text-[#4B5563]"}`}
+                />
+                <span
+                  className={`${pathname === "/settings" ? "text-[#FFFFFF]" : "text-[#4B5563]"}`}
+                >
+                  Settings
+                </span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
+          <SidebarMenuItem className="px-2">
             <SidebarMenuButton
               className="py-5 px-5 rounded-tl-none rounded-bl-none rounded-tr-[36px] rounded-br-[36px] cursor-pointer"
               asChild

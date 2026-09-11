@@ -25,4 +25,6 @@ export const ROUTE_PERMISSIONS: Record<string, ApiPermission[]> = {
   "/staff": [
     API_PERMISSIONS.staff_viewStaffList,
   ],
+
+  "/settings": [], // Own account settings — every signed-in staff member manages their own profile
 } as const;
