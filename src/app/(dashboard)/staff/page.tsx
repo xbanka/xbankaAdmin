@@ -12,7 +12,7 @@ import { StaffMember } from "@/lib/types/staffTypes";
 import { formatDate } from "@/lib/formatDate";
 import StaffActionMenu from "@/components/staff/staff-action-menu";
 import DeleteStaffModal from "@/components/staff/delete-staff-modal";
-import { EditStaffSidebar } from "@/components/staff/edit-staff-sidebar";
+import { EditPermissionsSidebar } from "@/components/staff/edit-permissions-sidebar";
 import { usePermissions } from "@/hooks/usePermissions";
 import { ActiveBadge } from "@/components/customer-management/active-badge";
 import { EditRolesPermissionsModal } from "@/components/staff/edit-role_permission-modal";
@@ -23,6 +23,7 @@ export default function StaffPage() {
   const { hasPermission } = usePermissions();
   const canAddStaff = hasPermission("staff:add");
   const canEditRoles = hasPermission("staff:edit_roles");
+  const canEditPermissions = hasPermission("staff:edit_permissions");
 
   // const { data, error, isLoading } = useGetStaff(role)
   const { data, isError, error, isPending } = useGetAllStaff();
@@ -35,9 +36,9 @@ export default function StaffPage() {
     },
   );
   const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null);
-  const [editOpen, setEditOpen] = useState(false);
+  const [editPermissionsOpen, setEditPermissionsOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-   const [editRolesOpen, setEditRolesOpen] = useState(true);
+  const [editRolesOpen, setEditRolesOpen] = useState(false);
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
@@ -148,10 +149,15 @@ export default function StaffPage() {
       header: "",
       render: (item: StaffMember) => (
         <StaffActionMenu
+          canEditPermissions={canEditPermissions}
           canEditRoles={canEditRoles}
-          onEdit={() => {
+          onEditPermissions={() => {
             setSelectedStaff(item);
-            setEditOpen(true);
+            setEditPermissionsOpen(true);
+          }}
+          onEditRoles={() => {
+            setSelectedStaff(item);
+            setEditRolesOpen(true);
           }}
           onDelete={() => {
             setSelectedStaff(item);
@@ -201,9 +207,9 @@ export default function StaffPage() {
           isOpen={isAddStaffOpen}
           onClose={() => setIsAddStaffOpen(false)}
         />
-        <EditStaffSidebar
-          isOpen={editOpen}
-          onClose={() => setEditOpen(false)}
+        <EditPermissionsSidebar
+          isOpen={editPermissionsOpen}
+          onClose={() => setEditPermissionsOpen(false)}
           staff={selectedStaff}
         />
 

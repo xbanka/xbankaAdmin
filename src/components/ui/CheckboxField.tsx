@@ -5,8 +5,6 @@ import { Controller } from "react-hook-form";
 type CheckboxFieldProps = {
   id: string;
   label: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  // register: any;
   disabled?: boolean;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   control?: any;
@@ -27,7 +25,7 @@ export const CheckboxField = ({
       render={({ field }) => (
         <label className="flex items-center gap-3 cursor-pointer">
           <Checkbox
-            checked={field.value}
+            checked={!!field.value}
             onCheckedChange={field.onChange}
             disabled={disabled || isDefault}
           />
@@ -35,9 +33,6 @@ export const CheckboxField = ({
             {label}
             {isDefault && (
               <span className="text-xs text-gray-400 ml-1">(default)</span>
-            )}
-            {disabled && !isDefault && (
-              <span className="text-xs text-red-500 ml-1">(restricted)</span>
             )}
           </Label>
         </label>

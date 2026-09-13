@@ -7,7 +7,7 @@ export interface RoleChangeLog {
   roleFrom: string;
   roleTo: string;
   reason: string;
-  status: "success" | "failed" | "pending";
+  status: "pending" | "confirmed";
 }
 
 export interface LoginLog {

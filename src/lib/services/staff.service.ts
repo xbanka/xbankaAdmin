@@ -7,6 +7,8 @@ import {
   inviteStaff,
   updateStaffRolesPermissions,
   UpdateStaffRolesPermissionsPayload,
+  updateStaffPermissions,
+  UpdateStaffPermissionsPayload,
 } from "../actions/staff";
 import { toast } from "sonner";
 import { StaffPayload } from "../types/staffTypes";
@@ -75,6 +77,32 @@ export const useUpdateStaffRolesPermissions = () => {
       });
 
       toast.success("Staff role and permissions updated successfully");
+    },
+
+    onError: (error) => {
+      handleApiError(error);
+    },
+  });
+};
+
+export const useUpdateStaffPermissions = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      staffId,
+      payload,
+    }: {
+      staffId: string;
+      payload: UpdateStaffPermissionsPayload;
+    }) => updateStaffPermissions(staffId, payload),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["getAllStaff"],
+      });
+
+      toast.success("Staff permissions updated successfully");
     },
 
     onError: (error) => {

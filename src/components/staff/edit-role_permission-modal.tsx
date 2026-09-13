@@ -5,8 +5,11 @@ import { useEffect, useMemo, useState } from "react";
 import { X, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SelectFieldLayout } from "@/components/forms/SelectFieldLayout";
-import { CheckboxField } from "@/components/ui/CheckboxField";
-import { CollapsiblePermissionSection } from "@/components/staff/collapsible-permission-section";
+import {
+  CustomisePermissionsToggle,
+  getPermissionLabel,
+  PermissionsFieldset,
+} from "@/components/staff/permissions-fieldset";
 import { useForm } from "react-hook-form";
 import {
   ASSIGNABLE_ROLES,
@@ -20,6 +23,7 @@ import {
 import { useUpdateStaffRolesPermissions } from "@/lib/services/staff.service";
 import { StaffMember } from "@/lib/types/staffTypes";
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
+import { usePermissionAvailability } from "@/hooks/usePermissionAvailability";
 import { RoleChangeBadge } from "../ui/role-change-badge";
 
 interface EditRolesPermissionsModalProps {
@@ -29,15 +33,6 @@ interface EditRolesPermissionsModalProps {
 }
 
 type Step = "details" | "permissions" | "review";
-
-function getPermissionLabel(permId: string) {
-  const rawLabel =
-    permId
-      .split("_")[1]
-      ?.replace(/([A-Z])/g, " $1")
-      .trim() ?? permId;
-  return rawLabel.charAt(0).toUpperCase() + rawLabel.slice(1);
-}
 
 function joinWithAmpersand(labels: string[]) {
   if (labels.length === 0) return "No access";
@@ -58,12 +53,28 @@ export function EditRolesPermissionsModal({
 
   const currentRole = staff?.role?.name as Role | undefined;
 
-  const { control, handleSubmit, watch, reset } = useForm<Record<string, any>>({
+  const { control, handleSubmit, watch, reset, setValue } = useForm<
+    Record<string, any>
+  >({
     defaultValues: {},
     shouldUnregister: false,
   });
 
   const watchedPermissions = watch();
+
+  const {
+    availablePerms,
+    addablePerms,
+    defaultPerms,
+    isCustomising,
+    setCustomising,
+    addPermission,
+    removePermission,
+    resetAvailability,
+  } = usePermissionAvailability(newRole, {
+    onAdd: (permission) => setValue(permission, false, { shouldDirty: true }),
+    onRemove: (permission) => setValue(permission, false, { shouldDirty: true }),
+  });
 
   const roleOptions =
     currentRole && !ASSIGNABLE_ROLES.includes(currentRole)
@@ -77,35 +88,17 @@ export function EditRolesPermissionsModal({
     setNewRole(undefined);
     setReason("");
     reset({});
-  }, [staff, isOpen, reset]);
+    resetAvailability();
+  }, [staff, isOpen, reset, resetAvailability]);
 
   const handleClose = () => {
     setStep("details");
     setNewRole(undefined);
     setReason("");
     reset({});
+    resetAvailability();
     onClose();
   };
-
-  // Permission set available for whichever role is selected as "New Role"
-  const permissionState = useMemo(() => {
-    if (!newRole) {
-      return {
-        allPermissions: [] as Permission[],
-        defaultPerms: [] as Permission[],
-        neverAllowedPerms: [] as Permission[],
-      };
-    }
-    const roleConfig = ROLE_CONFIG[newRole];
-    return {
-      allPermissions: [
-        ...roleConfig.defaultPermissions,
-        ...roleConfig.optionalPermissions,
-      ],
-      defaultPerms: roleConfig.defaultPermissions,
-      neverAllowedPerms: roleConfig.neverAllowedPermissions,
-    };
-  }, [newRole]);
 
   // Rough "permission impact" count shown on step 1, comparing role defaults
   const permissionImpact = useMemo(() => {
@@ -125,6 +118,7 @@ export function EditRolesPermissionsModal({
     const role = value as Role;
     setNewRole(role);
     reset(getRolePermissionDefaults(role));
+    resetAvailability();
   };
 
   const goToPermissions = () => {
@@ -152,7 +146,11 @@ export function EditRolesPermissionsModal({
     updateStaff(
       {
         staffId: staff.id,
-        payload: { role: newRole, permissions: apiPermissions },
+        payload: {
+          role: newRole,
+          permissions: apiPermissions,
+          reason: reason.trim() || undefined,
+        },
       },
       { onSuccess: handleClose },
     );
@@ -321,46 +319,21 @@ export function EditRolesPermissionsModal({
                   Set Permissions
                 </h3>
 
-                {Object.entries(PERMISSION_CATEGORIES).map(
-                  ([category, permissions]) => {
-                    const allowedPermissions = permissions.filter(
-                      (permission) =>
-                        permissionState.allPermissions.includes(permission),
-                    );
+                <PermissionsFieldset
+                  control={control}
+                  watchedPermissions={watchedPermissions}
+                  allPermissions={availablePerms}
+                  defaultPerms={defaultPerms}
+                  isCustomising={isCustomising}
+                  addablePerms={addablePerms}
+                  onAddPermission={addPermission}
+                  onRemovePermission={removePermission}
+                />
 
-                    if (!allowedPermissions.length) return null;
-
-                    return (
-                      <CollapsiblePermissionSection
-                        key={category}
-                        title={category}
-                        checkedCount={
-                          allowedPermissions.filter(
-                            (permission) =>
-                              watchedPermissions?.[permission] === true,
-                          ).length
-                        }
-                      >
-                        <div className="flex gap-8 flex-wrap">
-                          {allowedPermissions.map((permId) => (
-                            <CheckboxField
-                              key={permId}
-                              id={permId}
-                              label={getPermissionLabel(permId)}
-                              control={control}
-                              disabled={permissionState.neverAllowedPerms.includes(
-                                permId,
-                              )}
-                              isDefault={permissionState.defaultPerms.includes(
-                                permId,
-                              )}
-                            />
-                          ))}
-                        </div>
-                      </CollapsiblePermissionSection>
-                    );
-                  },
-                )}
+                <CustomisePermissionsToggle
+                  isCustomising={isCustomising}
+                  onToggle={setCustomising}
+                />
               </div>
             </>
           )}
