@@ -39,6 +39,11 @@ export interface MemberRole {
   allowed_permissions: string[];
 }
 
+export interface RoleChange {
+  previous_role: string;
+  new_role: string;
+}
+
 export interface StaffMember {
   id: string;
   first_name: string;
@@ -48,6 +53,7 @@ export interface StaffMember {
   role: MemberRole;
   staff_code: string;
   verified: boolean;
+  role_change: RoleChange | null;
 }
 
 export interface StaffResponse {

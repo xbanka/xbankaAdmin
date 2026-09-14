@@ -14,6 +14,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { markAsReadNotification } from "@/lib/actions/notificationsActions";
 import {
   NOTIFICATIONS_QUERY_KEY,
+  useConfirmRoleChange,
   useGetNotifications,
 } from "@/lib/services/notification.service";
 import LoaderSpinner from "../ui/loaderSpinner";
@@ -155,6 +156,8 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
     },
   });
 
+  const confirmRoleChangeMutation = useConfirmRoleChange();
+
   const clearFilters = () => {
     setTypeFilter("ALL");
     setStatusFilter("ALL");
@@ -163,6 +166,14 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
 
   const handleViewRequest = (notification: PayoutNotification) => {
     if (notification.reference_type === "STAFF_ACCOUNT") {
+      if (!notification.reference_id) {
+        console.error("Notification has no reference_id", notification);
+        return;
+      }
+
+      // Self-confirmation workflow: confirming applies the staff member's
+      // pending role change (and any pending permission overrides).
+      confirmRoleChangeMutation.mutate({ id: notification.reference_id });
       markReadMutation.mutate({
         id: notification.id,
       });
@@ -319,8 +330,11 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
                 const unread = !notification.is_read;
                 const isResolved = notification.status === "RESOLVED";
                 const isConfirming =
-                  markReadMutation.isPending &&
-                  markReadMutation.variables?.id === notification.id;
+                  (markReadMutation.isPending &&
+                    markReadMutation.variables?.id === notification.id) ||
+                  (confirmRoleChangeMutation.isPending &&
+                    confirmRoleChangeMutation.variables?.id ===
+                      notification.reference_id);
                 const showConfirmCta = !(
                   isResolved &&
                   (notification.reference_type === "STAFF_ACCOUNT" ||
