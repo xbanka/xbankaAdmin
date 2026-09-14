@@ -190,33 +190,36 @@ export function EditPermissionsSidebar({
               onAddPermission={addPermission}
               onRemovePermission={removePermission}
             />
+          </div>
+        </div>
 
+        {/* Footer */}
+        <div className="border-t border-border flex-shrink-0">
+          <div className="px-6 pt-4">
             <CustomisePermissionsToggle
               isCustomising={isCustomising}
               onToggle={setCustomising}
             />
           </div>
-        </div>
+          <div className="flex gap-3 p-6">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleClose}
+              className="flex-1 bg-transparent"
+            >
+              Cancel
+            </Button>
 
-        {/* Footer */}
-        <div className="flex gap-3 p-6 border-t border-border flex-shrink-0">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleClose}
-            className="flex-1 bg-transparent"
-          >
-            Cancel
-          </Button>
-
-          <Button
-            type="button"
-            disabled={isPending}
-            onClick={handleSubmit(handleSubmitForm)}
-            className="flex-[3]"
-          >
-            {isPending ? "Saving..." : "Save Changes"}
-          </Button>
+            <Button
+              type="button"
+              disabled={isPending}
+              onClick={handleSubmit(handleSubmitForm)}
+              className="flex-[3]"
+            >
+              {isPending ? "Saving..." : "Save Changes"}
+            </Button>
+          </div>
         </div>
       </div>
     </div>

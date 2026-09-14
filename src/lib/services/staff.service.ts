@@ -33,9 +33,13 @@ export const useInviteStaff = () => {
     mutationFn: (payload: StaffPayload) => inviteStaff(payload),
     onSuccess: async() => {
       toast.success("Staff invited successfully");
-      await queryClient.invalidateQueries({
-        queryKey: ["getStaff"],
-      });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["getStaff"] }),
+        // The Staff page reads ["getAllStaff"], not ["getStaff"] — without
+        // this, a freshly invited staff member wouldn't show up there until
+        // a manual reload.
+        queryClient.invalidateQueries({ queryKey: ["getAllStaff"] }),
+      ]);
     },
     onError: (err) => {
       handleApiError(err);

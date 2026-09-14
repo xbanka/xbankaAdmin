@@ -329,11 +329,6 @@ export function EditRolesPermissionsModal({
                   onAddPermission={addPermission}
                   onRemovePermission={removePermission}
                 />
-
-                <CustomisePermissionsToggle
-                  isCustomising={isCustomising}
-                  onToggle={setCustomising}
-                />
               </div>
             </>
           )}
@@ -402,45 +397,55 @@ export function EditRolesPermissionsModal({
         </div>
 
         {/* Footer */}
-        <div className="flex gap-3 p-6 border-t border-border flex-shrink-0">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={
-              step === "details" ? handleClose : () => setStep("details")
-            }
-            className="flex-1 bg-transparent"
-          >
-            Cancel
-          </Button>
-
-          {step === "details" && (
-            <Button
-              type="button"
-              disabled={!newRole}
-              onClick={goToPermissions}
-              className="flex-[3]"
-            >
-              Set Permission
-            </Button>
-          )}
-
+        <div className="border-t border-border flex-shrink-0">
           {step === "permissions" && (
-            <Button type="button" onClick={goToReview} className="flex-[3]">
-              Review Changes
-            </Button>
+            <div className="px-6 pt-4">
+              <CustomisePermissionsToggle
+                isCustomising={isCustomising}
+                onToggle={setCustomising}
+              />
+            </div>
           )}
-
-          {step === "review" && (
+          <div className="flex gap-3 p-6">
             <Button
               type="button"
-              disabled={isPending}
-              onClick={handleSubmit(handleConfirm)}
-              className="flex-[3]"
+              variant="outline"
+              onClick={
+                step === "details" ? handleClose : () => setStep("details")
+              }
+              className="flex-1 bg-transparent"
             >
-              {isPending ? "Saving..." : "Confirm Changes"}
+              Cancel
             </Button>
-          )}
+
+            {step === "details" && (
+              <Button
+                type="button"
+                disabled={!newRole}
+                onClick={goToPermissions}
+                className="flex-[3]"
+              >
+                Set Permission
+              </Button>
+            )}
+
+            {step === "permissions" && (
+              <Button type="button" onClick={goToReview} className="flex-[3]">
+                Review Changes
+              </Button>
+            )}
+
+            {step === "review" && (
+              <Button
+                type="button"
+                disabled={isPending}
+                onClick={handleSubmit(handleConfirm)}
+                className="flex-[3]"
+              >
+                {isPending ? "Saving..." : "Confirm Changes"}
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </div>

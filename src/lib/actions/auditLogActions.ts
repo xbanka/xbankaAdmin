@@ -14,7 +14,14 @@ export const getRoleChangeLogs = async ({
   limit = 10,
 }: GetAuditLogParams = {}) => {
   try {
-    const response = await AxiosInstance.get(`/api/audit/role-changes`);
+    const response = await AxiosInstance.get(`/api/audit/role-changes`, {
+      params: {
+        status,
+        search,
+        page,
+        limit,
+      },
+    });
 
     return {
       success: true,
@@ -38,7 +45,14 @@ export const getLoginLogs = async ({
   limit = 10,
 }: GetAuditLogParams = {}) => {
   try {
-    const response = await AxiosInstance.get(`/api/audit/logins`);
+    const response = await AxiosInstance.get(`/api/audit/logins`, {
+      params: {
+        status,
+        search,
+        page,
+        limit,
+      },
+    });
 
     return {
       success: true,
@@ -58,7 +72,7 @@ export const getLoginLogs = async ({
 export const confirmRoleChange = async ({ id }: { id: string }) => {
   try {
     const response = await AxiosInstance.post(
-      `/api/erp/audit/role-changes/${id}/confirm`,
+      `/api/audit/role-changes/${id}/confirm`,
     );
 
     return {

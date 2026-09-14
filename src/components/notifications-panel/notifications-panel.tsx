@@ -11,11 +11,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 import { markAsReadNotification } from "@/lib/actions/notificationsActions";
-import { confirmRoleChange } from "@/lib/actions/auditLogActions";
 import {
   NOTIFICATIONS_QUERY_KEY,
+  useConfirmRoleChange,
   useGetNotifications,
 } from "@/lib/services/notification.service";
 import LoaderSpinner from "../ui/loaderSpinner";
@@ -157,17 +156,7 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
     },
   });
 
-  const confirmRoleChangeMutation = useMutation({
-    mutationFn: confirmRoleChange,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEY });
-      queryClient.invalidateQueries({ queryKey: ["audit-log", "role-changes"] });
-    },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    onError: (error: any) => {
-      toast.error(error?.message || "Failed to confirm role change.");
-    },
-  });
+  const confirmRoleChangeMutation = useConfirmRoleChange();
 
   const clearFilters = () => {
     setTypeFilter("ALL");

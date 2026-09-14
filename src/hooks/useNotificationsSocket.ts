@@ -2,7 +2,10 @@
 
 import { useEffect, useRef, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { PayoutNotification } from "@/components/notifications-panel/notifications";
+import {
+  NotificationFilters,
+  PayoutNotification,
+} from "@/components/notifications-panel/notifications";
 import { NOTIFICATIONS_QUERY_KEY } from "@/lib/services/notification.service";
 
 type NotificationEvent =
@@ -68,8 +71,36 @@ export function useNotificationsSocket({
       }
 
       if (event === "notification:new") {
-        // We can't know client-side which filtered views this belongs in, so
-        // refetch rather than guess — the panel is a small list either way.
+        // Patch every cached view whose filters the new notification actually
+        // matches, synchronously — the bell dot, an open dropdown, and the
+        // role-change popup queue all read this same cache, and none of them
+        // should have to wait on a refetch (or the 60s poll) to notice a push
+        // that already arrived. setQueriesData's updater doesn't expose the
+        // query key, so we go query-by-query via getQueriesData instead.
+        const cached = queryClient.getQueriesData<
+          { data: PayoutNotification[] } | undefined
+        >({ queryKey: NOTIFICATIONS_QUERY_KEY });
+
+        cached.forEach(([queryKey, old]) => {
+          if (!old?.data || old.data.some((n) => n.id === data.id)) return;
+
+          const filters = queryKey[1] as NotificationFilters | undefined;
+          const matches =
+            (!filters?.reference_type ||
+              filters.reference_type === data.reference_type) &&
+            (!filters?.status || filters.status === data.status) &&
+            (filters?.is_read === undefined ||
+              filters.is_read === data.is_read);
+          if (!matches) return;
+
+          queryClient.setQueryData(queryKey, {
+            ...old,
+            data: [data, ...old.data],
+          });
+        });
+
+        // Let the server re-decide filter membership in the background too,
+        // in case our client-side filter matching above ever drifts from it.
         queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEY });
         onNewNotification?.(data);
       }

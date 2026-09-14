@@ -225,31 +225,36 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
                     onAddPermission={addPermission}
                     onRemovePermission={removePermission}
                   />
+                </div>
+              )}
+            </div>
 
+            <div className="border-t border-gray-200 flex-shrink-0">
+              {roleValue && (
+                <div className="px-6 pt-4">
                   <CustomisePermissionsToggle
                     isCustomising={isCustomising}
                     onToggle={setCustomising}
                   />
                 </div>
               )}
-            </div>
-
-            <div className="flex gap-3 p-6 border-t border-gray-200 flex-shrink-0">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleBack}
-                className="flex-1 bg-transparent"
-              >
-                Back
-              </Button>
-              <Button
-                disabled={!roleValue || isPending}
-                type="submit"
-                className="flex-3"
-              >
-                Send Invite
-              </Button>
+              <div className="flex gap-3 p-6">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleBack}
+                  className="flex-1 bg-transparent"
+                >
+                  Back
+                </Button>
+                <Button
+                  disabled={!roleValue || isPending}
+                  type="submit"
+                  className="flex-3"
+                >
+                  Send Invite
+                </Button>
+              </div>
             </div>
           </form>
         )}

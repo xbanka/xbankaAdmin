@@ -16,6 +16,10 @@ import { EditPermissionsSidebar } from "@/components/staff/edit-permissions-side
 import { usePermissions } from "@/hooks/usePermissions";
 import { ActiveBadge } from "@/components/customer-management/active-badge";
 import { EditRolesPermissionsModal } from "@/components/staff/edit-role_permission-modal";
+import {
+  RoleChangeBadge,
+  NoRoleChange,
+} from "@/components/ui/role-change-badge";
 
 export default function StaffPage() {
   const [filter, setFilter] = useState("all");
@@ -65,6 +69,10 @@ export default function StaffPage() {
       return next;
     });
   };
+
+  const hasRoleChange = filteredStaff.some(
+    (staff: StaffMember) => staff.role_change,
+  );
 
   const columns = [
     {
@@ -122,15 +130,24 @@ export default function StaffPage() {
       header: "Status",
       render: (staff: StaffMember) => <ActiveBadge active={staff.verified} />,
     },
-    {
-      key: "created_at" as const,
-      header: "Role Change",
-      render: (staff: StaffMember) => (
-        <div className="">
-          <span>----</span>
-        </div>
-      ),
-    },
+    ...(hasRoleChange
+      ? [
+          {
+            key: "role_change" as const,
+            header: "Role Change",
+            render: (staff: StaffMember) =>
+              staff.role_change ? (
+                <RoleChangeBadge
+                  from={staff.role_change.previous_role}
+                  to={staff.role_change.new_role}
+                  subStatus="Pending confirmation"
+                />
+              ) : (
+                <NoRoleChange />
+              ),
+          },
+        ]
+      : []),
     {
       key: "created_at" as const,
       header: "Date joined",
