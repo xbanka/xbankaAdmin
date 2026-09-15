@@ -120,16 +120,19 @@ export function EditButton({
   onClick,
   label = "Edit",
   disabled,
+  title,
 }: {
   onClick?: () => void;
   label?: string;
   disabled?: boolean;
+  title?: string;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
+      title={title}
       className="shrink-0 cursor-pointer rounded-lg border border-grey-border bg-white px-5 py-2 text-[13px] font-medium text-grey-text transition-colors hover:bg-[#F9FAFB] disabled:cursor-not-allowed disabled:opacity-50"
     >
       {label}

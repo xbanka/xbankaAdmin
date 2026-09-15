@@ -46,6 +46,20 @@ type SettingsProfile = {
 /** Values the backend hasn't supplied yet read as a dash, not an empty gap. */
 const EMPTY = "—";
 
+/**
+ * Profile editing is switched off until the backend can accept it.
+ * `PATCH /api/erp/me` answers 405 (the path is GET-only) and there is no
+ * avatar upload route at all, so all three Edit buttons could only fail in
+ * the user's face. They stay visible but inert, which reads as unfinished
+ * rather than broken.
+ *
+ * Flip this to `true` once those endpoints exist — the dialogs, mutations and
+ * upload handler behind these buttons are already written and wired.
+ */
+const PROFILE_EDITING_ENABLED = false;
+
+const EDITING_DISABLED_HINT = "Not available yet — waiting on the backend endpoint";
+
 function ValueText({ children }: { children: React.ReactNode }) {
   return (
     <span className="text-[14px] text-secondary-text">{children}</span>
@@ -135,7 +149,8 @@ export function MyProfileTab() {
             </div>
             <EditButton
               onClick={() => fileInputRef.current?.click()}
-              disabled={uploadPicture.isPending}
+              disabled={!PROFILE_EDITING_ENABLED || uploadPicture.isPending}
+              title={PROFILE_EDITING_ENABLED ? undefined : EDITING_DISABLED_HINT}
             />
             <input
               ref={fileInputRef}
@@ -157,7 +172,13 @@ export function MyProfileTab() {
                   <ValueText>{fullName || EMPTY}</ValueText>
                 </>
               )}
-              <EditButton onClick={() => setEditingName(true)} />
+              <EditButton
+                onClick={() => setEditingName(true)}
+                disabled={!PROFILE_EDITING_ENABLED}
+                title={
+                  PROFILE_EDITING_ENABLED ? undefined : EDITING_DISABLED_HINT
+                }
+              />
             </div>
           </SettingsRow>
 
@@ -186,7 +207,13 @@ export function MyProfileTab() {
                   <ValueText>{user.phone_number || EMPTY}</ValueText>
                 </>
               )}
-              <EditButton onClick={() => setEditingPhone(true)} />
+              <EditButton
+                onClick={() => setEditingPhone(true)}
+                disabled={!PROFILE_EDITING_ENABLED}
+                title={
+                  PROFILE_EDITING_ENABLED ? undefined : EDITING_DISABLED_HINT
+                }
+              />
             </div>
           </SettingsRow>
         </SettingsGroup>
