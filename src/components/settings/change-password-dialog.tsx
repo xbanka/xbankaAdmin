@@ -10,12 +10,23 @@ import PasswordField from "@/components/ui/PasswordField";
 import { DialogLayout } from "@/components/layout/modalLayout";
 import { useChangePassword } from "@/lib/services/settings.service";
 
+/**
+ * Mirrors the strength rule the endpoint enforces, so an obviously weak
+ * password is caught before a round trip. The server still has the final say.
+ */
+const STRENGTH_MESSAGE =
+  "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one digit, and one special character.";
+
 const changePasswordSchema = z
   .object({
     current_password: z.string().min(1, "Enter your current password"),
     new_password: z
       .string()
-      .min(8, "Password must be at least 8 characters"),
+      .min(8, STRENGTH_MESSAGE)
+      .regex(/[A-Z]/, STRENGTH_MESSAGE)
+      .regex(/[a-z]/, STRENGTH_MESSAGE)
+      .regex(/[0-9]/, STRENGTH_MESSAGE)
+      .regex(/[^A-Za-z0-9]/, STRENGTH_MESSAGE),
     confirm_password: z.string().min(1, "Confirm your new password"),
   })
   .refine((values) => values.new_password === values.confirm_password, {

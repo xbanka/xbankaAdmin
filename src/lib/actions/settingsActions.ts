@@ -3,19 +3,32 @@ import AxiosInstance from "../Axiosinstance/axiosInstance";
 /**
  * Every backend call the Account Settings screen makes lives here.
  *
- * `changePassword` is CONFIRMED against the contract the backend team
- * supplied, and verified end to end. The rest are still PROVISIONAL: the
- * backend exposes `GET /api/erp/me` and the logged-out forgot/reset password
- * pair, but nothing yet for updating a profile, uploading an avatar, or
- * reading/writing notification preferences. They are grouped in this one file
- * precisely so that confirming the real contract is a rename here and nothing
- * else.
+ * All three are CONFIRMED against the contract the backend team documented
+ * and against the live OpenAPI spec. Notification preferences remain the one
+ * outstanding gap — no endpoint exists for them yet.
  */
+
+/** JPG, PNG or WebP, per the avatar endpoint's documented validation. */
+export const AVATAR_ACCEPTED_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+] as const;
+
+/** 5 MB ceiling, matching the server's own limit. */
+export const AVATAR_MAX_BYTES = 5 * 1024 * 1024;
 
 export interface UpdateProfilePayload {
   first_name?: string;
   last_name?: string;
-  phone_number?: string;
+  /**
+   * Named `phone`, not `phone_number` — the endpoint rejects unknown fields
+   * with a 422. Nigerian numbers may be sent locally (08031234567); anything
+   * else needs its country code. The server normalises what it stores to
+   * international format, so the value to display afterwards is the one that
+   * comes back, not the one the user typed.
+   */
+  phone?: string | null;
 }
 
 export const updateProfile = async (payload: UpdateProfilePayload) => {
@@ -36,9 +49,14 @@ export const updateProfile = async (payload: UpdateProfilePayload) => {
   }
 };
 
+/**
+ * The form field must be called `avatar` — the endpoint looks for that name
+ * specifically. Each upload returns a fresh URL, so the avatar is always
+ * re-read from the refreshed profile rather than cached anywhere.
+ */
 export const uploadProfilePicture = async (file: File) => {
   const formData = new FormData();
-  formData.append("file", file);
+  formData.append("avatar", file);
 
   try {
     const response = await AxiosInstance.post("/api/erp/me/avatar", formData, {
@@ -68,31 +86,21 @@ export interface ChangePasswordPayload {
 }
 
 /**
- * Authenticates by cookie (`access_token` / `refresh_token`), which the shared
- * instance already sends via `withCredentials`.
+ * Every rejection here is a 400 carrying its own message — a wrong current
+ * password included, which the backend documents explicitly as "400, not 401"
+ * so it is never mistaken for an expired session. That means the shared
+ * interceptor's refresh-and-logout branch is never reached by a failed
+ * attempt, and a genuine 401 here really does mean the session died and
+ * should be treated as such.
  *
- * The backend answers 401 for a *wrong current password*, not just for an
- * expired session — confirmed by the backend team. Left alone, the shared
- * response interceptor reads that 401 as a dead session: it attempts a token
- * refresh and, when that refresh fails, wipes the token and redirects to
- * /signin with no message at all. Mistyping your password would log you out.
- *
- * Marking the request `_retry` up front is what prevents that. The interceptor
- * skips its refresh-and-redirect branch for any request already flagged as
- * retried, so the 401 falls through to normal error handling and the user sees
- * the server's message instead.
- *
- * The trade-off: a genuinely expired access token is no longer refreshed
- * transparently here, surfacing as an error the user must act on. That is the
- * better failure — and in practice the other queries on the page refresh the
- * token long before anyone opens this dialog.
+ * A success leaves the current session valid — the user stays logged in and
+ * simply uses the new password next time.
  */
 export const changePassword = async (payload: ChangePasswordPayload) => {
   try {
     const response = await AxiosInstance.post(
       "/api/auth/erp/change-password",
       payload,
-      { _retry: true } as never,
     );
     return {
       success: true,

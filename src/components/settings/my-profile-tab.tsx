@@ -5,7 +5,13 @@ import { Lock } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
+
 import { useProfile } from "@/lib/services/profile.service";
+import {
+  AVATAR_ACCEPTED_TYPES,
+  AVATAR_MAX_BYTES,
+} from "@/lib/actions/settingsActions";
 import {
   useUpdateProfile,
   useUploadProfilePicture,
@@ -25,16 +31,16 @@ import {
 } from "./settings-ui";
 
 /**
- * Shape this panel reads off `GET /api/erp/me`. Only `first_name`,
- * `last_name` and `role` are confirmed to exist today — the rest are optional
- * so the panel degrades to a dash rather than breaking once the backend
- * starts returning them.
+ * Shape this panel reads off `GET /api/erp/me`. `department`, `phone_verified`
+ * and `role.managed_by` are the only ones the endpoint still doesn't return —
+ * they stay optional so those rows degrade to a dash rather than breaking if
+ * and when they arrive.
  */
 type SettingsProfile = {
   first_name?: string;
   last_name?: string;
   email?: string;
-  phone_number?: string;
+  phone?: string;
   staff_code?: string;
   department?: string;
   avatar_url?: string;
@@ -45,20 +51,6 @@ type SettingsProfile = {
 
 /** Values the backend hasn't supplied yet read as a dash, not an empty gap. */
 const EMPTY = "—";
-
-/**
- * Profile editing is switched off until the backend can accept it.
- * `PATCH /api/erp/me` answers 405 (the path is GET-only) and there is no
- * avatar upload route at all, so all three Edit buttons could only fail in
- * the user's face. They stay visible but inert, which reads as unfinished
- * rather than broken.
- *
- * Flip this to `true` once those endpoints exist — the dialogs, mutations and
- * upload handler behind these buttons are already written and wired.
- */
-const PROFILE_EDITING_ENABLED = false;
-
-const EDITING_DISABLED_HINT = "Not available yet — waiting on the backend endpoint";
 
 function ValueText({ children }: { children: React.ReactNode }) {
   return (
@@ -98,22 +90,44 @@ export function MyProfileTab() {
 
   const handleAvatarPicked = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) uploadPicture.mutate(file);
-    // Reset so picking the same file twice still fires a change event.
+    // Reset first, so picking the same file twice still fires a change event
+    // even when the pick below is rejected.
     event.target.value = "";
+    if (!file) return;
+
+    // Mirrors the server's own rules so an obviously invalid file is refused
+    // without a round trip. The server still enforces both.
+    if (
+      !(AVATAR_ACCEPTED_TYPES as readonly string[]).includes(file.type)
+    ) {
+      toast.error("Invalid file type. Use a JPG, PNG or WebP image");
+      return;
+    }
+    if (file.size > AVATAR_MAX_BYTES) {
+      toast.error("Image is too large. The limit is 5MB");
+      return;
+    }
+
+    uploadPicture.mutate(file);
   };
 
   const handleSaveName = (value: string) => {
     const [first, ...rest] = value.split(" ").filter(Boolean);
+    const last = rest.join(" ");
+    // Neither name may be sent blank — the endpoint rejects that with a 400 —
+    // so a single-word entry updates only the first name and leaves the
+    // surname as it was.
     updateProfile.mutate(
-      { first_name: first ?? "", last_name: rest.join(" ") },
+      { ...(first ? { first_name: first } : {}), ...(last ? { last_name: last } : {}) },
       { onSuccess: () => setEditingName(false) },
     );
   };
 
   const handleSavePhone = (value: string) => {
     updateProfile.mutate(
-      { phone_number: value },
+      // Sent as `phone`; the server normalises it to international format, and
+      // the refetched profile is what gets displayed afterwards.
+      { phone: value },
       { onSuccess: () => setEditingPhone(false) },
     );
   };
@@ -149,13 +163,12 @@ export function MyProfileTab() {
             </div>
             <EditButton
               onClick={() => fileInputRef.current?.click()}
-              disabled={!PROFILE_EDITING_ENABLED || uploadPicture.isPending}
-              title={PROFILE_EDITING_ENABLED ? undefined : EDITING_DISABLED_HINT}
+              disabled={uploadPicture.isPending}
             />
             <input
               ref={fileInputRef}
               type="file"
-              accept="image/*"
+              accept={AVATAR_ACCEPTED_TYPES.join(",")}
               hidden
               onChange={handleAvatarPicked}
             />
@@ -172,13 +185,7 @@ export function MyProfileTab() {
                   <ValueText>{fullName || EMPTY}</ValueText>
                 </>
               )}
-              <EditButton
-                onClick={() => setEditingName(true)}
-                disabled={!PROFILE_EDITING_ENABLED}
-                title={
-                  PROFILE_EDITING_ENABLED ? undefined : EDITING_DISABLED_HINT
-                }
-              />
+              <EditButton onClick={() => setEditingName(true)} />
             </div>
           </SettingsRow>
 
@@ -204,16 +211,10 @@ export function MyProfileTab() {
                   {user.phone_verified && (
                     <VerifiedTick className="bg-[#12B76A]" />
                   )}
-                  <ValueText>{user.phone_number || EMPTY}</ValueText>
+                  <ValueText>{user.phone || EMPTY}</ValueText>
                 </>
               )}
-              <EditButton
-                onClick={() => setEditingPhone(true)}
-                disabled={!PROFILE_EDITING_ENABLED}
-                title={
-                  PROFILE_EDITING_ENABLED ? undefined : EDITING_DISABLED_HINT
-                }
-              />
+              <EditButton onClick={() => setEditingPhone(true)} />
             </div>
           </SettingsRow>
         </SettingsGroup>
@@ -301,7 +302,7 @@ export function MyProfileTab() {
         title="Edit Phone Number"
         label="Phone number"
         placeholder="+234 700 123 4567"
-        initialValue={user.phone_number ?? ""}
+        initialValue={user.phone ?? ""}
         isSaving={updateProfile.isPending}
         onSave={handleSavePhone}
       />
