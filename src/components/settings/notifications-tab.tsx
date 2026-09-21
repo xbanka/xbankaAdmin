@@ -1,7 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { Lock } from "lucide-react";
 
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
+
+import {
+  ALWAYS_ON_CATEGORY,
+  NOTIFICATION_CATEGORY_KEYS,
+  NotificationCategoryKey,
+  NotificationChannel,
+} from "@/lib/actions/settingsActions";
+import {
+  useNotificationPreferences,
+  useUpdateNotificationPreferences,
+} from "@/lib/services/settings.service";
 import {
   SettingsGroup,
   SettingsPanelHeader,
@@ -11,86 +24,115 @@ import {
   SettingsSwitch,
 } from "./settings-ui";
 
-/** The two delivery channels a preference can be routed to. */
-type Channel = "in_app" | "email";
-
 /**
- * Categories shown under "Notification Preference".
- *
- * The `id`s below are a best guess at the backend's vocabulary. There is no
- * preferences endpoint yet, so nothing reads or writes them remotely — see the
- * note on `preferences` state below.
+ * Wording for each category. The keys are the backend's stable identifiers;
+ * everything shown to the user lives here, so copy changes never alter what
+ * gets sent.
  */
-const PREFERENCE_ROWS = [
-  {
-    id: "transaction_activity",
+const CATEGORY_COPY: Record<
+  NotificationCategoryKey,
+  { title: string; description: string }
+> = {
+  TRANSACTION_ACTIVITY: {
     title: "Transaction Activity",
     description: "Important transaction activity and exceptions",
   },
-  {
-    id: "approval_requests",
+  APPROVAL_REQUESTS: {
     title: "Approval requests",
     description: "Actions requiring your approval",
   },
-  {
-    id: "role_permission_changes",
+  ROLE_PERMISSION_CHANGES: {
     title: "Role and permission changes",
     description: "Changes to staff roles and permissions",
   },
-  {
-    id: "rate_management_changes",
+  RATE_MANAGEMENT: {
     title: "Rate management changes",
     description: "Rate configuration changes and approval requests",
   },
-  {
-    id: "kyc_verification_updates",
+  KYC_VERIFICATION: {
     title: "KYC & verification updates",
     description: "Important verification and compliance updates",
   },
-  {
-    id: "support_activity",
+  SUPPORT_ACTIVITY: {
     title: "Support activity",
     description: "Customer support issues requiring attention",
   },
-  {
-    id: "system_security_alerts",
+  SYSTEM_SECURITY: {
     title: "System & Security alerts",
     description: "Get updates on system and security alerts",
   },
-] as const;
-
-type PreferenceId = (typeof PREFERENCE_ROWS)[number]["id"];
-
-type PreferenceState = Record<PreferenceId, Record<Channel, boolean>>;
-
-/** Defaults mirror the states drawn in the design. */
-const DEFAULT_PREFERENCES: PreferenceState = {
-  transaction_activity: { in_app: true, email: false },
-  approval_requests: { in_app: true, email: false },
-  role_permission_changes: { in_app: true, email: false },
-  rate_management_changes: { in_app: true, email: false },
-  kyc_verification_updates: { in_app: true, email: false },
-  support_activity: { in_app: true, email: true },
-  system_security_alerts: { in_app: true, email: true },
 };
 
-export function NotificationsTab() {
-  // TODO(backend): swap this local state for the preferences query/mutation
-  // once `GET`/`PATCH` endpoints exist. Nothing here persists today — a reload
-  // returns every toggle to the defaults above.
-  const [channels, setChannels] = useState<Record<Channel, boolean>>({
-    in_app: true,
-    email: true,
-  });
-  const [preferences, setPreferences] =
-    useState<PreferenceState>(DEFAULT_PREFERENCES);
+const CHANNEL_LABEL: Record<NotificationChannel, string> = {
+  in_app: "In app",
+  email: "Email",
+};
 
-  const togglePreference = (id: PreferenceId, channel: Channel) => {
-    setPreferences((current) => ({
-      ...current,
-      [id]: { ...current[id], [channel]: !current[id][channel] },
-    }));
-  };
+/** One "In app"/"Email" switch with its caption. */
+function ToggleCell({
+  label,
+  srLabel,
+  checked,
+  disabled,
+  hint,
+  onCheckedChange,
+}: {
+  label: string;
+  srLabel: string;
+  checked: boolean;
+  disabled?: boolean;
+  hint?: string;
+  onCheckedChange: (checked: boolean) => void;
+}) {
+  return (
+    <div className="flex items-center gap-2.5" title={hint}>
+      <span
+        className={cn(
+          "text-[13px] text-secondary-text",
+          disabled && "opacity-50",
+        )}
+      >
+        {label}
+      </span>
+      <SettingsSwitch
+        aria-label={srLabel}
+        checked={checked}
+        disabled={disabled}
+        onCheckedChange={onCheckedChange}
+      />
+    </div>
+  );
+}
+
+function PreferencesSkeleton() {
+  return (
+    <div className="space-y-2.5">
+      {Array.from({ length: 7 }).map((_, index) => (
+        <Skeleton key={index} className="h-[68px] w-full rounded-xl" />
+      ))}
+    </div>
+  );
+}
+
+export function NotificationsTab() {
+  const { data, isLoading, isError } = useNotificationPreferences();
+  const savePreferences = useUpdateNotificationPreferences();
+
+  const preferences = data?.data;
+
+  /**
+   * Both helpers always name exactly one switch, which is what keeps us clear
+   * of the 400 the backend returns for a request that would change nothing.
+   */
+  const setChannel = (channel: NotificationChannel, value: boolean) =>
+    savePreferences.mutate({ channels: { [channel]: value } });
+
+  const setCategory = (
+    category: NotificationCategoryKey,
+    channel: NotificationChannel,
+    value: boolean,
+  ) =>
+    savePreferences.mutate({ categories: { [category]: { [channel]: value } } });
 
   return (
     <>
@@ -100,70 +142,111 @@ export function NotificationsTab() {
       />
 
       <div className="px-5 pb-6 pt-5 sm:px-7 sm:pb-7">
-        <SettingsSectionLabel>Notification channels</SettingsSectionLabel>
-        <SettingsGroup>
-          <SettingsRow>
-            <SettingsRowText
-              title="In-app notifications"
-              description="Receive notifications directly within the ERP"
-            />
-            <SettingsSwitch
-              aria-label="In-app notifications"
-              checked={channels.in_app}
-              onCheckedChange={(checked) =>
-                setChannels((current) => ({ ...current, in_app: checked }))
-              }
-            />
-          </SettingsRow>
+        {isError && !preferences ? (
+          <p className="text-[14px] text-secondary-text">
+            Your notification preferences couldn&apos;t be loaded. Refresh the
+            page to try again.
+          </p>
+        ) : isLoading || !preferences ? (
+          <>
+            <SettingsSectionLabel>Notification channels</SettingsSectionLabel>
+            <Skeleton className="h-[140px] w-full rounded-xl" />
+            <SettingsSectionLabel className="mt-7">
+              Notification Preference
+            </SettingsSectionLabel>
+            <PreferencesSkeleton />
+          </>
+        ) : (
+          <>
+            <SettingsSectionLabel>Notification channels</SettingsSectionLabel>
+            <SettingsGroup>
+              <SettingsRow>
+                <SettingsRowText
+                  title="In-app notifications"
+                  description="Receive notifications directly within the ERP"
+                />
+                <SettingsSwitch
+                  aria-label="In-app notifications"
+                  checked={preferences.channels.in_app}
+                  onCheckedChange={(checked) => setChannel("in_app", checked)}
+                />
+              </SettingsRow>
 
-          <SettingsRow>
-            <SettingsRowText
-              title="Email notifications"
-              description="Receive important ERP updates and alerts by email"
-            />
-            <SettingsSwitch
-              aria-label="Email notifications"
-              checked={channels.email}
-              onCheckedChange={(checked) =>
-                setChannels((current) => ({ ...current, email: checked }))
-              }
-            />
-          </SettingsRow>
-        </SettingsGroup>
+              <SettingsRow>
+                <SettingsRowText
+                  title="Email notifications"
+                  description="Receive important ERP updates and alerts by email"
+                />
+                <SettingsSwitch
+                  aria-label="Email notifications"
+                  checked={preferences.channels.email}
+                  onCheckedChange={(checked) => setChannel("email", checked)}
+                />
+              </SettingsRow>
+            </SettingsGroup>
 
-        <SettingsSectionLabel className="mt-7">
-          Notification Preference
-        </SettingsSectionLabel>
-        <SettingsGroup>
-          {PREFERENCE_ROWS.map((row) => (
-            <SettingsRow key={row.id}>
-              <SettingsRowText
-                title={row.title}
-                description={row.description}
-              />
-              <div className="flex shrink-0 items-center gap-5">
-                <div className="flex items-center gap-2.5">
-                  <span className="text-[13px] text-secondary-text">
-                    In app
-                  </span>
-                  <SettingsSwitch
-                    aria-label={`${row.title} — in app`}
-                    checked={preferences[row.id].in_app}
-                    onCheckedChange={() => togglePreference(row.id, "in_app")}
-                  />
-                </div>
-                <div className="flex items-center gap-2.5">
-                  <span className="text-[13px] text-secondary-text">Email</span>
-                  <SettingsSwitch
-                    aria-label={`${row.title} — email`}
-                    checked={preferences[row.id].email}
-                    onCheckedChange={() => togglePreference(row.id, "email")}
-                  />
-                </div>
-              </div>
-            </SettingsRow>
-          ))}
-        </SettingsGroup>
+            <SettingsSectionLabel className="mt-7">
+              Notification Preference
+            </SettingsSectionLabel>
+            <SettingsGroup>
+              {NOTIFICATION_CATEGORY_KEYS.map((category) => {
+                const copy = CATEGORY_COPY[category];
+                const toggles = preferences.categories[category];
+                const locked = category === ALWAYS_ON_CATEGORY;
+
+                return (
+                  <SettingsRow key={category}>
+                    <SettingsRowText
+                      title={copy.title}
+                      description={copy.description}
+                    />
+
+                    <div className="flex shrink-0 items-center gap-5">
+                      {locked && (
+                        <span
+                          className="flex items-center gap-1.5 text-[13px] text-secondary-text"
+                          title="Security alerts are always delivered and can't be turned off."
+                        >
+                          <Lock className="size-[13px]" aria-hidden />
+                          Always on
+                        </span>
+                      )}
+
+                      {(["in_app", "email"] as const).map((channel) => {
+                        // A channel switched off greys its whole column. The
+                        // stored toggles are untouched underneath and come
+                        // back as they were when it's switched on again.
+                        const channelOff = !preferences.channels[channel];
+
+                        return (
+                          <ToggleCell
+                            key={channel}
+                            label={CHANNEL_LABEL[channel]}
+                            srLabel={`${copy.title} — ${CHANNEL_LABEL[channel].toLowerCase()}`}
+                            // Security alerts ignore both switches, so showing
+                            // this row as anything but on would be a lie.
+                            checked={locked ? true : toggles[channel]}
+                            disabled={locked || channelOff}
+                            hint={
+                              locked
+                                ? "Security alerts are always delivered and can't be turned off."
+                                : channelOff
+                                  ? `Turn ${CHANNEL_LABEL[channel].toLowerCase()} notifications on to change this.`
+                                  : undefined
+                            }
+                            onCheckedChange={(checked) =>
+                              setCategory(category, channel, checked)
+                            }
+                          />
+                        );
+                      })}
+                    </div>
+                  </SettingsRow>
+                );
+              })}
+            </SettingsGroup>
+          </>
+        )}
       </div>
     </>
   );
