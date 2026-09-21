@@ -14,6 +14,14 @@ export type NotificationReferenceType =
 
 export type NotificationStatus = "ACTIVE" | "RESOLVED";
 
+// The only action the backend emits today. More may be added later, but
+// every other notification carries `action: null` — never infer an action
+// from reference_type/reference_id, always check this field.
+export interface ConfirmRoleChangeAction {
+  type: "CONFIRM_ROLE_CHANGE";
+  role_change_id: string;
+}
+
 export interface PayoutNotification {
   id: string;
   amount: number;
@@ -26,6 +34,7 @@ export interface PayoutNotification {
   reference_id: string | null;
   reference_type: NotificationReferenceType;
   affiliate: Affiliate;
+  action: ConfirmRoleChangeAction | null;
 }
 
 /**

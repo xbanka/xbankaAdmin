@@ -72,7 +72,7 @@ export function EditRolesPermissionsModal({
     removePermission,
     resetAvailability,
   } = usePermissionAvailability(newRole, {
-    onAdd: (permission) => setValue(permission, false, { shouldDirty: true }),
+    onAdd: (permission) => setValue(permission, true, { shouldDirty: true }),
     onRemove: (permission) => setValue(permission, false, { shouldDirty: true }),
   });
 

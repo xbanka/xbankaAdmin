@@ -4,6 +4,7 @@ import { getNotifications } from "../actions/notificationsActions";
 import { confirmRoleChange } from "../actions/auditLogActions";
 import { handleApiError } from "../errors/handleApiError";
 import { NotificationFilters } from "@/components/notifications-panel/notifications";
+import { PROFILE_QUERY_KEY } from "./profile.service";
 
 export const NOTIFICATIONS_QUERY_KEY = ["allNotification"] as const;
 
@@ -38,7 +39,7 @@ export const useConfirmRoleChange = () => {
       // The confirming staff member's own role/permissions just changed, and
       // the Staff table's Role Change column reads the same data — both need
       // to drop the now-cleared role_change without a manual reload.
-      queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+      queryClient.invalidateQueries({ queryKey: PROFILE_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: ["getAllStaff"] });
       toast.success("Role change confirmed.");
     },

@@ -54,7 +54,7 @@ export function EditPermissionsSidebar({
     removePermission,
     resetAvailability,
   } = usePermissionAvailability(role, {
-    onAdd: (permission) => setValue(permission, false, { shouldDirty: true }),
+    onAdd: (permission) => setValue(permission, true, { shouldDirty: true }),
     onRemove: (permission) => setValue(permission, false, { shouldDirty: true }),
   });
 

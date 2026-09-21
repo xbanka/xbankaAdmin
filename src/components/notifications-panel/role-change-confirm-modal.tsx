@@ -20,9 +20,9 @@ export function RoleChangeConfirmModal({
   const { mutate, isPending } = useConfirmRoleChange();
 
   const handleConfirm = () => {
-    if (!notification?.reference_id) return;
+    if (!notification?.action) return;
     mutate(
-      { id: notification.reference_id },
+      { id: notification.action.role_change_id },
       { onSuccess: onConfirmed },
     );
   };

@@ -77,7 +77,7 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
     resetAvailability,
   } = usePermissionAvailability(roleValue, {
     onAdd: (permission) =>
-      setValueStep2(permission, false, { shouldDirty: true }),
+      setValueStep2(permission, true, { shouldDirty: true }),
     onRemove: (permission) =>
       setValueStep2(permission, false, { shouldDirty: true }),
   });
