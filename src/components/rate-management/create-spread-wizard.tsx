@@ -77,9 +77,9 @@ export function CreateSpreadWizard({ onClose }: { onClose: () => void }) {
         id: segment.id,
         name: segment.name,
         isActive: segment.isActive,
-        buyFeeType: "PERCENTAGE",
+        buyFeeType: "PERCENTAGE" as const,
         buySpread: segment.buySpread,
-        sellFeeType: "PERCENTAGE",
+        sellFeeType: "PERCENTAGE" as const,
         sellSpread: segment.sellSpread,
       }));
 

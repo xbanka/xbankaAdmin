@@ -28,8 +28,11 @@ export const CheckboxField = ({
             checked={!!field.value}
             onCheckedChange={field.onChange}
             disabled={disabled || isDefault}
+            // Default permissions are locked (can't be unchecked), not
+            // degraded — the base disabled state shouldn't wash out its color.
+            className={isDefault ? "disabled:opacity-100" : undefined}
           />
-          <Label className="text-[#4B5563]">
+          <Label className="text-[#4B5563] peer-disabled:opacity-100">
             {label}
             {isDefault && (
               <span className="text-xs text-gray-400 ml-1">(default)</span>

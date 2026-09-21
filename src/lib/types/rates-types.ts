@@ -1,4 +1,7 @@
-export type FeeType = 'FLAT' | 'PERCENTAGE' | string;
+// "FIXED" is a legacy value some existing rows still carry — the app now
+// writes "FLAT" for a flat Naira fee, but reads must still handle "FIXED"
+// from rows created before that change.
+export type FeeType = 'PERCENTAGE' | 'FLAT' | 'FIXED';
 
 export interface CurrencyConfig {
   currency: string;
