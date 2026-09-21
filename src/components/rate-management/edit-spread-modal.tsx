@@ -12,14 +12,27 @@ import { fmt } from "@/lib/utils/formatNumber";
 import { ModalHeader } from "../ui/modal-header";
 import { Label } from "../ui/label";
 import { useUpdateBuyAndSpreadRates } from "@/lib/services/rates.service";
+import { FeeType } from "@/lib/types/rates-types";
 
 type UpdateOutcome = "applied" | "pending";
+
+const SPREAD_FORMAT_OPTIONS: { value: FeeType; label: string }[] = [
+  { value: "FLAT", label: "Flat Value" },
+  { value: "PERCENTAGE", label: "Percentage" },
+];
 
 export function EditSpreadModal({
   spreadData,
   onClose,
   onSave,
 }: EditSpreadModalProps) {
+  const [feeMode, setFeeMode] = useState<FeeType>(
+    // A row can still carry the legacy "FIXED" value — treat that the same
+    // as "FLAT" when deciding which radio starts selected.
+    spreadData?.buyFeeType === "PERCENTAGE" ? "PERCENTAGE" : "FLAT",
+  );
+  const isFlat = feeMode !== "PERCENTAGE";
+
   const [buySpread, setBuySpread] = useState(
     String(spreadData?.segment?.buySpread ?? 0),
   );
@@ -28,6 +41,14 @@ export function EditSpreadModal({
   );
   const buySpreadValue = Number(buySpread) || 0;
   const sellSpreadValue = Number(sellSpread) || 0;
+
+  const handleFeeModeChange = (mode: FeeType) => {
+    setFeeMode(mode);
+    // A percentage number and a flat currency amount mean very different
+    // things — never carry one over as the other when switching tabs.
+    setBuySpread("0");
+    setSellSpread("0");
+  };
 
   const [spreadActive, setSpreadActive] = useState(
     spreadData?.isActive ?? true,
@@ -40,16 +61,16 @@ export function EditSpreadModal({
   const OBIEX_BUY_RATE = spreadData?.obiexRate ?? 0;
   const OBIEX_SELL_RATE = spreadData?.obiexRate ?? 0;
 
-  const buyAmt = OBIEX_BUY_RATE * (buySpreadValue / 100);
+  const buyAmt = isFlat
+    ? buySpreadValue
+    : OBIEX_BUY_RATE * (buySpreadValue / 100);
   const customerBuyRate = OBIEX_BUY_RATE + buyAmt;
-  const sellAmt = OBIEX_SELL_RATE * (sellSpreadValue / 100);
+  const sellAmt = isFlat
+    ? sellSpreadValue
+    : OBIEX_SELL_RATE * (sellSpreadValue / 100);
   const customerSellRate = OBIEX_SELL_RATE - sellAmt;
 
   const handleUpdate = () => {
-    // NOTE: backend hasn't confirmed the update schema yet — mirroring the
-    // existing asset-level fields but marking them explicitly as percentage
-    // spreads, since that's now what buySpread/sellSpread represent here.
-    // Confirm with backend once they share the real update contract.
     mutate(
       {
         rateId: spreadData.id,
@@ -57,9 +78,9 @@ export function EditSpreadModal({
           currency: spreadData.currency,
           name: spreadData.name,
           isActive: spreadActive,
-          buyFeeType: spreadData.buyFeeType,
+          buyFeeType: feeMode,
           buyFeeValue: buySpreadValue,
-          sellFeeType: spreadData.sellFeeType,
+          sellFeeType: feeMode,
           sellFeeValue: sellSpreadValue,
           segmentId: spreadData.segmentId,
         },
@@ -135,41 +156,90 @@ export function EditSpreadModal({
       <div className="bg-card-primary flex ">
         {/* Left: inputs */}
         <div className="bg-card-primary p-6">
-          {/* Buy Spread */}
           <div className="mb-4 space-y-2">
-            <Label>Buy Spread</Label>
+            <Label>Spread Format</Label>
+            <div className="flex items-center gap-3">
+              {SPREAD_FORMAT_OPTIONS.map((option) => {
+                const selected = feeMode === option.value;
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => handleFeeModeChange(option.value)}
+                    className={cn(
+                      "flex-1 flex items-center gap-2 px-4 py-3 rounded-[8px] border text-[14px] font-medium text-text-primary transition-colors",
+                      selected
+                        ? "border-[#0D9488] bg-[#F0FDFA]"
+                        : "border-[#E5E7EB] bg-transparent",
+                    )}
+                    aria-pressed={selected}
+                  >
+                    <span
+                      className={cn(
+                        "flex items-center justify-center w-4 h-4 rounded-full border-2 flex-shrink-0",
+                        selected ? "border-[#0D9488]" : "border-[#D1D5DB]",
+                      )}
+                    >
+                      {selected && (
+                        <span className="w-2 h-2 rounded-full bg-[#0D9488]" />
+                      )}
+                    </span>
+                    {option.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Buy Spread / Fee */}
+          <div className="mb-4 space-y-2">
+            <Label>{isFlat ? "Buy Fee" : "Buy Spread"}</Label>
             <div className="flex items-center border border-[#E5E7EB] rounded-[8px] bg-[#F9FAFB] overflow-hidden focus-within:border-[#0D9488] focus-within:ring-[3px] focus-within:ring-[#0D9488]/10 transition-all">
+              {isFlat && (
+                <span className="pl-3 text-[#9CA3AF] text-[14px]">₦</span>
+              )}
               <input
                 type="number"
                 value={buySpread}
                 onChange={(e) => setBuySpread(e.target.value)}
                 className="flex-1 border-none outline-none px-3 py-2.5 text-[14px] font-medium bg-transparent"
               />
-              <span className="px-3 py-2.5 text-[#9CA3AF] text-[14px] border-l border-[#E5E7EB]">
-                %
-              </span>
+              {!isFlat && (
+                <span className="px-3 py-2.5 text-[#9CA3AF] text-[14px] border-l border-[#E5E7EB]">
+                  %
+                </span>
+              )}
             </div>
             <p className="text-[12px] font-normal text-text-secondary">
-              Added above Obiex buy rate when customers buy crypto.
+              {isFlat
+                ? "Flat amount added above Obiex buy rate when customers buy crypto."
+                : "Added above Obiex buy rate when customers buy crypto."}
             </p>
           </div>
 
-          {/* Sell Spread */}
+          {/* Sell Spread / Fee */}
           <div className="mb-4 space-y-2">
-            <Label>Sell Spread</Label>
+            <Label>{isFlat ? "Sell Fee" : "Sell Spread"}</Label>
             <div className="flex items-center border border-[#E5E7EB] rounded-[8px] bg-[#F9FAFB] overflow-hidden focus-within:border-[#0D9488] focus-within:ring-[3px] focus-within:ring-[#0D9488]/10 transition-all">
+              {isFlat && (
+                <span className="pl-3 text-[#9CA3AF] text-[14px]">₦</span>
+              )}
               <input
                 type="number"
                 value={sellSpread}
                 onChange={(e) => setSellSpread(e.target.value)}
                 className="flex-1 border-none outline-none px-3 py-2.5 text-[14px] font-medium bg-transparent"
               />
-              <span className="px-3 py-2.5 text-[#9CA3AF] text-[14px] border-l border-[#E5E7EB]">
-                %
-              </span>
+              {!isFlat && (
+                <span className="px-3 py-2.5 text-[#9CA3AF] text-[14px] border-l border-[#E5E7EB]">
+                  %
+                </span>
+              )}
             </div>
             <p className="text-[12px] font-normal text-text-secondary mt-1">
-              Deducted from Obiex sell rate when customers sell crypto.
+              {isFlat
+                ? "Flat amount deducted from Obiex sell rate when customers sell crypto."
+                : "Deducted from Obiex sell rate when customers sell crypto."}
             </p>
           </div>
 
@@ -212,15 +282,15 @@ export function EditSpreadModal({
           {/* Buy section */}
           <div className="mb-4 bg-card-primary p-3 border-l-3 rounded-[12px] border-success-border">
             <div className="text-[14px] font-medium leading-[20px] text-text-primary uppercase tracking-wide mb-2">
-              Buy spread
+              {isFlat ? "Buy fee" : "Buy spread"}
             </div>
             <PreviewRow label="Obiex Buy Rate" value={fmt(OBIEX_BUY_RATE)} />
             <PreviewRow
-              label="Buy Spread"
-              value={`+${buySpreadValue.toFixed(2)}%`}
+              label={isFlat ? "Buy Fee" : "Buy Spread"}
+              value={isFlat ? fmt(buySpreadValue) : `+${buySpreadValue.toFixed(2)}%`}
               valueClass="text-[#059669]"
             />
-            <PreviewRow label="Spread Amount" value={fmt(buyAmt)} />
+            <PreviewRow label={isFlat ? "Fee Amount" : "Spread Amount"} value={fmt(buyAmt)} />
             <PreviewRow
               label="Customer Buy Rate"
               value={fmt(customerBuyRate)}
@@ -229,7 +299,7 @@ export function EditSpreadModal({
             <div className="flex items-start gap-1 mt-2 bg-card-secondary rounded-[8px]">
               <p className="text-[12px] font-normal text-text-secondary py-1 px-2">
                 Customer buys {spreadData.currency} at Obiex buy rate plus
-                XBanka buy spread.
+                XBanka buy {isFlat ? "fee" : "spread"}.
               </p>
             </div>
           </div>
@@ -237,15 +307,15 @@ export function EditSpreadModal({
           {/* Sell section */}
           <div className="mb-4 bg-card-primary p-3 border-l-3 rounded-[12px] border-error-border">
             <div className="text-[11px] font-semibold text-[#9CA3AF] uppercase tracking-wide mb-2">
-              Sell spread
+              {isFlat ? "Sell fee" : "Sell spread"}
             </div>
             <PreviewRow label="Obiex Sell Rate" value={fmt(OBIEX_SELL_RATE)} />
             <PreviewRow
-              label="Sell Spread"
-              value={`${sellSpreadValue.toFixed(2)}%`}
+              label={isFlat ? "Sell Fee" : "Sell Spread"}
+              value={isFlat ? fmt(sellSpreadValue) : `${sellSpreadValue.toFixed(2)}%`}
               valueClass="text-[#EF4444]"
             />
-            <PreviewRow label="Spread Amount" value={fmt(sellAmt)} />
+            <PreviewRow label={isFlat ? "Fee Amount" : "Spread Amount"} value={fmt(sellAmt)} />
             <PreviewRow
               label="Customer Sell Rate"
               value={fmt(customerSellRate)}
@@ -253,7 +323,8 @@ export function EditSpreadModal({
             />
             <div className="flex items-start gap-1 mt-2 bg-card-secondary rounded-[8px]">
               <p className="text-[12px] font-normal text-text-secondary py-1 px-2">
-                XBanka pays customer Obiex sell rate minus XBanka sell spread.
+                XBanka pays customer Obiex sell rate minus XBanka sell{" "}
+                {isFlat ? "fee" : "spread"}.
               </p>
             </div>
           </div>

@@ -73,7 +73,6 @@ export const ROLE_CONFIG: Record<
   {
     defaultPermissions: Permission[];
     optionalPermissions: Permission[];
-    neverAllowedPermissions: Permission[];
   }
 > = {
   "Super Admin": {
@@ -160,7 +159,6 @@ export const ROLE_CONFIG: Record<
       "rates_changeOverride",
     ],
     optionalPermissions: [],
-    neverAllowedPermissions: [],
   },
   Admin: {
     defaultPermissions: [
@@ -188,16 +186,6 @@ export const ROLE_CONFIG: Record<
       "reports_exportOperational",
       "reconciliation_viewRecords",
     ],
-    neverAllowedPermissions: [
-      "finance_approvePayments",
-      "finance_holdPayments",
-      "finance_releasePayments",
-      "transactions_settleTransactions",
-      "systemSettings_editSettings",
-      "audit_exportAuditLogs",
-      "staff_createSuperAdmin",
-      "finance_bypassApprovals",
-    ],
   },
   Manager: {
     defaultPermissions: [
@@ -213,17 +201,6 @@ export const ROLE_CONFIG: Record<
       "transactions_verifyTransactions",
       "kyc_viewKycDocuments",
       "tasks_commentTasks",
-    ],
-    neverAllowedPermissions: [
-      "finance_approvePayments",
-      "finance_holdPayments",
-      "finance_releasePayments",
-      "transactions_createTransactions",
-      "transactions_settleTransactions",
-      "staff_editPermissions",
-      "finance_viewProfit",
-      "systemSettings_editSettings",
-      "audit_viewAuditLogs",
     ],
   },
   Finance: {
@@ -249,14 +226,6 @@ export const ROLE_CONFIG: Record<
       "affiliate_adjustBalances",
       "reports_exportFinance",
     ],
-    neverAllowedPermissions: [
-      "transactions_createTransactions",
-      "transactions_settleTransactions",
-      "staff_editPermissions",
-      "systemSettings_editSettings",
-      "records_deleteRecords",
-      "audit_bypassLogging",
-    ],
   },
   Operations: {
     defaultPermissions: [
@@ -278,16 +247,6 @@ export const ROLE_CONFIG: Record<
       "tasks_createTasks",
       "tasks_editDetails",
     ],
-    neverAllowedPermissions: [
-      "kyc_approveKyc",
-      "kyc_rejectKyc",
-      "finance_approvePayments",
-      "finance_holdPayments",
-      "finance_releasePayments",
-      "finance_viewProfit",
-      "staff_editPermissions",
-      "systemSettings_editSettings",
-    ],
   },
   Compliance: {
     defaultPermissions: [
@@ -307,12 +266,6 @@ export const ROLE_CONFIG: Record<
       "finance_viewSummaries",
       "transactions_recommendReversal",
     ],
-    neverAllowedPermissions: [
-      "transactions_createTransactions",
-      "transactions_settleTransactions",
-      "finance_approvePayments",
-      "systemSettings_editSettings",
-    ],
   },
   "Customer Rep": {
     defaultPermissions: [
@@ -327,17 +280,6 @@ export const ROLE_CONFIG: Record<
       "tasks_commentTasks",
     ],
     optionalPermissions: [],
-    neverAllowedPermissions: [
-      "kyc_approveKyc",
-      "kyc_rejectKyc",
-      "transactions_verifyTransactions",
-      "finance_approvePayments",
-      "finance_holdPayments",
-      "finance_releasePayments",
-      "transactions_settleTransactions",
-      "finance_viewPayments",
-      "systemSettings_editSettings",
-    ],
   },
   Staff: {
     defaultPermissions: [
@@ -346,13 +288,6 @@ export const ROLE_CONFIG: Record<
       "transactions_viewLimitedTransactions",
     ],
     optionalPermissions: ["tasks_commentTasks"],
-    neverAllowedPermissions: [
-      "transactions_createTransactions",
-      "finance_approvePayments",
-      "finance_viewPayments",
-      "staff_editPermissions",
-      "systemSettings_editSettings",
-    ],
   },
   Viewer: {
     defaultPermissions: [
@@ -361,13 +296,6 @@ export const ROLE_CONFIG: Record<
       "tasks_viewBoardReadOnly",
     ],
     optionalPermissions: ["reports_exportReadOnly"],
-    neverAllowedPermissions: [
-      "transactions_createTransactions",
-      "transactions_updateStatus",
-      "finance_approvePayments",
-      "kyc_viewKycDocuments",
-      "systemSettings_editSettings",
-    ],
   },
 };
 

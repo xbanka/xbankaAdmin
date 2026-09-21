@@ -39,6 +39,25 @@ export interface MemberRole {
   allowed_permissions: string[];
 }
 
+export interface RoleChange {
+  previous_role: string;
+  new_role: string;
+}
+
+// GET /erp/me — the logged-in staff member's own profile.
+export interface Profile {
+  id: string;
+  staff_code: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string | null;
+  avatar_url: string | null;
+  role: MemberRole;
+  created_at: string;
+  verified: boolean;
+}
+
 export interface StaffMember {
   id: string;
   first_name: string;
@@ -48,6 +67,7 @@ export interface StaffMember {
   role: MemberRole;
   staff_code: string;
   verified: boolean;
+  role_change: RoleChange | null;
 }
 
 export interface StaffResponse {

@@ -41,9 +41,13 @@ export const deleteStaff = async (staff_id: string) => {
   };
 };
 
+// The roles-permissions endpoint accepts a partial payload: pass `role` +
+// `permissions` (+ optional `reason`) to change the role, or just
+// `permissions` on its own to edit permissions without touching the role.
 export interface UpdateStaffRolesPermissionsPayload {
-  role: string;
+  role?: string;
   permissions: string[];
+  reason?: string;
 }
 export const updateStaffRolesPermissions = async (
   staffId: string,
@@ -59,3 +63,12 @@ export const updateStaffRolesPermissions = async (
 
   return response.data;
 };
+
+export type UpdateStaffPermissionsPayload = Pick<
+  UpdateStaffRolesPermissionsPayload,
+  "permissions"
+>;
+export const updateStaffPermissions = (
+  staffId: string,
+  payload: UpdateStaffPermissionsPayload,
+) => updateStaffRolesPermissions(staffId, payload);

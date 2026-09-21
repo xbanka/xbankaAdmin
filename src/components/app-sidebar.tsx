@@ -60,6 +60,11 @@ const data = {
       url: "/rate-management",
       icon: PercentSquare,
     },
+    {
+      title: "Audit Log",
+      url: "/audit-log",
+      icon: PercentSquare,
+    },
     // {
     //   title: "Support Center",
     //   url: "/customer-support",

@@ -12,9 +12,14 @@ import { StaffMember } from "@/lib/types/staffTypes";
 import { formatDate } from "@/lib/formatDate";
 import StaffActionMenu from "@/components/staff/staff-action-menu";
 import DeleteStaffModal from "@/components/staff/delete-staff-modal";
-import { EditStaffSidebar } from "@/components/staff/edit-staff-sidebar";
+import { EditPermissionsSidebar } from "@/components/staff/edit-permissions-sidebar";
 import { usePermissions } from "@/hooks/usePermissions";
 import { ActiveBadge } from "@/components/customer-management/active-badge";
+import { EditRolesPermissionsModal } from "@/components/staff/edit-role_permission-modal";
+import {
+  RoleChangeBadge,
+  NoRoleChange,
+} from "@/components/ui/role-change-badge";
 
 export default function StaffPage() {
   const [filter, setFilter] = useState("all");
@@ -22,18 +27,52 @@ export default function StaffPage() {
   const { hasPermission } = usePermissions();
   const canAddStaff = hasPermission("staff:add");
   const canEditRoles = hasPermission("staff:edit_roles");
+  const canEditPermissions = hasPermission("staff:edit_permissions");
 
   // const { data, error, isLoading } = useGetStaff(role)
   const { data, isError, error, isPending } = useGetAllStaff();
   // const { data, isError, error, isPending } = useDeleteStaff();
 
-  const filteredStaff = (data?.data?.staff ?? []).filter((staff: StaffMember) => {
-    if (filter === "all") return true;
-    return filter === "active" ? staff.verified : !staff.verified;
-  });
+  const filteredStaff = (data?.data?.staff ?? []).filter(
+    (staff: StaffMember) => {
+      if (filter === "all") return true;
+      return filter === "active" ? staff.verified : !staff.verified;
+    },
+  );
   const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null);
-  const [editOpen, setEditOpen] = useState(false);
+  const [editPermissionsOpen, setEditPermissionsOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [editRolesOpen, setEditRolesOpen] = useState(false);
+
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  const allSelected =
+    filteredStaff.length > 0 &&
+    filteredStaff.every((s: StaffMember) => selectedIds.has(s.id));
+
+  const toggleAll = () => {
+    if (allSelected) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filteredStaff.map((s: StaffMember) => s.id)));
+    }
+  };
+
+  const toggleOne = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const hasRoleChange = filteredStaff.some(
+    (staff: StaffMember) => staff.role_change,
+  );
 
   const columns = [
     {
@@ -74,7 +113,7 @@ export default function StaffPage() {
       header: "Email address",
     },
     {
-      key: "id" as const,
+      key: "staff_code" as const,
       header: "Staff ID",
     },
     {
@@ -82,7 +121,7 @@ export default function StaffPage() {
       header: "Role",
       render: (staff: StaffMember) => (
         <div className="">
-          <span>{staff.staff_code}</span>
+          <span>{staff.role.name}</span>
         </div>
       ),
     },
@@ -91,6 +130,24 @@ export default function StaffPage() {
       header: "Status",
       render: (staff: StaffMember) => <ActiveBadge active={staff.verified} />,
     },
+    ...(hasRoleChange
+      ? [
+          {
+            key: "role_change" as const,
+            header: "Role Change",
+            render: (staff: StaffMember) =>
+              staff.role_change ? (
+                <RoleChangeBadge
+                  from={staff.role_change.previous_role}
+                  to={staff.role_change.new_role}
+                  subStatus="Pending confirmation"
+                />
+              ) : (
+                <NoRoleChange />
+              ),
+          },
+        ]
+      : []),
     {
       key: "created_at" as const,
       header: "Date joined",
@@ -109,10 +166,15 @@ export default function StaffPage() {
       header: "",
       render: (item: StaffMember) => (
         <StaffActionMenu
+          canEditPermissions={canEditPermissions}
           canEditRoles={canEditRoles}
-          onEdit={() => {
+          onEditPermissions={() => {
             setSelectedStaff(item);
-            setEditOpen(true);
+            setEditPermissionsOpen(true);
+          }}
+          onEditRoles={() => {
+            setSelectedStaff(item);
+            setEditRolesOpen(true);
           }}
           onDelete={() => {
             setSelectedStaff(item);
@@ -162,11 +224,17 @@ export default function StaffPage() {
           isOpen={isAddStaffOpen}
           onClose={() => setIsAddStaffOpen(false)}
         />
-        <EditStaffSidebar
-                isOpen={editOpen}
-                onClose={() => setEditOpen(false)}
-                staff={selectedStaff}
-              />
+        <EditPermissionsSidebar
+          isOpen={editPermissionsOpen}
+          onClose={() => setEditPermissionsOpen(false)}
+          staff={selectedStaff}
+        />
+
+        <EditRolesPermissionsModal
+          isOpen={editRolesOpen}
+          onClose={() => setEditRolesOpen(false)}
+          staff={selectedStaff}
+        />
 
         <DeleteStaffModal
           isOpen={deleteOpen}

@@ -14,6 +14,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { markAsReadNotification } from "@/lib/actions/notificationsActions";
 import {
   NOTIFICATIONS_QUERY_KEY,
+  useConfirmRoleChange,
   useGetNotifications,
 } from "@/lib/services/notification.service";
 import LoaderSpinner from "../ui/loaderSpinner";
@@ -155,6 +156,8 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
     },
   });
 
+  const confirmRoleChangeMutation = useConfirmRoleChange();
+
   const clearFilters = () => {
     setTypeFilter("ALL");
     setStatusFilter("ALL");
@@ -162,7 +165,24 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
   };
 
   const handleViewRequest = (notification: PayoutNotification) => {
+    if (notification.action?.type === "CONFIRM_ROLE_CHANGE") {
+      // Self-confirmation workflow: confirming applies the staff member's
+      // pending role change (and any pending permission overrides). The
+      // action's role_change_id, not reference_id, is what the confirm
+      // endpoint expects.
+      confirmRoleChangeMutation.mutate({
+        id: notification.action.role_change_id,
+      });
+      markReadMutation.mutate({
+        id: notification.id,
+      });
+      return;
+    }
+
     if (notification.reference_type === "STAFF_ACCOUNT") {
+      // STAFF_ACCOUNT also covers events with nothing to confirm (e.g. a
+      // password change) — action is null for those. Nothing to open, just
+      // mark it read.
       markReadMutation.mutate({
         id: notification.id,
       });
@@ -319,13 +339,20 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
                 const unread = !notification.is_read;
                 const isResolved = notification.status === "RESOLVED";
                 const isConfirming =
-                  markReadMutation.isPending &&
-                  markReadMutation.variables?.id === notification.id;
-                const showConfirmCta = !(
-                  isResolved &&
-                  (notification.reference_type === "STAFF_ACCOUNT" ||
-                    notification.reference_type === "RATE_PROPOSAL")
-                );
+                  (markReadMutation.isPending &&
+                    markReadMutation.variables?.id === notification.id) ||
+                  (confirmRoleChangeMutation.isPending &&
+                    confirmRoleChangeMutation.variables?.id ===
+                      notification.action?.role_change_id);
+                // STAFF_ACCOUNT notifications only get a Confirm CTA when
+                // the backend actually attached a confirmable action — a
+                // password-change event under the same reference_type has
+                // nothing to confirm and gets no CTA at all.
+                const showConfirmCta =
+                  notification.reference_type === "STAFF_ACCOUNT"
+                    ? !isResolved &&
+                      notification.action?.type === "CONFIRM_ROLE_CHANGE"
+                    : !(isResolved && notification.reference_type === "RATE_PROPOSAL");
                 return (
                   <li
                     key={notification.id}

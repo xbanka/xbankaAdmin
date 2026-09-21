@@ -131,10 +131,10 @@ export default function CustomerManagement() {
       header: "Status",
       render: (item: CustomerProps) => (
         <span
-          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
+          className={`inline-flex items-center border gap-1.5 px-3 py-2 rounded-full text-xs font-medium ${
             item.isEmailVerified
-              ? "bg-[#D1FAE5] text-[#037508]"
-              : "bg-[#FFF8D8] text-[#B29504]"
+              ? "bg-[#ECFDF3] text-[#037508] border-success-border"
+              : "bg-[#FFF8D8] text-[#A27D00] border-[#FEF0C7]"
           }`}
         >
           <span className="h-1.5 w-1.5 rounded-full bg-current" />
