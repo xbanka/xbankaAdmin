@@ -40,10 +40,10 @@ type SettingsProfile = {
   first_name?: string;
   last_name?: string;
   email?: string;
-  phone?: string;
+  phone?: string | null;
   staff_code?: string;
   department?: string;
-  avatar_url?: string;
+  avatar_url?: string | null;
   verified?: boolean;
   phone_verified?: boolean;
   role?: { name?: string; managed_by?: string };
@@ -148,7 +148,7 @@ export function MyProfileTab() {
                 <Skeleton className="size-12 rounded-full" />
               ) : (
                 <Avatar className="size-12">
-                  <AvatarImage src={user.avatar_url} alt={fullName} />
+                  <AvatarImage src={user.avatar_url ?? undefined} alt={fullName} />
                   <AvatarFallback className="bg-teal-light text-[14px] font-semibold text-text-teal">
                     {initials}
                   </AvatarFallback>
