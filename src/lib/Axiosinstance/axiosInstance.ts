@@ -2,6 +2,20 @@ import axios from "axios";
 import { authToken } from "../authToken";
 import { refreshAccessToken } from "../refresh-token";
 
+/**
+ * Picks the first usable string out of an error body.
+ *
+ * FastAPI answers a 422 with an *array* of validation objects in `detail`.
+ * Handed straight to a toast, that array reaches React as a child and throws,
+ * turning a bad request into a blank screen — so only strings qualify, and
+ * anything else falls through to the generic message.
+ */
+const firstMessage = (...candidates: unknown[]): string | undefined =>
+  candidates.find(
+    (value): value is string =>
+      typeof value === "string" && value.trim().length > 0,
+  );
+
 const AxiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
   headers: {
@@ -118,22 +132,24 @@ AxiosInstance.interceptors.response.use(
         const text = await error.response.data.text();
         const parsed = JSON.parse(text);
         apiMessage =
-          parsed?.message ||
-          parsed?.error ||
-          parsed?.detail ||
-          parsed?.errors?.[0] ||
-          "Something went wrong";
+          firstMessage(
+            parsed?.message,
+            parsed?.error,
+            parsed?.detail,
+            parsed?.errors?.[0],
+          ) || "Something went wrong";
       } catch {
         apiMessage = error.message || "Something went wrong";
       }
     } else {
       apiMessage =
-        error.response?.data?.message ||
-        error.response?.data?.error ||
-        error.response?.data?.detail ||
-        error.response?.data?.errors?.[0] ||
-        error.message ||
-        "Something went wrong";
+        firstMessage(
+          error.response?.data?.message,
+          error.response?.data?.error,
+          error.response?.data?.detail,
+          error.response?.data?.errors?.[0],
+          error.message,
+        ) || "Something went wrong";
     }
 
     const customError = {
