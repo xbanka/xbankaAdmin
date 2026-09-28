@@ -35,6 +35,7 @@ export const DashboardHomePage = () => {
     isLoading: transactionLoading,
     refetch: refetchTransactionMetrics,
     isFetching: isRefetchingTransactionMetrics,
+    error: errorMetrics
   } = useGetTransactionMetrics();
   console.log("Transaction Metrics:", transactionMetrics);
 
@@ -62,6 +63,7 @@ export const DashboardHomePage = () => {
       icon: Banknote,
       value: transactionMetrics?.data.total ?? 0,
       isLoading: transactionLoading,
+      error: errorMetrics?.message,
       // trend: "12% vs last week",
       stats: [
         {
@@ -206,12 +208,13 @@ export const DashboardHomePage = () => {
               // trend={metric.trend}
               stats={metric.stats}
               isLoading={metric.isLoading}
+              error={metric.error}
             />
           ))}
         </div>
 
         {/* Workflow Health + Needs Urgent Attention */}
-        <div className="grid gap-6 lg:grid-cols-2">
+        {/* <div className="grid gap-6 lg:grid-cols-2">
           <CardLayout className="space-y-4">
             <div>
               <h1 className="text-text-primary font-medium text-[16px] leading-6">
@@ -304,7 +307,7 @@ export const DashboardHomePage = () => {
               </div>
             </CardContent>
           </Card>
-        </div>
+        </div> */}
       </div>
     </DashboardLayout>
   );

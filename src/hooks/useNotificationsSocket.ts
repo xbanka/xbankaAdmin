@@ -2,7 +2,11 @@
 
 import { useEffect, useRef, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { PayoutNotification } from "@/components/notifications-panel/notifications";
+import {
+  NotificationFilters,
+  PayoutNotification,
+} from "@/components/notifications-panel/notifications";
+import { NOTIFICATIONS_QUERY_KEY } from "@/lib/services/notification.service";
 
 type NotificationEvent =
   | { event: "notification:new"; data: PayoutNotification }
@@ -44,31 +48,60 @@ export function useNotificationsSocket({
       const { event, data } = parsed;
       if (!data?.id) return;
 
-      queryClient.setQueryData<{ data: PayoutNotification[] } | undefined>(
-        ["allNotification"],
-        (old) => {
-          if (!old) return old;
-          const exists = old.data.some((n) => n.id === data.id);
-
-          if (event === "notification:new") {
-            if (exists) return old; // guards against dupes on reconnect replay
-            return { ...old, data: [data, ...old.data] };
-          }
-
-          if (event === "notification:updated") {
+      if (event === "notification:updated") {
+        // Patch the notification everywhere it's cached — the panel keeps a
+        // separate cache entry per filter combination, so an exact-key write
+        // would only ever reach one of them.
+        queryClient.setQueriesData<{ data: PayoutNotification[] } | undefined>(
+          { queryKey: NOTIFICATIONS_QUERY_KEY },
+          (old) => {
+            if (!old?.data) return old;
+            if (!old.data.some((n) => n.id === data.id)) return old;
             return {
               ...old,
               data: old.data.map((n) =>
                 n.id === data.id ? { ...n, ...data } : n,
               ),
             };
-          }
-
-          return old;
-        },
-      );
+          },
+        );
+        // A patched notification may now fall in or out of a filtered view
+        // (e.g. it just became RESOLVED), so let the server re-decide.
+        queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEY });
+      }
 
       if (event === "notification:new") {
+        // Patch every cached view whose filters the new notification actually
+        // matches, synchronously — the bell dot, an open dropdown, and the
+        // role-change popup queue all read this same cache, and none of them
+        // should have to wait on a refetch (or the 60s poll) to notice a push
+        // that already arrived. setQueriesData's updater doesn't expose the
+        // query key, so we go query-by-query via getQueriesData instead.
+        const cached = queryClient.getQueriesData<
+          { data: PayoutNotification[] } | undefined
+        >({ queryKey: NOTIFICATIONS_QUERY_KEY });
+
+        cached.forEach(([queryKey, old]) => {
+          if (!old?.data || old.data.some((n) => n.id === data.id)) return;
+
+          const filters = queryKey[1] as NotificationFilters | undefined;
+          const matches =
+            (!filters?.reference_type ||
+              filters.reference_type === data.reference_type) &&
+            (!filters?.status || filters.status === data.status) &&
+            (filters?.is_read === undefined ||
+              filters.is_read === data.is_read);
+          if (!matches) return;
+
+          queryClient.setQueryData(queryKey, {
+            ...old,
+            data: [data, ...old.data],
+          });
+        });
+
+        // Let the server re-decide filter membership in the background too,
+        // in case our client-side filter matching above ever drifts from it.
+        queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEY });
         onNewNotification?.(data);
       }
     },
@@ -93,7 +126,7 @@ export function useNotificationsSocket({
         // socket missed while disconnected, rather than trusting the
         // gap to be empty.
         if (isReconnect) {
-          queryClient.invalidateQueries({ queryKey: ["allNotification"] });
+          queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEY });
         }
       };
 

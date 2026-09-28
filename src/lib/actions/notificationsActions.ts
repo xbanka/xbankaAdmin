@@ -1,8 +1,19 @@
+import { NotificationFilters } from "@/components/notifications-panel/notifications";
 import AxiosInstance from "../Axiosinstance/axiosInstance";
 
-export const getNotifications = async () => {
+export const getNotifications = async (filters: NotificationFilters = {}) => {
+  const { reference_type, status, is_read } = filters;
+
   try {
-    const response = await AxiosInstance.get(`/api/erp/notifications`);
+    const response = await AxiosInstance.get(`/api/erp/notifications`, {
+      // Only send the axes the user actually narrowed — an omitted param
+      // means "all" for that axis on the backend.
+      params: {
+        ...(reference_type ? { reference_type } : {}),
+        ...(status ? { status } : {}),
+        ...(is_read === undefined ? {} : { is_read }),
+      },
+    });
     return {
       success: true,
       data: response.data, // ✅ only return actual payload

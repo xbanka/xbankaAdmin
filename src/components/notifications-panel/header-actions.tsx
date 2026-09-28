@@ -12,24 +12,17 @@ import { NotificationsPanel } from "./notifications-panel";
 import { Skeleton } from "../ui/skeleton";
 import { useProfile } from "@/lib/services/profile.service";
 import { useNotificationStore } from "@/store/useNotificationStore";
-import { useQuery } from "@tanstack/react-query";
-import { getNotifications } from "@/lib/actions/notificationsActions";
-import { PayoutNotification } from "./notifications";
+import { useGetNotifications } from "@/lib/services/notification.service";
 
 export function HeaderActions() {
   const { toggle, isOpen } = useNotificationStore();
   const notificationsRef = useRef<HTMLDivElement>(null);
 
-  const { data: notificationsData } = useQuery({
-    queryKey: ["allNotification"],
-    queryFn: getNotifications,
-  });
+  // The list endpoint returns no counts, so the badge rides on its own
+  // unread-only query rather than counting a list the panel now filters.
+  const { data: unreadData } = useGetNotifications({ is_read: false });
 
-  const notifications = notificationsData?.data ?? [];
-
-  const hasUnreadNotifications = notifications.some(
-    (notification: PayoutNotification) => !notification.is_read,
-  );
+  const hasUnreadNotifications = (unreadData?.data ?? []).length > 0;
 
   const { data, isLoading } = useProfile();
   const user = data?.data;
@@ -50,12 +43,9 @@ export function HeaderActions() {
           )}
         </Button>
 
-        {/* Notifications Dropdown */}
-        {isOpen && (
-          <div className="absolute right-0 top-full mt-2 z-50">
-            <NotificationsPanel onClose={toggle} />
-          </div>
-        )}
+        {/* Notifications Dropdown — the panel anchors itself to this
+            relatively-positioned wrapper. */}
+        {isOpen && <NotificationsPanel onClose={toggle} />}
       </div>
 
       {/* User Profile Dropdown */}

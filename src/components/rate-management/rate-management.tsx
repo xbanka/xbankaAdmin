@@ -35,6 +35,13 @@ import { AuditLogItem, SPREAD_HISTORY_MOCK, SpreadHistoryEntry } from "./types";
 import { AffectedAssetsBadge, ScopeBadge } from "./scope-badge";
 import { SpreadChangeDetailsDrawer } from "./spread-change-details-change-drawer";
 import { usePermissions } from "@/hooks/usePermissions";
+import { fmt } from "@/lib/utils/formatNumber";
+import {
+  formatFeeDisplay,
+  getEffectiveSpreads,
+  getXBankaRates,
+} from "@/lib/utils/rates";
+import { Checkbox } from "../ui/checkbox";
 
 export default function RateManagement() {
   const [activeTab, setActiveTab] = useState<"schedule" | "history">(
@@ -71,7 +78,56 @@ export default function RateManagement() {
   const historyData = ratesLogData?.logs;
   const ratesData = data?.data;
 
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  const allSelected =
+    (ratesData?.length ?? 0) > 0 &&
+    (ratesData ?? []).every((row: CryptoCurrencyTypes) =>
+      selectedIds.has(row.id),
+    );
+
+  const toggleAll = () => {
+    if (allSelected) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(
+        new Set((ratesData ?? []).map((row: CryptoCurrencyTypes) => row.id)),
+      );
+    }
+  };
+
+  const toggleOne = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
   const columns = [
+    {
+      key: "select",
+      header: (
+        <Checkbox
+          checked={allSelected}
+          onCheckedChange={toggleAll}
+          aria-label="Select all"
+        />
+      ),
+      className: "w-[48px]",
+      render: (row: CryptoCurrencyTypes) => (
+        <Checkbox
+          checked={selectedIds.has(row.id)}
+          onCheckedChange={() => toggleOne(row.id)}
+          onClick={(e) => e.stopPropagation()}
+          aria-label={`Select ${row.name}`}
+        />
+      ),
+    },
     {
       key: "asset",
       header: "Asset",
@@ -98,18 +154,46 @@ export default function RateManagement() {
       ),
     },
     {
-      key: "buyFeeValue",
-      header: "Buy Spread",
+      key: "obiexRate",
+      header: "Obiex Rate",
       render: (row: CryptoCurrencyTypes) => (
-        <div className="">{row.buyFeeValue}%</div>
+        <div className="">{fmt(row.obiexRate ?? 0)}</div>
       ),
     },
     {
-      key: "sellFeeValue",
+      key: "buySpread",
+      header: "Buy Spread",
+      render: (row: CryptoCurrencyTypes) => {
+        const { buySpread } = getEffectiveSpreads(row);
+        return (
+          <div className="">{formatFeeDisplay(buySpread, row.buyFeeType)}</div>
+        );
+      },
+    },
+    {
+      key: "sellSpread",
       header: "Sell Spread",
-      render: (row: CryptoCurrencyTypes) => (
-        <div className="">{row.sellFeeValue}%</div>
-      ),
+      render: (row: CryptoCurrencyTypes) => {
+        const { sellSpread } = getEffectiveSpreads(row);
+        return (
+          <div className="">
+            {formatFeeDisplay(sellSpread, row.sellFeeType)}
+          </div>
+        );
+      },
+    },
+    {
+      key: "xbankaRate",
+      header: "XBanka's Rate",
+      render: (row: CryptoCurrencyTypes) => {
+        const { buy, sell } = getXBankaRates(row);
+        return (
+          <div>
+            <div className="text-[12px] text-[#111827]">Buy: {fmt(buy)}</div>
+            <div className="text-[11px] text-[#9CA3AF]">Sell: {fmt(sell)}</div>
+          </div>
+        );
+      },
     },
     {
       key: "status",
@@ -203,7 +287,7 @@ export default function RateManagement() {
       ),
     },
   ].filter((column) => {
-    const restrictedColumns = ["actions", "toggle"];
+    const restrictedColumns = ["actions", "toggle", "select"];
 
     if (restrictedColumns.includes(column.key)) {
       return canEditSpread;
@@ -418,6 +502,18 @@ export default function RateManagement() {
                     <SlidersHorizontal size={14} /> Advanced filter
                   </button>
                 </div>
+
+                {activeTab === "schedule" && selectedIds.size > 0 && (
+                  <div className="flex items-center gap-2 mb-4 text-[13px] text-text-secondary">
+                    <span>{selectedIds.size} selected</span>
+                    <button
+                      onClick={() => setSelectedIds(new Set())}
+                      className="text-text-teal font-medium hover:underline"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                )}
 
                 {activeTab === "schedule" ? (
                   <DataTableLayout

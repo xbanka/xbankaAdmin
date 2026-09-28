@@ -1,15 +1,17 @@
 "use client";
 // @ts-nocheck
 
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Mail, User } from "lucide-react";
+import { Mail } from "lucide-react";
 import { SelectFieldLayout } from "../forms/SelectFieldLayout";
 import FormField from "../forms/FormField";
-import { CheckboxField } from "../ui/CheckboxField";
-import { CollapsiblePermissionSection } from "./collapsible-permission-section";
+import {
+  CustomisePermissionsToggle,
+  PermissionsFieldset,
+} from "./permissions-fieldset";
 import {
   stepOneFormData,
   StepOneStaffSchema,
@@ -21,14 +23,12 @@ import { InviteStaffDraft } from "@/lib/types/staffTypes";
 import {
   ASSIGNABLE_ROLES,
   getRolePermissionDefaults,
-  Permission,
-  PERMISSION_CATEGORIES,
   Role,
-  ROLE_CONFIG,
   UI_TO_API_PERMISSION_MAP,
 } from "@/lib/rolePermissions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
+import { usePermissionAvailability } from "@/hooks/usePermissionAvailability";
 interface AddStaffSidebarProps {
   isOpen: boolean;
   onClose: () => void;
@@ -66,40 +66,29 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
 
   const watchedPermissions = watchStep2();
 
+  const {
+    availablePerms,
+    addablePerms,
+    defaultPerms,
+    isCustomising,
+    setCustomising,
+    addPermission,
+    removePermission,
+    resetAvailability,
+  } = usePermissionAvailability(roleValue, {
+    onAdd: (permission) =>
+      setValueStep2(permission, true, { shouldDirty: true }),
+    onRemove: (permission) =>
+      setValueStep2(permission, false, { shouldDirty: true }),
+  });
+
   const handleClose = () => {
     setStep(1);
     onClose();
     reset1();
     reset2();
+    resetAvailability();
   };
-
-  // Compute which permissions are auto-checked, disabled, etc.
-  const permissionState = useMemo(() => {
-    if (!roleValue)
-      return {
-        defaultPerms: [] as Permission[],
-        optionalPerms: [] as Permission[],
-        neverAllowedPerms: [] as Permission[],
-        allPermissions: [] as Permission[],
-        categoryPerms: {} as Record<string, readonly Permission[]>,
-      };
-
-    const roleConfig = ROLE_CONFIG[roleValue];
-
-    const categoryPerms: Record<string, readonly Permission[]> =
-      PERMISSION_CATEGORIES;
-
-    return {
-      defaultPerms: roleConfig.defaultPermissions,
-      optionalPerms: roleConfig.optionalPermissions,
-      neverAllowedPerms: roleConfig.neverAllowedPermissions,
-      allPermissions: [
-        ...roleConfig.defaultPermissions,
-        ...roleConfig.optionalPermissions,
-      ],
-      categoryPerms,
-    };
-  }, [roleValue]);
 
   const handleInviteSubmit = (data: stepOneFormData) => {
     setStaffData({
@@ -123,8 +112,6 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
     const apiPermissions = selectedPermissions.map(
       (perm) => UI_TO_API_PERMISSION_MAP[perm],
     );
-
-    console.log("Raw data", data);
 
     const payload = {
       email: staffData.email,
@@ -214,12 +201,11 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
                   const role = value as Role; // safe: options come from Role enum
 
                   setSelectedRole(role);
-                  setValueStep2("role", role);
-
                   reset2({
                     role,
                     ...getRolePermissionDefaults(role),
                   });
+                  resetAvailability();
                 }}
               />
 
@@ -228,79 +214,47 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
                   <h3 className="text-sm font-semibold text-gray-900">
                     Permissions
                   </h3>
-                  {Object.entries(PERMISSION_CATEGORIES).map(
-                    ([category, permissions]) => {
-                      const allowedPermissions = permissions.filter((perm) =>
-                        permissionState.allPermissions.includes(perm),
-                      );
 
-                      if (!allowedPermissions.length) return null;
-
-                      return (
-                        <CollapsiblePermissionSection
-                          key={category}
-                          title={category}
-                          checkedCount={
-                            allowedPermissions.filter(
-                              (perm) => watchedPermissions?.[perm] === true,
-                            ).length
-                          }
-                        >
-                          <div className="flex gap-[32px] flex-wrap">
-                            {allowedPermissions.map((permId) => {
-                              const isDefault =
-                                permissionState.defaultPerms.includes(permId);
-                              const isNeverAllowed =
-                                permissionState.neverAllowedPerms.includes(
-                                  permId,
-                                );
-
-                              const rawLabel =
-                                permId
-                                  .split("_")[1]
-                                  ?.replace(/([A-Z])/g, " $1")
-                                  .trim() ?? permId;
-
-                              const label =
-                                rawLabel.charAt(0).toUpperCase() +
-                                rawLabel.slice(1);
-
-                              return (
-                                <CheckboxField
-                                  key={permId}
-                                  id={permId}
-                                  label={label}
-                                  control={control}
-                                  disabled={isNeverAllowed}
-                                  isDefault={isDefault} // 👈 THIS fixes everything
-                                />
-                              );
-                            })}
-                          </div>
-                        </CollapsiblePermissionSection>
-                      );
-                    },
-                  )}
+                  <PermissionsFieldset
+                    control={control}
+                    watchedPermissions={watchedPermissions}
+                    allPermissions={availablePerms}
+                    defaultPerms={defaultPerms}
+                    isCustomising={isCustomising}
+                    addablePerms={addablePerms}
+                    onAddPermission={addPermission}
+                    onRemovePermission={removePermission}
+                  />
                 </div>
               )}
             </div>
 
-            <div className="flex gap-3 p-6 border-t border-gray-200 flex-shrink-0">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleBack}
-                className="flex-1 bg-transparent"
-              >
-                Back
-              </Button>
-              <Button
-                disabled={!roleValue || isPending}
-                type="submit"
-                className="flex-3"
-              >
-                Send Invite
-              </Button>
+            <div className="border-t border-gray-200 flex-shrink-0">
+              {roleValue && (
+                <div className="px-6 pt-4">
+                  <CustomisePermissionsToggle
+                    isCustomising={isCustomising}
+                    onToggle={setCustomising}
+                  />
+                </div>
+              )}
+              <div className="flex gap-3 p-6">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleBack}
+                  className="flex-1 bg-transparent"
+                >
+                  Back
+                </Button>
+                <Button
+                  disabled={!roleValue || isPending}
+                  type="submit"
+                  className="flex-3"
+                >
+                  Send Invite
+                </Button>
+              </div>
             </div>
           </form>
         )}

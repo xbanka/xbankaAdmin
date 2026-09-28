@@ -1,4 +1,7 @@
-export type FeeType = 'FLAT' | 'PERCENTAGE' | string;
+// "FIXED" is a legacy value some existing rows still carry — the app now
+// writes "FLAT" for a flat Naira fee, but reads must still handle "FIXED"
+// from rows created before that change.
+export type FeeType = 'PERCENTAGE' | 'FLAT' | 'FIXED';
 
 export interface CurrencyConfig {
   currency: string;
@@ -31,17 +34,19 @@ export interface AssetSegment {
 }
 
 export interface CryptoCurrencyTypes {
-  id: string;                
-  currency: string;            
-  name: string;            
+  id: string;
+  currency: string;
+  name: string;
   isActive: boolean;
   buyFeeType: FeeType;
   buyFeeValue: number;
   sellFeeType: FeeType;
   sellFeeValue: number;
   overrideSegment: boolean;
-  segment: AssetSegment | null;      
+  segment: AssetSegment | null;
   segmentId: string;
+  obiexRate: number;
+  obiexValue: number;
   createdAt: string;
   updatedAt: string;
 }

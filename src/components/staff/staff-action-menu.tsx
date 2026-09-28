@@ -9,17 +9,19 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { StaffUser } from "@/lib/types/staffTypes";
-
 interface CustomerActionMenuProps {
-  onEdit?: () => void;
+  onEditPermissions?: () => void;
+  onEditRoles?: () => void;
   onDelete?: () => void;
+  canEditPermissions?: boolean;
   canEditRoles?: boolean;
 }
 
 export default function StaffActionMenu({
-  onEdit,
+  onEditPermissions,
+  onEditRoles,
   onDelete,
+  canEditPermissions = false,
   canEditRoles = false,
 }: CustomerActionMenuProps) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -31,23 +33,35 @@ export default function StaffActionMenu({
             <MoreVertical className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          {canEditRoles && (
+        <DropdownMenuContent className="font-[400] text-[14px] text-[#28282B] rounded-[12px] p-3 bg-[#FFFFFF]" align="end">
+          {canEditPermissions && (
             <DropdownMenuItem
+            className="font-[400] text-[14px] text-[#28282B] py-2 px-3"
               onClick={() => {
                 setMenuOpen(false);
-                onEdit?.();
+                onEditPermissions?.();
               }}
             >
-              Edit Staff Role
+              Edit Permissions
+            </DropdownMenuItem>
+          )}
+          {canEditRoles && (
+            <DropdownMenuItem
+            className="font-[400] text-[14px] text-[#28282B] py-2 px-3"
+              onClick={() => {
+                setMenuOpen(false);
+                onEditRoles?.();
+              }}
+            >
+              Edit Roles & Permissions
             </DropdownMenuItem>
           )}
           <DropdownMenuItem
+          className="font-[400] text-[14px] text-error-text py-2 px-3"
             onClick={() => {
               setMenuOpen(false);
               onDelete?.();
             }}
-            className="text-red-600"
           >
             Delete Staff
           </DropdownMenuItem>
