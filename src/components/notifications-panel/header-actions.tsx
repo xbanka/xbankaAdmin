@@ -27,6 +27,12 @@ export function HeaderActions() {
   const { data, isLoading } = useProfile();
   const user = data?.data;
 
+  const initials =
+    [user?.first_name?.[0], user?.last_name?.[0]]
+      .filter(Boolean)
+      .join("")
+      .toUpperCase() || "?";
+
   return (
     <div className="flex absolute right-2 items-center gap-4">
       {/* Notifications Bell */}
@@ -59,8 +65,13 @@ export function HeaderActions() {
               className="flex items-center gap-2 px-2 h-auto py-1"
             >
               <Avatar className="w-8 h-8">
-                <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=Joseph" />
-                <AvatarFallback>JE</AvatarFallback>
+                <AvatarImage
+                  src={user?.avatar_signed_url ?? undefined}
+                  alt={[user?.first_name, user?.last_name]
+                    .filter(Boolean)
+                    .join(" ")}
+                />
+                <AvatarFallback>{initials}</AvatarFallback>
               </Avatar>
               <div className="text-left">
                 <p className="text-sm font-medium leading-none">

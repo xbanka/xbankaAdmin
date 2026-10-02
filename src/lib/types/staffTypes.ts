@@ -53,6 +53,8 @@ export interface Profile {
   email: string;
   phone: string | null;
   avatar_url: string | null;
+  /** Short-lived link the browser can load; avatar_url is only the S3 key. */
+  avatar_signed_url: string | null;
   role: MemberRole;
   created_at: string;
   verified: boolean;
