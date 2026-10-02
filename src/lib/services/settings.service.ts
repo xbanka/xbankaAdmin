@@ -24,9 +24,11 @@ export const useUpdateProfile = () => {
 
   return useMutation({
     mutationFn: (payload: UpdateProfilePayload) => updateProfile(payload),
-    onSuccess: async () => {
+    onSuccess: (result) => {
       toast.success("Profile updated");
-      await queryClient.invalidateQueries({ queryKey: PROFILE_QUERY_KEY });
+      // The PATCH answers with the full updated profile, so it drops straight
+      // into the cache — no refetch, and no window for a stale GET to land.
+      queryClient.setQueryData(PROFILE_QUERY_KEY, result);
     },
     onError: (err) => {
       handleApiError(err);
@@ -39,9 +41,10 @@ export const useUploadProfilePicture = () => {
 
   return useMutation({
     mutationFn: (file: File) => uploadProfilePicture(file),
-    onSuccess: async () => {
+    onSuccess: (result) => {
       toast.success("Profile picture updated");
-      await queryClient.invalidateQueries({ queryKey: PROFILE_QUERY_KEY });
+      // Same shape as the profile GET, fresh signed avatar URL included.
+      queryClient.setQueryData(PROFILE_QUERY_KEY, result);
     },
     onError: (err) => {
       handleApiError(err);
