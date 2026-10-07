@@ -25,13 +25,19 @@ export function RoleChangeBadge({
     <div className={cn("flex flex-col gap-1", className)}>
       <div
         className={cn(
-          "flex items-center gap-1.5 text-sm font-medium text-text-primary-font-color w-fit",
-          boxed && "rounded-md border border-border px-2 py-1 bg-card-secondary",
+          "flex items-center gap-10 text-sm font-medium text-text-primary-font-color",
+          boxed && "rounded-[8px] border border-[#E9EBEE] p-3 bg-card-primary",
         )}
       >
-        <span>{from}</span>
+        <div className="space-y-1 w-full">
+          <div className="font-normal text-[12px] text-[#606368]">Current Role</div>
+          <span className="font-medium text-[14px] text-[#111827]">{from}</span>
+        </div>
         <ArrowRight className="w-3.5 h-3.5 text-secondary-text shrink-0" />
-        <span>{to}</span>
+        <div className="space-y-1 w-full">
+          <div className="font-normal text-[12px] text-[#606368]">New Role</div>
+          <span className="font-medium text-[14px] text-[#111827]">{to}</span>
+        </div>
       </div>
 
       {subStatus && (

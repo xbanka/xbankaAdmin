@@ -27,6 +27,7 @@ interface SelectFieldProps {
   className?: string;
   error?: FieldError;
   selectClassName?: string;
+  labelClassName?: string;
   value?: string | null;
 }
 
@@ -40,11 +41,12 @@ export const SelectFieldLayout = ({
   className,
   error,
   selectClassName,
+  labelClassName,
   value,
 }: SelectFieldProps) => {
   return (
     <div className={cn("space-y-2", className)}>
-      {label && <Label htmlFor={id}>{label}</Label>}
+      {label && <Label className={labelClassName} htmlFor={id}>{label}</Label>}
       <div className="relative w-full">
         {Icon && (
           <Icon className="absolute left-3 top-4 h-4 w-4 text-gray-400" />

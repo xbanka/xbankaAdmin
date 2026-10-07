@@ -9,7 +9,7 @@ import { useGetRoleChangeLogs, useGetLoginLogs } from "@/lib/services/audit-log.
 import { usePermissions } from "@/hooks/usePermissions";
 import { LoginLog, RoleChangeLog } from "./types";
 import { StatusBadge } from "../ui/status-badge";
-import { RoleChangeBadge } from "../ui/role-change-badge";
+import { RoleChangeCell } from "../staff/role-change-cell";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -107,7 +107,7 @@ export default function AuditLogPage() {
         key: "roleChange" as const,
         header: "Role Change",
         render: (item: RoleChangeLog) => (
-          <RoleChangeBadge from={item.roleFrom} to={item.roleTo} />
+          <RoleChangeCell from={item.roleFrom} to={item.roleTo} />
         ),
       },
       {

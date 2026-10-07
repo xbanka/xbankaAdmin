@@ -25,6 +25,7 @@ import { StaffMember } from "@/lib/types/staffTypes";
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 import { usePermissionAvailability } from "@/hooks/usePermissionAvailability";
 import { RoleChangeBadge } from "../ui/role-change-badge";
+import { DetailItem } from "./detail-item";
 
 interface EditRolesPermissionsModalProps {
   isOpen: boolean;
@@ -46,6 +47,7 @@ export function EditRolesPermissionsModal({
   staff,
 }: EditRolesPermissionsModalProps) {
   const { mutate: updateStaff, isPending } = useUpdateStaffRolesPermissions();
+  console.log("staff:", staff);
 
   const [step, setStep] = useState<Step>("details");
   const [newRole, setNewRole] = useState<Role | undefined>();
@@ -73,7 +75,8 @@ export function EditRolesPermissionsModal({
     resetAvailability,
   } = usePermissionAvailability(newRole, {
     onAdd: (permission) => setValue(permission, true, { shouldDirty: true }),
-    onRemove: (permission) => setValue(permission, false, { shouldDirty: true }),
+    onRemove: (permission) =>
+      setValue(permission, false, { shouldDirty: true }),
   });
 
   const roleOptions =
@@ -190,91 +193,86 @@ export function EditRolesPermissionsModal({
       {/* Sidebar */}
       <div className="relative bg-white w-full max-w-[550px] h-full flex flex-col shadow-lg">
         {/* Header */}
-        <div className="p-6 border-b border-border flex items-start justify-between flex-shrink-0">
+        <div className="px-6 py-4 bg-[#F9F9F9] flex items-center justify-between flex-shrink-0">
           <div>
-            <h2 className="text-lg font-semibold text-text-primary-font-color">
+            <h2 className="text-[24px] font-semibold text-text-primary">
               Edit Roles & Permissions
             </h2>
-            <p className="text-sm text-secondary-text mt-1">
+            <p className="text-sm font-normal text-text-secondary mt-1">
               Update this staff member&apos;s role and manage their ERP access.
             </p>
           </div>
           <button
             onClick={handleClose}
-            className="text-secondary-text hover:text-text-primary"
+            className="bg-card-primary p-[10px] rounded-[360px] text-secondary-text hover:text-text-primary"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 space-y-5">
+        <div className="flex-1 overflow-y-auto px-6 pt-5 space-y-5">
           {/* Staff summary card - shown on details + review steps */}
           {(step === "details" || step === "review") && (
-            <div className="rounded-lg bg-card-secondary p-4 flex items-center gap-4">
+            <div className="rounded-[8px] border border-card-border-secondary bg-card-primary p-4 flex items-start gap-4">
               <div className="w-10 h-10 rounded-full bg-purple-200 flex items-center justify-center text-sm font-semibold text-purple-700 shrink-0">
                 {staff.first_name?.charAt(0).toUpperCase()}
                 {staff.last_name?.charAt(0).toUpperCase()}
               </div>
-              <div className="flex-1 grid grid-cols-3 gap-2 text-sm">
-                <div>
-                  <p className="text-xs text-secondary-text">Name</p>
-                  <p className="font-medium text-text-primary-font-color">
-                    {staff.first_name} {staff.last_name}
-                  </p>
+              <div className="w-full space-y-3">
+                <div className="flex items-center justify-between text-sm">
+                  <DetailItem
+                    label="Name"
+                    value={staff.first_name + " " + staff.last_name}
+                  />
+                  <DetailItem label="Staff ID" value={staff.staff_code} />
+                  <DetailItem label="Current Role" value={currentRole} />
                 </div>
-                <div>
-                  <p className="text-xs text-secondary-text">Staff ID</p>
-                  <p className="font-medium text-text-primary-font-color">
-                    {staff.id}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-secondary-text">Current Role</p>
-                  <p className="font-medium text-text-primary-font-color">
-                    {currentRole}
-                  </p>
-                </div>
+
+                <DetailItem label="Email" value={staff.email} />
               </div>
             </div>
           )}
 
           {/* STEP 1: details */}
           {step === "details" && (
-            <>
-              <div>
-                <label className="text-sm font-medium text-text-primary-font-color mb-1.5 flex items-center gap-1.5">
-                  Current Role
-                </label>
-                <div className="flex items-center justify-between px-3 py-2 rounded-md border border-input bg-grey-light text-secondary-text text-sm">
-                  {currentRole}
-                  <Lock className="w-4 h-4" />
+            <div className="space-y-5">
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-text-primary-font-color mb-1.5 flex items-center gap-1.5">
+                    Current Role
+                  </label>
+                  <div className="flex items-center justify-between px-3 py-2 rounded-md border border-input bg-grey-light text-secondary-text text-sm">
+                    {currentRole}
+                    <Lock className="w-4 h-4" />
+                  </div>
                 </div>
-              </div>
 
-              <SelectFieldLayout
-                id="newRole"
-                label="New Role"
-                placeholder="Select new role"
-                options={roleOptions}
-                value={newRole}
-                onChange={handleRoleSelect}
-              />
-
-              <div>
-                <label
-                  htmlFor="reason"
-                  className="text-sm font-medium text-text-primary-font-color mb-1.5 block"
-                >
-                  Reason for change
-                </label>
-                <textarea
-                  id="reason"
-                  value={reason}
-                  onChange={(e) => setReason(e.target.value)}
-                  placeholder="Enter reason for change..."
-                  rows={3}
-                  className="w-full px-3 py-2 text-sm rounded-md border border-input focus:outline-none focus:border-input-border-focus resize-none"
+                <SelectFieldLayout
+                  id="newRole"
+                  label="New Role"
+                  placeholder="Select new role"
+                  options={roleOptions}
+                  value={newRole}
+                  onChange={handleRoleSelect}
+                  labelClassName="font-[500] text-[12px] text-text-secondary"
                 />
+
+                <div>
+                  <label
+                    htmlFor="reason"
+                    className="text-sm font-medium text-text-primary-font-color mb-1.5 block"
+                  >
+                    Reason for change
+                  </label>
+                  <textarea
+                    id="reason"
+                    value={reason}
+                    onChange={(e) => setReason(e.target.value)}
+                    placeholder="Enter reason for change..."
+                    rows={3}
+                    className="w-full px-3 py-2 text-sm rounded-md border border-input focus:outline-none focus:border-input-border-focus resize-none"
+                  />
+                </div>
               </div>
 
               {newRole && (
@@ -299,7 +297,7 @@ export function EditRolesPermissionsModal({
                   </div>
                 </div>
               )}
-            </>
+            </div>
           )}
 
           {/* STEP 2: set permissions */}
@@ -337,7 +335,7 @@ export function EditRolesPermissionsModal({
           {step === "review" && newRole && (
             <>
               <div>
-                <p className="text-sm font-medium text-text-primary-font-color mb-1.5">
+                <p className="text-[12px] font-medium text-text-secondary mb-2">
                   Role Change
                 </p>
                 <RoleChangeBadge from={currentRole ?? ""} to={newRole} boxed />
