@@ -62,13 +62,21 @@ export interface Profile {
 
 export interface StaffMember {
   id: string;
+  staff_code: string;
+
   first_name: string;
   last_name: string;
+
   email: string;
+  phone: string | null;
+  avatar_url: string | null;
+
   created_at: string; // ISO 8601 date string
+
   role: MemberRole;
-  staff_code: string;
+
   verified: boolean;
+
   role_change: RoleChange | null;
 }
 
