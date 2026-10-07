@@ -23,7 +23,7 @@ export const CheckboxField = ({
       name={id}
       control={control}
       render={({ field }) => (
-        <label className="flex items-center gap-3 cursor-pointer">
+        <label className="flex items-center gap-2 cursor-pointer">
           <Checkbox
             checked={!!field.value}
             onCheckedChange={field.onChange}
@@ -32,11 +32,11 @@ export const CheckboxField = ({
             // degraded — the base disabled state shouldn't wash out its color.
             className={isDefault ? "disabled:opacity-100" : undefined}
           />
-          <Label className="text-[#4B5563] peer-disabled:opacity-100">
-            {label}
-            {isDefault && (
-              <span className="text-xs text-gray-400 ml-1">(default)</span>
-            )}
+          <Label className="text-[#4B5563] font-normal text-[12px] peer-disabled:opacity-100">
+            <span className="whitespace-nowrap">{label}</span>
+            {/* {isDefault && (
+              <span className="font-normal text-[12px] text-gray-400">(default)</span>
+            )} */}
           </Label>
         </label>
       )}

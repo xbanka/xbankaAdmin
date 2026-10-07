@@ -92,7 +92,7 @@ export function PermissionsFieldset({
               ).length
             }
           >
-            <div className="flex gap-x-8 gap-y-2 flex-wrap">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-2">
               {allowedPermissions.map((permId) => (
                 <div key={permId} className="flex items-center gap-1.5">
                   <CheckboxField
@@ -116,7 +116,7 @@ export function PermissionsFieldset({
             </div>
 
             {addablePermissions.length > 0 && (
-              <div className="mt-2 pt-2 border-t border-dashed border-[#E9EBEE] flex gap-x-8 gap-y-2 flex-wrap">
+              <div className="mt-2 pt-2 border-t border-dashed border-[#E9EBEE] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-2">
                 {addablePermissions.map((permId) => (
                   <div key={permId} className="flex items-center gap-1.5">
                     <button
@@ -127,7 +127,7 @@ export function PermissionsFieldset({
                     >
                       <Plus className="w-3 h-3" />
                     </button>
-                    <span className="text-sm text-secondary-text">
+                    <span className="font-normal text-[12px] text-text-secondary">
                       {getPermissionLabel(permId)}
                     </span>
                   </div>

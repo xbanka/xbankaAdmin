@@ -17,9 +17,9 @@ import { usePermissions } from "@/hooks/usePermissions";
 import { ActiveBadge } from "@/components/customer-management/active-badge";
 import { EditRolesPermissionsModal } from "@/components/staff/edit-role_permission-modal";
 import {
-  RoleChangeBadge,
-  NoRoleChange,
-} from "@/components/ui/role-change-badge";
+  RoleChangeCell,
+  NoRoleChangeCell,
+} from "@/components/staff/role-change-cell";
 
 export default function StaffPage() {
   const [filter, setFilter] = useState("all");
@@ -78,6 +78,7 @@ export default function StaffPage() {
     {
       key: "name" as const,
       header: "Staff name",
+      className: "w-[195px]",
       render: (staff: StaffMember) => {
         const isInvitePending = !staff.first_name && !staff.last_name;
 
@@ -125,25 +126,21 @@ export default function StaffPage() {
         </div>
       ),
     },
-    {
-      key: "verified" as const,
-      header: "Status",
-      render: (staff: StaffMember) => <ActiveBadge active={staff.verified} />,
-    },
     ...(hasRoleChange
       ? [
           {
             key: "role_change" as const,
             header: "Role Change",
+            className: "w-[195px]",
             render: (staff: StaffMember) =>
               staff.role_change ? (
-                <RoleChangeBadge
+                <RoleChangeCell
                   from={staff.role_change.previous_role}
                   to={staff.role_change.new_role}
                   subStatus="Pending confirmation"
                 />
               ) : (
-                <NoRoleChange />
+                <NoRoleChangeCell />
               ),
           },
         ]
@@ -156,6 +153,11 @@ export default function StaffPage() {
           <span>{formatDate(staff.created_at)}</span>
         </div>
       ),
+    },
+    {
+      key: "verified" as const,
+      header: "Status",
+      render: (staff: StaffMember) => <ActiveBadge active={staff.verified} />,
     },
     // {
     //   key: "lastLogin" as const,

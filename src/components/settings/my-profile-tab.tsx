@@ -44,6 +44,8 @@ type SettingsProfile = {
   staff_code?: string;
   department?: string;
   avatar_url?: string | null;
+  /** Short-lived link the browser can load; avatar_url is only the S3 key. */
+  avatar_signed_url?: string | null;
   verified?: boolean;
   phone_verified?: boolean;
   role?: { name?: string; managed_by?: string };
@@ -148,7 +150,7 @@ export function MyProfileTab() {
                 <Skeleton className="size-12 rounded-full" />
               ) : (
                 <Avatar className="size-12">
-                  <AvatarImage src={user.avatar_url ?? undefined} alt={fullName} />
+                  <AvatarImage src={user.avatar_signed_url ?? undefined} alt={fullName} />
                   <AvatarFallback className="bg-teal-light text-[14px] font-semibold text-text-teal">
                     {initials}
                   </AvatarFallback>

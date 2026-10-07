@@ -1,6 +1,7 @@
 import axios from "axios";
 import { authToken } from "../authToken";
 import { refreshAccessToken } from "../refresh-token";
+import { useAuthStore } from "../../store/useAuthState";
 
 /**
  * Picks the first usable string out of an error body.
@@ -96,6 +97,10 @@ AxiosInstance.interceptors.response.use(
         const newAccessToken = refreshResponse.data?.access_token;
         if (newAccessToken) {
           authToken.set(newAccessToken);
+          // The notifications socket (and anything else on the auth store)
+          // reads its token from the store, not the cookie — left unsynced,
+          // it reconnects with the expired token in a 403 loop until reload.
+          useAuthStore.getState().login(newAccessToken);
           // originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
           originalRequest.headers = {
             ...(originalRequest.headers || {}),
