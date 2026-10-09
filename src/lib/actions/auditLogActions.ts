@@ -7,6 +7,16 @@ export interface GetAuditLogParams {
   limit?: number;
 }
 
+// The audit endpoints validate `status` as an enum, so `status=` (the "All
+// status" filter) is rejected with a 422. Axios only drops undefined/null
+// params, so blank strings are stripped here before the request goes out.
+export const buildAuditLogParams = ({ status, search, page, limit }: GetAuditLogParams) => ({
+  status: status?.trim() || undefined,
+  search: search?.trim() || undefined,
+  page,
+  limit,
+});
+
 export const getRoleChangeLogs = async ({
   status,
   search,
@@ -15,12 +25,7 @@ export const getRoleChangeLogs = async ({
 }: GetAuditLogParams = {}) => {
   try {
     const response = await AxiosInstance.get(`/api/audit/role-changes`, {
-      params: {
-        status,
-        search,
-        page,
-        limit,
-      },
+      params: buildAuditLogParams({ status, search, page, limit }),
     });
 
     return {
@@ -46,12 +51,7 @@ export const getLoginLogs = async ({
 }: GetAuditLogParams = {}) => {
   try {
     const response = await AxiosInstance.get(`/api/audit/logins`, {
-      params: {
-        status,
-        search,
-        page,
-        limit,
-      },
+      params: buildAuditLogParams({ status, search, page, limit }),
     });
 
     return {
