@@ -6,9 +6,9 @@ import {
   cleanBankReference,
   extractAttachmentUrl,
   extractIntentsPage,
+  isAmountOverridden,
   formatNaira,
   isAccountNumber,
-  isAmountOverridden,
   isDuplicateResult,
   statusLabel,
   unwrapSettleResult,
@@ -38,6 +38,12 @@ describe("buildIntentParams", () => {
       expect(buildIntentParams({ accountNumber }).accountNumber).toBeUndefined();
     },
   );
+
+  it("sends status=ALL for the All tab (a missing status would mean PENDING)", () => {
+    expect(toQuery(buildIntentParams({ status: "all", page: 1, limit: 10 }))).toBe(
+      "status=ALL&page=1&limit=10",
+    );
+  });
 
   it("omits a blank status so the backend default (PENDING) applies", () => {
     expect(buildIntentParams({ status: " " }).status).toBeUndefined();
@@ -129,6 +135,7 @@ describe("isAmountOverridden", () => {
     ["5000", 5000, false],
     ["5000.00", 5000, false],
     ["4800", 5000, true],
+    ["5200", 5000, true],
     ["", 5000, false],
     ["abc", 5000, false],
   ])("%j vs declared %d -> %s", (amount, declared, expected) => {
@@ -155,8 +162,16 @@ describe("buildCompletePayload", () => {
 
   it("sends amount and the trimmed reason together when the amount changed", () => {
     expect(
-      buildCompletePayload({ ...base, amount: "48000", overrideReason: " Sent 48k " }, { ...ctx, declaredAmount: 50000 }),
-    ).toMatchObject({ amount: 48000, overrideReason: "Sent 48k" });
+      buildCompletePayload(
+        { ...base, amount: "48000", overrideReason: " Sent 48k " },
+        { ...ctx, declaredAmount: 50000 },
+      ),
+    ).toEqual({
+      bankReference: "NIP240815123456789",
+      creditedBy: "ops@xbanka.com",
+      amount: 48000,
+      overrideReason: "Sent 48k",
+    });
   });
 
   it("adds fundingAccountId and attachmentUrls only when present", () => {
@@ -185,7 +200,7 @@ describe("completeIntentSchema", () => {
     expect(schema.safeParse(valid).success).toBe(true);
   });
 
-  it("requires a reason once the amount differs", () => {
+  it("requires a reason once the amount differs (the backend 422s otherwise)", () => {
     const result = schema.safeParse({ ...valid, amount: "4800" });
     expect(result.success).toBe(false);
     expect(result.error?.issues[0].path).toEqual(["overrideReason"]);

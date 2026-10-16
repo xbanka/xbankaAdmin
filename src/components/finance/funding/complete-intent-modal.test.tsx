@@ -30,15 +30,15 @@ beforeEach(() => {
   useProfile.mockReturnValue({ data: { data: { email: "ops@xbanka.com" } } });
 });
 
-const amountInput = () => screen.getByLabelText("Amount received");
 const referenceInput = () => screen.getByLabelText("Bank reference / session ID");
 
 describe("CompleteIntentModal", () => {
-  it("pre-fills the declared amount and needs a bank reference", async () => {
+  it("shows the declared amount locked by default and needs a bank reference", async () => {
     const user = userEvent.setup();
     render(<CompleteIntentModal intent={pendingIntent} onClose={vi.fn()} />);
 
-    expect(amountInput()).toHaveValue("5,000");
+    expect(screen.getByTestId("locked-amount")).toHaveTextContent("₦5,000");
+    expect(screen.queryByLabelText("Amount received")).not.toBeInTheDocument();
     expect(screen.queryByLabelText(/Why does it differ/)).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Review" }));
@@ -82,12 +82,19 @@ describe("CompleteIntentModal", () => {
     expect(mutate.mock.calls[0][0].payload).not.toHaveProperty("fundingAccountId");
   });
 
-  it("asks for a reason when the amount changes, then sends amount + reason", async () => {
+  it("unlocks on purpose, asks for a reason when the amount changes, then sends amount + reason", async () => {
     const user = userEvent.setup();
-    render(<CompleteIntentModal intent={pendingIntent} onClose={vi.fn()} />);
+    render(<CompleteIntentModal intent={{ ...pendingIntent, declaredAmount: 50000 }} onClose={vi.fn()} />);
 
-    await user.clear(amountInput());
-    await user.type(amountInput(), "4800");
+    await user.click(screen.getByRole("button", { name: "Bank received a different amount?" }));
+    const amountInput = screen.getByLabelText("Amount received");
+    expect(amountInput).toHaveValue("50,000");
+    expect(amountInput).toHaveFocus();
+    // Unlocking alone changes nothing, so no reason is asked for yet.
+    expect(screen.queryByLabelText(/Why does it differ/)).not.toBeInTheDocument();
+
+    await user.clear(amountInput);
+    await user.type(amountInput, "48000");
     await user.type(referenceInput(), "NIP1");
     await user.click(screen.getByRole("button", { name: "Review" }));
 
@@ -95,14 +102,40 @@ describe("CompleteIntentModal", () => {
       await screen.findByText("Explain why the amount differs from what the customer declared"),
     ).toBeInTheDocument();
 
-    await user.type(screen.getByLabelText(/Why does it differ/), "Customer sent 4.8k");
+    await user.type(screen.getByLabelText(/Why does it differ/), "Customer sent 48k, not 50k");
+    await user.click(screen.getByRole("button", { name: "Review" }));
+
+    expect(await screen.findByText("₦2,000 less than declared")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Credit wallet" }));
+
+    expect(mutate.mock.calls[0][0].payload).toEqual({
+      bankReference: "NIP1",
+      creditedBy: "ops@xbanka.com",
+      amount: 48000,
+      overrideReason: "Customer sent 48k, not 50k",
+      fundingAccountId: "b7d2a9e1-5c33-4f0a-8a6e-1d9f3c7e2b44",
+    });
+  });
+
+  it("'Use declared' re-locks the amount and drops the override from the request", async () => {
+    const user = userEvent.setup();
+    render(<CompleteIntentModal intent={pendingIntent} onClose={vi.fn()} />);
+
+    await user.click(screen.getByRole("button", { name: "Bank received a different amount?" }));
+    await user.clear(screen.getByLabelText("Amount received"));
+    await user.type(screen.getByLabelText("Amount received"), "4000");
+    await user.type(screen.getByLabelText(/Why does it differ/), "typo");
+    await user.click(screen.getByRole("button", { name: "Use declared" }));
+
+    expect(screen.getByTestId("locked-amount")).toHaveTextContent("₦5,000");
+
+    await user.type(referenceInput(), "NIP1");
     await user.click(screen.getByRole("button", { name: "Review" }));
     await user.click(await screen.findByRole("button", { name: "Credit wallet" }));
 
-    expect(mutate.mock.calls[0][0].payload).toMatchObject({
-      amount: 4800,
-      overrideReason: "Customer sent 4.8k",
-    });
+    const { payload } = mutate.mock.calls[0][0];
+    expect(payload).not.toHaveProperty("amount");
+    expect(payload).not.toHaveProperty("overrideReason");
   });
 
   it("uploads proof on add, blocks Review while uploading, and sends the URL", async () => {

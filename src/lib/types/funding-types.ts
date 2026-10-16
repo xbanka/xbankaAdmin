@@ -57,7 +57,12 @@ export interface FundingIntentsPage {
   meta: FundingIntentsMeta;
 }
 
-/** Body of POST /intents/{transactionId}/complete. Optional fields are omitted, never null. */
+/**
+ * Body of POST /intents/{transactionId}/complete. Optional fields are
+ * omitted, never null. `amount` is only sent when the bank received a
+ * different figure from the declaration, and then `overrideReason` is
+ * required (the backend 422s on one without the other).
+ */
 export interface CompleteFundingIntentPayload {
   bankReference: string;
   creditedBy: string;
