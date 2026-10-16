@@ -1,9 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ClipboardPaste } from "lucide-react";
+import { ClipboardPaste, Lock, Undo2 } from "lucide-react";
 import { toast } from "sonner";
 import { Modal } from "@/components/ui/modal";
 import { CopyButton } from "@/components/ui/copy-button";
@@ -36,6 +36,9 @@ export function CompleteIntentModal({
   onClose: () => void;
 }) {
   const [step, setStep] = useState<"form" | "review">("form");
+  // The declared amount is shown locked; staff unlock it on purpose only
+  // when the bank statement shows a different figure.
+  const [editingAmount, setEditingAmount] = useState(false);
   const { data: profile } = useProfile();
   const creditedBy = profile?.data?.email ?? "";
   const { mutate, isPending } = useCompleteFundingIntent();
@@ -59,11 +62,25 @@ export function CompleteIntentModal({
     watch,
     setValue,
     getValues,
+    clearErrors,
     formState: { errors },
   } = form;
 
   const amount = watch("amount");
   const overridden = isAmountOverridden(amount ?? "", intent.declaredAmount);
+  const difference = Number(amount) - Number(intent.declaredAmount);
+
+  const useDeclaredAmount = () => {
+    setValue("amount", String(intent.declaredAmount ?? ""));
+    setValue("overrideReason", "");
+    clearErrors(["amount", "overrideReason"]);
+    setEditingAmount(false);
+  };
+
+  useEffect(() => {
+    if (editingAmount) document.getElementById("amount")?.focus();
+  }, [editingAmount]);
+
   const selectedAccountId = watch("fundingAccountId");
   const selectedAccount = accounts.find((a) => a.id === selectedAccountId);
 
@@ -127,6 +144,12 @@ export function CompleteIntentModal({
               value={
                 <span className={overridden ? "text-warning-text" : undefined}>
                   {formatNaira(Number(values.amount), intent.currency)}
+                  {overridden && (
+                    <span className="block text-xs font-normal">
+                      {formatNaira(Math.abs(difference), intent.currency)}{" "}
+                      {difference < 0 ? "less" : "more"} than declared
+                    </span>
+                  )}
                 </span>
               }
             />
@@ -178,12 +201,6 @@ export function CompleteIntentModal({
             <p className="text-xs text-secondary-text">
               {[intent.customer?.xbId, intent.customer?.email].filter(Boolean).join(" · ")}
             </p>
-            <p className="mt-2 text-xs text-secondary-text">
-              Declared{" "}
-              <span className="font-medium text-text-primary">
-                {formatNaira(intent.declaredAmount, intent.currency)}
-              </span>
-            </p>
             {intentReference && (
               <div className="mt-1 flex items-center gap-1 text-xs text-secondary-text">
                 <span>Intent reference</span>
@@ -222,12 +239,54 @@ export function CompleteIntentModal({
             {errors.bankReference && <p className={ERROR}>{errors.bankReference.message}</p>}
           </div>
 
-          <div>
-            <AmountField id="amount" label="Amount received" currencySymbol="₦" inputClassName="pl-8" />
-            {errors.amount && <p className={`mt-1 ${ERROR}`}>{errors.amount.message}</p>}
-          </div>
+          {editingAmount ? (
+            <div className="space-y-2">
+              <div className="flex items-end justify-between gap-2">
+                <AmountField
+                  id="amount"
+                  label="Amount received"
+                  currencySymbol="₦"
+                  inputClassName="pl-8"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-9 shrink-0 text-[#111827]"
+                  onClick={useDeclaredAmount}
+                >
+                  <Undo2 />
+                  Use declared
+                </Button>
+              </div>
+              <p className="text-xs text-secondary-text">
+                Declared {formatNaira(intent.declaredAmount, intent.currency)}. Enter exactly what the
+                bank statement shows.
+              </p>
+              {errors.amount && <p className={ERROR}>{errors.amount.message}</p>}
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <Label>Amount to credit</Label>
+              <div
+                data-testid="locked-amount"
+                className="flex h-9 items-center justify-between rounded-[0.5rem] border border-border bg-[#F9FAFB] px-3 text-sm"
+              >
+                <span className="font-medium text-text-primary">
+                  {formatNaira(intent.declaredAmount, intent.currency)}
+                </span>
+                <Lock className="h-3.5 w-3.5 text-secondary-text" aria-hidden />
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditingAmount(true)}
+                className="text-xs text-text-teal underline cursor-pointer"
+              >
+                Bank received a different amount?
+              </button>
+            </div>
+          )}
 
-          {overridden && (
+          {editingAmount && overridden && (
             <div className="space-y-2">
               <Label htmlFor="overrideReason">Why does it differ from the declared amount?</Label>
               <Input

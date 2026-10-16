@@ -16,7 +16,9 @@ import { CompleteIntentModal } from "./complete-intent-modal";
 import { RejectIntentModal } from "./reject-intent-modal";
 
 const LIMIT = 10;
-const STATUS_FILTERS = ["Pending", "Completed", "Failed"];
+// "All" maps to status=ALL; the backend defaults a missing status to PENDING,
+// so it has to be sent explicitly.
+const STATUS_FILTERS = ["All", "Pending", "Completed", "Failed"];
 
 const STATUS_VARIANT: Record<string, StatusVariant> = {
   PENDING: "warning",
@@ -48,6 +50,11 @@ export function FundingRequestsTab() {
     enabled: canView,
   });
   const isPendingTab = status === "pending";
+  // Settled columns are pointless on the Pending tab; actions only make sense
+  // where pending rows can appear (Pending and All).
+  const showSettledColumns = !isPendingTab;
+  const showActions = canSettle && (isPendingTab || status === "all");
+  const isSettled = (item: FundingIntent) => item.status !== "PENDING";
 
   const columns = [
     {
@@ -69,8 +76,8 @@ export function FundingRequestsTab() {
         </span>
       ),
     },
-    // Settled rows show what was actually credited, which can differ.
-    ...(!isPendingTab
+    // Settled rows show what was actually credited.
+    ...(showSettledColumns
       ? [
           {
             key: "amount",
@@ -102,11 +109,15 @@ export function FundingRequestsTab() {
     },
     {
       key: "intentReference",
-      header: isPendingTab ? "Reference" : "Bank reference",
+      header: isPendingTab ? "Reference" : "Reference / bank ref",
       hiddenOnMobile: true,
+      // Pending rows only have our intent reference; settled ones carry the
+      // bank's reference that staff matched on the statement.
       render: (item: FundingIntent) => (
-        <span className="text-xs text-secondary-text break-all">
-          {isPendingTab ? item.intentReference || item.reference : item.bankReference || "-"}
+        <span className="text-xs text-secondary-text break-all font-mono">
+          {isSettled(item) && item.bankReference
+            ? item.bankReference
+            : item.intentReference || item.reference || "-"}
         </span>
       ),
     },
@@ -125,7 +136,7 @@ export function FundingRequestsTab() {
         />
       ),
     },
-    ...(!isPendingTab
+    ...(showSettledColumns
       ? [
           {
             key: "settledBy",
@@ -142,7 +153,7 @@ export function FundingRequestsTab() {
           },
         ]
       : []),
-    ...(isPendingTab && canSettle
+    ...(showActions
       ? [
           {
             key: "actions",
@@ -170,6 +181,8 @@ export function FundingRequestsTab() {
         ]
       : []),
   ];
+
+  const statusNoun = status === "all" ? "" : `${status} `;
 
   if (!canView && !permissionsLoading) {
     return (
@@ -228,8 +241,8 @@ export function FundingRequestsTab() {
         className={isFetching && !isPending ? "opacity-70 transition-opacity" : undefined}
         emptyMessage={
           debouncedAccount && isAccountNumber(debouncedAccount)
-            ? `No ${status} requests from account ${debouncedAccount}.`
-            : `No ${status} funding requests.`
+            ? `No ${statusNoun}requests from account ${debouncedAccount}.`
+            : `No ${statusNoun}funding requests.`
         }
       />
 

@@ -78,6 +78,49 @@ describe("FundingRequestsTab", () => {
     expect(screen.queryByRole("button", { name: "Confirm" })).not.toBeInTheDocument();
   });
 
+  it("All sends status=all (ALL on the wire) and keeps actions on pending rows only", async () => {
+    const user = userEvent.setup();
+    const settled = {
+      ...intentsResponse.items[0],
+      transactionId: "settled-1",
+      status: "COMPLETED",
+      bankReference: "NIP240815123456789",
+      creditedBy: "ops@xbanka.com",
+    };
+    useGetFundingIntents.mockReturnValue({
+      data: { items: [intentsResponse.items[0], settled], meta: { ...intentsResponse.meta, totalItems: 2 } },
+      isPending: false,
+      isError: false,
+      isFetching: false,
+    });
+    render(<FundingRequestsTab />);
+
+    await user.click(screen.getByRole("button", { name: "All" }));
+
+    expect(lastQuery()).toMatchObject({ status: "all", page: 1 });
+    expect(screen.getAllByRole("button", { name: "Confirm" }).length).toBeGreaterThan(0);
+    // Settled row shows its bank reference and who settled it.
+    expect(screen.getAllByText("NIP240815123456789").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("ops@xbanka.com").length).toBeGreaterThan(0);
+  });
+
+  it("All shows no Confirm/Reject on a settled row", async () => {
+    const user = userEvent.setup();
+    const settled = { ...intentsResponse.items[0], status: "COMPLETED", bankReference: "NIP9" };
+    useGetFundingIntents.mockReturnValue({
+      data: { items: [settled], meta: intentsResponse.meta },
+      isPending: false,
+      isError: false,
+      isFetching: false,
+    });
+    render(<FundingRequestsTab />);
+
+    await user.click(screen.getByRole("button", { name: "All" }));
+
+    expect(screen.queryByRole("button", { name: "Confirm" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Reject" })).not.toBeInTheDocument();
+  });
+
   it("strips non-digits from the account search and hints until 10 digits", async () => {
     const user = userEvent.setup();
     render(<FundingRequestsTab />);
