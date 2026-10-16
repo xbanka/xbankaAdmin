@@ -90,7 +90,7 @@ export interface CompleteIntentFormValues {
   fundingAccountId: string;
 }
 
-/** True when staff typed a different figure from what the customer declared. */
+/** True when staff entered a different figure from what the customer declared. */
 export function isAmountOverridden(amount: string, declaredAmount: number) {
   const value = Number(amount);
   return amount.trim() !== "" && Number.isFinite(value) && value !== Number(declaredAmount);
@@ -98,7 +98,8 @@ export function isAmountOverridden(amount: string, declaredAmount: number) {
 
 /**
  * Form values to the complete request. Per the backend contract:
- * - `amount` + `overrideReason` only go out when the amount was changed
+ * - `amount` + `overrideReason` only go out when the amount was changed;
+ *   otherwise the backend credits the declared amount
  * - optional fields are omitted, never sent as null or ""
  * - the bank reference is trimmed, since it can only be used once
  */
