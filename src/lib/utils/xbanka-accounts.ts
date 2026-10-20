@@ -1,6 +1,7 @@
 import type {
   AccountLookupResult,
   CreateXbankaAccountPayload,
+  DeleteXbankaAccountResult,
   FundingBank,
   UpdateXbankaAccountPayload,
   XbankaAccount,
@@ -127,3 +128,43 @@ export function bankInitials(name?: string) {
   if (source.length === 1) return source[0].slice(0, 2).toUpperCase();
   return (source[0][0] + source[1][0]).toUpperCase();
 }
+
+/**
+ * When the core backend rejects a request, this backend returns its status
+ * code with the core's whole response body as a JSON *string* in `detail`
+ * (e.g. '{"message":"The primary (default) account cannot be deleted...",...}'),
+ * and the shared axios interceptor surfaces that string as the error message.
+ * Show the inner `message`; anything that isn't such JSON is shown as-is.
+ */
+export function parseBackendMessage(message: unknown): string {
+  if (typeof message !== "string") return "Something went wrong";
+  const text = message.trim();
+  if (text.startsWith("{")) {
+    try {
+      const inner = JSON.parse(text)?.message;
+      if (typeof inner === "string" && inner.trim()) return inner;
+    } catch {
+      // Not JSON after all: fall through and show it unchanged.
+    }
+  }
+  return text || "Something went wrong";
+}
+
+/** "5555500001" -> "••••0001" */
+export const maskAccountNumber = (accountNumber: string) =>
+  `••••${(accountNumber ?? "").slice(-4)}`;
+
+/** data of the delete response, unwrapped from the `{ data }` envelope. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function extractDeleteResult(body: any): DeleteXbankaAccountResult | null {
+  const result = body?.data?.deleted !== undefined ? body.data : body?.deleted !== undefined ? body : null;
+  return result?.deleted === true ? result : null;
+}
+
+/**
+ * Deleting the only visible account would leave customers nothing to pay
+ * into. (The primary can't be deleted at all, so this only matters for a
+ * visible non-primary account when every other account is hidden.)
+ */
+export const isLastVisibleAccount = (account: XbankaAccount, all: XbankaAccount[]) =>
+  account.isActive && !all.some((a) => a.id !== account.id && a.isActive);

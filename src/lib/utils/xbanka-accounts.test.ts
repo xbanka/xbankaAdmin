@@ -3,13 +3,17 @@ import {
   bankInitials,
   buildCreatePayload,
   buildUpdatePayload,
+  extractDeleteResult,
   extractFundingBanks,
   extractLookupResult,
   extractXbankaAccount,
   extractXbankaAccounts,
   findBankLogo,
   hideRisk,
+  isLastVisibleAccount,
   isTenDigits,
+  maskAccountNumber,
+  parseBackendMessage,
   sortXbankaAccounts,
 } from "./xbanka-accounts";
 import { indexBankLogos, normaliseBankName } from "../actions/bank-logos";
@@ -192,4 +196,53 @@ describe("bankInitials", () => {
     ["Zenith Bank PLC", "ZE"],
     ["", "?"],
   ])("%j -> %s", (name, initials) => expect(bankInitials(name)).toBe(initials));
+});
+
+describe("parseBackendMessage", () => {
+  const nested = JSON.stringify({
+    message: "The primary (default) account cannot be deleted. Make another account primary first.",
+    details: "",
+    errorGroup: "MICROSERVICE_ERROR",
+    data: null,
+  });
+
+  it("shows the inner message of a core-backend JSON body sent as a string", () => {
+    expect(parseBackendMessage(nested)).toBe(
+      "The primary (default) account cannot be deleted. Make another account primary first.",
+    );
+  });
+
+  it.each([
+    ["Account already exists", "Account already exists"],
+    ["{not json", "{not json"],
+    ['{"message":""}', '{"message":""}'],
+    ['{"other":1}', '{"other":1}'],
+    ["  padded  ", "padded"],
+  ])("falls back to %j as-is", (input, out) => expect(parseBackendMessage(input)).toBe(out));
+
+  it.each([undefined, null, 42, {}])("gives a generic message for %j", (input) =>
+    expect(parseBackendMessage(input)).toBe("Something went wrong"),
+  );
+});
+
+describe("delete helpers", () => {
+  it("masks all but the last four digits", () => {
+    expect(maskAccountNumber("5555500001")).toBe("••••0001");
+    expect(maskAccountNumber("")).toBe("••••");
+  });
+
+  it("reads the delete result from the envelope and requires deleted: true", () => {
+    const data = { deleted: true, id: "x", bankName: "Delete Test Bank", accountNumber: "5555500001", remaining: 3 };
+    expect(extractDeleteResult({ data })?.remaining).toBe(3);
+    expect(extractDeleteResult({ ...data })?.id).toBe("x");
+    expect(extractDeleteResult({ data: { ...data, deleted: false } })).toBeNull();
+    expect(extractDeleteResult({ message: "ok" })).toBeNull();
+  });
+
+  it("knows when deleting would remove the only visible account", () => {
+    const hiddenGtb = { ...gtb, isActive: false };
+    expect(isLastVisibleAccount(access, [hiddenGtb, access])).toBe(true);
+    expect(isLastVisibleAccount(access, [gtb, access])).toBe(false);
+    expect(isLastVisibleAccount({ ...access, isActive: false }, [hiddenGtb, { ...access, isActive: false }])).toBe(false);
+  });
 });

@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   createXbankaAccount,
+  deleteXbankaAccount,
   getFundingBanks,
   getXbankaAccounts,
   lookupFundingAccount,
@@ -14,10 +15,12 @@ import type {
   UpdateXbankaAccountPayload,
 } from "../types/xbanka-account-types";
 import {
+  extractDeleteResult,
   extractFundingBanks,
   extractLookupResult,
   extractXbankaAccounts,
   isTenDigits,
+  maskAccountNumber,
   sortXbankaAccounts,
 } from "../utils/xbanka-accounts";
 
@@ -68,6 +71,31 @@ export function useUpdateXbankaAccount() {
     async (vars: { accountId: string; payload: UpdateXbankaAccountPayload; successMessage: string }) => {
       const result = await updateXbankaAccount(vars);
       toast.success(vars.successMessage);
+      return result;
+    },
+  );
+}
+
+/**
+ * Permanent delete. Refetches on success and on failure (a 404 or a "primary
+ * can't be deleted" rejection both mean the list on screen is stale).
+ */
+export function useDeleteXbankaAccount() {
+  return useXbankaAccountMutation(
+    async (vars: { accountId: string; deletedBy: string; bankName: string; accountNumber: string }) => {
+      const response = await deleteXbankaAccount(vars);
+      const result = extractDeleteResult(response.data);
+      const bank = result?.bankName ?? vars.bankName;
+      const masked = maskAccountNumber(result?.accountNumber ?? vars.accountNumber);
+      toast.success(`Deleted ${bank} ${masked}.`);
+      if (result && result.remaining <= 1) {
+        toast.warning(
+          result.remaining === 0
+            ? "No Xbanka accounts are left. Customers have nowhere to send bank transfers."
+            : "Only one Xbanka account is left.",
+          { duration: 6000 },
+        );
+      }
       return result;
     },
   );
