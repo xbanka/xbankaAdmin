@@ -8,9 +8,10 @@ import Header from "@/components/ui/Header";
 import { UnderlineTabs } from "@/components/ui/underline-tabs";
 import { PayoutsTab } from "@/components/finance/payouts-tab";
 import { FundingRequestsTab } from "@/components/finance/funding/funding-requests-tab";
+import { XbankaAccountsTab } from "@/components/finance/xbanka-accounts/xbanka-accounts-tab";
 import { usePermissions } from "@/hooks/usePermissions";
 
-const TABS = ["Payout Requests", "Funding Requests"] as const;
+const TABS = ["Payout Requests", "Funding Requests", "Xbanka Accounts"] as const;
 type Tab = (typeof TABS)[number];
 
 export default function FinancePage() {
@@ -42,7 +43,9 @@ export default function FinancePage() {
           className="mb-6"
         />
 
-        {isPayouts ? <PayoutsTab /> : <FundingRequestsTab />}
+        {activeTab === "Payout Requests" && <PayoutsTab />}
+        {activeTab === "Funding Requests" && <FundingRequestsTab />}
+        {activeTab === "Xbanka Accounts" && <XbankaAccountsTab />}
       </div>
     </DashboardLayout>
   );
