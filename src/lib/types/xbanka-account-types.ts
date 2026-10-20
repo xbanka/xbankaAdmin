@@ -55,3 +55,13 @@ export interface AccountLookupResult {
   bank_code: string;
   bank_name: string;
 }
+
+/** data of DELETE /api/transactions/funding/xbanka-accounts/{id}. */
+export interface DeleteXbankaAccountResult {
+  deleted: boolean;
+  id: string;
+  bankName: string;
+  accountNumber: string;
+  /** Accounts left after the delete. */
+  remaining: number;
+}

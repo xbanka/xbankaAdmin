@@ -2,15 +2,17 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-const { useXbankaAccounts, mutate, hasPermission, useProfile } = vi.hoisted(() => ({
+const { useXbankaAccounts, mutate, removeMutate, hasPermission, useProfile } = vi.hoisted(() => ({
   useXbankaAccounts: vi.fn(),
   mutate: vi.fn(),
+  removeMutate: vi.fn(),
   hasPermission: vi.fn(),
   useProfile: vi.fn(),
 }));
 vi.mock("@/lib/services/xbanka-accounts.service", () => ({
   useXbankaAccounts,
   useUpdateXbankaAccount: () => ({ mutate, isPending: false, variables: undefined }),
+  useDeleteXbankaAccount: () => ({ mutate: removeMutate, isPending: false, variables: undefined }),
   useBankLogos: () => ({ data: undefined }),
 }));
 vi.mock("@/hooks/usePermissions", () => ({ usePermissions: () => ({ hasPermission, isLoading: false }) }));
@@ -32,7 +34,7 @@ function withAccounts(accounts: unknown[]) {
 }
 
 beforeEach(() => {
-  [useXbankaAccounts, mutate, hasPermission, useProfile].forEach((m) => m.mockReset());
+  [useXbankaAccounts, mutate, removeMutate, hasPermission, useProfile].forEach((m) => m.mockReset());
   hasPermission.mockReturnValue(true);
   useProfile.mockReturnValue({ data: { data: { email: "ops@xbanka.com" } } });
   withAccounts([gtb, access, hidden]);
@@ -124,12 +126,66 @@ describe("XbankaAccountsTab", () => {
     expect(screen.getByText("form-edit-Access Bank")).toBeInTheDocument();
   });
 
+  it("disables Delete on the primary account with a reason", () => {
+    render(<XbankaAccountsTab />);
+    const del = card(gtb.id).getByRole("button", { name: /Delete Guaranty Trust Bank/ });
+    expect(del).toBeDisabled();
+    expect(del.closest("span")).toHaveAttribute("title", "Make another account primary first");
+  });
+
+  it("confirms a delete naming the bank and full account number, then sends deletedBy", async () => {
+    const user = userEvent.setup();
+    render(<XbankaAccountsTab />);
+
+    await user.click(card(access.id).getByRole("button", { name: "Delete Access Bank" }));
+    expect(screen.getByText(/permanently removes Access Bank \(0987654321\)/)).toBeInTheDocument();
+    expect(screen.getByText(/hide it instead/)).toBeInTheDocument();
+    expect(removeMutate).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole("button", { name: "Delete account" }));
+    expect(removeMutate.mock.calls[0][0]).toEqual({
+      accountId: access.id,
+      deletedBy: "ops@xbanka.com",
+      bankName: "Access Bank",
+      accountNumber: "0987654321",
+    });
+  });
+
+  it("Cancel leaves the account alone", async () => {
+    const user = userEvent.setup();
+    render(<XbankaAccountsTab />);
+
+    await user.click(card(access.id).getByRole("button", { name: "Delete Access Bank" }));
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+
+    expect(removeMutate).not.toHaveBeenCalled();
+    expect(screen.queryByText(/permanently removes/)).not.toBeInTheDocument();
+  });
+
+  it("adds a warning when the account is the only one customers can see", async () => {
+    const user = userEvent.setup();
+    withAccounts([{ ...gtb, isActive: false, isPrimary: false }, access]);
+    render(<XbankaAccountsTab />);
+
+    await user.click(card(access.id).getByRole("button", { name: "Delete Access Bank" }));
+    expect(screen.getByText(/nothing to pay into/)).toBeInTheDocument();
+  });
+
+  it("lets a hidden account be deleted without the visibility warning", async () => {
+    const user = userEvent.setup();
+    render(<XbankaAccountsTab />);
+
+    await user.click(card(hidden.id).getByRole("button", { name: "Delete Zenith Bank" }));
+    expect(screen.queryByText(/nothing to pay into/)).not.toBeInTheDocument();
+  });
+
   it("shows no management controls without finance:adjust_balance", () => {
     hasPermission.mockImplementation((p: string) => p !== "finance:adjust_balance");
     render(<XbankaAccountsTab />);
     expect(screen.queryByRole("button", { name: "Add account" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Edit" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Hide" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Delete/ })).not.toBeInTheDocument();
     expect(screen.getByText("Guaranty Trust Bank")).toBeInTheDocument();
   });
 

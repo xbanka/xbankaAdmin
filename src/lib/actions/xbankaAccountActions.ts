@@ -3,6 +3,7 @@ import type {
   CreateXbankaAccountPayload,
   UpdateXbankaAccountPayload,
 } from "../types/xbanka-account-types";
+import { parseBackendMessage } from "../utils/xbanka-accounts";
 
 const BASE = "/api/transactions/funding";
 
@@ -10,7 +11,8 @@ const BASE = "/api/transactions/funding";
 const toActionError = (error: any) => ({
   success: false,
   status: error.status,
-  message: error.message,
+  // Core-backend rejections arrive as a JSON string inside `detail`.
+  message: parseBackendMessage(error.message),
 });
 
 /** GET /api/transactions/funding/xbanka-accounts — every account, hidden ones included. */
@@ -50,6 +52,31 @@ export const updateXbankaAccount = async ({
 }) => {
   try {
     const response = await AxiosInstance.patch(`${BASE}/xbanka-accounts/${accountId}`, payload);
+    return { success: true, data: response.data, status: response.status };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    throw toActionError(error);
+  }
+};
+
+/**
+ * DELETE /api/transactions/funding/xbanka-accounts/{accountId}?deletedBy=<email>
+ *
+ * Permanent. No body; the staff email goes in the query string and a blank
+ * one is a 422. The primary account is rejected by the core backend, whose
+ * message comes through parseBackendMessage.
+ */
+export const deleteXbankaAccount = async ({
+  accountId,
+  deletedBy,
+}: {
+  accountId: string;
+  deletedBy: string;
+}) => {
+  try {
+    const response = await AxiosInstance.delete(`${BASE}/xbanka-accounts/${accountId}`, {
+      params: { deletedBy },
+    });
     return { success: true, data: response.data, status: response.status };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
