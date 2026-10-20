@@ -1,14 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { Eye, EyeOff, Pencil, Plus, Star } from "lucide-react";
+import { Eye, EyeOff, Pencil, Plus, Star, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CopyButton } from "@/components/ui/copy-button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useProfile } from "@/lib/services/profile.service";
-import { useUpdateXbankaAccount, useXbankaAccounts } from "@/lib/services/xbanka-accounts.service";
-import { hideRisk } from "@/lib/utils/xbanka-accounts";
+import {
+  useDeleteXbankaAccount,
+  useUpdateXbankaAccount,
+  useXbankaAccounts,
+} from "@/lib/services/xbanka-accounts.service";
+import { hideRisk, isLastVisibleAccount } from "@/lib/utils/xbanka-accounts";
 import { formatDate } from "@/lib/formatDate";
 import { cn } from "@/lib/utils";
 import type { XbankaAccount } from "@/lib/types/xbanka-account-types";
@@ -20,6 +24,7 @@ type Dialog =
   | { kind: "form"; account?: XbankaAccount }
   | { kind: "hide"; account: XbankaAccount; risk: "primary" | "last" }
   | { kind: "primary"; account: XbankaAccount }
+  | { kind: "delete"; account: XbankaAccount; lastVisible: boolean }
   | null;
 
 const HIDE_RISK_MESSAGE = {
@@ -37,6 +42,7 @@ export function XbankaAccountsTab() {
 
   const { data: accounts = [], isPending, isError, error } = useXbankaAccounts({ enabled: canView });
   const update = useUpdateXbankaAccount();
+  const remove = useDeleteXbankaAccount();
   const [dialog, setDialog] = useState<Dialog>(null);
 
   // Hide/show and make-primary send just the one field plus updatedBy.
@@ -56,7 +62,22 @@ export function XbankaAccountsTab() {
     else patch(account, { isActive: false }, `${account.bankName} is now hidden from customers.`);
   };
 
-  const busyId = update.isPending ? update.variables?.accountId : undefined;
+  const busyId = update.isPending
+    ? update.variables?.accountId
+    : remove.isPending
+      ? remove.variables?.accountId
+      : undefined;
+  const confirmDelete = (account: XbankaAccount) =>
+    remove.mutate(
+      {
+        accountId: account.id,
+        deletedBy: updatedBy,
+        bankName: account.bankName,
+        accountNumber: account.accountNumber,
+      },
+      { onSettled: () => setDialog(null) },
+    );
+
   const activeCount = accounts.filter((a) => a.isActive).length;
 
   if (!canView && !permissionsLoading) {
@@ -164,6 +185,37 @@ export function XbankaAccountsTab() {
                         Show
                       </Button>
                     )}
+                    {account.isPrimary ? (
+                      // A disabled button swallows hover, so the reason sits on a wrapper.
+                      <span title="Make another account primary first">
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          disabled
+                          aria-label={`Delete ${account.bankName} (make another account primary first)`}
+                        >
+                          <Trash2 />
+                          Delete
+                        </Button>
+                      </span>
+                    ) : (
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        disabled={busy || !updatedBy}
+                        aria-label={`Delete ${account.bankName}`}
+                        onClick={() =>
+                          setDialog({
+                            kind: "delete",
+                            account,
+                            lastVisible: isLastVisibleAccount(account, accounts),
+                          })
+                        }
+                      >
+                        <Trash2 />
+                        Delete
+                      </Button>
+                    )}
                     {!account.isPrimary && account.isActive && (
                       <Button
                         size="sm"
@@ -197,6 +249,21 @@ export function XbankaAccountsTab() {
           onConfirm={() =>
             patch(dialog.account, { isActive: false }, `${dialog.account.bankName} is now hidden from customers.`)
           }
+          onClose={() => setDialog(null)}
+        />
+      )}
+      {dialog?.kind === "delete" && (
+        <ConfirmAccountAction
+          title={`Delete ${dialog.account.bankName}?`}
+          message={`This permanently removes ${dialog.account.bankName} (${dialog.account.accountNumber}) and cannot be undone. If you might need it again, hide it instead.${
+            dialog.lastVisible
+              ? " It is the only account customers can see, so they will have nothing to pay into."
+              : ""
+          }`}
+          confirmLabel="Delete account"
+          destructive
+          isPending={remove.isPending}
+          onConfirm={() => confirmDelete(dialog.account)}
           onClose={() => setDialog(null)}
         />
       )}

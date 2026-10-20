@@ -7,10 +7,11 @@ const actions = vi.hoisted(() => ({
   getXbankaAccounts: vi.fn(),
   createXbankaAccount: vi.fn(),
   updateXbankaAccount: vi.fn(),
+  deleteXbankaAccount: vi.fn(),
   getFundingBanks: vi.fn(),
   lookupFundingAccount: vi.fn(),
 }));
-const toast = vi.hoisted(() => ({ success: vi.fn(), error: vi.fn() }));
+const toast = vi.hoisted(() => ({ success: vi.fn(), error: vi.fn(), warning: vi.fn() }));
 vi.mock("../actions/xbankaAccountActions", () => actions);
 vi.mock("sonner", () => ({ toast }));
 
@@ -18,6 +19,7 @@ import {
   XBANKA_ACCOUNTS_QUERY_KEY,
   useAccountLookup,
   useCreateXbankaAccount,
+  useDeleteXbankaAccount,
   useFundingBanks,
   useUpdateXbankaAccount,
   useXbankaAccounts,
@@ -134,5 +136,66 @@ describe("useAccountLookup", () => {
     const { result } = renderHook(() => useAccountLookup("044", "0000000000"), { wrapper });
     await waitFor(() => expect(result.current.isError).toBe(true));
     expect(result.current.error).toMatchObject({ message: "No account found for this bank and number." });
+  });
+});
+
+describe("useDeleteXbankaAccount", () => {
+  const vars = { accountId: "id-1", deletedBy: "ops@xbanka.com", bankName: "Access Bank", accountNumber: "0987654321" };
+  const deleted = (remaining: number) => ({
+    data: { data: { deleted: true, id: "id-1", bankName: "Delete Test Bank", accountNumber: "5555500001", remaining } },
+  });
+
+  it("deletes, refetches the list, and toasts the removed account masked", async () => {
+    actions.deleteXbankaAccount.mockResolvedValue(deleted(3));
+    const { wrapper, invalidate } = setup();
+    const { result } = renderHook(() => useDeleteXbankaAccount(), { wrapper });
+
+    await act(() => result.current.mutateAsync(vars));
+
+    expect(actions.deleteXbankaAccount).toHaveBeenCalledWith(vars);
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: XBANKA_ACCOUNTS_QUERY_KEY });
+    expect(toast.success).toHaveBeenCalledWith("Deleted Delete Test Bank ••••0001.");
+    expect(toast.warning).not.toHaveBeenCalled();
+  });
+
+  it("falls back to the row's own details when the response has no body", async () => {
+    actions.deleteXbankaAccount.mockResolvedValue({ data: {} });
+    const { wrapper } = setup();
+    const { result } = renderHook(() => useDeleteXbankaAccount(), { wrapper });
+
+    await act(() => result.current.mutateAsync(vars));
+
+    expect(toast.success).toHaveBeenCalledWith("Deleted Access Bank ••••4321.");
+  });
+
+  it.each([
+    [1, "Only one Xbanka account is left."],
+    [0, "No Xbanka accounts are left. Customers have nowhere to send bank transfers."],
+  ])("warns when %d account(s) remain", async (remaining, message) => {
+    actions.deleteXbankaAccount.mockResolvedValue(deleted(remaining));
+    const { wrapper } = setup();
+    const { result } = renderHook(() => useDeleteXbankaAccount(), { wrapper });
+
+    await act(() => result.current.mutateAsync(vars));
+
+    expect(toast.warning).toHaveBeenCalledWith(message, expect.anything());
+  });
+
+  it("refetches and shows the readable message when the primary can't be deleted", async () => {
+    actions.deleteXbankaAccount.mockRejectedValue({
+      status: 400,
+      message: "The primary (default) account cannot be deleted. Make another account primary first.",
+    });
+    const { wrapper, invalidate } = setup();
+    const { result } = renderHook(() => useDeleteXbankaAccount(), { wrapper });
+
+    await act(() => result.current.mutateAsync(vars).catch(() => {}));
+
+    expect(toast.error).toHaveBeenCalledWith(
+      "The primary (default) account cannot be deleted. Make another account primary first.",
+      expect.anything(),
+    );
+    expect(toast.success).not.toHaveBeenCalled();
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: XBANKA_ACCOUNTS_QUERY_KEY });
   });
 });

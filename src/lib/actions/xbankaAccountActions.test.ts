@@ -1,10 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { get, post, patch } = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn(), patch: vi.fn() }));
-vi.mock("../Axiosinstance/axiosInstance", () => ({ default: { get, post, patch } }));
+const { get, post, patch, del } = vi.hoisted(() => ({
+  get: vi.fn(),
+  post: vi.fn(),
+  patch: vi.fn(),
+  del: vi.fn(),
+}));
+vi.mock("../Axiosinstance/axiosInstance", () => ({ default: { get, post, patch, delete: del } }));
 
 import {
   createXbankaAccount,
+  deleteXbankaAccount,
   getFundingBanks,
   getXbankaAccounts,
   lookupFundingAccount,
@@ -15,7 +21,7 @@ const ID = "a48c1a83-63a5-4f2a-8e01-18386ebe021f";
 const BASE = "/api/transactions/funding";
 
 beforeEach(() => {
-  [get, post, patch].forEach((m) => m.mockReset().mockResolvedValue({ data: {}, status: 200 }));
+  [get, post, patch, del].forEach((m) => m.mockReset().mockResolvedValue({ data: {}, status: 200 }));
 });
 
 describe("xbanka account requests", () => {
@@ -72,5 +78,39 @@ describe("bank list and lookup requests", () => {
       accountNumber: "9082455489",
       bankCode: "044",
     });
+  });
+});
+
+describe("deleteXbankaAccount", () => {
+  it("DELETEs the account with the staff email as deletedBy in the query string and no body", async () => {
+    del.mockResolvedValue({ data: { data: { deleted: true } }, status: 200 });
+    const res = await deleteXbankaAccount({ accountId: ID, deletedBy: "ops@xbanka.com" });
+
+    expect(del).toHaveBeenCalledWith(`${BASE}/xbanka-accounts/${ID}`, {
+      params: { deletedBy: "ops@xbanka.com" },
+    });
+    expect(res.success).toBe(true);
+  });
+
+  it("surfaces the readable message when the core backend refuses to delete the primary", async () => {
+    const detail = JSON.stringify({
+      message: "The primary (default) account cannot be deleted. Make another account primary first.",
+      errorGroup: "MICROSERVICE_ERROR",
+      data: null,
+    });
+    del.mockRejectedValue({ status: 400, message: detail });
+
+    await expect(deleteXbankaAccount({ accountId: ID, deletedBy: "o" })).rejects.toEqual({
+      success: false,
+      status: 400,
+      message: "The primary (default) account cannot be deleted. Make another account primary first.",
+    });
+  });
+
+  it("applies the same message parsing to the other account requests", async () => {
+    post.mockRejectedValue({ status: 400, message: JSON.stringify({ message: "Account already exists" }) });
+    await expect(
+      createXbankaAccount({ bankName: "a", bankCode: "1", accountNumber: "0123456789", accountName: "n", updatedBy: "u" }),
+    ).rejects.toMatchObject({ message: "Account already exists" });
   });
 });
