@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
@@ -12,6 +13,7 @@ import PasswordField from "../ui/PasswordField";
 import Image from "next/image";
 import { LoginFormData, loginSchema } from "@/lib/schema/login.schema";
 import { useLogin } from "@/lib/services/login.service";
+import { TwoFactorLoginStep } from "./two-factor-login-step";
 
 export default function LoginForm() {
   const {
@@ -22,11 +24,35 @@ export default function LoginForm() {
     resolver: zodResolver(loginSchema),
   });
 
-  const { error, mutate, isPending } = useLogin();
+  // Set when the password was right but the account has 2FA on. Memory only:
+  // the doc forbids persisting it, and a reload should restart the login.
+  const [mfaToken, setMfaToken] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+
+  const { error, mutate, isPending, reset } = useLogin({
+    onMfaRequired: (token) => {
+      setNotice(null);
+      setMfaToken(token);
+    },
+  });
 
   const onSubmit = async (data: LoginFormData) => {
+    setNotice(null);
     mutate(data);
   };
+
+  const backToPassword = useCallback(
+    (message: string | null) => {
+      setMfaToken(null);
+      setNotice(message);
+      reset();
+    },
+    [reset],
+  );
+  const onExpired = useCallback(
+    (message: string) => backToPassword(message),
+    [backToPassword],
+  );
 
   return (
     <div>
@@ -46,6 +72,19 @@ export default function LoginForm() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            {mfaToken ? (
+              <TwoFactorLoginStep
+                mfaToken={mfaToken}
+                onExpired={onExpired}
+                onBack={() => backToPassword(null)}
+              />
+            ) : (
+            <>
+            {notice && (
+              <Alert>
+                <AlertDescription>{notice}</AlertDescription>
+              </Alert>
+            )}
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="flex flex-col gap-6">
                 <FormField
@@ -103,6 +142,8 @@ export default function LoginForm() {
                 </Link>
               </p>
             </div>
+            </>
+            )}
           </CardContent>
         </Card>
       </div>

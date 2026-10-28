@@ -58,6 +58,8 @@ export interface Profile {
   role: MemberRole;
   created_at: string;
   verified: boolean;
+  /** Whether authenticator-app 2FA is on. Drives Settings → Security. */
+  totp_enabled?: boolean;
 }
 
 export interface StaffMember {
