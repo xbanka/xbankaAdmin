@@ -13,16 +13,21 @@ interface CustomerActionMenuProps {
   onEditPermissions?: () => void;
   onEditRoles?: () => void;
   onDelete?: () => void;
+  onReset2fa?: () => void;
   canEditPermissions?: boolean;
   canEditRoles?: boolean;
+  /** Super Admins only. The backend answers 403 for anyone else. */
+  canReset2fa?: boolean;
 }
 
 export default function StaffActionMenu({
   onEditPermissions,
   onEditRoles,
   onDelete,
+  onReset2fa,
   canEditPermissions = false,
   canEditRoles = false,
+  canReset2fa = false,
 }: CustomerActionMenuProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   return (
@@ -54,6 +59,17 @@ export default function StaffActionMenu({
               }}
             >
               Edit Roles & Permissions
+            </DropdownMenuItem>
+          )}
+          {canReset2fa && (
+            <DropdownMenuItem
+            className="font-[400] text-[14px] text-[#28282B] py-2 px-3"
+              onClick={() => {
+                setMenuOpen(false);
+                onReset2fa?.();
+              }}
+            >
+              Reset 2FA
             </DropdownMenuItem>
           )}
           <DropdownMenuItem
