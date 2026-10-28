@@ -12,6 +12,9 @@ import { StaffMember } from "@/lib/types/staffTypes";
 import { formatDate } from "@/lib/formatDate";
 import StaffActionMenu from "@/components/staff/staff-action-menu";
 import DeleteStaffModal from "@/components/staff/delete-staff-modal";
+import Reset2faModal from "@/components/staff/reset-2fa-modal";
+import { useProfile } from "@/lib/services/profile.service";
+import { isSuperAdminRole } from "@/lib/utils/two-factor";
 import { EditPermissionsSidebar } from "@/components/staff/edit-permissions-sidebar";
 import { usePermissions } from "@/hooks/usePermissions";
 import { ActiveBadge } from "@/components/customer-management/active-badge";
@@ -28,6 +31,10 @@ export default function StaffPage() {
   const canAddStaff = hasPermission("staff:add");
   const canEditRoles = hasPermission("staff:edit_roles");
   const canEditPermissions = hasPermission("staff:edit_permissions");
+  // The reset endpoint is role-gated, not permission-gated, so this reads the
+  // role name the same way the Role enum spells it.
+  const { data: profile } = useProfile();
+  const canReset2fa = isSuperAdminRole(profile?.data?.role?.name);
 
   // const { data, error, isLoading } = useGetStaff(role)
   const { data, isError, error, isPending } = useGetAllStaff();
@@ -42,6 +49,7 @@ export default function StaffPage() {
   const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null);
   const [editPermissionsOpen, setEditPermissionsOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [reset2faOpen, setReset2faOpen] = useState(false);
   const [editRolesOpen, setEditRolesOpen] = useState(false);
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -182,6 +190,11 @@ export default function StaffPage() {
             setSelectedStaff(item);
             setDeleteOpen(true);
           }}
+          canReset2fa={canReset2fa}
+          onReset2fa={() => {
+            setSelectedStaff(item);
+            setReset2faOpen(true);
+          }}
         />
       ),
     },
@@ -241,6 +254,12 @@ export default function StaffPage() {
         <DeleteStaffModal
           isOpen={deleteOpen}
           onClose={() => setDeleteOpen(false)}
+          staff={selectedStaff}
+        />
+
+        <Reset2faModal
+          isOpen={reset2faOpen}
+          onClose={() => setReset2faOpen(false)}
           staff={selectedStaff}
         />
       </div>

@@ -78,8 +78,16 @@ AxiosInstance.interceptors.response.use(
       }
       return Promise.reject(error);
     }
+    // A wrong 2FA code on /2fa/disable or /2fa/recovery-codes/regenerate is a
+    // 401 "Invalid code." on a perfectly valid session. Refreshing and
+    // retrying would resend the same bad code and burn a second of the five
+    // attempts before the 15-minute lockout, so it goes straight to the caller.
+    const isWrong2faCode =
+      error.response?.status === 401 &&
+      error.response?.data?.detail === "Invalid code.";
     if (
       error.response?.status === 401 &&
+      !isWrong2faCode &&
       !originalRequest._retry &&
       !originalRequest.url.includes("/api/auth/erp/login") &&
       !originalRequest.url.includes("/api/auth/erp/register") &&

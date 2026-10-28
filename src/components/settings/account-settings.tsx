@@ -7,11 +7,12 @@ import { DashboardLayout } from "@/components/layout/dashboard-layout";
 
 import { MyProfileTab } from "./my-profile-tab";
 import { NotificationsTab } from "./notifications-tab";
+import { SecurityTab } from "./security-tab";
 import { SETTINGS_TABS, SettingsNav, SettingsTabId } from "./settings-nav";
 import { SettingsPanelHeader } from "./settings-ui";
 
 /**
- * Stand-in for the three sections that appear in the rail but haven't been
+ * Stand-in for the two sections that appear in the rail but haven't been
  * designed yet. They stay listed so the navigation matches the design.
  */
 function ComingSoonTab({ tab }: { tab: SettingsTabId }) {
@@ -46,7 +47,8 @@ export function AccountSettings() {
           <section className="w-full min-w-0 flex-1 rounded-2xl border border-border-default bg-card-primary">
             {activeTab === "profile" && <MyProfileTab />}
             {activeTab === "notifications" && <NotificationsTab />}
-            {activeTab !== "profile" && activeTab !== "notifications" && (
+            {activeTab === "security" && <SecurityTab />}
+            {(activeTab === "general" || activeTab === "integrations") && (
               <ComingSoonTab tab={activeTab} />
             )}
           </section>

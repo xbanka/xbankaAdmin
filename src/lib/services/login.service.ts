@@ -7,20 +7,45 @@ import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/useAuthState";
 import { authToken } from "../authToken";
 import { forgotPasswordErp } from "../actions/passwordActions";
+import { LoginResponse } from "../types/two-factor-types";
 
-export const useLogin = () => {
+/**
+ * Turns an access token into a signed-in session. Shared by the password
+ * step (no 2FA) and the code step (2FA), so both land the user identically.
+ */
+export const useCompleteLogin = () => {
   const login = useAuthStore((state) => state.login);
   const router = useRouter();
   const queryClient = useQueryClient();
+
+  return (accessToken: string) => {
+    toast.success("Logged in successfully");
+    queryClient.removeQueries({ queryKey: ["userProfile"] });
+    login(accessToken);
+    authToken.set(accessToken);
+    router.push("/");
+  };
+};
+
+/**
+ * Password step. When the account has 2FA on, the server answers with an
+ * `mfa_token` and no session — nothing is stored, and `onMfaRequired` hands
+ * the token to the form so it can show the code screen. The token stays in
+ * component memory only, never cookies or localStorage.
+ */
+export const useLogin = ({
+  onMfaRequired,
+}: { onMfaRequired?: (mfaToken: string) => void } = {}) => {
+  const completeLogin = useCompleteLogin();
   return useMutation({
     mutationFn: (data: loginTypes) => loginAction(data),
     onSuccess: (result) => {
-      toast.success("Logged in successfully");
-      queryClient.removeQueries({ queryKey: ["userProfile"] });
-      login(result.data.access_token);
-      const access_token = result.data.access_token;
-      authToken.set(access_token);
-      router.push("/");
+      const body = result.data as LoginResponse;
+      if (body.mfa_required) {
+        onMfaRequired?.(body.mfa_token);
+        return;
+      }
+      completeLogin(body.access_token);
     },
     onError: (err) => {
       handleApiError(err);
