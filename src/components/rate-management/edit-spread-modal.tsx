@@ -13,6 +13,7 @@ import { ModalHeader } from "../ui/modal-header";
 import { Label } from "../ui/label";
 import { useUpdateBuyAndSpreadRates } from "@/lib/services/rates.service";
 import { FeeType } from "@/lib/types/rates-types";
+import { getEffectiveSpreads } from "@/lib/utils/rates";
 
 type UpdateOutcome = "applied" | "pending";
 
@@ -26,19 +27,17 @@ export function EditSpreadModal({
   onClose,
   onSave,
 }: EditSpreadModalProps) {
+  // Open with the same spread and fee type the table shows for this row.
+  const current = getEffectiveSpreads(spreadData);
   const [feeMode, setFeeMode] = useState<FeeType>(
     // A row can still carry the legacy "FIXED" value — treat that the same
     // as "FLAT" when deciding which radio starts selected.
-    spreadData?.buyFeeType === "PERCENTAGE" ? "PERCENTAGE" : "FLAT",
+    current.buyFeeType === "PERCENTAGE" ? "PERCENTAGE" : "FLAT",
   );
   const isFlat = feeMode !== "PERCENTAGE";
 
-  const [buySpread, setBuySpread] = useState(
-    String(spreadData?.segment?.buySpread ?? 0),
-  );
-  const [sellSpread, setSellSpread] = useState(
-    String(spreadData?.segment?.sellSpread ?? 0),
-  );
+  const [buySpread, setBuySpread] = useState(String(current.buySpread));
+  const [sellSpread, setSellSpread] = useState(String(current.sellSpread));
   const buySpreadValue = Number(buySpread) || 0;
   const sellSpreadValue = Number(sellSpread) || 0;
 
@@ -83,6 +82,9 @@ export function EditSpreadModal({
           sellFeeType: feeMode,
           sellFeeValue: sellSpreadValue,
           segmentId: spreadData.segmentId,
+          // A per-asset spread only applies once the asset overrides its
+          // segment; without this the backend keeps using the segment spread.
+          overrideSegment: true,
         },
       },
       {

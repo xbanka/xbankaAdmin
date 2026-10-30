@@ -11,22 +11,25 @@ import {
   useUpdateBuyAndSpreadRates,
 } from "@/lib/services/rates.service";
 import { Input } from "../ui/input";
-import { SEGMENT_TYPES } from "./mock";
+import { ALL_SEGMENTS, filterReviewAssets } from "./segment-selection";
 import { fmt } from "@/lib/utils/formatNumber";
 import { getXBankaRates } from "@/lib/utils/rates";
 
 export function StepAssignAssets({
   assets,
   segments,
+  loading = false,
+  pendingApproval = false,
 }: {
   assets: CryptoCurrencyTypes[];
   segments: Segment[];
+  loading?: boolean;
+  pendingApproval?: boolean;
 }) {
   const segOptions = segments.map((s) => s.name);
   const [selectedAssetIds, setSelectedAssetIds] = useState<string[]>([]);
   const [selectedSegmentName, setSelectedSegmentName] = useState("");
-  const [selectedTransactionType, setSelectedTransactionType] =
-    useState<string>("");
+  const [segmentFilter, setSegmentFilter] = useState<string>(ALL_SEGMENTS);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSegments, setSelectedSegments] = useState<
     Record<string, string>
@@ -39,6 +42,14 @@ export function StepAssignAssets({
     label: segment.name,
     value: segment.id,
   }));
+  const segmentFilterOptions = [
+    { label: "All segments", value: ALL_SEGMENTS },
+    ...segmentOptions,
+  ];
+  const visibleAssets = filterReviewAssets(assets, {
+    segmentId: segmentFilter,
+    query: searchQuery,
+  });
   console.log("segments", segments);
   console.log("assets", assets);
 
@@ -217,10 +228,20 @@ export function StepAssignAssets({
         </h3>
         <p className="text-[12px] font-normal text-text-secondary">
           Assign each supported asset to a spread segment. Assets will inherit
-          the segment's buy
+          the segment&apos;s buy
           <br /> and sell spreads unless a custom override is added later.
         </p>
       </div>
+
+      {pendingApproval && (
+        <div
+          role="status"
+          className="mb-4 rounded-[8px] bg-teal-light px-3 py-2 text-[12px] text-teal-text"
+        >
+          Your spread change is waiting for approval. The rates below show the
+          current live spreads until it is approved.
+        </div>
+      )}
 
       {/* Toolbar */}
       <div className="flex items-center gap-2 mb-4 flex-wrap">
@@ -236,10 +257,10 @@ export function StepAssignAssets({
           </div>
           <SelectFieldLayout
             id="transactionType"
-            options={SEGMENT_TYPES}
-            placeholder="All segment"
-            value={selectedTransactionType}
-            onChange={setSelectedTransactionType}
+            options={segmentFilterOptions}
+            placeholder="All segments"
+            value={segmentFilter}
+            onChange={setSegmentFilter}
             className="w-full md:w-[180px]"
             selectClassName="border border-gray-300"
           />
@@ -278,11 +299,17 @@ export function StepAssignAssets({
 
       <div className="border-b border-x border-[#E5E7EB] rounded-[8px] overflow-hidden">
         <DataTableLayout
-          data={assets}
+          data={visibleAssets}
           columns={columns}
           rowKey={(row) => row.id}
           itemsPerPage={10}
-          totalCount={assets.length}
+          totalCount={visibleAssets.length}
+          isLoading={loading}
+          emptyMessage={
+            segments.length === 0
+              ? "None of the selected segments has a buy or sell spread. Go back and set one."
+              : "No assets in the selected segments."
+          }
         />
       </div>
     </div>

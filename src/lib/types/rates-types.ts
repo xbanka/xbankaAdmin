@@ -11,7 +11,9 @@ export interface CurrencyConfig {
   buyFeeValue: number;
   sellFeeType: FeeType;
   sellFeeValue: number;
-  segmentId: string
+  segmentId: string;
+  // true makes buyFeeValue/sellFeeValue apply instead of the segment spread.
+  overrideSegment?: boolean;
 }
 
 export interface ActiveConfig {

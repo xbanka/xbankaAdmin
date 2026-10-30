@@ -19,7 +19,7 @@ import { useState } from "react";
 import { DashboardLayout } from "../layout/dashboard-layout";
 import { EmptySpreadSchedule } from "./empty-spread-schedule";
 import {
-  useGetCryptoRates,
+  useSpreadSchedule,
   UseGetRateLogDetails,
   UseGetRateLogs,
   UseGetRateProposals,
@@ -55,7 +55,12 @@ export default function RateManagement() {
     hasPermission("rates:propose_changes") ||
     hasPermission("rates:approve_changes") ||
     hasPermission("rates:change_override");
-  const { data, isPending, error } = useGetCryptoRates();
+  const {
+    rows: ratesData,
+    isLoading: ratesLoading,
+    error: ratesError,
+    isEmpty: isScheduleEmpty,
+  } = useSpreadSchedule();
 
   const {
     data: ratesLogData,
@@ -76,7 +81,6 @@ export default function RateManagement() {
     UseGetRateLogDetails(selectedHistoryEntry?.id);
   console.log("Rate Log Details", rateLogDetails?.log);
   const historyData = ratesLogData?.logs;
-  const ratesData = data?.data;
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
@@ -164,21 +168,19 @@ export default function RateManagement() {
       key: "buySpread",
       header: "Buy Spread",
       render: (row: CryptoCurrencyTypes) => {
-        const { buySpread } = getEffectiveSpreads(row);
-        return (
-          <div className="">{formatFeeDisplay(buySpread, row.buyFeeType)}</div>
-        );
+        // The fee type comes with the value: a segment spread inherited by
+        // the row is a percentage even when the row's own unused type is FLAT.
+        const { buySpread, buyFeeType } = getEffectiveSpreads(row);
+        return <div className="">{formatFeeDisplay(buySpread, buyFeeType)}</div>;
       },
     },
     {
       key: "sellSpread",
       header: "Sell Spread",
       render: (row: CryptoCurrencyTypes) => {
-        const { sellSpread } = getEffectiveSpreads(row);
+        const { sellSpread, sellFeeType } = getEffectiveSpreads(row);
         return (
-          <div className="">
-            {formatFeeDisplay(sellSpread, row.sellFeeType)}
-          </div>
+          <div className="">{formatFeeDisplay(sellSpread, sellFeeType)}</div>
         );
       },
     },
@@ -446,7 +448,7 @@ export default function RateManagement() {
 
           {/* Content */}
           {view === "list" ? (
-            ratesData?.length === 0 ? (
+            isScheduleEmpty ? (
               <EmptySpreadSchedule onClick={() => setView("wizard")} />
             ) : (
               <main className="flex-1 px-8">
@@ -523,7 +525,11 @@ export default function RateManagement() {
                     itemsPerPage={10}
                     totalCount={ratesData?.length}
                     emptyMessage="No spreads configured yet."
-                    isLoading={isPending}
+                    isLoading={ratesLoading}
+                    isError={!!ratesError}
+                    errorMessage={
+                      ratesError?.message || "Failed to load spread schedule."
+                    }
                   />
                 ) : (
                   <DataTableLayout
