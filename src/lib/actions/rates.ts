@@ -6,8 +6,15 @@ import {
   UpdateSegmentsBulkPayload,
 } from "../types/rates-types";
 
-export const getCryptoRates = async () => {
-  const response = await AxiosInstance.get(`/api/rates/crypto/all`);
+// With segmentIds, only assets in those segments come back. Without them the
+// backend returns every asset that has a segment, so callers that mean "none"
+// must not call this with an empty list.
+export const getCryptoRates = async (segmentIds?: string[]) => {
+  const response = await AxiosInstance.get(`/api/rates/crypto/all`, {
+    params: segmentIds?.length
+      ? { segmentId: segmentIds.join(",") }
+      : undefined,
+  });
   return response.data;
 };
 

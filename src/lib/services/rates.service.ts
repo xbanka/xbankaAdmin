@@ -1,5 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CurrencyConfig, UpdateCryptoRatesArgs } from "../types/rates-types";
+import {
+  CryptoCurrencyTypes,
+  CurrencyConfig,
+  UpdateCryptoRatesArgs,
+} from "../types/rates-types";
+import { getConfiguredSegmentIds, keepSegments } from "../utils/rates";
 import {
   approveRateProposal,
   bulkAssignSegment,
@@ -17,11 +22,41 @@ import {
 import { handleApiError } from "../errors/handleApiError";
 import { toast } from "sonner";
 
-export const useGetCryptoRates = () => {
+// Assets in the given segments only. An empty list means "no segments", so
+// the request is skipped rather than sent unfiltered (which returns every
+// asset). The key sits under "get-crypto-rates" so existing invalidations
+// still refetch it.
+export const useGetCryptoRates = (segmentIds: string[]) => {
+  const ids = [...segmentIds].sort();
   return useQuery({
-    queryKey: ["get-crypto-rates"],
-    queryFn: getCryptoRates,
+    queryKey: ["get-crypto-rates", ids],
+    queryFn: () => getCryptoRates(ids),
+    enabled: ids.length > 0,
+    select: (res: { data?: CryptoCurrencyTypes[] }) => ({
+      ...res,
+      data: keepSegments(res?.data, ids),
+    }),
   });
+};
+
+// The dashboard's spread schedule: segments where at least one asset has a
+// non-zero spread, then the assets in those segments from the backend.
+export const useSpreadSchedule = () => {
+  const segments = useGetAllSegments();
+  const segmentIds = getConfiguredSegmentIds(segments.data?.data);
+  const rates = useGetCryptoRates(segmentIds);
+
+  const hasSegments = segmentIds.length > 0;
+  const rows: CryptoCurrencyTypes[] = hasSegments ? (rates.data?.data ?? []) : [];
+  const isLoading = segments.isPending || (hasSegments && rates.isPending);
+  const error = segments.error ?? (hasSegments ? rates.error : null);
+
+  return {
+    rows,
+    isLoading,
+    error,
+    isEmpty: !isLoading && !error && rows.length === 0,
+  };
 };
 
 export const usePostCryptoRates = () => {

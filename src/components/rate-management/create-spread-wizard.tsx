@@ -15,6 +15,8 @@ import {
   useGetCryptoRates,
   useUpdateAllSegments,
 } from "@/lib/services/rates.service";
+import { isChangePendingApproval } from "@/lib/utils/rates";
+import { getReviewSegments, mergeSegments } from "./segment-selection";
 
 export function CreateSpreadWizard({ onClose }: { onClose: () => void }) {
   const [step, setStep] = useState<Step>(1);
@@ -34,10 +36,16 @@ export function CreateSpreadWizard({ onClose }: { onClose: () => void }) {
     (sum, segment) => sum + segment.assets.length,
     0,
   );
-  const { data: cryptoData } = useGetCryptoRates();
-
-  const cryptoAssets = cryptoData?.data ?? [];
+  // Step 3 reviews only the assets in segments picked in step 1 that have a
+  // spread after step 2. The backend filters by segmentId; nothing is fetched
+  // before step 3, or when no picked segment has a spread.
+  const reviewSegments = getReviewSegments(segments);
+  const reviewSegmentIds = step === 3 ? reviewSegments.map((s) => s.id) : [];
+  const { data: cryptoData, isPending: isPendingAssets } =
+    useGetCryptoRates(reviewSegmentIds);
+  const reviewAssets = cryptoData?.data ?? [];
   const [setupNote, setSetupNote] = useState("");
+  const [pendingApproval, setPendingApproval] = useState(false);
 
   const toggleSegment = (id: string) => {
     setSegments((prev) =>
@@ -86,7 +94,8 @@ export function CreateSpreadWizard({ onClose }: { onClose: () => void }) {
     updateSegments(
       { setupNote, segments: segmentsPayload },
       {
-        onSuccess: () => {
+        onSuccess: (data) => {
+          setPendingApproval(isChangePendingApproval(data));
           setStep(3);
         },
       },
@@ -95,16 +104,8 @@ export function CreateSpreadWizard({ onClose }: { onClose: () => void }) {
 
   useEffect(() => {
     if (segmentData?.data) {
-      setSegments(
-        segmentData.data.map((segment: SegmentResponse) => ({
-          id: segment.id,
-          name: segment.name,
-          selected: true,
-          isActive: segment.isActive ?? true,
-          buySpread: segment.buySpread,
-          sellSpread: segment.sellSpread,
-          assets: segment.assets,
-        })),
+      setSegments((prev) =>
+        mergeSegments(prev, segmentData.data as SegmentResponse[]),
       );
     }
   }, [segmentData]);
@@ -175,7 +176,12 @@ export function CreateSpreadWizard({ onClose }: { onClose: () => void }) {
             />
           )}
           {step === 3 && (
-            <StepAssignAssets assets={cryptoAssets} segments={segments} />
+            <StepAssignAssets
+              assets={reviewAssets}
+              segments={reviewSegments}
+              loading={reviewSegmentIds.length > 0 && isPendingAssets}
+              pendingApproval={pendingApproval}
+            />
           )}
         </div>
       </div>
@@ -204,7 +210,7 @@ export function CreateSpreadWizard({ onClose }: { onClose: () => void }) {
 
                 setStep((s) => (s + 1) as Step);
               }}
-              disabled={isPending}
+              disabled={isPending || (step === 1 && selectedCount === 0)}
             >
               {step === 1
                 ? "Continue to Spread Segment"
