@@ -21,6 +21,8 @@ export interface FundingIntentLog {
   failureReason: string | null; // "<http status>: <message>", only on failed rows
   bankReference: string | null;
   overrideAmount: number | null; // null when the declared amount was used
+  fundingAccountId: string | null;
+  attachmentUrls: string[]; // proof of payment; empty when none were sent
   reason: string | null;
   ipAddress: string | null;
 }

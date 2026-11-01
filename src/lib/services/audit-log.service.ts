@@ -64,6 +64,8 @@ function mapFundingIntent(raw: any): FundingIntentLog {
     failureReason: raw.failure_reason ?? null,
     bankReference: raw.bank_reference ?? null,
     overrideAmount: override !== null && Number.isFinite(override) ? override : null,
+    fundingAccountId: raw.funding_account_id ?? null,
+    attachmentUrls: Array.isArray(raw.attachment_urls) ? raw.attachment_urls : [],
     reason: raw.reason ?? null,
     ipAddress: raw.ip_address ?? null,
   };

@@ -14,6 +14,7 @@ import { usePermissions } from "@/hooks/usePermissions";
 import { useDebounce } from "@/hooks/useDebounce";
 import { formatNaira } from "@/lib/utils/funding";
 import { FundingIntentLog, LoginLog, RoleChangeLog } from "./types";
+import { FundingIntentDetailSheet } from "./funding-intent-detail-sheet";
 import { StatusBadge } from "../ui/status-badge";
 import { RoleChangeCell } from "../staff/role-change-cell";
 import {
@@ -71,6 +72,7 @@ export default function AuditLogPage() {
   const [statusFilter, setStatusFilter] = useState("");
   const [actionFilter, setActionFilter] = useState("");
   const [page, setPage] = useState(1);
+  const [selectedIntent, setSelectedIntent] = useState<FundingIntentLog | null>(null);
   const limit = 10;
   const debouncedSearch = useDebounce(search, 400);
 
@@ -260,10 +262,17 @@ export default function AuditLogPage() {
         ),
       },
       {
-        key: "ipAddress" as const,
-        header: "IP",
-        hiddenOnMobile: true,
-        render: (item: FundingIntentLog) => item.ipAddress ?? "—",
+        key: "actions" as const,
+        header: "",
+        render: (item: FundingIntentLog) => (
+          <button
+            type="button"
+            onClick={() => setSelectedIntent(item)}
+            className="text-sm font-medium text-text-teal hover:underline"
+          >
+            View
+          </button>
+        ),
       },
     ],
     [],
@@ -399,6 +408,7 @@ export default function AuditLogPage() {
           />
         </div>
       </div>
+      <FundingIntentDetailSheet log={selectedIntent} onClose={() => setSelectedIntent(null)} />
     </DashboardLayout>
   );
 }
