@@ -4,7 +4,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const { get } = vi.hoisted(() => ({ get: vi.fn() }));
 vi.mock("../Axiosinstance/axiosInstance", () => ({ default: { get } }));
 
-import { buildAuditLogParams, getLoginLogs, getRoleChangeLogs } from "./auditLogActions";
+import {
+  buildAuditLogParams,
+  getFundingIntentAuditLogs,
+  getLoginLogs,
+  getRoleChangeLogs,
+} from "./auditLogActions";
 
 // Serialize exactly the way axios will on the wire, so the assertion is on
 // the real query string the backend sees.
@@ -44,5 +49,26 @@ describe("audit log requests", () => {
       params: { status: undefined, search: undefined, page: 1, limit: 10 },
     });
     expect(toQuery(get.mock.calls[0][1].params)).toBe("page=1&limit=10");
+  });
+
+  it("funding intents request never sends blank action=, status= or search=", async () => {
+    await getFundingIntentAuditLogs({ action: "", status: "", search: "", page: 1, limit: 10 });
+
+    expect(get.mock.calls[0][0]).toBe("/api/audit/funding-intents");
+    expect(toQuery(get.mock.calls[0][1].params)).toBe("page=1&limit=10");
+  });
+
+  it("funding intents request sends action alongside the other filters", async () => {
+    await getFundingIntentAuditLogs({
+      action: "COMPLETED",
+      status: "FAILED",
+      search: "NIP/20261015",
+      page: 2,
+      limit: 20,
+    });
+
+    expect(toQuery(get.mock.calls[0][1].params)).toBe(
+      "status=FAILED&search=NIP%2F20261015&page=2&limit=20&action=COMPLETED",
+    );
   });
 });
