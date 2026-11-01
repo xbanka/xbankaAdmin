@@ -1,10 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  CryptoCurrencyTypes,
-  CurrencyConfig,
-  UpdateCryptoRatesArgs,
-} from "../types/rates-types";
-import { getConfiguredSegmentIds, keepSegments } from "../utils/rates";
+import { CurrencyConfig, UpdateCryptoRatesArgs } from "../types/rates-types";
+import { parseCryptoRates } from "../utils/rates";
 import {
   approveRateProposal,
   bulkAssignSegment,
@@ -22,40 +18,28 @@ import {
 import { handleApiError } from "../errors/handleApiError";
 import { toast } from "sonner";
 
-// Assets in the given segments only. An empty list means "no segments", so
-// the request is skipped rather than sent unfiltered (which returns every
-// asset). The key sits under "get-crypto-rates" so existing invalidations
-// still refetch it.
-export const useGetCryptoRates = (segmentIds: string[]) => {
-  const ids = [...segmentIds].sort();
+// Every crypto asset, no segment filter. `initial` is the backend's flag for
+// "no spread schedule set up yet". The key stays "get-crypto-rates" so
+// existing invalidations still refetch it.
+export const useGetCryptoRates = () => {
   return useQuery({
-    queryKey: ["get-crypto-rates", ids],
-    queryFn: () => getCryptoRates(ids),
-    enabled: ids.length > 0,
-    select: (res: { data?: CryptoCurrencyTypes[] }) => ({
-      ...res,
-      data: keepSegments(res?.data, ids),
-    }),
+    queryKey: ["get-crypto-rates"],
+    queryFn: getCryptoRates,
+    select: (res: { data?: Parameters<typeof parseCryptoRates>[0] }) =>
+      parseCryptoRates(res?.data),
   });
 };
 
-// The dashboard's spread schedule: segments where at least one asset has a
-// non-zero spread, then the assets in those segments from the backend.
+// The dashboard's spread schedule. The empty state shows only when the
+// backend says initial: true; otherwise every item is listed.
 export const useSpreadSchedule = () => {
-  const segments = useGetAllSegments();
-  const segmentIds = getConfiguredSegmentIds(segments.data?.data);
-  const rates = useGetCryptoRates(segmentIds);
-
-  const hasSegments = segmentIds.length > 0;
-  const rows: CryptoCurrencyTypes[] = hasSegments ? (rates.data?.data ?? []) : [];
-  const isLoading = segments.isPending || (hasSegments && rates.isPending);
-  const error = segments.error ?? (hasSegments ? rates.error : null);
+  const { data, isPending, error } = useGetCryptoRates();
 
   return {
-    rows,
-    isLoading,
+    rows: data?.items ?? [],
+    isLoading: isPending,
     error,
-    isEmpty: !isLoading && !error && rows.length === 0,
+    isEmpty: !isPending && !error && data?.initial === true,
   };
 };
 

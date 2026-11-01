@@ -52,61 +52,22 @@ export function getEffectiveSpreads(
   };
 }
 
-type SegmentWithAssets = Partial<SpreadSource> & {
-  id: string;
-  assets?: CryptoCurrencyTypes[];
+type CryptoRatesPayload = {
+  initial?: boolean;
+  items?: CryptoCurrencyTypes[];
 };
 
-// Smallest buy or sell spread that counts as configured, as a percentage or
-// a flat Naira amount. Anything below it is treated as not set.
-export const MIN_SPREAD = 1;
-
-// True when at least one asset in the segment shows a buy or sell spread of
-// at least MIN_SPREAD (percentage or flat), resolved exactly as the dashboard
-// row shows it. A segment whose assets are all below 1 does not count.
-export function hasAssetSpread(segment: SegmentWithAssets) {
-  return (segment.assets ?? []).some((asset) => {
-    const shown = getEffectiveSpreads(asset, asset.segment ?? segment);
-    return shown.buySpread >= MIN_SPREAD || shown.sellSpread >= MIN_SPREAD;
-  });
-}
-
-// A segment is configured once it has assets and a spread of at least
-// MIN_SPREAD, either its own (what the wizard's step 2 saves) or one shown by
-// any of its assets. The segment's own spread counts even while its coins
-// read 0% (the backend stores unused coin fees as 0), so a segment set in the
-// wizard is on the dashboard after Done. Step 3 of the wizard and the
-// dashboard both use this rule, so Done shows the segments step 3 showed.
-export function isSegmentConfigured(segment: SegmentWithAssets) {
-  if ((segment.assets ?? []).length === 0) return false;
-  return (
-    (segment.buySpread || 0) >= MIN_SPREAD ||
-    (segment.sellSpread || 0) >= MIN_SPREAD ||
-    hasAssetSpread(segment)
-  );
-}
-
-// The dashboard's spread schedule. Segments that are not configured, and so
-// all their assets, stay off the dashboard.
-export function getConfiguredSegmentIds(
-  segments: SegmentWithAssets[] | undefined,
-) {
-  return (segments ?? [])
-    .filter(isSegmentConfigured)
-    .map((segment) => segment.id);
-}
-
-// Keeps only rows in the given segments. crypto/all is asked to filter by
-// segmentId, but the screen must not show other segments' assets if a
-// backend build ignores the filter, so the rows are checked here too.
-export function keepSegments(
-  rows: CryptoCurrencyTypes[] | undefined,
-  segmentIds: string[],
-) {
-  const ids = new Set(segmentIds);
-  return (rows ?? []).filter((row) =>
-    ids.has(row.segmentId || row.segment?.id || ""),
-  );
+// GET /api/rates/crypto/all returns { initial, items }. The backend sets
+// initial to true until a spread schedule has been set up, which is when the
+// dashboard shows "No spread schedule configured yet". Any other value means
+// the schedule exists and items are shown as they come back, unfiltered.
+export function parseCryptoRates(
+  data: CryptoRatesPayload | null | undefined,
+): { initial: boolean; items: CryptoCurrencyTypes[] } {
+  return {
+    initial: data?.initial === true,
+    items: Array.isArray(data?.items) ? data.items : [],
+  };
 }
 
 // A save that needs a second approver comes back as a pending proposal. Only
@@ -128,13 +89,57 @@ export function formatFeeDisplay(value: number, feeType: FeeType) {
   return feeType === "PERCENTAGE" ? `${value}%` : fmt(value);
 }
 
-export function getXBankaRates(row: CryptoCurrencyTypes) {
-  const obiexRate = row.obiexRate ?? 0;
-  const buySpread = row.segment?.buySpread ?? 0;
-  const sellSpread = row.segment?.sellSpread ?? 0;
+// The Obiex buy and sell rates the edit modal previews against. crypto/all
+// sends them as obiexValueBuyRate / obiexValueSellRate; a row without one
+// falls back to obiexRate so the preview never drops to 0 by mistake.
+export function getObiexRates(row: CryptoCurrencyTypes) {
+  const reference = row.obiexRate ?? 0;
+  return {
+    buy: row.obiexValueBuyRate ?? reference,
+    sell: row.obiexValueSellRate ?? reference,
+  };
+}
+
+type ResolvedSpreads = ReturnType<typeof getEffectiveSpreads>;
+
+// The spread a row inherits from its segment, ignoring the coin's own fee.
+// Wizard step 3 shows segment spreads, so its customer rates use these.
+export function getSegmentSpreads(row: CryptoCurrencyTypes): ResolvedSpreads {
+  return {
+    buySpread: row.segment?.buySpread ?? 0,
+    sellSpread: row.segment?.sellSpread ?? 0,
+    buyFeeType: row.segment?.buyFeeType ?? "PERCENTAGE",
+    sellFeeType: row.segment?.sellFeeType ?? "PERCENTAGE",
+  };
+}
+
+// Customer rates: the buy spread is added to the Obiex buy rate and the sell
+// spread taken off the Obiex sell rate. A PERCENTAGE spread is a % of that
+// rate; anything else (FLAT, legacy FIXED) is a Naira amount. The edit modal
+// preview and the tables both use this, so they always agree.
+export function applySpreads(
+  obiex: { buy: number; sell: number },
+  spreads: ResolvedSpreads,
+) {
+  const amount = (rate: number, value: number, type: FeeType) =>
+    type === "PERCENTAGE" ? rate * (value / 100) : value;
+  const buyAmount = amount(obiex.buy, spreads.buySpread, spreads.buyFeeType);
+  const sellAmount = amount(obiex.sell, spreads.sellSpread, spreads.sellFeeType);
 
   return {
-    buy: obiexRate + obiexRate * (buySpread / 100),
-    sell: obiexRate - obiexRate * (sellSpread / 100),
+    buy: obiex.buy + buyAmount,
+    sell: obiex.sell - sellAmount,
+    buyAmount,
+    sellAmount,
   };
+}
+
+// XBanka's customer rates for a row. Defaults to the spread the dashboard
+// shows for the row (getEffectiveSpreads), the same one the edit modal opens on.
+export function getXBankaRates(
+  row: CryptoCurrencyTypes,
+  spreads: ResolvedSpreads = getEffectiveSpreads(row),
+) {
+  const { buy, sell } = applySpreads(getObiexRates(row), spreads);
+  return { buy, sell };
 }

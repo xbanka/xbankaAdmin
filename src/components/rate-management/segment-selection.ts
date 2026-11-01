@@ -1,18 +1,7 @@
 import { CryptoCurrencyTypes } from "@/lib/types/rates-types";
-import { isSegmentConfigured } from "@/lib/utils/rates";
 import { Segment, SegmentResponse } from "./types";
 
 export const ALL_SEGMENTS = "all";
-
-// Step 3 only works on segments picked in step 1 that are configured after
-// step 2 (isSegmentConfigured: a step 2 value or an asset spread of at least
-// 1, percentage or flat). The dashboard uses the same rule, so after Done it
-// shows exactly the segments step 3 showed.
-export function getReviewSegments(segments: Segment[]): Segment[] {
-  return segments.filter(
-    (segment) => segment.selected && isSegmentConfigured(segment),
-  );
-}
 
 // Step 3 table filters: the segment dropdown and the name/ticker search.
 export function filterReviewAssets(

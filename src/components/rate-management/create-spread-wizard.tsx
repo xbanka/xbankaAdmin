@@ -16,7 +16,7 @@ import {
   useUpdateAllSegments,
 } from "@/lib/services/rates.service";
 import { isChangePendingApproval } from "@/lib/utils/rates";
-import { getReviewSegments, mergeSegments } from "./segment-selection";
+import { mergeSegments } from "./segment-selection";
 
 export function CreateSpreadWizard({ onClose }: { onClose: () => void }) {
   const [step, setStep] = useState<Step>(1);
@@ -36,14 +36,10 @@ export function CreateSpreadWizard({ onClose }: { onClose: () => void }) {
     (sum, segment) => sum + segment.assets.length,
     0,
   );
-  // Step 3 reviews only the assets in segments picked in step 1 that have a
-  // spread after step 2. The backend filters by segmentId; nothing is fetched
-  // before step 3, or when no picked segment has a spread.
-  const reviewSegments = getReviewSegments(segments);
-  const reviewSegmentIds = step === 3 ? reviewSegments.map((s) => s.id) : [];
-  const { data: cryptoData, isPending: isPendingAssets } =
-    useGetCryptoRates(reviewSegmentIds);
-  const reviewAssets = cryptoData?.data ?? [];
+  // Step 3 lists every asset from crypto/all, unfiltered, and offers every
+  // segment for assignment.
+  const { data: cryptoData, isPending: isPendingAssets } = useGetCryptoRates();
+  const reviewAssets = cryptoData?.items ?? [];
   const [setupNote, setSetupNote] = useState("");
   const [pendingApproval, setPendingApproval] = useState(false);
 
@@ -178,8 +174,8 @@ export function CreateSpreadWizard({ onClose }: { onClose: () => void }) {
           {step === 3 && (
             <StepAssignAssets
               assets={reviewAssets}
-              segments={reviewSegments}
-              loading={reviewSegmentIds.length > 0 && isPendingAssets}
+              segments={segments}
+              loading={isPendingAssets}
               pendingApproval={pendingApproval}
             />
           )}
