@@ -10,6 +10,21 @@ export interface RoleChangeLog {
   status: "pending" | "confirmed";
 }
 
+export interface FundingIntentLog {
+  id: string;
+  timestamp: string; // ISO string
+  staffName: string;
+  staffId: string;
+  transactionId: string;
+  action: "completed" | "rejected";
+  status: "success" | "failed";
+  failureReason: string | null; // "<http status>: <message>", only on failed rows
+  bankReference: string | null;
+  overrideAmount: number | null; // null when the declared amount was used
+  reason: string | null;
+  ipAddress: string | null;
+}
+
 export interface LoginLog {
   id: string;
   timestamp: string; // ISO string
