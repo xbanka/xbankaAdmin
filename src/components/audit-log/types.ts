@@ -7,7 +7,7 @@ export interface RoleChangeLog {
   roleFrom: string;
   roleTo: string;
   reason: string;
-  status: "pending" | "confirmed";
+  status: "pending" | "confirmed" | "superseded";
 }
 
 export interface FundingIntentLog {

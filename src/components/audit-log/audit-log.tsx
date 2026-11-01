@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Search, ChevronDown } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { DataTableLayout } from "@/components/DataTableLayout/DataTableLayout";
@@ -30,6 +30,7 @@ const ROLE_CHANGE_STATUS_OPTIONS = [
   { value: "", label: "All status" },
   { value: "PENDING", label: "Pending" },
   { value: "CONFIRMED", label: "Confirmed" },
+  { value: "SUPERSEDED", label: "Superseded" },
 ];
 
 const LOGIN_STATUS_OPTIONS = [
@@ -275,6 +276,13 @@ export default function AuditLogPage() {
       : fundingIntentsQuery;
   const rows = activeQuery.data?.data.logs ?? [];
   const totalCount = activeQuery.data?.data.total ?? rows.length;
+  const totalPages = activeQuery.data?.data.pages;
+
+  // A page past the end is a 200 with no rows (e.g. a refetch after the data
+  // shrank); step back to the last real page.
+  useEffect(() => {
+    if (totalPages && page > totalPages) setPage(totalPages);
+  }, [totalPages, page]);
   const activeColumns = isRoleChanges
     ? roleChangeColumns
     : isLogins
@@ -376,7 +384,7 @@ export default function AuditLogPage() {
             )}
           </div>
 
-          <DataTableLayout
+          <DataTableLayout<RoleChangeLog | LoginLog | FundingIntentLog>
             data={rows}
             columns={activeColumns as never}
             isLoading={activeQuery.isPending}
@@ -407,6 +415,8 @@ function statusLabel(
       return "Pending confirmation";
     case "confirmed":
       return "Confirmed";
+    case "superseded":
+      return "Superseded";
     default:
       return status;
   }

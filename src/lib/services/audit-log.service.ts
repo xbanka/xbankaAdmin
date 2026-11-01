@@ -5,7 +5,7 @@ import {
   getLoginLogs,
   getRoleChangeLogs,
 } from "@/lib/actions/auditLogActions";
-import { estimatePagination } from "@/lib/utils/pagination";
+import { extractEnvelopePage } from "@/lib/utils/pagination";
 
 interface AuditLogParams {
   search?: string;
@@ -30,7 +30,8 @@ function mapRoleChange(raw: any): RoleChangeLog {
     roleFrom: raw.role_change?.previous_role ?? "",
     roleTo: raw.role_change?.new_role ?? "",
     reason: raw.reason ?? "",
-    status: raw.status === "CONFIRMED" ? "confirmed" : "pending",
+    status:
+      raw.status === "CONFIRMED" ? "confirmed" : raw.status === "SUPERSEDED" ? "superseded" : "pending",
   };
 }
 
@@ -77,9 +78,8 @@ export function useGetRoleChangeLogs({ enabled = true, ...params }: AuditLogPara
     enabled,
     queryFn: async () => {
       const response = await getRoleChangeLogs({ search: params.search, status: params.status, page, limit });
-      const logs = (response.data ?? []).map(mapRoleChange);
-      const { total, hasNextPage } = estimatePagination(page, limit, logs.length);
-      return { data: { logs, total, hasNextPage } };
+      const { rows: logs, total, pages, hasNextPage } = extractEnvelopePage(response.data, mapRoleChange, page);
+      return { data: { logs, total, pages, hasNextPage } };
     },
   });
 }
@@ -102,9 +102,12 @@ export function useGetFundingIntentAuditLogs({
         page,
         limit,
       });
-      const logs = (response.data ?? []).map(mapFundingIntent);
-      const { total, hasNextPage } = estimatePagination(page, limit, logs.length);
-      return { data: { logs, total, hasNextPage } };
+      const { rows: logs, total, pages, hasNextPage } = extractEnvelopePage(
+        response.data,
+        mapFundingIntent,
+        page,
+      );
+      return { data: { logs, total, pages, hasNextPage } };
     },
   });
 }
@@ -118,9 +121,8 @@ export function useGetLoginLogs({ enabled = true, ...params }: AuditLogParams = 
     enabled,
     queryFn: async () => {
       const response = await getLoginLogs({ search: params.search, status: params.status, page, limit });
-      const logs = (response.data ?? []).map(mapLogin);
-      const { total, hasNextPage } = estimatePagination(page, limit, logs.length);
-      return { data: { logs, total, hasNextPage } };
+      const { rows: logs, total, pages, hasNextPage } = extractEnvelopePage(response.data, mapLogin, page);
+      return { data: { logs, total, pages, hasNextPage } };
     },
   });
 }
