@@ -48,6 +48,9 @@ export interface CryptoCurrencyTypes {
   segment: AssetSegment | null;
   segmentId: string;
   obiexRate: number;
+  // Obiex's own buy and sell quotes; obiexRate is the single reference rate.
+  obiexValueBuyRate?: number | null;
+  obiexValueSellRate?: number | null;
   obiexValue: number;
   createdAt: string;
   updatedAt: string;
