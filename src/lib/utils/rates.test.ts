@@ -1,10 +1,11 @@
 import { describe, it, expect } from "vitest";
 import {
   formatFeeDisplay,
-  getConfiguredSegmentIds,
-  hasAssetSpread,
-  keepSegments,
+  parseCryptoRates,
   getEffectiveSpreads,
+  applySpreads,
+  getObiexRates,
+  getSegmentSpreads,
   getXBankaRates,
   isChangePendingApproval,
 } from "./rates";
@@ -146,125 +147,102 @@ describe("getEffectiveSpreads", () => {
   });
 });
 
-describe("getXBankaRates", () => {
-  it("applies the segment's percentage spread to the Obiex rate", () => {
+describe("applySpreads", () => {
+  const obiex = { buy: 1375, sell: 1371.5 };
+
+  it("adds a percentage buy spread and takes off a percentage sell spread", () => {
     expect(
-      getXBankaRates(coin({ obiexRate: 1000, segment: seg({ buySpread: 2, sellSpread: 1 }) })),
-    ).toEqual({ buy: 1020, sell: 990 });
+      applySpreads(obiex, {
+        buySpread: 2,
+        sellSpread: 1,
+        buyFeeType: "PERCENTAGE",
+        sellFeeType: "PERCENTAGE",
+      }),
+    ).toEqual({ buy: 1402.5, sell: 1357.785, buyAmount: 27.5, sellAmount: 13.715 });
   });
 
-  it("returns the Obiex rate unchanged when the segment spread is 0", () => {
-    expect(getXBankaRates(coin({ obiexRate: 1384 }))).toEqual({ buy: 1384, sell: 1384 });
+  it("treats FLAT and legacy FIXED as a Naira amount", () => {
+    expect(
+      applySpreads(obiex, {
+        buySpread: 25,
+        sellSpread: 10,
+        buyFeeType: "FLAT",
+        sellFeeType: "FIXED",
+      }),
+    ).toEqual({ buy: 1400, sell: 1361.5, buyAmount: 25, sellAmount: 10 });
   });
 });
 
-describe("getConfiguredSegmentIds", () => {
-  // Shaped like a segment from GET /api/rates/segments/all.
-  const segment = (
-    id: string,
-    buySpread: number,
-    sellSpread: number,
-    assets: Partial<CryptoCurrencyTypes>[],
-  ) => ({
-    ...seg({ id, buySpread, sellSpread }),
-    assets: assets.map((a) => coin({ segment: null, ...a })),
+describe("getXBankaRates", () => {
+  // BNB on staging: Obiex buy 1375, sell 1371.5.
+  const bnb = (over: Partial<CryptoCurrencyTypes> = {}) =>
+    coin({
+      obiexRate: 1371.5,
+      obiexValueBuyRate: 1375,
+      obiexValueSellRate: 1371.5,
+      ...over,
+    });
+
+  it("matches the edit modal: Obiex buy/sell rates plus the row's shown spread", () => {
+    // Regression: the table used obiexRate for both sides and only the
+    // segment %, so it disagreed with the modal preview for the same coin.
+    const row = bnb({ buyFeeValue: 1.5, sellFeeValue: 2 });
+    expect(getXBankaRates(row)).toEqual({ buy: 1395.625, sell: 1344.07 });
   });
 
-  it("returns nothing for missing or empty data", () => {
-    expect(getConfiguredSegmentIds(undefined)).toEqual([]);
-    expect(getConfiguredSegmentIds([])).toEqual([]);
+  it("uses a coin's flat fee as Naira, not a percentage", () => {
+    const row = bnb({
+      buyFeeType: "FLAT",
+      buyFeeValue: 25,
+      sellFeeType: "FLAT",
+      sellFeeValue: 10,
+    });
+    expect(getXBankaRates(row)).toEqual({ buy: 1400, sell: 1361.5 });
   });
 
-  it("drops every segment when all coins are at 0 (the initial state)", () => {
-    expect(
-      getConfiguredSegmentIds([
-        segment("major", 0, 0, [{ id: "btc" }, { id: "eth" }]),
-        segment("stable", 0, 0, [{ id: "usdt", obiexRate: 1384 }]),
-      ]),
-    ).toEqual([]);
+  it("falls back to the segment spread when the coin fee is missing", () => {
+    const row = bnb({
+      buyFeeValue: undefined as unknown as number,
+      sellFeeValue: undefined as unknown as number,
+      segment: seg({ buySpread: 2, sellSpread: 1 }),
+    });
+    expect(getXBankaRates(row)).toEqual({ buy: 1402.5, sell: 1357.785 });
   });
 
-  it("after Done shows only the segment set in the wizard, even while its coins read 0%", () => {
-    // Regression: picking only Alt coins in the wizard and clicking Done
-    // left the dashboard on the empty state, because the backend stores
-    // each coin's unused fee as 0 and only coin values were checked.
-    expect(
-      getConfiguredSegmentIds([
-        segment("major", 0, 0, [{ id: "btc" }, { id: "eth" }]),
-        segment("alt", 1.5, 1.5, [{ id: "sol" }, { id: "ada" }]),
-        segment("stable", 0, 0, [{ id: "usdt" }]),
-      ]),
-    ).toEqual(["alt"]);
-  });
-  it("keeps a segment whose coins fall back to a segment spread of 1 or more", () => {
-    expect(
-      getConfiguredSegmentIds([
-        segment("major", 1.5, 0, [{ id: "btc", buyFeeValue: undefined }]),
-      ]),
-    ).toEqual(["major"]);
-  });
-  it("drops a segment whose own spread and coins are all below 1", () => {
-    expect(
-      getConfiguredSegmentIds([segment("alt", 0.5, 0.99, [{ id: "sol", buyFeeValue: 0.5 }])]),
-    ).toEqual([]);
-  });
-  it("keeps a segment whose coins fall back to its spread (fee missing)", () => {
-    expect(
-      getConfiguredSegmentIds([
-        segment("major", 1.5, 0, [
-          { id: "btc", buyFeeValue: undefined, sellFeeValue: undefined },
-        ]),
-      ]),
-    ).toEqual(["major"]);
+  it("uses obiexRate on both sides for a row without Obiex buy/sell rates", () => {
+    expect(getXBankaRates(coin({ obiexRate: 1384 }))).toEqual({ buy: 1384, sell: 1384 });
   });
 
-  it("keeps a segment when one coin has only a sell spread", () => {
-    expect(
-      getConfiguredSegmentIds([
-        segment("major", 0, 0, [{ id: "btc" }, { id: "eth", sellFeeValue: 1.25 }]),
-      ]),
-    ).toEqual(["major"]);
+  it("takes explicit spreads, as wizard step 3 does with the segment spread", () => {
+    const row = bnb({ segment: seg({ buySpread: 2, sellSpread: 1 }) });
+    expect(getXBankaRates(row, getSegmentSpreads(row))).toEqual({
+      buy: 1402.5,
+      sell: 1357.785,
+    });
+  });
+});
+
+describe("getSegmentSpreads", () => {
+  it("reads the segment spread and its fee type, ignoring the coin fee", () => {
+    const row = coin({
+      buyFeeValue: 5,
+      segment: seg({ buySpread: 2, sellSpread: 300, sellFeeType: "FLAT" }),
+    });
+    expect(getSegmentSpreads(row)).toEqual({
+      buySpread: 2,
+      sellSpread: 300,
+      buyFeeType: "PERCENTAGE",
+      sellFeeType: "FLAT",
+    });
   });
 
-  it("keeps a 0/0 segment when one coin in it has its own edited spread", () => {
-    expect(
-      getConfiguredSegmentIds([
-        segment("major", 0, 0, [
-          { id: "btc" },
-          { id: "eth", buyFeeType: "FLAT", buyFeeValue: 5000 },
-        ]),
-      ]),
-    ).toEqual(["major"]);
-  });
-
-  it("drops a segment when every coin's spread is below 1, percentage or flat", () => {
-    expect(
-      getConfiguredSegmentIds([
-        segment("major", 0.99, 0.5, [{ id: "btc" }]),
-        segment("stable", 0, 0, [
-          { id: "usdt", buyFeeType: "FLAT", buyFeeValue: 0.5 },
-          { id: "usdc", sellFeeType: "FLAT", sellFeeValue: 0.99 },
-        ]),
-      ]),
-    ).toEqual([]);
-  });
-
-  it("keeps a segment when one coin is exactly 1 (inclusive), flat or percentage", () => {
-    expect(
-      getConfiguredSegmentIds([
-        segment("major", 0, 0, [{ id: "btc", buyFeeValue: 1 }]),
-        segment("stable", 0, 0, [
-          { id: "usdt", buyFeeValue: 0.5 },
-          { id: "usdc", sellFeeType: "FLAT", sellFeeValue: 1 },
-        ]),
-      ]),
-    ).toEqual(["major", "stable"]);
-  });
-  it("drops a segment with no assets, even with a spread set", () => {
-    expect(getConfiguredSegmentIds([segment("empty", 2, 2, [])])).toEqual([]);
-    expect(
-      getConfiguredSegmentIds([{ ...seg({ id: "bare", buySpread: 2 }) }]),
-    ).toEqual([]);
+  it("is 0% when the row has no segment", () => {
+    expect(getSegmentSpreads(coin({ segment: null }))).toEqual({
+      buySpread: 0,
+      sellSpread: 0,
+      buyFeeType: "PERCENTAGE",
+      sellFeeType: "PERCENTAGE",
+    });
   });
 });
 
@@ -292,34 +270,74 @@ describe("isChangePendingApproval", () => {
   });
 });
 
-describe("hasAssetSpread", () => {
-  it("is false for a segment with no assets", () => {
-    expect(hasAssetSpread({ id: "empty", buySpread: 2, sellSpread: 2 })).toBe(false);
+describe("parseCryptoRates", () => {
+  // Shaped like `data` from GET /api/rates/crypto/all.
+  it("reads initial: true as the empty spread schedule", () => {
+    expect(parseCryptoRates({ initial: true, items: [] })).toEqual({
+      initial: true,
+      items: [],
+    });
   });
 
-  it("matches what the dashboard row shows for each coin", () => {
-    const row = coin({ sellFeeType: "FLAT", sellFeeValue: 50 });
-    const shown = getEffectiveSpreads(row);
-    expect(shown.sellSpread).toBe(50);
-    expect(hasAssetSpread({ id: "major", buySpread: 0, sellSpread: 0, assets: [row] })).toBe(true);
+  it("keeps every item, from every segment, when initial is false", () => {
+    const items = [
+      coin({ id: "bnb", segmentId: "alt" }),
+      coin({ id: "btc", segmentId: "major" }),
+      coin({ id: "usdt", segmentId: "stable" }),
+    ];
+    const parsed = parseCryptoRates({ initial: false, items });
+    expect(parsed.initial).toBe(false);
+    expect(parsed.items.map((i) => i.id)).toEqual(["bnb", "btc", "usdt"]);
+  });
+
+  it("only treats an explicit true as initial", () => {
+    expect(parseCryptoRates({ items: [] }).initial).toBe(false);
+    expect(parseCryptoRates(undefined)).toEqual({ initial: false, items: [] });
+    expect(parseCryptoRates(null)).toEqual({ initial: false, items: [] });
+  });
+
+  it("returns no items when items is missing or not a list", () => {
+    expect(parseCryptoRates({ initial: false }).items).toEqual([]);
+    expect(
+      parseCryptoRates({ initial: false, items: "x" as unknown as [] }).items,
+    ).toEqual([]);
   });
 });
 
-describe("keepSegments", () => {
-  it("drops rows from segments that were not asked for", () => {
-    const rows = [
-      coin({ id: "btc", segmentId: "major" }),
-      coin({ id: "sol", segmentId: "alt" }),
-      coin({ id: "usdt", segmentId: "", segment: seg({ id: "stable" }) }),
-    ];
-    expect(keepSegments(rows, ["major", "stable"]).map((r) => r.id)).toEqual([
-      "btc",
-      "usdt",
-    ]);
+describe("getObiexRates", () => {
+  // Values from a staging crypto/all row.
+  it("uses Obiex's own buy and sell rates, not obiexRate for both", () => {
+    expect(
+      getObiexRates(
+        coin({
+          obiexRate: 1371.5,
+          obiexValueBuyRate: 1375,
+          obiexValueSellRate: 1371.5,
+        }),
+      ),
+    ).toEqual({ buy: 1375, sell: 1371.5 });
   });
 
-  it("returns nothing for no ids or no rows", () => {
-    expect(keepSegments([coin({ segmentId: "major" })], [])).toEqual([]);
-    expect(keepSegments(undefined, ["major"])).toEqual([]);
+  it("keeps a real 0 from the backend", () => {
+    expect(
+      getObiexRates(
+        coin({ obiexRate: 1371.5, obiexValueBuyRate: 0, obiexValueSellRate: 0 }),
+      ),
+    ).toEqual({ buy: 0, sell: 0 });
+  });
+
+  it("falls back to obiexRate when a side is missing", () => {
+    expect(
+      getObiexRates(coin({ obiexRate: 1371.5, obiexValueSellRate: 1370 })),
+    ).toEqual({ buy: 1371.5, sell: 1370 });
+    expect(
+      getObiexRates(coin({ obiexRate: 1371.5, obiexValueBuyRate: null })),
+    ).toEqual({ buy: 1371.5, sell: 1371.5 });
+  });
+
+  it("is 0/0 when the row has no rates at all", () => {
+    expect(
+      getObiexRates(coin({ obiexRate: undefined as unknown as number })),
+    ).toEqual({ buy: 0, sell: 0 });
   });
 });

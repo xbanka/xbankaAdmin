@@ -13,7 +13,11 @@ import { ModalHeader } from "../ui/modal-header";
 import { Label } from "../ui/label";
 import { useUpdateBuyAndSpreadRates } from "@/lib/services/rates.service";
 import { FeeType } from "@/lib/types/rates-types";
-import { getEffectiveSpreads } from "@/lib/utils/rates";
+import {
+  applySpreads,
+  getEffectiveSpreads,
+  getObiexRates,
+} from "@/lib/utils/rates";
 
 type UpdateOutcome = "applied" | "pending";
 
@@ -57,17 +61,21 @@ export function EditSpreadModal({
   const [outcome, setOutcome] = useState<UpdateOutcome | null>(null);
   const [outcomeMessage, setOutcomeMessage] = useState("");
 
-  const OBIEX_BUY_RATE = spreadData?.obiexRate ?? 0;
-  const OBIEX_SELL_RATE = spreadData?.obiexRate ?? 0;
+  const obiex = getObiexRates(spreadData);
+  const OBIEX_BUY_RATE = obiex.buy;
+  const OBIEX_SELL_RATE = obiex.sell;
 
-  const buyAmt = isFlat
-    ? buySpreadValue
-    : OBIEX_BUY_RATE * (buySpreadValue / 100);
-  const customerBuyRate = OBIEX_BUY_RATE + buyAmt;
-  const sellAmt = isFlat
-    ? sellSpreadValue
-    : OBIEX_SELL_RATE * (sellSpreadValue / 100);
-  const customerSellRate = OBIEX_SELL_RATE - sellAmt;
+  const {
+    buy: customerBuyRate,
+    sell: customerSellRate,
+    buyAmount: buyAmt,
+    sellAmount: sellAmt,
+  } = applySpreads(obiex, {
+    buySpread: buySpreadValue,
+    sellSpread: sellSpreadValue,
+    buyFeeType: feeMode,
+    sellFeeType: feeMode,
+  });
 
   const handleUpdate = () => {
     mutate(

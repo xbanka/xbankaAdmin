@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import {
   ALL_SEGMENTS,
   filterReviewAssets,
-  getReviewSegments,
   mergeSegments,
 } from "./segment-selection";
 import { CryptoCurrencyTypes } from "@/lib/types/rates-types";
@@ -70,75 +69,6 @@ const asset = (id: string, over: Partial<CryptoCurrencyTypes> = {}) =>
     sellFeeValue: 0,
     ...over,
   }) as CryptoCurrencyTypes;
-
-const segment = (id: string, over: Partial<Segment> = {}): Segment => ({
-  id,
-  name: id,
-  selected: true,
-  isActive: true,
-  buySpread: 0,
-  sellSpread: 0,
-  assets: [asset(`${id}-coin`, { segmentId: id })],
-  ...over,
-});
-
-describe("getReviewSegments", () => {
-  it("keeps only segments picked in step 1", () => {
-    const result = getReviewSegments([
-      segment("major", { buySpread: 2 }),
-      segment("alt", { buySpread: 2, selected: false }),
-    ]);
-    expect(result.map((s) => s.id)).toEqual(["major"]);
-  });
-
-  it("keeps a picked segment bulk updated in step 2 with only a sell spread", () => {
-    expect(getReviewSegments([segment("major", { sellSpread: 1.5 })])).toHaveLength(1);
-  });
-
-  it("drops a picked segment left empty in step 2 when every asset is at 0", () => {
-    expect(getReviewSegments([segment("stable")])).toEqual([]);
-  });
-
-  it("keeps a picked segment left empty in step 2 when one asset has a percentage spread", () => {
-    const stable = segment("stable", {
-      assets: [
-        asset("usdt", { segmentId: "stable" }),
-        asset("usdc", { segmentId: "stable", buyFeeValue: 1 }),
-      ],
-    });
-    expect(getReviewSegments([stable]).map((s) => s.id)).toEqual(["stable"]);
-  });
-
-  it("keeps a picked segment left empty in step 2 when one asset has a flat sell fee", () => {
-    const stable = segment("stable", {
-      assets: [
-        asset("usdt", { segmentId: "stable", sellFeeType: "FLAT", sellFeeValue: 50 }),
-      ],
-    });
-    expect(getReviewSegments([stable])).toHaveLength(1);
-  });
-
-  it("drops a picked segment with a spread but no assets", () => {
-    expect(getReviewSegments([segment("empty", { buySpread: 2, assets: [] })])).toEqual([]);
-  });
-
-  it("drops a picked segment whose step 2 values and coins are all below 1", () => {
-    const major = segment("major", {
-      buySpread: 0.5,
-      sellSpread: 0.99,
-      assets: [asset("btc", { segmentId: "major", buyFeeType: "FLAT", buyFeeValue: 0.5 })],
-    });
-    expect(getReviewSegments([major])).toEqual([]);
-  });
-
-  it("keeps a picked segment bulk set to exactly 1", () => {
-    expect(getReviewSegments([segment("major", { buySpread: 1 })])).toHaveLength(1);
-  });
-
-  it("treats a cleared step 2 input (NaN) as empty", () => {
-    expect(getReviewSegments([segment("major", { buySpread: NaN })])).toEqual([]);
-  });
-});
 
 describe("filterReviewAssets", () => {
   const assets = [

@@ -13,7 +13,7 @@ import {
 import { Input } from "../ui/input";
 import { ALL_SEGMENTS, filterReviewAssets } from "./segment-selection";
 import { fmt } from "@/lib/utils/formatNumber";
-import { getXBankaRates } from "@/lib/utils/rates";
+import { getSegmentSpreads, getXBankaRates } from "@/lib/utils/rates";
 
 export function StepAssignAssets({
   assets,
@@ -159,7 +159,8 @@ export function StepAssignAssets({
       key: "xbankaRate",
       header: "XBanka's Rate",
       render: (row: CryptoCurrencyTypes) => {
-        const { buy, sell } = getXBankaRates(row);
+        // Step 3 shows the segment spread, so the rate uses it too.
+        const { buy, sell } = getXBankaRates(row, getSegmentSpreads(row));
         return (
           <div>
             <div className="text-[12px] text-[#111827]">Buy: {fmt(buy)}</div>
@@ -305,11 +306,7 @@ export function StepAssignAssets({
           itemsPerPage={10}
           totalCount={visibleAssets.length}
           isLoading={loading}
-          emptyMessage={
-            segments.length === 0
-              ? "None of the selected segments has a buy or sell spread. Go back and set one."
-              : "No assets in the selected segments."
-          }
+          emptyMessage="No assets found."
         />
       </div>
     </div>
