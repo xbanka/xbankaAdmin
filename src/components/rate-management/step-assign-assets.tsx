@@ -4,6 +4,7 @@ import { Asset, Segment } from "./types";
 import { CryptoCurrencyTypes } from "@/lib/types/rates-types";
 import { SelectFieldLayout } from "../forms/SelectFieldLayout";
 import { Badge } from "./badge";
+import { AssetIcon } from "./asset-icon";
 import { DataTableLayout } from "../DataTableLayout/DataTableLayout";
 import { useState } from "react";
 import {
@@ -100,7 +101,7 @@ export function StepAssignAssets({
     {
       key: "select",
       header: "",
-      className: "w-[10px]",
+      className: "md:w-[50px]",
       render: (row: CryptoCurrencyTypes) => (
         <div
           onClick={() => toggleAsset(row)}
@@ -121,15 +122,18 @@ export function StepAssignAssets({
     {
       key: "asset",
       header: "Asset",
+      className: "md:w-[200px]",
       render: (row: CryptoCurrencyTypes) => (
-        <div className="flex items-center gap-3">
-          <div
-            className="w-8 h-8 rounded-full flex items-center justify-center text-white bg-black/50 text-[11px] font-bold flex-shrink-0"
-            // style={{ background: row.color }}
-          ></div>
-          <div>
-            <div>{row.name}</div>
-            <div>{row.currency}</div>
+        <div className="flex items-center gap-3 min-w-0">
+          <AssetIcon currency={row.currency} />
+          <div className="min-w-0">
+            <div
+              className="font-semibold text-[13px] text-[#111827] truncate"
+              title={row.name}
+            >
+              {row.name}
+            </div>
+            <div className="text-[11px] text-[#9CA3AF]">{row.currency}</div>
           </div>
         </div>
       ),
@@ -138,26 +142,31 @@ export function StepAssignAssets({
     {
       key: "segment",
       header: "Current Segment",
+      className: "md:w-[150px]",
       render: (row: CryptoCurrencyTypes) => row.segment?.name,
     },
     {
       key: "obiexRate",
       header: "Obiex Rate",
+      className: "md:w-[130px]",
       render: (row: CryptoCurrencyTypes) => fmt(row.obiexRate ?? 0),
     },
     {
       key: "buyFeeValue",
       header: "Buy Rate",
+      className: "md:w-[100px]",
       render: (row: CryptoCurrencyTypes) => `${row.segment?.buySpread}%`,
     },
     {
       key: "sellFeeValue",
       header: "Sell Rate",
+      className: "md:w-[100px]",
       render: (row: CryptoCurrencyTypes) => `${row.segment?.sellSpread}%`,
     },
     {
       key: "xbankaRate",
       header: "XBanka's Rate",
+      className: "md:w-[150px]",
       render: (row: CryptoCurrencyTypes) => {
         // Step 3 shows the segment spread, so the rate uses it too.
         const { buy, sell } = getXBankaRates(row, getSegmentSpreads(row));
@@ -173,6 +182,7 @@ export function StepAssignAssets({
     {
       key: "status",
       header: "Status",
+      className: "md:w-[110px]",
       render: (row: CryptoCurrencyTypes) => (
         <Badge
           active={row.isActive}
@@ -184,6 +194,7 @@ export function StepAssignAssets({
     {
       key: "assign",
       header: "Assign Segment",
+      className: "md:w-[180px]",
       render: (row: CryptoCurrencyTypes) => {
         const currentSegmentId =
           selectedSegments[row.id] || row.segmentId || "";
@@ -193,6 +204,8 @@ export function StepAssignAssets({
             value={currentSegmentId}
             onChange={(segmentId) => handleSegmentChange(row, segmentId)}
             options={segmentOptions}
+            className="w-[130px]"
+            selectClassName="h-9 px-3 text-[13px]"
           />
         );
       },
@@ -280,6 +293,8 @@ export function StepAssignAssets({
             onChange={setBulkSegmentId}
             options={segmentOptions}
             placeholder="Assign selected to"
+            className="w-[220px]"
+            selectClassName="px-3"
           />
           <button
             onClick={handleBulkAssign}
@@ -298,7 +313,7 @@ export function StepAssignAssets({
         </div>
       </div>
 
-      <div className="border-b border-x border-[#E5E7EB] rounded-[8px] overflow-hidden">
+      <div className="w-full md:max-w-[700px] lg:min-w-[100%] xl:min-w-full">
         <DataTableLayout
           data={visibleAssets}
           columns={columns}

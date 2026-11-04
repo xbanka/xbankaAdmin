@@ -107,7 +107,7 @@ export function CreateSpreadWizard({ onClose }: { onClose: () => void }) {
   }, [segmentData]);
 
   return (
-    <div className="flex flex-col h-full bg-card-secondary">
+    <div className="flex flex-col h-full min-w-0 max-w-full bg-card-secondary">
       {/* Wizard Header */}
       {/* Steps */}
       <div>
@@ -152,7 +152,7 @@ export function CreateSpreadWizard({ onClose }: { onClose: () => void }) {
         </div>
 
         {/* Step Content */}
-        <div className="px-6 pb-2">
+        <div className="px-6 pb-2 min-w-0">
           {step === 1 && (
             <StepSegment
               segments={segments}

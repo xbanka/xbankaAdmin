@@ -42,6 +42,7 @@ import {
   getXBankaRates,
 } from "@/lib/utils/rates";
 import { Checkbox } from "../ui/checkbox";
+import { AssetIcon } from "./asset-icon";
 
 export default function RateManagement() {
   const [activeTab, setActiveTab] = useState<"schedule" | "history">(
@@ -135,14 +136,15 @@ export default function RateManagement() {
     {
       key: "asset",
       header: "Asset",
+      className: "w-[200px]",
       render: (row: CryptoCurrencyTypes) => (
-        <div className="flex items-center gap-3">
-          <div
-            className="w-8 h-8 rounded-full flex items-center justify-center text-white bg-black/50 text-[11px] font-bold flex-shrink-0"
-            // style={{ background: row.color }}
-          ></div>
-          <div>
-            <div className="font-semibold text-[13px] text-[#111827]">
+        <div className="flex items-center gap-3 min-w-0">
+          <AssetIcon currency={row.currency} />
+          <div className="min-w-0">
+            <div
+              className="font-semibold text-[13px] text-[#111827] truncate"
+              title={row.name}
+            >
               {row.name}
             </div>
             <div className="text-[11px] text-[#9CA3AF]">{row.currency}</div>
@@ -443,7 +445,7 @@ export default function RateManagement() {
     >
       <div className="flex min-h-screen bg-card-primary">
         {/* Main */}
-        <div className="flex-1 flex flex-col min-h-screen">
+        <div className="flex-1 min-w-0 flex flex-col min-h-screen">
           {/* Topbar */}
 
           {/* Content */}

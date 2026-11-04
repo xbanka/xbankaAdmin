@@ -1,5 +1,6 @@
 "use client";
 
+import { AssetIcon } from "./asset-icon";
 import { AlertTriangle, Clock, Info, X } from "lucide-react";
 import Image from "next/image";
 import { Button } from "../ui/button";
@@ -156,6 +157,7 @@ export function EditSpreadModal({
     <Modal onClose={onClose} className="max-w-[700px] px-0 pb-0 border-none">
       {/* Header */}
       <ModalHeader
+        icon={<AssetIcon currency={spreadData?.currency} />}
         title={`Edit Spread — ${spreadData?.name} (${spreadData?.currency})`}
         subtitle="Changes take effect immediately across all active customer quotes."
         onClose={onClose}
