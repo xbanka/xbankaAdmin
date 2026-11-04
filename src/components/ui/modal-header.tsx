@@ -1,16 +1,19 @@
 import { cn } from "@/lib/utils";
 import { ChevronLeft } from "lucide-react";
+import type { ReactNode } from "react";
 import { CloseBtn } from "./close-btn";
 
 export function ModalHeader({
   title,
   subtitle,
+  icon,
   onBack,
   onClose,
   className,
 }: {
   title?: string;
   subtitle?: string;
+  icon?: ReactNode;
   onBack?: () => void;
   onClose: () => void;
   className?: string;
@@ -31,6 +34,7 @@ export function ModalHeader({
             <ChevronLeft className="w-4 h-4" />
           </button>
         )}
+        {icon && <div className="shrink-0 mt-1">{icon}</div>}
         <div className="min-w-0">
           <h3 className="text-2xl font-semibold leading-8 text-text-primary max-sm:text-[24px] max-sm:leading-8">
             {title}
