@@ -108,8 +108,9 @@ export function MarginModal({
   const [values, setValues] = useState<MarginFormValues>({
     marginType: margin.marginType ?? "PERCENTAGE",
     marginValue: isEdit ? String(margin.marginValue) : "",
-    // Matches the API default: nothing is charged until it is switched on.
-    isActive: isEdit ? margin.isActive : false,
+    // A new margin starts on. The API itself defaults to off, so this is
+    // always sent explicitly.
+    isActive: isEdit ? margin.isActive : true,
     reason: "",
   });
   const [errors, setErrors] = useState<MarginFormErrors>({});
