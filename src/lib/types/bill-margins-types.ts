@@ -1,32 +1,21 @@
-export const BILL_PRODUCTS = [
-  "AIRTIME",
-  "DATA",
-  "ELECTRICITY",
-  "CABLE_TV",
-  "BETTING",
-] as const;
+// AIRTIME and DATA never carry a margin and cannot be changed. Every product
+// below starts at a FIXED ₦100, switched on, so there is nothing to add first.
+export const BILL_PRODUCTS = ["ELECTRICITY", "CABLE_TV", "BETTING"] as const;
 
 export type BillProduct = (typeof BILL_PRODUCTS)[number];
 
 export type BillMarginType = "PERCENTAGE" | "FIXED";
 
-/** One row of GET /api/bills/margins. Unconfigured products have no type. */
+/** One row of GET /api/bills/margins. */
 export interface BillMargin {
-  product: BillProduct;
-  configured: boolean;
-  marginType?: BillMarginType | null;
-  marginValue: number;
-  isActive: boolean;
-  updatedAt?: string | null;
-}
-
-/** POST /api/bills/margins. `changedBy` is filled in by the server. */
-export interface CreateBillMarginPayload {
   product: BillProduct;
   marginType: BillMarginType;
   marginValue: number;
-  isActive?: boolean;
-  reason: string;
+  isActive: boolean;
+  /** What the margin adds to a ₦1,000 bill (0 when switched off). */
+  sampleOn1000?: number;
+  /** null until someone changes the default. */
+  updatedAt?: string | null;
 }
 
 /** PUT /api/bills/margins/{product}: only the changed fields, plus reason. */

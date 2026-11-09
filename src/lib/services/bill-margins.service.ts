@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
-  createBillMargin,
   getBillMarginHistory,
   getBillMargins,
   updateBillMargin,
@@ -9,10 +8,13 @@ import {
 import { handleApiError } from "../errors/handleApiError";
 import {
   BillProduct,
-  CreateBillMarginPayload,
   UpdateBillMarginPayload,
 } from "../types/bill-margins-types";
-import { normalizeHistory, normalizeMargins } from "../utils/bill-margins";
+import {
+  isConflictError,
+  normalizeHistory,
+  normalizeMargins,
+} from "../utils/bill-margins";
 
 export const BILL_MARGINS_KEY = ["bill-margins"] as const;
 export const BILL_MARGIN_HISTORY_KEY = ["bill-margin-history"] as const;
@@ -48,21 +50,6 @@ const useInvalidateBillMargins = () => {
   };
 };
 
-export const useCreateBillMargin = () => {
-  const invalidate = useInvalidateBillMargins();
-  return useMutation({
-    mutationFn: (payload: CreateBillMarginPayload) =>
-      createBillMargin(payload),
-    onSuccess: (data) => {
-      invalidate();
-      toast.success(data?.message || "Bill margin added");
-    },
-    onError: (err) => {
-      handleApiError(err);
-    },
-  });
-};
-
 export const useUpdateBillMargin = () => {
   const invalidate = useInvalidateBillMargins();
   return useMutation({
@@ -78,6 +65,8 @@ export const useUpdateBillMargin = () => {
       toast.success(data?.message || "Bill margin updated");
     },
     onError: (err) => {
+      // Someone else changed this margin first: pull the current values.
+      if (isConflictError(err)) invalidate();
       handleApiError(err);
     },
   });

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Edit, Plus } from "lucide-react";
+import { Edit } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DataTableLayout } from "../../DataTableLayout/DataTableLayout";
 import { Badge } from "../badge";
@@ -48,35 +48,40 @@ export function BillMarginsTab() {
     {
       key: "marginType",
       header: "Type",
-      render: (row: BillMargin) =>
-        row.configured && row.marginType
-          ? MARGIN_TYPE_LABELS[row.marginType]
-          : "—",
+      render: (row: BillMargin) => MARGIN_TYPE_LABELS[row.marginType] ?? "—",
     },
     {
       key: "marginValue",
       header: "Margin",
+      render: (row: BillMargin) => formatMargin(row.marginType, row.marginValue),
+    },
+    {
+      key: "sampleOn1000",
+      header: "On a ₦1,000 bill",
       render: (row: BillMargin) =>
-        row.configured ? formatMargin(row.marginType, row.marginValue) : "—",
+        typeof row.sampleOn1000 === "number"
+          ? `+₦${row.sampleOn1000.toLocaleString("en-NG")}`
+          : "—",
     },
     {
       key: "status",
       header: "Status",
-      render: (row: BillMargin) =>
-        row.configured ? (
-          <Badge
-            active={row.isActive}
-            text={row.isActive ? "Active" : "Inactive"}
-          />
-        ) : (
-          <span className="text-[12px] text-[#9CA3AF]">Not configured</span>
-        ),
+      render: (row: BillMargin) => (
+        <Badge
+          active={row.isActive}
+          text={row.isActive ? "Active" : "Inactive"}
+        />
+      ),
     },
     {
       key: "updatedAt",
       header: "Last updated",
       render: (row: BillMargin) =>
-        row.configured && row.updatedAt ? formatDate(row.updatedAt) : "—",
+        row.updatedAt ? (
+          formatDate(row.updatedAt)
+        ) : (
+          <span className="text-[12px] text-[#9CA3AF]">Default</span>
+        ),
     },
     {
       key: "actions",
@@ -86,15 +91,7 @@ export function BillMarginsTab() {
           onClick={() => setEditRow(row)}
           className="flex items-center gap-1 leading-[22px] text-[14px] text-text-primary-font-color font-medium hover:opacity-70 transition-opacity"
         >
-          {row.configured ? (
-            <>
-              <Edit size={16} className="text-[#004C99]" /> Edit
-            </>
-          ) : (
-            <>
-              <Plus size={16} className="text-[#004C99]" /> Add margin
-            </>
-          )}
+          <Edit size={16} className="text-[#004C99]" /> Edit
         </button>
       ),
     },
@@ -102,26 +99,25 @@ export function BillMarginsTab() {
       key: "toggle",
       header: "",
       className: "w-[80px]",
-      render: (row: BillMargin) =>
-        row.configured ? (
-          <button
-            onClick={() => setToggleRow(row)}
+      render: (row: BillMargin) => (
+        <button
+          onClick={() => setToggleRow(row)}
+          className={cn(
+            "w-10 h-[22px] rounded-full relative transition-colors flex-shrink-0",
+            row.isActive ? "bg-[#0D9488]" : "bg-[#D1D5DB]",
+          )}
+          role="switch"
+          aria-checked={row.isActive}
+          aria-label={`Toggle ${productLabel(row.product)} margin`}
+        >
+          <span
             className={cn(
-              "w-10 h-[22px] rounded-full relative transition-colors flex-shrink-0",
-              row.isActive ? "bg-[#0D9488]" : "bg-[#D1D5DB]",
+              "absolute top-[3px] w-4 h-4 bg-white rounded-full transition-all",
+              row.isActive ? "right-[3px]" : "left-[3px]",
             )}
-            role="switch"
-            aria-checked={row.isActive}
-            aria-label={`Toggle ${productLabel(row.product)} margin`}
-          >
-            <span
-              className={cn(
-                "absolute top-[3px] w-4 h-4 bg-white rounded-full transition-all",
-                row.isActive ? "right-[3px]" : "left-[3px]",
-              )}
-            />
-          </button>
-        ) : null,
+          />
+        </button>
+      ),
     },
   ];
 

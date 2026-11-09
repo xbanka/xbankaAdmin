@@ -4,17 +4,32 @@ import {
   BillMarginHistoryMetadata,
   BillMarginHistoryPage,
   BillMarginType,
-  BillProduct,
   UpdateBillMarginPayload,
 } from "../types/bill-margins-types";
 
-export const BILL_PRODUCT_LABELS: Record<BillProduct, string> = {
+// Airtime and Data are kept so older history entries still read properly.
+export const BILL_PRODUCT_LABELS: Record<string, string> = {
   AIRTIME: "Airtime",
   DATA: "Data",
   ELECTRICITY: "Electricity",
   CABLE_TV: "Cable TV",
   BETTING: "Betting",
 };
+
+const SOURCE_LABELS: Record<string, string> = {
+  ADMIN_CONSOLE: "Admin console",
+  INTERNAL_API: "Internal API",
+};
+
+/**
+ * 409: someone else changed the same margin at the same moment. The fix is to
+ * reload the list and retry, so callers refetch and close the stale form.
+ */
+export const isConflictError = (error: unknown): boolean =>
+  isRecord(error) && error.status === 409;
+
+export const sourceLabel =(source: string | undefined | null) =>
+  (source && SOURCE_LABELS[source]) || source || "";
 
 export const MARGIN_TYPE_LABELS: Record<BillMarginType, string> = {
   PERCENTAGE: "Percentage",
@@ -38,7 +53,7 @@ const unwrap = (body: unknown): unknown =>
   isRecord(body) && "data" in body ? body.data : body;
 
 export const productLabel = (product: string | undefined | null) =>
-  (product && BILL_PRODUCT_LABELS[product as BillProduct]) || product || "—";
+  (product && BILL_PRODUCT_LABELS[product]) || product || "—";
 
 export function formatMargin(
   type: BillMarginType | null | undefined,
@@ -50,8 +65,10 @@ export function formatMargin(
 }
 
 /**
- * Always returns the five products in a stable order. A product the response
- * leaves out is shown as not configured rather than disappearing.
+ * The margin products in a stable order. Anything else the response carries
+ * (AIRTIME and DATA never have a margin) is dropped. A product the response
+ * leaves out is not shown: guessing its default would risk showing a margin
+ * that is not the real one.
  */
 export function normalizeMargins(body: unknown): BillMargin[] {
   const payload = unwrap(body);
@@ -68,15 +85,10 @@ export function normalizeMargins(body: unknown): BillMargin[] {
     }
   }
 
-  return BILL_PRODUCTS.map(
-    (product) =>
-      byProduct.get(product) ?? {
-        product,
-        configured: false,
-        marginValue: 0,
-        isActive: false,
-      },
-  );
+  return BILL_PRODUCTS.flatMap((product) => {
+    const margin = byProduct.get(product);
+    return margin ? [margin] : [];
+  });
 }
 
 export function normalizeHistory(
@@ -126,14 +138,16 @@ const formatChangeValue = (field: string, value: unknown): string => {
   return String(value);
 };
 
-/** "Margin value: 3 → 5" lines for one history entry. */
+/**
+ * "Margin value: 3 → 5" lines for one history entry. A product's first change
+ * starts from the defaults, so there is normally a "from" to show.
+ */
 export function describeChanges(meta: BillMarginHistoryMetadata): string[] {
-  return Object.entries(meta.changes).map(
-    ([field, { from, to }]) =>
-      `${FIELD_LABELS[field] ?? field}: ${
-        meta.created ? "" : `${formatChangeValue(field, from)} → `
-      }${formatChangeValue(field, to)}`,
-  );
+  return Object.entries(meta.changes).map(([field, { from, to }]) => {
+    const label = FIELD_LABELS[field] ?? field;
+    const hasFrom = from !== null && from !== undefined;
+    return `${label}: ${hasFrom ? `${formatChangeValue(field, from)} → ` : ""}${formatChangeValue(field, to)}`;
+  });
 }
 
 export interface MarginFormValues {

@@ -3,9 +3,11 @@ import {
   buildUpdatePayload,
   describeChanges,
   formatMargin,
+  isConflictError,
   normalizeHistory,
   normalizeMargins,
   parseHistoryMetadata,
+  sourceLabel,
   validateMarginForm,
 } from "./bill-margins";
 import type { BillMargin } from "../types/bill-margins-types";
@@ -19,11 +21,12 @@ const form = (over: Partial<Parameters<typeof validateMarginForm>[0]> = {}) => (
 });
 
 const saved: BillMargin = {
-  product: "DATA",
-  configured: true,
+  product: "CABLE_TV",
   marginType: "PERCENTAGE",
   marginValue: 2,
   isActive: true,
+  sampleOn1000: 20,
+  updatedAt: "2026-11-09T10:00:00Z",
 };
 
 describe("validateMarginForm", () => {
@@ -78,29 +81,43 @@ describe("buildUpdatePayload", () => {
 });
 
 describe("normalizeMargins", () => {
-  it("fills in unconfigured products in a stable order", () => {
-    const rows = normalizeMargins([saved]);
+  const electricity: BillMargin = { ...saved, product: "ELECTRICITY" };
+  const betting: BillMargin = { ...saved, product: "BETTING" };
+
+  it("returns the margin products in a stable order", () => {
+    const rows = normalizeMargins([betting, saved, electricity]);
     expect(rows.map((r) => r.product)).toEqual([
-      "AIRTIME",
-      "DATA",
       "ELECTRICITY",
       "CABLE_TV",
       "BETTING",
     ]);
-    expect(rows[0]).toMatchObject({ configured: false, marginValue: 0 });
     expect(rows[1]).toBe(saved);
   });
 
+  it("drops airtime, data and unknown products", () => {
+    const rows = normalizeMargins([
+      { ...saved, product: "AIRTIME" },
+      { ...saved, product: "DATA" },
+      { ...saved, product: "SOMETHING_NEW" },
+      saved,
+    ]);
+    expect(rows).toEqual([saved]);
+  });
+
+  it("does not invent rows for products the response leaves out", () => {
+    expect(normalizeMargins([saved])).toEqual([saved]);
+  });
+
   it("accepts the list bare, under items, or under data", () => {
-    expect(normalizeMargins([saved])[1].configured).toBe(true);
-    expect(normalizeMargins({ items: [saved] })[1].configured).toBe(true);
-    expect(normalizeMargins({ data: [saved] })[1].configured).toBe(true);
-    expect(normalizeMargins({ data: { items: [saved] } })[1].configured).toBe(true);
+    expect(normalizeMargins([saved])).toEqual([saved]);
+    expect(normalizeMargins({ items: [saved] })).toEqual([saved]);
+    expect(normalizeMargins({ data: [saved] })).toEqual([saved]);
+    expect(normalizeMargins({ data: { items: [saved] } })).toEqual([saved]);
   });
 
   it("survives a malformed body", () => {
-    expect(normalizeMargins(undefined)).toHaveLength(5);
-    expect(normalizeMargins("nope")).toHaveLength(5);
+    expect(normalizeMargins(undefined)).toEqual([]);
+    expect(normalizeMargins("nope")).toEqual([]);
   });
 });
 
@@ -141,19 +158,50 @@ describe("history metadata", () => {
     ]);
   });
 
-  it("shows only the new value for a created margin", () => {
+  it("shows from the defaults on a product's first change", () => {
     const meta = parseHistoryMetadata(
       JSON.stringify({
+        product: "CABLE_TV",
+        source: "ADMIN_CONSOLE",
         created: true,
-        changes: { marginType: { from: null, to: "FIXED" } },
+        changes: {
+          marginType: { from: "FIXED", to: "PERCENTAGE" },
+          marginValue: { from: 100, to: 3 },
+        },
       }),
     );
+    expect(meta.source).toBe("ADMIN_CONSOLE");
+    expect(describeChanges(meta)).toEqual([
+      "Margin type: Fixed (₦) → Percentage",
+      "Margin value: 100 → 3",
+    ]);
+  });
+
+  it("shows only the new value when there is no previous value", () => {
+    const meta = parseHistoryMetadata(
+      JSON.stringify({ changes: { marginType: { from: null, to: "FIXED" } } }),
+    );
     expect(describeChanges(meta)).toEqual(["Margin type: Fixed (₦)"]);
+  });
+
+  it("labels the change source", () => {
+    expect(sourceLabel("ADMIN_CONSOLE")).toBe("Admin console");
+    expect(sourceLabel("INTERNAL_API")).toBe("Internal API");
+    expect(sourceLabel(undefined)).toBe("");
   });
 
   it("returns no changes for missing or invalid metadata", () => {
     expect(parseHistoryMetadata(undefined).changes).toEqual({});
     expect(parseHistoryMetadata("{not json").changes).toEqual({});
+  });
+});
+
+describe("isConflictError", () => {
+  it("is true only for a 409", () => {
+    expect(isConflictError({ status: 409, message: "x" })).toBe(true);
+    expect(isConflictError({ status: 400 })).toBe(false);
+    expect(isConflictError(new Error("x"))).toBe(false);
+    expect(isConflictError(undefined)).toBe(false);
   });
 });
 

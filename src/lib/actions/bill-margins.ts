@@ -1,17 +1,11 @@
 import AxiosInstance from "../Axiosinstance/axiosInstance";
 import {
   BillProduct,
-  CreateBillMarginPayload,
   UpdateBillMarginPayload,
 } from "../types/bill-margins-types";
 
 export const getBillMargins = async () => {
   const response = await AxiosInstance.get("/api/bills/margins");
-  return response.data;
-};
-
-export const createBillMargin = async (payload: CreateBillMarginPayload) => {
-  const response = await AxiosInstance.post("/api/bills/margins", payload);
   return response.data;
 };
 
