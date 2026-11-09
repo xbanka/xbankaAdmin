@@ -21,7 +21,14 @@ const SOURCE_LABELS: Record<string, string> = {
   INTERNAL_API: "Internal API",
 };
 
-export const sourceLabel = (source: string | undefined | null) =>
+/**
+ * 409: someone else changed the same margin at the same moment. The fix is to
+ * reload the list and retry, so callers refetch and close the stale form.
+ */
+export const isConflictError = (error: unknown): boolean =>
+  isRecord(error) && error.status === 409;
+
+export const sourceLabel =(source: string | undefined | null) =>
   (source && SOURCE_LABELS[source]) || source || "";
 
 export const MARGIN_TYPE_LABELS: Record<BillMarginType, string> = {

@@ -3,6 +3,7 @@ import {
   buildUpdatePayload,
   describeChanges,
   formatMargin,
+  isConflictError,
   normalizeHistory,
   normalizeMargins,
   parseHistoryMetadata,
@@ -192,6 +193,15 @@ describe("history metadata", () => {
   it("returns no changes for missing or invalid metadata", () => {
     expect(parseHistoryMetadata(undefined).changes).toEqual({});
     expect(parseHistoryMetadata("{not json").changes).toEqual({});
+  });
+});
+
+describe("isConflictError", () => {
+  it("is true only for a 409", () => {
+    expect(isConflictError({ status: 409, message: "x" })).toBe(true);
+    expect(isConflictError({ status: 400 })).toBe(false);
+    expect(isConflictError(new Error("x"))).toBe(false);
+    expect(isConflictError(undefined)).toBe(false);
   });
 });
 

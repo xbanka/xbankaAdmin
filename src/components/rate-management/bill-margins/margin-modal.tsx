@@ -16,6 +16,7 @@ import {
   MarginFormErrors,
   MarginFormValues,
   buildUpdatePayload,
+  isConflictError,
   productLabel,
   validateMarginForm,
 } from "@/lib/utils/bill-margins";
@@ -134,7 +135,17 @@ export function MarginModal({
       setFormError("Nothing has changed. Edit a field before saving.");
       return;
     }
-    mutate({ product: margin.product, payload }, { onSuccess: onClose });
+    mutate(
+      { product: margin.product, payload },
+      {
+        onSuccess: onClose,
+        // The form holds values that are now out of date; the list is
+        // refetching, so close and let the admin reopen with the current ones.
+        onError: (err) => {
+          if (isConflictError(err)) onClose();
+        },
+      },
+    );
   };
 
   const isFixed = values.marginType === "FIXED";
@@ -273,7 +284,12 @@ export function ToggleMarginModal({
         product: margin.product,
         payload: { isActive: turningOn, reason: reason.trim() },
       },
-      { onSuccess: onClose },
+      {
+        onSuccess: onClose,
+        onError: (err) => {
+          if (isConflictError(err)) onClose();
+        },
+      },
     );
   };
 

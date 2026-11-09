@@ -10,7 +10,11 @@ import {
   BillProduct,
   UpdateBillMarginPayload,
 } from "../types/bill-margins-types";
-import { normalizeHistory, normalizeMargins } from "../utils/bill-margins";
+import {
+  isConflictError,
+  normalizeHistory,
+  normalizeMargins,
+} from "../utils/bill-margins";
 
 export const BILL_MARGINS_KEY = ["bill-margins"] as const;
 export const BILL_MARGIN_HISTORY_KEY = ["bill-margin-history"] as const;
@@ -61,6 +65,8 @@ export const useUpdateBillMargin = () => {
       toast.success(data?.message || "Bill margin updated");
     },
     onError: (err) => {
+      // Someone else changed this margin first: pull the current values.
+      if (isConflictError(err)) invalidate();
       handleApiError(err);
     },
   });
