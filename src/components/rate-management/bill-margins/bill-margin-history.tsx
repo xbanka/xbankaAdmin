@@ -14,6 +14,7 @@ import {
   describeChanges,
   parseHistoryMetadata,
   productLabel,
+  sourceLabel,
 } from "@/lib/utils/bill-margins";
 import { formatDate } from "@/lib/formatDate";
 
@@ -69,7 +70,7 @@ export function BillMarginHistory() {
               {productLabel(meta.product)}
             </div>
             <div className="text-[11px] text-[#9CA3AF]">
-              {meta.created ? "Added" : "Updated"}
+              {sourceLabel(meta.source)}
             </div>
           </div>
         );

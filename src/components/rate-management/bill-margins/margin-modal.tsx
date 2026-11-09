@@ -10,10 +10,7 @@ import {
   BillMargin,
   BillMarginType,
 } from "@/lib/types/bill-margins-types";
-import {
-  useCreateBillMargin,
-  useUpdateBillMargin,
-} from "@/lib/services/bill-margins.service";
+import { useUpdateBillMargin } from "@/lib/services/bill-margins.service";
 import {
   MARGIN_TYPE_LABELS,
   MarginFormErrors,
@@ -94,7 +91,7 @@ function ActiveSwitch({
   );
 }
 
-/** Add a margin to an unconfigured product, or edit an existing one. */
+/** Edit a product's margin. Every product already has one (the default). */
 export function MarginModal({
   margin,
   onClose,
@@ -102,22 +99,18 @@ export function MarginModal({
   margin: BillMargin;
   onClose: () => void;
 }) {
-  const isEdit = margin.configured;
   const name = productLabel(margin.product);
 
   const [values, setValues] = useState<MarginFormValues>({
-    marginType: margin.marginType ?? "PERCENTAGE",
-    marginValue: isEdit ? String(margin.marginValue) : "",
-    // Matches the API default: nothing is charged until it is switched on.
-    isActive: isEdit ? margin.isActive : false,
+    marginType: margin.marginType,
+    marginValue: String(margin.marginValue),
+    isActive: margin.isActive,
     reason: "",
   });
   const [errors, setErrors] = useState<MarginFormErrors>({});
   const [formError, setFormError] = useState("");
 
-  const create = useCreateBillMargin();
-  const update = useUpdateBillMargin();
-  const isPending = create.isPending || update.isPending;
+  const { mutate, isPending } = useUpdateBillMargin();
 
   const set = <K extends keyof MarginFormValues>(
     key: K,
@@ -136,29 +129,12 @@ export function MarginModal({
     setFormError("");
     if (Object.keys(nextErrors).length > 0) return;
 
-    if (isEdit) {
-      const payload = buildUpdatePayload(margin, values);
-      if (!payload) {
-        setFormError("Nothing has changed. Edit a field before saving.");
-        return;
-      }
-      update.mutate(
-        { product: margin.product, payload },
-        { onSuccess: onClose },
-      );
+    const payload = buildUpdatePayload(margin, values);
+    if (!payload) {
+      setFormError("Nothing has changed. Edit a field before saving.");
       return;
     }
-
-    create.mutate(
-      {
-        product: margin.product,
-        marginType: values.marginType,
-        marginValue: Number(values.marginValue),
-        isActive: values.isActive,
-        reason: values.reason.trim(),
-      },
-      { onSuccess: onClose },
-    );
+    mutate({ product: margin.product, payload }, { onSuccess: onClose });
   };
 
   const isFixed = values.marginType === "FIXED";
@@ -166,7 +142,7 @@ export function MarginModal({
   return (
     <Modal onClose={onClose} className="max-w-[520px] px-0 pb-0 border-none">
       <ModalHeader
-        title={`${isEdit ? "Edit" : "Add"} margin — ${name}`}
+        title={`Edit margin — ${name}`}
         subtitle="Applies to the next payment a user starts. Payments already quoted keep their margin."
         onClose={onClose}
         className="border-b border-card-border-secondary bg-card-primary rounded-tl-2xl rounded-tr-2xl"
@@ -261,14 +237,14 @@ export function MarginModal({
           Cancel
         </Button>
         <Button onClick={handleSubmit} disabled={isPending}>
-          {isEdit ? "Save changes" : "Add margin"}
+          Save changes
         </Button>
       </div>
     </Modal>
   );
 }
 
-/** Switch a configured margin on or off. The API requires a reason either way. */
+/** Switch a margin on or off. The API requires a reason either way. */
 export function ToggleMarginModal({
   margin,
   onClose,

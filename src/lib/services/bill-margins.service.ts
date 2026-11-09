@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
-  createBillMargin,
   getBillMarginHistory,
   getBillMargins,
   updateBillMargin,
@@ -9,7 +8,6 @@ import {
 import { handleApiError } from "../errors/handleApiError";
 import {
   BillProduct,
-  CreateBillMarginPayload,
   UpdateBillMarginPayload,
 } from "../types/bill-margins-types";
 import { normalizeHistory, normalizeMargins } from "../utils/bill-margins";
@@ -46,21 +44,6 @@ const useInvalidateBillMargins = () => {
     queryClient.invalidateQueries({ queryKey: BILL_MARGINS_KEY });
     queryClient.invalidateQueries({ queryKey: BILL_MARGIN_HISTORY_KEY });
   };
-};
-
-export const useCreateBillMargin = () => {
-  const invalidate = useInvalidateBillMargins();
-  return useMutation({
-    mutationFn: (payload: CreateBillMarginPayload) =>
-      createBillMargin(payload),
-    onSuccess: (data) => {
-      invalidate();
-      toast.success(data?.message || "Bill margin added");
-    },
-    onError: (err) => {
-      handleApiError(err);
-    },
-  });
 };
 
 export const useUpdateBillMargin = () => {
