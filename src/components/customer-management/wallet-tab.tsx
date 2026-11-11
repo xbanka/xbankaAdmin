@@ -19,11 +19,11 @@ export function WalletTab({ wallet }: WalletTabProps) {
     (asset) => Number(asset.balance) > 0,
   );
   return (
-    <div className="p-6 flex flex-col gap-5">
+    <div className="p-4 sm:p-6 flex flex-col gap-5">
       {/* Wallet Summary */}
       <div>
         <SectionTitle>Wallet Summary</SectionTitle>
-        <div className="grid grid-cols-3 gap-3 bg-card-primary py-4 px-5">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-card-primary py-4 px-5">
           {[
             {
               label: "Total NGN Balance",
@@ -45,13 +45,13 @@ export function WalletTab({ wallet }: WalletTabProps) {
           </div>
         </SectionTitle>
         <SectionCard>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
             <DetailField
               label="Available Balance"
               value={formatNGN(wallet?.fiatAssets[0]?.balance)}
             />
             <DetailField label="Wallet ID" value={wallet?.userId} />
-            <DetailField label="Provider" value="—" />
+            <DetailField label="Provider" value={null} />
           </div>
         </SectionCard>
       </div>
@@ -60,18 +60,18 @@ export function WalletTab({ wallet }: WalletTabProps) {
       <div>
         <SectionTitle>Dedicated Funding Account</SectionTitle>
         <SectionCard>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
             <DetailField
               label="Account Name"
-              value={primaryAddress?.accountName ?? "—"}
+              value={primaryAddress?.accountName}
             />
             <DetailField
               label="Account Number"
-              value={primaryAddress?.accountNumber ?? "—"}
+              value={primaryAddress?.accountNumber}
             />
             <DetailField
               label="Bank Name"
-              value={primaryAddress?.bankName ?? "—"}
+              value={primaryAddress?.bankName}
             />
           </div>
         </SectionCard>
@@ -81,7 +81,8 @@ export function WalletTab({ wallet }: WalletTabProps) {
       <div>
         <SectionTitle className="bg-card-primary">Crypto Wallets</SectionTitle>
         <div className="border border-[var(--border-default)] overflow-hidden">
-          <table className="w-full text-xs">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[480px] text-xs">
             <thead>
               <tr className="bg-card-secondary border-b border-card-border-secondary">
                 {["Asset", "Available", "Provider", "Status", ""].map((h) => (
@@ -139,6 +140,7 @@ export function WalletTab({ wallet }: WalletTabProps) {
               )}
             </tbody>
           </table>
+          </div>
         </div>
       </div>
     </div>

@@ -113,7 +113,7 @@ export function CustomerSearchSidebar({
           ? `${user.profile.firstName} ${user.profile.lastName}`
           : "No Profile",
         email: user.email,
-        phone: user.profile?.phoneNumber ?? "-",
+        phone: user.profile?.phoneNumber ?? "N/A",
 
         // keep original data attached
         raw: user,
@@ -131,9 +131,9 @@ export function CustomerSearchSidebar({
       name: customer.name,
       email: customer.email,
       phone: customer.phone,
-      username: "-",
-      affiliate: "-",
-      totalTransactions: "-",
+      username: "N/A",
+      affiliate: "N/A",
+      totalTransactions: "N/A",
       joinedAt: customer.raw.createdAt,
     });
     setShowResults(false);
@@ -179,9 +179,9 @@ export function CustomerSearchSidebar({
       name: `${newUser.firstName} ${newUser.lastName}`,
       email: newUser.email,
       phone: newUser.phoneNumber,
-      username: "-",
-      affiliate: "-",
-      totalTransactions: "-",
+      username: "N/A",
+      affiliate: "N/A",
+      totalTransactions: "N/A",
       joinedAt: new Date().toISOString(),
     });
     setView("search"); // back to showing customer detail + "+ Add Transaction"

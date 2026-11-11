@@ -10,7 +10,7 @@ export function FilterTabs({
   className = "",
 }: FilterTabsProps) {
   return (
-    <div className={`flex justify-center md:justify-start gap-1 ${className}`}>
+    <div className={`flex justify-start gap-1 overflow-x-auto md:overflow-visible md:shrink-0 ${className}`}>
       {filters.map((filter) => {
         const normalized = filter.toLowerCase();
         const isActive = value === normalized;

@@ -18,6 +18,8 @@ import { WalletTab } from "./wallet-tab";
 import { TransactionsTab } from "./transactions-tab";
 import { VerificationTab } from "./verification-tab";
 import { UserProfileData } from "@/lib/types/customer";
+import { CustomerDetailsSkeleton } from "./customer-details-skeleton";
+import { fullNameOrNA, orNA } from "@/lib/utils/display";
 
 interface Props {
   isOpen: boolean;
@@ -63,29 +65,23 @@ export default function CustomerDetailsSidebar({
   return (
     <div className="fixed inset-0 z-50 flex">
       {/* Overlay */}
-      <div className="flex-1 bg-black/50" onClick={onClose} />
+      <div className="hidden md:block flex-1 bg-black/50" onClick={onClose} />
 
       {/* Sidebar */}
-      <div className="w-full md:w-[600px] bg-white h-full overflow-y-auto">
+      <div className="w-full md:w-[600px] md:max-w-[90vw] bg-white h-full overflow-y-auto">
         {isLoading ? (
-          <div className="flex items-center gap-4 animate-pulse">
-            <div className="h-14 w-14 rounded-full bg-gray-200" />
-            <div className="flex flex-col gap-2">
-              <div className="h-5 w-40 bg-gray-200 rounded" />
-              <div className="h-3 w-24 bg-gray-100 rounded" />
-            </div>
-          </div>
+          <CustomerDetailsSkeleton onClose={onClose} />
         ) : (
           <>
             {/* Header */}
-            <div className="py-4 px-6 flex justify-between items-start">
-              <div className="flex items-center gap-4">
-                <div className="h-14 w-14 rounded-full bg-gray-200" />
+            <div className="py-4 px-4 sm:px-6 flex justify-between items-start gap-3">
+              <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                <div className="h-12 w-12 sm:h-14 sm:w-14 shrink-0 rounded-full bg-gray-200" />
 
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-2xl font-semibold">
-                      {customer?.firstName} {customer?.lastName}
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <h2 className="text-lg sm:text-2xl font-semibold break-words">
+                      {fullNameOrNA(customer?.firstName, customer?.lastName)}
                     </h2>
 
                     <Image
@@ -105,24 +101,24 @@ export default function CustomerDetailsSidebar({
                       className="text-sm leading-[24px] font-normal truncate min-w-0"
                       title={customer?.email}
                     >
-                      {customer?.email}
+                      {orNA(customer?.email)}
                     </div>
                   </div>
                 </div>
               </div>
 
-              <button onClick={onClose}>
+              <button onClick={onClose} aria-label="Close" className="shrink-0">
                 <X />
               </button>
             </div>
 
             {/* Tabs */}
-            <div className="flex border-b border-[var(--border-default)] px-6 shrink-0">
+            <div className="flex border-b border-[var(--border-default)] px-2 sm:px-6 shrink-0 overflow-x-auto">
               {TABS.map((tab) => (
                 <button
                   key={tab.key}
                   onClick={() => setActiveTab(tab.key)}
-                  className={`text-sm py-3 px-4 font-medium border-b-2 transition-colors ${
+                  className={`text-sm py-3 px-3 sm:px-4 whitespace-nowrap font-medium border-b-2 transition-colors ${
                     activeTab === tab.key
                       ? "border-text-teal text-text-primary"
                       : "border-transparent text-text-secondary hover:text-text-primary"

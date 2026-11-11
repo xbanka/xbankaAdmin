@@ -18,15 +18,15 @@ export function ManualTabFilters({
   setSourceFilter: (v: string) => void;
 }) {
   return (
-    <div className="flex flex-col md:flex-row gap-3 items-start md:items-end justify-between">
-      <div className="flex gap-2">
+    <div className="col-span-2 w-full md:w-auto flex flex-col md:flex-row gap-3 md:items-end justify-between">
+      <div className="grid grid-cols-2 gap-3 w-full md:flex md:gap-2">
         <SelectFieldLayout
           id="statusFilter"
           options={["All", "Successful", "Pending", "Failed"]}
           placeholder="Status: All"
           value={statusFilter}
           onChange={setStatusFilter}
-          className="w-36"
+          className="w-full md:w-36"
           selectClassName="border border-gray-300"
         />
         {/* <SelectFieldLayout
@@ -35,7 +35,7 @@ export function ManualTabFilters({
           placeholder="Source: All"
           value={sourceFilter}
           onChange={setSourceFilter}
-          className="w-36"
+          className="w-full md:w-36"
           selectClassName="border border-gray-300"
         /> */}
       </div>

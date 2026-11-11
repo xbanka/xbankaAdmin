@@ -11,10 +11,10 @@ export interface TransactionsTabProps {
 export function TransactionsTab({ transactions, wallet }: TransactionsTabProps) {
   // Placeholder — no transaction data from UserProfileData
   return (
-    <div className="p-6 flex flex-col">
+    <div className="p-4 sm:p-6 flex flex-col">
       <SectionTitle>Transaction Summary</SectionTitle>
       <SectionCard>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="bg-[var(--grey-light)] rounded-xl p-4 flex flex-col items-center gap-2">
             <div className="p-2.5 h-10 rounded-full bg-success-light flex items-center justify-center">
               <ArrowLeftRight size={20} className="text-[#0F766E]" />

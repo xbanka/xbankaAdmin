@@ -61,7 +61,7 @@ export function useCryptoColumns(
       render: (item: TransactionRecord) => (
         <span className="text-xs text-gray-700">
           {/* {item.transaction_type ?? "—"} */}
-          {"—"}
+          {"N/A"}
         </span>
       ),
     },
@@ -79,7 +79,7 @@ export function useCryptoColumns(
       header: "Customer Pays",
       className: "md:w-[130px]",
       render: (item: TransactionRecord) => (
-        <span className="text-xs text-gray-800">{item.amount_in ?? "—"}</span>
+        <span className="text-xs text-gray-800">{item.amount_in ?? "N/A"}</span>
       ),
     },
     {
@@ -87,7 +87,7 @@ export function useCryptoColumns(
       header: "Customer Receives",
       className: "md:w-[140px]",
       render: (item: TransactionRecord) => (
-        <span className="text-xs text-gray-800">{item.amount_out ?? "—"}</span>
+        <span className="text-xs text-gray-800">{item.amount_out ?? "N/A"}</span>
       ),
     },
     {

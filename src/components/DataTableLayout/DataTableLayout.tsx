@@ -96,6 +96,9 @@ export function DataTableLayout<T>({
 
   // Filter columns for mobile (show only non-hidden columns)
   const visibleColumns = columns.filter((col) => !col.hiddenOnMobile);
+  // Row-selection column: on mobile its header (a select-all checkbox) must not
+  // repeat on every card, so we render only the row checkbox in the card header.
+  const selectColumn = columns.find((col) => col.key === "select");
 
   return (
     <div
@@ -213,6 +216,12 @@ export function DataTableLayout<T>({
               >
                 {/* Main top row */}
                 <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-3">
+                    {selectColumn?.render && (
+                      <div data-testid="mobile-row-select">
+                        {selectColumn.render(item)}
+                      </div>
+                    )}
                   <div className="flex flex-col">
                     <span className="text-[12px] text-[#606368] font-medium">
                       Request ID
@@ -220,6 +229,7 @@ export function DataTableLayout<T>({
                     <span className="text-[15px] font-[600] text-[#111827]">
                       {(item as any).requestId ?? (item as any).id}
                     </span>
+                  </div>
                   </div>
 
                   {/* Status (rendered with your existing badge colors) */}
@@ -233,6 +243,7 @@ export function DataTableLayout<T>({
                   {visibleColumns
                     .filter(
                       (col) =>
+                        col.key !== "select" &&
                         col.key !== "status" &&
                         col.key !== "actions" &&
                         col.key !== "requestId"

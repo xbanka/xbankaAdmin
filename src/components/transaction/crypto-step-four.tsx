@@ -32,7 +32,7 @@ function SummaryItem({
           highlight ? "text-[var(--text-teal)]" : "text-[var(--text-primary)]"
         }`}
       >
-        {value && value.trim() ? value : "—"}
+        {value && value.trim() ? value : "N/A"}
       </span>
     </div>
   );
