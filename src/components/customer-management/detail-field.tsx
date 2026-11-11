@@ -1,3 +1,5 @@
+import { orNA } from "@/lib/utils/display";
+
 export function DetailField({
   label,
   value,
@@ -5,6 +7,7 @@ export function DetailField({
   label: string;
   value?: string | null | number;
 }) {
+  const display = orNA(value);
   return (
     <div className="flex flex-col gap-1 min-w-0">
       <p className="text-xs font-normal leading-[18px] text-text-secondary">
@@ -12,9 +15,9 @@ export function DetailField({
       </p>
       <p
         className="text-sm leading-[24px] font-normal text-[#111827] truncate"
-        title={value?.toString()}
+        title={display}
       >
-        {value ?? "—"}
+        {display}
       </p>
     </div>
   );

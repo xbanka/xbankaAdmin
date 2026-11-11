@@ -17,6 +17,7 @@ import { CustomerProps } from "@/lib/types/customer";
 import EditCustomerModal from "@/components/customer-management/EditCustomerModal";
 import DeleteCustomerModal from "@/components/customer-management/DeleteCustomerModal";
 import { formatDate } from "@/lib/formatDate";
+import { fullNameOrNA, orNA } from "@/lib/utils/display";
 import Image from "next/image";
 import { tierImages } from "@/lib/utils/tier-images";
 import CustomerDetailsSidebar from "@/components/customer-management/customer-details-sidebar";
@@ -96,19 +97,21 @@ export default function CustomerManagement() {
     {
       key: "firstName",
       header: "Full Name",
+      className: "w-[20%]",
       render: (item: CustomerProps) => (
-        <div>
-          {item.firstName ? `${item.firstName + " " + item.lastName}` : "-"}
-        </div>
+        <div>{fullNameOrNA(item.firstName, item.lastName)}</div>
       ),
     },
-    { key: "email", header: "Email" },
+    {
+      key: "email",
+      header: "Email",
+      className: "w-[24%]",
+      render: (item: CustomerProps) => <div>{orNA(item.email)}</div>,
+    },
     {
       key: "phoneNumber",
       header: "Phone Number",
-      render: (item: CustomerProps) => (
-        <div>{item.phoneNumber ? item.phoneNumber : "-"}</div>
-      ),
+      render: (item: CustomerProps) => <div>{orNA(item.phoneNumber)}</div>,
     },
     {
       key: "kyc",
@@ -182,7 +185,7 @@ export default function CustomerManagement() {
           {/* Toolbar */}
           <div className="flex flex-wrap items-center gap-3">
             {/* Search */}
-            <div className="relative w-full min-w-[240px] sm:w-auto sm:flex-1 sm:max-w-[360px]">
+            <div className="relative w-full sm:min-w-[240px] sm:w-auto sm:flex-1 sm:max-w-[360px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 placeholder="Search by name, email or phone"
@@ -194,7 +197,7 @@ export default function CustomerManagement() {
 
             {/* Tier filter */}
             <Select value={tierFilter} onValueChange={setTierFilter}>
-              <SelectTrigger className="h-10 w-[130px] border-[#E5E7EB] text-[#374151]">
+              <SelectTrigger className="h-10 w-[calc(50%-6px)] sm:w-[130px] border-[#E5E7EB] text-[#374151]">
                 <SelectValue placeholder="All Tiers" />
               </SelectTrigger>
               <SelectContent>
@@ -219,11 +222,11 @@ export default function CustomerManagement() {
             </Select> */}
 
             {/* Date range */}
-            <div className="relative">
+            <div className="relative w-[calc(50%-6px)] sm:w-auto">
               <button
                 type="button"
                 onClick={() => setDateOpen((o) => !o)}
-                className="inline-flex h-10 items-center gap-2 rounded-lg border border-[#E5E7EB] px-3 text-[14px] text-[#374151] hover:bg-gray-50"
+                className="inline-flex h-10 w-full sm:w-auto items-center justify-between sm:justify-start gap-2 rounded-lg border border-[#E5E7EB] px-3 text-[14px] text-[#374151] hover:bg-gray-50"
               >
                 <Calendar className="h-4 w-4 text-gray-400" />
                 {dateLabel}
@@ -234,7 +237,7 @@ export default function CustomerManagement() {
                     className="fixed inset-0 z-10"
                     onClick={() => setDateOpen(false)}
                   />
-                  <div className="absolute left-0 top-12 z-20 w-[260px] space-y-3 rounded-lg border border-[#E5E7EB] bg-white p-4 shadow-lg">
+                  <div className="absolute right-0 sm:right-auto sm:left-0 top-12 z-20 w-[260px] max-w-[calc(100vw-32px)] space-y-3 rounded-lg border border-[#E5E7EB] bg-white p-4 shadow-lg">
                     <div className="space-y-1">
                       <label className="text-[11px] font-medium text-gray-500">
                         From
@@ -282,11 +285,11 @@ export default function CustomerManagement() {
             </div>
 
             {/* Advanced filter */}
-            <div className="relative">
+            <div className="relative w-[calc(50%-6px)] sm:w-auto">
               <button
                 type="button"
                 onClick={() => setAdvOpen((o) => !o)}
-                className="inline-flex h-10 items-center gap-2 rounded-lg border border-[#E5E7EB] px-3 text-[14px] text-[#374151] hover:bg-gray-50"
+                className="inline-flex h-10 w-full sm:w-auto items-center justify-between sm:justify-start gap-2 rounded-lg border border-[#E5E7EB] px-3 text-[14px] text-[#374151] hover:bg-gray-50"
               >
                 Advanced filter
                 <SlidersHorizontal className="h-4 w-4 text-gray-400" />
@@ -297,7 +300,7 @@ export default function CustomerManagement() {
                     className="fixed inset-0 z-10"
                     onClick={() => setAdvOpen(false)}
                   />
-                  <div className="absolute right-0 top-12 z-20 w-[200px] rounded-lg border border-[#E5E7EB] bg-white p-2 text-sm shadow-lg">
+                  <div className="absolute left-0 sm:left-auto sm:right-0 top-12 z-20 w-[200px] rounded-lg border border-[#E5E7EB] bg-white p-2 text-sm shadow-lg">
                     <p className="px-2 py-1 text-[11px] uppercase tracking-wide text-gray-400">
                       Sort by date joined
                     </p>
@@ -348,7 +351,7 @@ export default function CustomerManagement() {
                 }
                 disabled={exportCustomers.isPending}
                 variant="outline"
-                className="ml-auto text-[#111827] py-2 px-3"
+                className="w-[calc(50%-6px)] sm:w-auto sm:ml-auto h-10 text-[#111827] py-2 px-3"
               >
                 <Download className="h-4 w-4" />
                 {exportCustomers.isPending ? "Exporting..." : "Export"}

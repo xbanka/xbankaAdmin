@@ -20,18 +20,18 @@ export function ProfileTab({ customer }: { customer: UserProfileData }) {
     : null;
 
   const fullName =
-    [customer.firstName, customer.lastName].filter(Boolean).join(" ") || "—";
+    [customer.firstName, customer.lastName].filter(Boolean).join(" ");
 
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6">
       <SectionTitle>Personal Details</SectionTitle>
       <SectionCard>
-        <div className="grid grid-cols-3 gap-x-4 gap-y-5">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-5">
           <DetailField
             label="Full name"
             value={fullName}
           />
-          <DetailField label="Username" value={customer.referralCode ?? "—"} />
+          <DetailField label="Username" value={customer.referralCode} />
           <DetailField label="Email Address" value={customer.email} />
           <DetailField label="Phone number" value={customer.phoneNumber} />
           <DetailField label="Date of Birth" value={dob} />
@@ -61,7 +61,7 @@ export function ProfileTab({ customer }: { customer: UserProfileData }) {
         </div>
         {/* Address full-width */}
         <div className="pt-2 border-t border-[var(--border-default)]">
-          <DetailField label="Address" value={customer.state ?? "—"} />
+          <DetailField label="Address" value={customer.state} />
         </div>
       </SectionCard>
     </div>

@@ -3,6 +3,7 @@ import {
   UserOnboardingData,
 } from "@/lib/types/customer";
 import { DetailField } from "./detail-field";
+import { NA } from "@/lib/utils/display";
 import { SectionCard } from "./section-card";
 import { SectionTitle } from "./section-title";
 import { TierBadge } from "./tier-badge";
@@ -42,12 +43,12 @@ export function VerificationTab({ customer, kyc }: { kyc?: UserOnboardingData; c
   // const tier = customer.kycStatus.bvnVerified ?? 0;
 
   return (
-    <div className="p-6 flex flex-col gap-5">
+    <div className="p-4 sm:p-6 flex flex-col gap-5">
       {/* Verification Summary */}
       <div>
         <SectionTitle>Verification Summary</SectionTitle>
         <SectionCard>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
             <div className="flex flex-col gap-1">
               <p className="text-xs text-[var(--text-secondary)]">
                 Current Tier
@@ -65,7 +66,7 @@ export function VerificationTab({ customer, kyc }: { kyc?: UserOnboardingData; c
               </p>
               <VerificationStatusBadge status={false} />
             </div>
-            <DetailField label="Date Verified" value={"-"} />
+            <DetailField label="Date Verified" value={null} />
           </div>
         </SectionCard>
       </div>
@@ -74,7 +75,8 @@ export function VerificationTab({ customer, kyc }: { kyc?: UserOnboardingData; c
       <div>
         <SectionTitle>Verification Requirements</SectionTitle>
         <SectionCard>
-          <table className="w-full text-xs">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[480px] text-xs">
             <thead>
               <tr className="border-b border-[var(--border-default)]">
                 <th className="text-left px-4 py-3 text-[var(--text-secondary)] font-medium">
@@ -112,6 +114,7 @@ export function VerificationTab({ customer, kyc }: { kyc?: UserOnboardingData; c
               ))}
             </tbody>
           </table>
+          </div>
         </SectionCard>
       </div>
 
@@ -119,7 +122,8 @@ export function VerificationTab({ customer, kyc }: { kyc?: UserOnboardingData; c
       <div>
         <SectionTitle>Submitted Documents</SectionTitle>
         <SectionCard>
-          <table className="w-full text-xs">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[480px] text-xs">
             <thead>
               <tr className="bg-[var(--grey-light)] border-b border-[var(--border-default)]">
                 {["Document", "Date Submitted", "Tier", "Status", ""].map(
@@ -146,7 +150,7 @@ export function VerificationTab({ customer, kyc }: { kyc?: UserOnboardingData; c
                           "en-GB",
                           { day: "2-digit", month: "long", year: "numeric" },
                         )
-                      : "-"}
+                      : NA}
                   </td>
                   <td className="px-4 py-3">
                     <TierBadge tier={2} />
@@ -172,6 +176,7 @@ export function VerificationTab({ customer, kyc }: { kyc?: UserOnboardingData; c
               )}
             </tbody>
           </table>
+          </div>
         </SectionCard>
       </div>
     </div>

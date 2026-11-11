@@ -258,9 +258,9 @@ export function StepAssignAssets({
       )}
 
       {/* Toolbar */}
-      <div className="flex items-center gap-2 mb-4 flex-wrap">
-        <div className="flex items-center gap-2.5 mb-6">
-          <div className="relative max-w-[200px]">
+      <div className="flex flex-col md:flex-row md:items-center gap-2 mb-4 md:flex-wrap">
+        <div className="grid grid-cols-2 gap-2.5 md:mb-6 md:flex md:items-center">
+          <div className="relative col-span-2 w-full md:w-[200px]">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
               placeholder="Search"
@@ -278,11 +278,11 @@ export function StepAssignAssets({
             className="w-full md:w-[180px]"
             selectClassName="border border-gray-300"
           />
-          <button className="flex items-center gap-1.5 border border-[#E5E7EB] rounded-lg px-3 py-2 text-[13px] text-[#6B7280] bg-white">
+          <button className="flex h-10 w-full md:w-auto items-center justify-center md:justify-start gap-1.5 whitespace-nowrap border border-[#E5E7EB] rounded-lg px-3 py-2 text-[13px] text-[#6B7280] bg-white">
             <SlidersHorizontal size={14} /> Advanced filter
           </button>
         </div>
-        <div className="ml-auto flex items-center gap-2">
+        <div className="md:ml-auto flex items-center justify-between md:justify-start gap-2">
           <span className="text-[12px] text-[#6B7280]">
             {selectedAssetIds.length} asset
             {selectedAssetIds.length !== 1 ? "s" : ""} selected

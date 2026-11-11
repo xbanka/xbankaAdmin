@@ -28,19 +28,19 @@ export function StepSegment({
             have its own default buy and sell spread.
           </p>
         </div>
-        <div className="flex items-center justify-between gap-8">
+        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 lg:gap-8">
           {loading ? (
             <LoaderSpinner />
           ) : (
             <>
-              <div className="flex gap-4 items-center">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 w-full lg:flex lg:w-auto lg:items-stretch">
                 {segments.map((seg) => {
                   return (
                     <div
                       key={seg.id}
                       onClick={() => onToggle(seg.id)}
                       className={cn(
-                        "flex flex-col justify-between border rounded-[12px] min-h-[242px] p-5 max-w-[288px] min-w-[288px] space-y-4 cursor-pointer relative transition-all bg-card-primary",
+                        "flex flex-col justify-between border rounded-[12px] p-4 sm:p-5 w-full lg:min-h-[242px] lg:w-[288px] lg:shrink-0 space-y-4 cursor-pointer relative transition-all bg-card-primary",
                         seg.selected
                           ? "border-input-border-focus"
                           : "border-[#E5E7EB]",
@@ -77,7 +77,7 @@ export function StepSegment({
                         <div className="text-[12px] font-normal text-[#5C544A]">
                           Example Assets
                         </div>
-                        <div className="text-[12px] text-[#374151] mt-1 flex items-center gap-2">
+                        <div className="text-[12px] text-[#374151] mt-1 flex flex-wrap items-center gap-2">
                           {seg.assets?.map((item) => (
                             <div
                               key={item.name}
@@ -92,7 +92,7 @@ export function StepSegment({
                   );
                 })}
               </div>
-              <div className="border min-h-[242px] max-w-[300px] border-card-border-secondary bg-card-primary rounded-[12px] px-5 pt-6 pb-[34px] space-y-2 h-fit">
+              <div className="border w-full lg:w-[300px] lg:shrink-0 lg:min-h-[242px] border-card-border-secondary bg-card-primary rounded-[12px] px-4 sm:px-5 pt-5 sm:pt-6 pb-5 sm:pb-[34px] space-y-2 h-fit">
                 <div className="text-[16px] font-medium text-text-primary">
                   Setup summary
                 </div>

@@ -16,6 +16,7 @@ import {
 import Header from "../ui/Header";
 import { usePermissions } from "@/hooks/usePermissions";
 import { formatDate } from "@/lib/formatDate";
+import { amountOrNA, fullNameOrNA, NA, orNA, pairOrNA } from "@/lib/utils/display";
 import { AllTabFilters } from "./all-tab-filters";
 import { ManualTabFilters } from "./manual-tab-filters";
 import { FiatTabFilters } from "./fiat-tab-filters";
@@ -75,8 +76,6 @@ export const CATEGORY_MAP: Record<ActiveTab, string | undefined> = {
   "bill payments": "BILL_PAYMENT",
 };
 
-const moneyFmt = (n: number) =>
-  new Intl.NumberFormat("en-NG", { maximumFractionDigits: 2 }).format(n ?? 0);
 
 export function TransactionsTable({
   onNewTransaction,
@@ -143,13 +142,13 @@ export function TransactionsTable({
     {
       key: "reference",
       header: "Txn ID",
-      className: "md:w-[230px]",
+      className: "md:w-[300px]",
       render: (item: TransactionRecord) => (
         <span
-          className="text-text-teal font-500 text-[14px] leading-[16px] truncate block"
+          className="text-text-teal font-500 text-[14px] leading-[18px] break-all block"
           title={item.reference}
         >
-          {item.reference}
+          {orNA(item.reference)}
         </span>
       ),
     },
@@ -159,7 +158,7 @@ export function TransactionsTable({
       className: "md:w-[130px]",
       render: (item: TransactionRecord) => (
         <span className="font-500 text-[14px] leading-[18px] text-[#111827]">
-          {formatDate(item.createdAt)}
+          {item.createdAt ? formatDate(item.createdAt) : NA}
         </span>
       ),
     },
@@ -169,7 +168,7 @@ export function TransactionsTable({
       className: "md:w-[140px]",
       render: (item: TransactionRecord) => (
         <div className="text-text-teal text-sm font-medium leading-5 hover:underline block">
-          {item?.customer?.firstName} {item?.customer?.lastName}
+          {fullNameOrNA(item?.customer?.firstName, item?.customer?.lastName)}
         </div>
       ),
     },
@@ -201,7 +200,7 @@ export function TransactionsTable({
       render: (item: TransactionRecord) => (
         <div className="flex flex-col">
           <span className="text-[14px] font-medium text-[#111827]">
-            {item.displayType}
+            {orNA(item.displayType)}
           </span>
           <span className="text-[10px] text-gray-400">{item.note}</span>
         </div>
@@ -213,7 +212,7 @@ export function TransactionsTable({
       className: "md:w-[150px]",
       render: (item: TransactionRecord) => (
         <span className="text-[14px] font-medium text-[#111827] leading-[18px]">
-          {item.currency} {moneyFmt(item.amount)}
+          {amountOrNA(item.amount, item.currency)}
         </span>
       ),
     },
@@ -246,7 +245,7 @@ export function TransactionsTable({
       header: "Type",
       className: "md:w-[150px]",
       render: (item: TransactionRecord) => (
-        <span className="capitalize">{item.type?.toLowerCase()}</span>
+        <span className="capitalize">{item.type ? item.type.toLowerCase() : NA}</span>
       ),
     },
     {
@@ -266,7 +265,7 @@ export function TransactionsTable({
       className: "md:w-[150px]",
       render: (item: TransactionRecord) => (
         <span className="text-xs font-medium text-gray-800">
-          {item.currency} {moneyFmt(item.amount)}
+          {amountOrNA(item.amount, item.currency)}
         </span>
       ),
     },
@@ -276,7 +275,7 @@ export function TransactionsTable({
       className: "md:w-[150px]",
       render: (item: TransactionRecord) => (
         <span className="text-xs text-gray-600">
-          {item.tradeDetails?.deliveryMethod ?? "—"}
+          {orNA(item.tradeDetails?.deliveryMethod)}
         </span>
       ),
     },
@@ -286,7 +285,7 @@ export function TransactionsTable({
       className: "md:w-[150px]",
       render: (item: TransactionRecord) => (
         <span className="text-xs text-gray-600">
-          {item.tradeDetails?.partner ?? "—"}
+          {orNA(item.tradeDetails?.partner)}
         </span>
       ),
     },
@@ -336,7 +335,7 @@ export function TransactionsTable({
       header: "Type",
       className: "md:w-[160px]",
       render: (item: TransactionRecord) => (
-        <span className="text-xs text-gray-700">{item.displayType}</span>
+        <span className="text-xs text-gray-700">{orNA(item.displayType)}</span>
       ),
     },
     {
@@ -345,8 +344,7 @@ export function TransactionsTable({
       className: "md:w-[120px]",
       render: (item: TransactionRecord) => (
         <span className="text-xs font-medium text-gray-700">
-          {item.tradeDetails?.sourceCurrency}-
-          {item.tradeDetails?.targetCurrency}
+          {pairOrNA(item.tradeDetails?.sourceCurrency, item.tradeDetails?.targetCurrency)}
         </span>
       ),
     },
@@ -356,8 +354,7 @@ export function TransactionsTable({
       className: "md:w-[130px]",
       render: (item: TransactionRecord) => (
         <span className="text-xs text-gray-800">
-          {moneyFmt(item.tradeDetails?.sourceAmount)}{" "}
-          {item.tradeDetails?.sourceCurrency}
+          {amountOrNA(item.tradeDetails?.sourceAmount, item.tradeDetails?.sourceCurrency, "after")}
         </span>
       ),
     },
@@ -367,8 +364,7 @@ export function TransactionsTable({
       className: "md:w-[160px]",
       render: (item: TransactionRecord) => (
         <span className="text-xs text-gray-800">
-          {moneyFmt(item.tradeDetails?.payoutAmount)}{" "}
-          {item.tradeDetails?.targetCurrency}
+          {amountOrNA(item.tradeDetails?.payoutAmount, item.tradeDetails?.targetCurrency, "after")}
         </span>
       ),
     },
@@ -401,7 +397,7 @@ export function TransactionsTable({
       header: "Type",
       className: "md:w-[120px]",
       render: (item: TransactionRecord) => (
-        <span className="text-xs text-gray-700">{item.displayType}</span>
+        <span className="text-xs text-gray-700">{orNA(item.displayType)}</span>
       ),
     },
     {
@@ -410,8 +406,7 @@ export function TransactionsTable({
       className: "md:w-[120px]",
       render: (item: TransactionRecord) => (
         <span className="text-xs font-medium text-gray-700">
-          {item.tradeDetails?.sourceCurrency}-
-          {item.tradeDetails?.targetCurrency}
+          {pairOrNA(item.tradeDetails?.sourceCurrency, item.tradeDetails?.targetCurrency)}
         </span>
       ),
     },
@@ -421,8 +416,7 @@ export function TransactionsTable({
       className: "md:w-[130px]",
       render: (item: TransactionRecord) => (
         <span className="text-xs text-gray-800">
-          {moneyFmt(item.tradeDetails?.sourceAmount)}{" "}
-          {item.tradeDetails?.sourceCurrency}
+          {amountOrNA(item.tradeDetails?.sourceAmount, item.tradeDetails?.sourceCurrency, "after")}
         </span>
       ),
     },
@@ -432,8 +426,7 @@ export function TransactionsTable({
       className: "md:w-[140px]",
       render: (item: TransactionRecord) => (
         <span className="text-xs text-gray-800">
-          {moneyFmt(item.tradeDetails?.payoutAmount)}{" "}
-          {item.tradeDetails?.targetCurrency}
+          {amountOrNA(item.tradeDetails?.payoutAmount, item.tradeDetails?.targetCurrency, "after")}
         </span>
       ),
     },
@@ -443,7 +436,7 @@ export function TransactionsTable({
       className: "md:w-[110px]",
       render: (item: TransactionRecord) => (
         <span className="text-xs text-gray-600">
-          {item.tradeDetails?.channelOrigin ?? "—"}
+          {orNA(item.tradeDetails?.channelOrigin)}
         </span>
       ),
     },
@@ -453,7 +446,7 @@ export function TransactionsTable({
       className: "md:w-[110px]",
       render: (item: TransactionRecord) => (
         <span className="text-xs text-gray-600">
-          {item.tradeDetails?.channelOrigin ?? "—"}
+          {orNA(item.tradeDetails?.channelOrigin)}
         </span>
       ),
     },
@@ -463,7 +456,7 @@ export function TransactionsTable({
       className: "md:w-[110px]",
       render: (item: TransactionRecord) => (
         <span className="text-xs text-gray-600">
-          {item.tradeDetails?.channelOrigin ?? "—"}
+          {orNA(item.tradeDetails?.channelOrigin)}
         </span>
       ),
     },
@@ -473,7 +466,7 @@ export function TransactionsTable({
       className: "md:w-[110px]",
       render: (item: TransactionRecord) => (
         <span className="text-xs text-gray-600">
-          {item.tradeDetails?.channelOrigin ?? "—"}
+          {orNA(item.tradeDetails?.channelOrigin)}
         </span>
       ),
     },
@@ -505,7 +498,7 @@ export function TransactionsTable({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <Header text="Transaction Management" />
 
         <div className="flex gap-3">
@@ -544,8 +537,8 @@ export function TransactionsTable({
       </div>
 
       {/* Filter Buttons */}
-      <div className="md:flex items-end justify-between w-full">
-        <div className="space-y-4 w-[40%]">
+      <div className="md:flex items-end justify-between gap-3 w-full">
+        <div className="space-y-4 w-full md:w-[40%]">
           <FilterTabs
             filters={[
               "All",
@@ -570,7 +563,7 @@ export function TransactionsTable({
             </div>
           </div>
         </div>
-        <div className="flex flex-col items-end md:flex-row gap-3">
+        <div className="grid grid-cols-2 gap-3 mt-4 md:mt-0 md:flex md:flex-row md:items-end">
           {/* Per-tab filter bar */}
           {activeFilter === "all" && (
             <AllTabFilters
@@ -631,16 +624,16 @@ export function TransactionsTable({
             placeholder="Currency: All"
             value={currencyFilter || "All"}
             onChange={(v) => setCurrencyFilter(v === "All" ? "" : v)}
-            className="w-36"
+            className="w-full md:w-36"
             selectClassName="border border-gray-300"
           />
 
           {/* Date range — applies across every tab */}
-          <div className="relative">
+          <div className="relative w-full md:w-auto">
             <button
               type="button"
               onClick={() => setDateOpen((o) => !o)}
-              className="inline-flex h-10 items-center gap-2 rounded-lg border border-gray-300 px-3 text-[14px] text-[#374151] hover:bg-gray-50"
+              className="inline-flex h-10 w-full md:w-auto items-center gap-2 rounded-lg border border-gray-300 whitespace-nowrap overflow-hidden px-3 text-[14px] text-[#374151] hover:bg-gray-50"
             >
               <Calendar className="h-4 w-4 text-gray-400" />
               {dateLabel}
@@ -651,7 +644,7 @@ export function TransactionsTable({
                   className="fixed inset-0 z-10"
                   onClick={() => setDateOpen(false)}
                 />
-                <div className="absolute right-0 top-12 z-20 w-[260px] space-y-3 rounded-lg border border-[#E5E7EB] bg-white p-4 shadow-lg">
+                <div className="absolute right-0 top-12 z-20 w-[260px] max-w-[calc(100vw-32px)] space-y-3 rounded-lg border border-[#E5E7EB] bg-white p-4 shadow-lg">
                   <div className="space-y-1">
                     <label className="text-[11px] font-medium text-gray-500">
                       From
