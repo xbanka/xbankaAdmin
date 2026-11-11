@@ -111,7 +111,7 @@ export function CreateSpreadWizard({ onClose }: { onClose: () => void }) {
       {/* Wizard Header */}
       {/* Steps */}
       <div>
-        <div className="flex items-center justify-center gap-1 py-5 px-6">
+        <div className="flex items-center justify-center gap-1 py-5 px-4 sm:px-6 overflow-x-auto">
           {STEP_LABELS.map((label, i) => {
             const num = i + 1;
             const done = step > num;
@@ -131,7 +131,7 @@ export function CreateSpreadWizard({ onClose }: { onClose: () => void }) {
                   </div>
                   <div
                     className={cn(
-                      "text-[11px] font-medium whitespace-nowrap",
+                      "text-[10px] sm:text-[11px] font-medium whitespace-nowrap",
                       done || current ? "text-[#0D9488]" : "text-[#9CA3AF]",
                     )}
                   >
@@ -141,7 +141,7 @@ export function CreateSpreadWizard({ onClose }: { onClose: () => void }) {
                 {i < STEP_LABELS.length - 1 && (
                   <div
                     className={cn(
-                      "w-14 h-[1.5px] mb-5 mx-1",
+                      "w-6 sm:w-14 h-[1.5px] mb-5 mx-0.5 sm:mx-1",
                       done ? "bg-[#0D9488]" : "bg-[#E5E7EB]",
                     )}
                   />
@@ -152,7 +152,7 @@ export function CreateSpreadWizard({ onClose }: { onClose: () => void }) {
         </div>
 
         {/* Step Content */}
-        <div className="px-6 pb-2 min-w-0">
+        <div className="px-4 sm:px-6 pb-2 min-w-0">
           {step === 1 && (
             <StepSegment
               segments={segments}
@@ -183,11 +183,11 @@ export function CreateSpreadWizard({ onClose }: { onClose: () => void }) {
       </div>
 
       {/* Footer */}
-      <div className="mt-auto sticky bottom-0 z-20 flex items-center justify-between px-6 py-4 border-t border-background-alt-neutral-grey bg-card-secondary">
-        <Button variant="outline" onClick={onClose}>
+      <div className="mt-auto sticky bottom-0 z-20 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-2.5 px-4 sm:px-6 py-4 border-t border-background-alt-neutral-grey bg-card-secondary">
+        <Button variant="outline" onClick={onClose} className="w-full sm:w-auto">
           Cancel
         </Button>
-        <div className="flex gap-2.5">
+        <div className="flex flex-col-reverse sm:flex-row gap-2.5 [&>button]:w-full sm:[&>button]:w-auto">
           {step > 1 && (
             <Button
               variant="outline"

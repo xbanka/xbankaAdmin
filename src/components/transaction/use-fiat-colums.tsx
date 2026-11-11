@@ -50,7 +50,7 @@ export function useFiatColumns(
       render: (item: TransactionRecord) => (
         <span className="text-xs text-gray-700">
           {/* {item.transaction_type ?? "—"} */}
-          {"—"}
+          {"N/A"}
         </span>
       ),
     },
@@ -64,7 +64,7 @@ export function useFiatColumns(
           className={`text-xs font-medium`}
         >
           {/* {item.direction ?? "—"} */}
-          {"—"}
+          {"N/A"}
         </span>
       ),
     },
@@ -84,7 +84,7 @@ export function useFiatColumns(
       className: "md:w-[140px]",
       render: (item: TransactionRecord) => (
         // <span className="text-xs text-gray-600">{item.channel ?? "—"}</span>
-        <span className="text-xs text-gray-600">{"—"}</span>
+        <span className="text-xs text-gray-600">{"N/A"}</span>
       ),
     },
     {
@@ -93,7 +93,7 @@ export function useFiatColumns(
       className: "md:w-[110px]",
       render: (item: TransactionRecord) => (
         // <span className="text-xs text-gray-600">{item.provider ?? "—"}</span>
-        <span className="text-xs text-gray-600">{"—"}</span>
+        <span className="text-xs text-gray-600">{"N/A"}</span>
       ),
     },
   ];

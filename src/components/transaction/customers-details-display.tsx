@@ -19,15 +19,15 @@ export function CustomerDetailsDisplay({
       <div className="space-y-[8px]">
         <div className="grid grid-cols-3 gap-4 bg-white rounded-[8px] p-3">
           <CustomDetailsName title="Name" body={customer.name} />
-          <CustomDetailsName title="Username" body={customer.username ? customer.username : "-"} />
+          <CustomDetailsName title="Username" body={customer.username ? customer.username : "N/A"} />
           <CustomDetailsName title="Email" body={customer.email} />
           <CustomDetailsName
             title="Total Transactions"
-            body={`${customer.totalTransactions ? customer.totalTransactions : "-"}`}
+            body={`${customer.totalTransactions ?? "N/A"}`}
           />
           <CustomDetailsName
             title="Affiliate"
-            body={customer.affiliate ? customer.affiliate : "-"}
+            body={customer.affiliate ? customer.affiliate : "N/A"}
           />
           <CustomDetailsName
             title="Joined"

@@ -126,7 +126,7 @@ export function PayoutsTab() {
           value={activeFilter}
           onChange={setActiveFilter}
         />
-        <div className="flex flex-col md:flex-row w-full items.center md:justify-end items-center gap-3">
+        <div className="flex flex-col md:flex-row w-full md:w-auto md:flex-1 md:min-w-0 md:justify-end items-center gap-3">
           <div className="relative w-full md:w-64">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input

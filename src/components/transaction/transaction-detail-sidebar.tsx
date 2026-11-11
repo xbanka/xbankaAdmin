@@ -32,7 +32,7 @@ function Field({
       </span>
       {children ?? (
         <span className="text-sm font-medium text-[var(--text-primary)]">
-          {value === 0 || value ? value : "—"}
+          {value === 0 || value ? value : "N/A"}
         </span>
       )}
     </div>
@@ -135,7 +135,7 @@ export function TransactionDetailSidebar({ transactionId, onClose }: Props) {
   const heroAmount =
     txn?.amount != null
       ? `${txn.currency ?? ""} ${txn.amount.toLocaleString()}`.trim()
-      : "—";
+      : "N/A";
 
   return (
     <div className="fixed inset-0 z-50 flex">
@@ -156,7 +156,7 @@ export function TransactionDetailSidebar({ transactionId, onClose }: Props) {
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-xs text-[var(--text-secondary)] truncate">
-                    {txn?.reference ?? "—"}
+                    {txn?.reference ?? "N/A"}
                   </span>
                   {txn?.reference && (
                     <button
