@@ -1,6 +1,7 @@
 import AxiosInstance from "../Axiosinstance/axiosInstance";
 import type {
   CompleteFundingIntentPayload,
+  DirectCreditPayload,
   RejectFundingIntentPayload,
 } from "../types/funding-types";
 import { buildIntentParams, type FundingIntentQuery } from "../utils/funding";
@@ -74,6 +75,49 @@ export const rejectFundingIntent = async ({
       `${BASE}/intents/${transactionId}/reject`,
       payload,
     );
+    return { success: true, data: response.data, status: response.status };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    throw toActionError(error);
+  }
+};
+
+/**
+ * GET /api/transactions/funding/lookup
+ *
+ * Finds the customer who registered the sending account. Answers with an
+ * array (the same number can exist at several banks). `accountNumber` must
+ * be exactly 10 digits or it 422s; `bankCode` narrows to one bank.
+ */
+export const lookupFundingCustomer = async ({
+  accountNumber,
+  bankCode,
+}: {
+  accountNumber: string;
+  bankCode?: string;
+}) => {
+  try {
+    const response = await AxiosInstance.get(`${BASE}/lookup`, {
+      params: { accountNumber, ...(bankCode ? { bankCode } : {}) },
+    });
+    return { success: true, data: response.data, status: response.status };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    throw toActionError(error);
+  }
+};
+
+/**
+ * POST /api/transactions/funding/credit
+ *
+ * Credits the customer's NGN wallet with no funding intent. The bank
+ * reference is the idempotency key, so a retry after a timeout cannot
+ * double-credit: it comes back with `duplicate: true`. A 409 means the
+ * reference was already used with different details and must not be retried.
+ */
+export const creditFundingDirectly = async (payload: DirectCreditPayload) => {
+  try {
+    const response = await AxiosInstance.post(`${BASE}/credit`, payload);
     return { success: true, data: response.data, status: response.status };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {

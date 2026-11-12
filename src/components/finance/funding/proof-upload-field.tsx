@@ -18,7 +18,10 @@ export interface ProofUpload {
  * Confirm the URLs already exist and go out with the complete request. The
  * caller blocks submit while anything is still uploading.
  */
-export function useProofUploads(upload: (file: File) => Promise<string> = uploadProofFile) {
+export function useProofUploads(
+  upload: (file: File) => Promise<string> = uploadProofFile,
+  { max = Infinity }: { max?: number } = {},
+) {
   const [uploads, setUploads] = useState<ProofUpload[]>([]);
   const nextId = useRef(0);
   const uploadsRef = useRef(uploads);
@@ -38,7 +41,11 @@ export function useProofUploads(upload: (file: File) => Promise<string> = upload
     [upload],
   );
 
-  const add = (items: { file: File; previewUrl?: string }[]) => {
+  const add = (allItems: { file: File; previewUrl?: string }[]) => {
+    // Files over the cap are dropped (their preview URLs freed), not queued.
+    const room = Math.max(0, max - uploadsRef.current.length);
+    allItems.slice(room).forEach((item) => item.previewUrl && URL.revokeObjectURL(item.previewUrl));
+    const items = allItems.slice(0, room);
     const created = items.map((item) => ({
       ...item,
       id: nextId.current++,
@@ -74,14 +81,23 @@ export function useProofUploads(upload: (file: File) => Promise<string> = upload
     urls: uploads.flatMap((u) => (u.status === "done" && u.url ? [u.url] : [])),
     isUploading: uploads.some((u) => u.status === "uploading"),
     hasFailed: uploads.some((u) => u.status === "failed"),
+    /** True once the file cap is reached; the drop box is hidden. */
+    isFull: uploads.length >= max,
   };
 }
 
-export function ProofUploadField({ proofs }: { proofs: ReturnType<typeof useProofUploads> }) {
+export function ProofUploadField({
+  proofs,
+  accept,
+}: {
+  proofs: ReturnType<typeof useProofUploads>;
+  /** Passed through to the file picker. Defaults to any image or PDF. */
+  accept?: string;
+}) {
   return (
     <div className="space-y-2">
       {/* Only the drop box is reused; the list below shows upload state. */}
-      <AttachmentUpload value={[]} onChange={proofs.add} />
+      {!proofs.isFull && <AttachmentUpload value={[]} onChange={proofs.add} accept={accept} />}
 
       {proofs.uploads.map((u) => (
         <div

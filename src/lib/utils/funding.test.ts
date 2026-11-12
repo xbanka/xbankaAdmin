@@ -2,20 +2,30 @@ import axios from "axios";
 import { describe, expect, it } from "vitest";
 import {
   buildCompletePayload,
+  buildDirectCreditPayload,
   buildIntentParams,
+  classifyCreditError,
   cleanBankReference,
   extractAttachmentUrl,
   extractIntentsPage,
+  extractLookupMatches,
+  getMatchBlocker,
+  hasAtMostTwoDecimals,
   isAmountOverridden,
   formatNaira,
   isAccountNumber,
   isDuplicateResult,
   statusLabel,
+  storedReference,
   unwrapSettleResult,
 } from "./funding";
 import { estimatePagination } from "./pagination";
-import { completeIntentSchema, rejectIntentSchema } from "../schema/funding-intent.schema";
-import { intentsResponse } from "./funding.fixtures";
+import {
+  completeIntentSchema,
+  directCreditSchema,
+  rejectIntentSchema,
+} from "../schema/funding-intent.schema";
+import { intentsResponse, lookupMatch } from "./funding.fixtures";
 
 const toQuery = (params: object) => axios.getUri({ url: "/x", params }).split("?")[1] ?? "";
 
@@ -247,6 +257,120 @@ describe("formatting", () => {
   it("labels statuses", () => {
     expect(statusLabel("PENDING")).toBe("Pending");
     expect(statusLabel("")).toBe("-");
+  });
+});
+
+describe("extractLookupMatches", () => {
+  it("accepts the bare array or one wrapped in { data }", () => {
+    expect(extractLookupMatches([lookupMatch])).toEqual([lookupMatch]);
+    expect(extractLookupMatches({ data: [lookupMatch] })).toEqual([lookupMatch]);
+  });
+
+  it("returns no matches for an empty or malformed body", () => {
+    expect(extractLookupMatches([])).toEqual([]);
+    expect(extractLookupMatches(undefined)).toEqual([]);
+    expect(extractLookupMatches({ message: "nope" })).toEqual([]);
+  });
+});
+
+describe("getMatchBlocker", () => {
+  it("lets an active customer with an NGN wallet through", () => {
+    expect(getMatchBlocker(lookupMatch)).toBeNull();
+  });
+
+  it("blocks a suspended customer", () => {
+    const suspended = { ...lookupMatch, customer: { ...lookupMatch.customer, isActive: false } };
+    expect(getMatchBlocker(suspended)).toBe("suspended");
+  });
+
+  it("blocks a customer with no NGN wallet", () => {
+    expect(getMatchBlocker({ ...lookupMatch, wallet: null })).toBe("no-wallet");
+  });
+
+  it("reports suspended before a missing wallet", () => {
+    const both = { ...lookupMatch, wallet: null, customer: { ...lookupMatch.customer, isActive: false } };
+    expect(getMatchBlocker(both)).toBe("suspended");
+  });
+});
+
+describe("storedReference", () => {
+  it("prefixes BANKFUND- and trims and uppercases like the core backend", () => {
+    expect(storedReference("  100004abc123 ")).toBe("BANKFUND-100004ABC123");
+  });
+});
+
+describe("hasAtMostTwoDecimals", () => {
+  it("allows up to two decimal places", () => {
+    expect(hasAtMostTwoDecimals("2000")).toBe(true);
+    expect(hasAtMostTwoDecimals("2000.5")).toBe(true);
+    expect(hasAtMostTwoDecimals("2000.55")).toBe(true);
+    expect(hasAtMostTwoDecimals("2000.555")).toBe(false);
+  });
+});
+
+describe("buildDirectCreditPayload", () => {
+  const ids = { fundingAccountId: lookupMatch.fundingAccountId, creditedBy: "ops@xbanka.com" };
+
+  it("sends a numeric amount and a trimmed reference, omitting empty attachments", () => {
+    expect(buildDirectCreditPayload({ amount: "2000", bankReference: "  REF12345  " }, ids)).toEqual({
+      fundingAccountId: lookupMatch.fundingAccountId,
+      amount: 2000,
+      reference: "REF12345",
+      creditedBy: "ops@xbanka.com",
+    });
+  });
+
+  it("includes attachment URLs only when there are some", () => {
+    const payload = buildDirectCreditPayload(
+      { amount: "10.5", bankReference: "REF12345" },
+      { ...ids, attachmentUrls: ["https://s3/a.png"] },
+    );
+    expect(payload.amount).toBe(10.5);
+    expect(payload.attachmentUrls).toEqual(["https://s3/a.png"]);
+  });
+});
+
+describe("classifyCreditError", () => {
+  it("treats network trouble, timeouts and 5xx as safe to retry", () => {
+    expect(classifyCreditError({ status: 408 })).toBe("retry");
+    expect(classifyCreditError({ status: 502 })).toBe("retry");
+    expect(classifyCreditError({ status: 503 })).toBe("retry");
+    expect(classifyCreditError({})).toBe("retry");
+    expect(classifyCreditError(undefined)).toBe("retry");
+  });
+
+  it("never retries a 409 and sends a 404 back to the lookup", () => {
+    expect(classifyCreditError({ status: 409 })).toBe("reference-conflict");
+    expect(classifyCreditError({ status: 404 })).toBe("not-found");
+  });
+
+  it("shows other refusals as-is", () => {
+    expect(classifyCreditError({ status: 403 })).toBe("rejected");
+    expect(classifyCreditError({ status: 400 })).toBe("rejected");
+  });
+});
+
+describe("directCreditSchema", () => {
+  const valid = { bankReference: "REF12345", amount: "2000" };
+
+  it("accepts a valid form", () => {
+    expect(directCreditSchema.safeParse(valid).success).toBe(true);
+  });
+
+  it("requires a reference of 4 to 100 characters, after trimming", () => {
+    expect(directCreditSchema.safeParse({ ...valid, bankReference: "abc" }).success).toBe(false);
+    expect(directCreditSchema.safeParse({ ...valid, bankReference: "  abc  " }).success).toBe(false);
+    expect(directCreditSchema.safeParse({ ...valid, bankReference: "abcd" }).success).toBe(true);
+    expect(directCreditSchema.safeParse({ ...valid, bankReference: "x".repeat(100) }).success).toBe(true);
+    expect(directCreditSchema.safeParse({ ...valid, bankReference: "x".repeat(101) }).success).toBe(false);
+  });
+
+  it("requires at least 0.01 with at most 2 decimals", () => {
+    expect(directCreditSchema.safeParse({ ...valid, amount: "" }).success).toBe(false);
+    expect(directCreditSchema.safeParse({ ...valid, amount: "0" }).success).toBe(false);
+    expect(directCreditSchema.safeParse({ ...valid, amount: "0.009" }).success).toBe(false);
+    expect(directCreditSchema.safeParse({ ...valid, amount: "0.01" }).success).toBe(true);
+    expect(directCreditSchema.safeParse({ ...valid, amount: "10.555" }).success).toBe(false);
   });
 });
 
