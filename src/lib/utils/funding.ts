@@ -1,7 +1,9 @@
 import type {
   CompleteFundingIntentPayload,
+  DirectCreditPayload,
   FundingIntentStatus,
   FundingIntentsPage,
+  FundingLookupMatch,
 } from "../types/funding-types";
 
 export const FUNDING_INTENT_STATUSES: FundingIntentStatus[] = ["PENDING", "COMPLETED", "FAILED"];
@@ -133,6 +135,91 @@ export function buildCompletePayload(
  */
 export function cleanBankReference(raw: string) {
   return raw.replace(/[\r\n\t]+/g, " ").trim();
+}
+
+/** Most proof files a credit request accepts. */
+export const MAX_PROOF_FILES = 5;
+
+/**
+ * GET /funding/lookup answers with an array. Accept it bare or wrapped in
+ * `{ data }` like the other routes, and fall back to no matches so a
+ * malformed body can't crash the step.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function extractLookupMatches(body: any): FundingLookupMatch[] {
+  const list = Array.isArray(body) ? body : body?.data;
+  return Array.isArray(list) ? list : [];
+}
+
+export type MatchBlocker = "suspended" | "no-wallet";
+
+/**
+ * Why a matched customer can't be credited, or null when they can. A
+ * suspended account is refused by the backend (403); no NGN wallet means
+ * there is nothing to credit, so both are blocked up front.
+ */
+export function getMatchBlocker(match: FundingLookupMatch): MatchBlocker | null {
+  if (!match.customer?.isActive) return "suspended";
+  if (!match.wallet) return "no-wallet";
+  return null;
+}
+
+export const MATCH_BLOCKER_MESSAGE: Record<MatchBlocker, string> = {
+  suspended: "Account suspended. It cannot be credited.",
+  "no-wallet": "No NGN wallet yet. It cannot be credited.",
+};
+
+/** The reference the core backend stores: it trims and uppercases, then prefixes. */
+export const storedReference = (reference: string) =>
+  `BANKFUND-${reference.trim().toUpperCase()}`;
+
+/** At most two decimal places, as the credit endpoint requires. */
+export const hasAtMostTwoDecimals = (value: string) => /^\d*(\.\d{0,2})?$/.test(value.trim());
+
+export interface DirectCreditFormValues {
+  bankReference: string;
+  /** Raw numeric string from AmountField, commas already stripped. */
+  amount: string;
+}
+
+/**
+ * Form values to the credit request. The reference is trimmed (it can only
+ * be used once, so stray whitespace must not make a different one), and
+ * `attachmentUrls` is omitted when empty rather than sent as [].
+ */
+export function buildDirectCreditPayload(
+  values: DirectCreditFormValues,
+  {
+    fundingAccountId,
+    creditedBy,
+    attachmentUrls = [],
+  }: { fundingAccountId: string; creditedBy: string; attachmentUrls?: string[] },
+): DirectCreditPayload {
+  const payload: DirectCreditPayload = {
+    fundingAccountId,
+    amount: Number(values.amount),
+    reference: values.bankReference.trim(),
+    creditedBy,
+  };
+  if (attachmentUrls.length > 0) payload.attachmentUrls = attachmentUrls;
+  return payload;
+}
+
+export type CreditFailure = "retry" | "reference-conflict" | "not-found" | "rejected";
+
+/**
+ * How the credit modal reacts to a failed request. Network trouble and 502
+ * are safe to retry (the bank reference prevents a double credit); a 409
+ * must not be retried; a 404 means the lookup is stale.
+ */
+export function classifyCreditError(error: unknown): CreditFailure {
+  const status = (error as { status?: number })?.status;
+  if (status === 409) return "reference-conflict";
+  if (status === 404) return "not-found";
+  // Timeouts, dropped connections and 5xx all leave it unknown whether the
+  // credit landed; resending the same reference is safe either way.
+  if (status === undefined || status === 408 || status >= 500) return "retry";
+  return "rejected";
 }
 
 export function formatNaira(amount: number, currency = "NGN") {

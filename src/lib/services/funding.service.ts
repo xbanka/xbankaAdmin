@@ -2,19 +2,25 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tansta
 import { toast } from "sonner";
 import {
   completeFundingIntent,
+  creditFundingDirectly,
   getFundingIntents,
+  lookupFundingCustomer,
   rejectFundingIntent,
   uploadFundingAttachment,
 } from "../actions/fundingActions";
 import { handleApiError } from "../errors/handleApiError";
 import type {
   CompleteFundingIntentPayload,
+  DirectCreditPayload,
+  DirectCreditResult,
   RejectFundingIntentPayload,
 } from "../types/funding-types";
 import {
   buildIntentParams,
   extractAttachmentUrl,
   extractIntentsPage,
+  extractLookupMatches,
+  isAccountNumber,
   isDuplicateResult,
   unwrapSettleResult,
   type FundingIntentQuery,
@@ -92,6 +98,43 @@ export function useRejectFundingIntent() {
       toast.success("Funding request rejected.");
     },
     onError: settleErrorHandler(queryClient),
+  });
+}
+
+export const FUNDING_LOOKUP_QUERY_KEY = ["funding-lookup"] as const;
+
+/**
+ * Who registered this sending account? Runs only for a full 10-digit number
+ * (the backend 422s on anything else). Customer details are not kept around
+ * after the modal closes (gcTime 0) and never retried automatically, so a
+ * failure shows straight away with an explicit Retry.
+ */
+export function useFundingLookup(accountNumber: string) {
+  const account = accountNumber.trim();
+
+  return useQuery({
+    queryKey: [...FUNDING_LOOKUP_QUERY_KEY, account],
+    enabled: isAccountNumber(account),
+    retry: false,
+    gcTime: 0,
+    queryFn: async () => extractLookupMatches((await lookupFundingCustomer({ accountNumber: account })).data),
+  });
+}
+
+/**
+ * Credits a wallet with no intent. Deliberately no toast and no
+ * handleApiError: the modal shows every failure inline, because each one
+ * (retry, edit the reference, redo the lookup) needs a different next step.
+ */
+export function useCreditFundingDirectly() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: DirectCreditPayload): Promise<DirectCreditResult> =>
+      unwrapSettleResult((await creditFundingDirectly(payload)).data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: FUNDING_INTENTS_QUERY_KEY });
+    },
   });
 }
 

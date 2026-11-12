@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Search } from "lucide-react";
+import { Plus, Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FilterTabs } from "@/components/ui/FilterTabs";
 import { StatusBadge, type StatusVariant } from "@/components/ui/status-badge";
@@ -14,6 +15,7 @@ import { usePermissions } from "@/hooks/usePermissions";
 import type { FundingIntent } from "@/lib/types/funding-types";
 import { CompleteIntentModal } from "./complete-intent-modal";
 import { RejectIntentModal } from "./reject-intent-modal";
+import { CreditDirectlyModal } from "./credit-directly-modal";
 
 const LIMIT = 10;
 // "All" maps to status=ALL; the backend defaults a missing status to PENDING,
@@ -37,6 +39,8 @@ export function FundingRequestsTab() {
   const [accountInput, setAccountInput] = useState("");
   const [page, setPage] = useState(1);
   const [action, setAction] = useState<Action>(null);
+  // Set while the "Credit directly" modal is open; `account` pre-fills step 1.
+  const [creditDirect, setCreditDirect] = useState<{ account: string } | null>(null);
 
   const debouncedAccount = useDebounce(accountInput, 400);
   const accountDigits = accountInput.trim();
@@ -55,6 +59,18 @@ export function FundingRequestsTab() {
   const showSettledColumns = !isPendingTab;
   const showActions = canSettle && (isPendingTab || status === "all");
   const isSettled = (item: FundingIntent) => item.status !== "PENDING";
+  // A full sender account with no pending request is the usual sign that the
+  // customer never tapped "I have sent the money": offer to credit directly.
+  // Only on tabs where a pending row would have shown, and not while the
+  // previous account's page is still on screen.
+  const showCreditNudge =
+    canSettle &&
+    isAccountNumber(debouncedAccount) &&
+    (isPendingTab || status === "all") &&
+    !isPending &&
+    !isFetching &&
+    !isError &&
+    data?.items.length === 0;
 
   const columns = [
     {
@@ -203,29 +219,59 @@ export function FundingRequestsTab() {
             setPage(1);
           }}
         />
-        <div className="w-full md:w-72">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              aria-label="Sender account number"
-              placeholder="Sender account number"
-              inputMode="numeric"
-              maxLength={10}
-              value={accountInput}
-              onChange={(e) => {
-                setAccountInput(e.target.value.replace(/\D/g, ""));
-                setPage(1);
-              }}
-              className="py-[10px] px-[12px] pl-10 w-full"
-            />
+        <div className="flex w-full flex-col gap-3 md:w-auto md:flex-row md:items-start">
+          <div className="w-full md:w-72">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                aria-label="Sender account number"
+                placeholder="Sender account number"
+                inputMode="numeric"
+                maxLength={10}
+                value={accountInput}
+                onChange={(e) => {
+                  setAccountInput(e.target.value.replace(/\D/g, ""));
+                  setPage(1);
+                }}
+                className="py-[10px] px-[12px] pl-10 w-full"
+              />
+            </div>
+            {showAccountHint && (
+              <p className="mt-1 text-xs text-secondary-text">
+                Enter all 10 digits to search ({accountDigits.length}/10)
+              </p>
+            )}
           </div>
-          {showAccountHint && (
-            <p className="mt-1 text-xs text-secondary-text">
-              Enter all 10 digits to search ({accountDigits.length}/10)
-            </p>
+          {canSettle && (
+            <Button
+              type="button"
+              className="h-[42px] shrink-0"
+              onClick={() => setCreditDirect({ account: "" })}
+            >
+              <Plus />
+              Credit directly
+            </Button>
           )}
         </div>
       </div>
+
+      {showCreditNudge && (
+        <div className="mb-4 flex flex-col gap-2 rounded-lg border border-border bg-[#F9FAFB] px-4 py-3 text-sm md:flex-row md:items-center md:justify-between">
+          <p className="text-text-primary">
+            No pending request from <span className="font-mono">{debouncedAccount}</span>. Did the money arrive
+            without the customer declaring it?
+          </p>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            className="shrink-0 text-[#111827]"
+            onClick={() => setCreditDirect({ account: debouncedAccount })}
+          >
+            Credit directly
+          </Button>
+        </div>
+      )}
 
       <DataTableLayout
         data={data?.items ?? []}
@@ -251,6 +297,17 @@ export function FundingRequestsTab() {
       )}
       {action?.kind === "reject" && (
         <RejectIntentModal intent={action.intent} onClose={() => setAction(null)} />
+      )}
+      {creditDirect && (
+        <CreditDirectlyModal
+          initialAccount={creditDirect.account}
+          onClose={() => setCreditDirect(null)}
+          // The customer did declare it: finish through the normal Confirm flow.
+          onOpenIntent={(intent) => {
+            setCreditDirect(null);
+            setAction({ kind: "complete", intent });
+          }}
+        />
       )}
     </>
   );

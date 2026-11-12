@@ -1,4 +1,4 @@
-import type { FundingIntent } from "../types/funding-types";
+import type { DirectCreditResult, FundingIntent, FundingLookupMatch } from "../types/funding-types";
 
 // Copied from the backend's sample for GET /funding/intents (2026-10-16).
 export const pendingIntent: FundingIntent = {
@@ -33,6 +33,38 @@ export const pendingIntent: FundingIntent = {
   overrideReason: null,
   rejectedBy: null,
   rejectReason: null,
+};
+
+// Shaped like the sample for GET /funding/lookup (funding-direct-credit-api).
+export const lookupMatch: FundingLookupMatch = {
+  fundingAccountId: "7c0c1d2e-5b4a-4c53-9d57-0f3f0f4a1b11",
+  bank: "Paycom (Opay)",
+  accountName: "OMOLADE OLUWASEGUN AKANBI",
+  customer: {
+    userId: "991fbf45-8c5a-4840-9f4f-8af81c586922",
+    xbId: "XB123",
+    email: "customer@example.com",
+    isActive: true,
+    name: "Omolade Akanbi",
+  },
+  wallet: { currency: "NGN" },
+};
+
+export const secondLookupMatch: FundingLookupMatch = {
+  ...lookupMatch,
+  fundingAccountId: "2a9f4c6e-7d10-4b7a-8c11-5e3d9a0b6f22",
+  bank: "Access Bank",
+  accountName: "OMOLADE O AKANBI",
+  customer: { ...lookupMatch.customer, userId: "u-2", xbId: "XB456", email: "other@example.com", name: "Omolade Akinbi" },
+};
+
+export const creditResult: DirectCreditResult = {
+  duplicate: false,
+  transactionId: "0d9a1b5e-3c42-4e8f-9a17-6b2f8c4d1e55",
+  reference: "BANKFUND-100004261006204500123456",
+  amount: 2000,
+  balance: 12000,
+  creditedAt: "2026-11-12T10:15:30.000Z",
 };
 
 export const intentsResponse = {

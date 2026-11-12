@@ -43,11 +43,28 @@ import {
 } from "@/lib/utils/rates";
 import { Checkbox } from "../ui/checkbox";
 import { AssetIcon } from "./asset-icon";
+import { BillMarginsTab } from "./bill-margins/bill-margins-tab";
+import { useProfile } from "@/lib/services/profile.service";
+import { isSuperAdminRole } from "@/lib/utils/two-factor";
+
+type RateTab = "schedule" | "history" | "bill-margins";
+
+const TAB_LABELS: Record<RateTab, string> = {
+  schedule: "Spread Schedule",
+  history: "Spread History",
+  "bill-margins": "Bill Margins",
+};
 
 export default function RateManagement() {
-  const [activeTab, setActiveTab] = useState<"schedule" | "history">(
-    "schedule",
-  );
+  const [activeTab, setActiveTab] = useState<RateTab>("schedule");
+  // Bill margins are Super Admin only: the backend answers 403 to any other
+  // role, so the tab is hidden rather than shown and failing.
+  const { data: profile } = useProfile();
+  const canViewBillMargins = isSuperAdminRole(profile?.data?.role?.name);
+  const tabs: RateTab[] = canViewBillMargins
+    ? ["schedule", "history", "bill-margins"]
+    : ["schedule", "history"];
+  const isBillMarginsTab = canViewBillMargins && activeTab === "bill-margins";
   const [searchQuery, setSearchQuery] = useState("");
   const [editRow, setEditRow] = useState<CryptoCurrencyTypes | null>(null);
   const [view, setView] = useState<"list" | "wizard">("list");
@@ -450,14 +467,16 @@ export default function RateManagement() {
 
           {/* Content */}
           {view === "list" ? (
-            isScheduleEmpty ? (
+            // With no schedule the crypto tabs show only the empty state, but a
+            // Super Admin still needs the tab bar to reach Bill Margins.
+            isScheduleEmpty && !canViewBillMargins ? (
               <EmptySpreadSchedule onClick={() => setView("wizard")} />
             ) : (
               <main className="flex-1 px-8">
                 {/* Tabs */}
                 <div className="flex justify-between items-center border-b border-card-border-secondary w-full mb-8">
                   <div className="flex">
-                    {(["schedule", "history"] as const).map((tab) => (
+                    {tabs.map((tab) => (
                       <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
@@ -468,13 +487,11 @@ export default function RateManagement() {
                             : "text-text-secondary border-transparent hover:text-text-primary",
                         )}
                       >
-                        {tab === "schedule"
-                          ? "Spread Schedule"
-                          : "Spread History"}
+                        {TAB_LABELS[tab]}
                       </button>
                     ))}
                   </div>
-                  {canEditSpread && (
+                  {canEditSpread && !isBillMarginsTab && !isScheduleEmpty && (
                     <Button onClick={() => setView("wizard")}>
                       <Edit />
                       Edit Spread
@@ -482,6 +499,12 @@ export default function RateManagement() {
                   )}
                 </div>
 
+                {isBillMarginsTab ? (
+                  <BillMarginsTab />
+                ) : isScheduleEmpty ? (
+                  <EmptySpreadSchedule onClick={() => setView("wizard")} />
+                ) : (
+                <>
                 {/* Toolbar */}
                 <div className="grid grid-cols-2 gap-2.5 mb-6 md:flex md:items-center">
                   <div className="relative col-span-2 w-full md:w-[200px]">
@@ -547,6 +570,8 @@ export default function RateManagement() {
                       ratesLogError?.message || "Failed to load spread history."
                     }
                   />
+                )}
+                </>
                 )}
               </main>
             )
