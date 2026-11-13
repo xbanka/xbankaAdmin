@@ -90,6 +90,7 @@ describe("CreditDirectlyModal: finding the customer", () => {
     expect(screen.getByLabelText("Sender account number")).toHaveValue(ACCOUNT);
     expect(screen.getByRole("radio", { name: /OMOLADE OLUWASEGUN AKANBI/ })).toBeChecked();
     expect(screen.getByText("Omolade Akanbi")).toBeInTheDocument();
+    expect(screen.getByText("Paycom (Opay)")).toBeInTheDocument();
     expect(continueButton()).toBeEnabled();
   });
 
@@ -117,16 +118,42 @@ describe("CreditDirectlyModal: finding the customer", () => {
     renderModal();
 
     expect(screen.getByText(/Account suspended/)).toBeInTheDocument();
-    expect(screen.getByRole("radio", { name: /OMOLADE OLUWASEGUN AKANBI/ })).toBeDisabled();
+    const card = screen.getByRole("radio", { name: /OMOLADE OLUWASEGUN AKANBI/ });
+    expect(card).toBeDisabled();
+    // A lone match is auto-selected, but one that can't be credited must not look chosen.
+    expect(card).not.toBeChecked();
     expect(continueButton()).toBeDisabled();
   });
 
-  it("blocks a customer with no NGN wallet", () => {
+  it("lets a customer with no NGN wallet through, with a note: the credit creates the wallet", async () => {
+    const user = userEvent.setup();
     useFundingLookup.mockReturnValue(lookupResult([{ ...lookupMatch, wallet: null }]));
     renderModal();
 
-    expect(screen.getByText(/No NGN wallet yet/)).toBeInTheDocument();
-    expect(continueButton()).toBeDisabled();
+    expect(screen.getByText(/No NGN wallet yet\. One will be created when you credit/)).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: /OMOLADE OLUWASEGUN AKANBI/ })).toBeChecked();
+    expect(continueButton()).toBeEnabled();
+
+    // The note is repeated where the money is confirmed.
+    await toReview(user);
+    expect(screen.getByText(/No NGN wallet yet\. One will be created when you credit/)).toBeInTheDocument();
+  });
+
+  it("does not show the no-wallet note for a customer who has one", () => {
+    renderModal();
+    expect(screen.queryByText(/No NGN wallet yet/)).not.toBeInTheDocument();
+  });
+
+  it("falls back to the email when the backend sends no customer name", async () => {
+    const user = userEvent.setup();
+    useFundingLookup.mockReturnValue(
+      lookupResult([{ ...lookupMatch, customer: { ...lookupMatch.customer, name: null } }]),
+    );
+    renderModal();
+
+    expect(screen.getByText("customer@example.com", { selector: "p.text-sm" })).toBeInTheDocument();
+    await toReview(user);
+    expect(screen.getAllByText(/customer@example\.com/).length).toBeGreaterThan(0);
   });
 
   it("makes staff pick when several customers registered the number", async () => {
@@ -241,6 +268,7 @@ describe("CreditDirectlyModal: review and credit", () => {
     await toReview(user);
 
     expect(screen.getByText("Omolade Akanbi")).toBeInTheDocument();
+    expect(screen.getByText(/Paycom \(Opay\) · 7054178290/)).toBeInTheDocument();
     expect(screen.getByText(/Stored as BANKFUND-100004261006204500123456/)).toBeInTheDocument();
     expect(screen.getByText("ops@xbanka.com")).toBeInTheDocument();
 
@@ -290,6 +318,23 @@ describe("CreditDirectlyModal: review and credit", () => {
     expect(await screen.findByText("Already credited")).toBeInTheDocument();
     expect(screen.getByText(/No second credit was made/)).toBeInTheDocument();
     expect(screen.queryByText("Wallet credited")).not.toBeInTheDocument();
+  });
+
+  it("shows no balance row, and never NaN, when a duplicate result has no balance", async () => {
+    const user = userEvent.setup();
+    renderModal();
+    await toReview(user);
+    await user.click(screen.getByRole("button", { name: "Credit ₦2,000" }));
+
+    // The backend's duplicate response omits `balance`.
+    const { balance, ...withoutBalance } = creditResult;
+    void balance;
+    mutate.mock.calls[0][1].onSuccess({ ...withoutBalance, duplicate: true });
+
+    expect(await screen.findByText("Already credited")).toBeInTheDocument();
+    expect(screen.queryByText("New balance")).not.toBeInTheDocument();
+    expect(screen.queryByText(/NaN/)).not.toBeInTheDocument();
+    expect(screen.getByText(creditResult.transactionId)).toBeInTheDocument();
   });
 
   it("offers a safe retry with the same payload after a network error", async () => {
