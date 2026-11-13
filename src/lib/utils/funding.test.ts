@@ -17,6 +17,8 @@ import {
   formatNaira,
   isAccountNumber,
   isDuplicateResult,
+  pendingIntentsToReview,
+  readableErrorMessage,
   statusLabel,
   storedReference,
   unwrapSettleResult,
@@ -27,7 +29,7 @@ import {
   directCreditSchema,
   rejectIntentSchema,
 } from "../schema/funding-intent.schema";
-import { intentsResponse, lookupMatch } from "./funding.fixtures";
+import { intentsResponse, lookupMatch, pendingIntent } from "./funding.fixtures";
 
 const toQuery = (params: object) => axios.getUri({ url: "/x", params }).split("?")[1] ?? "";
 
@@ -416,6 +418,69 @@ describe("classifyCreditError", () => {
   it("shows other refusals as-is", () => {
     expect(classifyCreditError({ status: 403 })).toBe("rejected");
     expect(classifyCreditError({ status: 400 })).toBe("rejected");
+  });
+});
+
+describe("readableErrorMessage", () => {
+  it("pulls the sentence out of the core backend's JSON error text", () => {
+    const raw = JSON.stringify({
+      message: "This customer account is suspended",
+      details: "",
+      errorGroup: "MICROSERVICE_ERROR",
+    });
+    expect(readableErrorMessage(raw)).toBe("This customer account is suspended");
+  });
+
+  it("joins a list of validation messages", () => {
+    const raw = JSON.stringify({ message: ["amount must be a number", "reference is too short"] });
+    expect(readableErrorMessage(raw)).toBe("amount must be a number. reference is too short");
+  });
+
+  it("falls back to `detail` when there is no message", () => {
+    expect(readableErrorMessage(JSON.stringify({ detail: "Funding account not found" }))).toBe(
+      "Funding account not found",
+    );
+  });
+
+  it("leaves ordinary text, empty values and non-JSON braces unchanged", () => {
+    expect(readableErrorMessage("Network error. Please check your internet connection.")).toBe(
+      "Network error. Please check your internet connection.",
+    );
+    expect(readableErrorMessage(undefined)).toBe("");
+    expect(readableErrorMessage(null)).toBe("");
+    expect(readableErrorMessage("{not json")).toBe("{not json");
+  });
+
+  it("returns the original text when the JSON has no usable message", () => {
+    expect(readableErrorMessage('{"errorGroup":"X"}')).toBe('{"errorGroup":"X"}');
+  });
+});
+
+describe("pendingIntentsToReview", () => {
+  const owner = { ...pendingIntent, customer: { ...pendingIntent.customer, userId: lookupMatch.customer.userId } };
+  const other = { ...pendingIntent, customer: { ...pendingIntent.customer, userId: "someone-else" } };
+  const second = { ...lookupMatch, customer: { ...lookupMatch.customer, userId: "someone-else" } };
+
+  it("keeps only the chosen customer's requests", () => {
+    expect(pendingIntentsToReview([owner, other], [lookupMatch, second], lookupMatch)).toEqual([owner]);
+    expect(pendingIntentsToReview([owner, other], [lookupMatch, second], second)).toEqual([other]);
+  });
+
+  it("keeps every candidate's requests until one is chosen", () => {
+    expect(pendingIntentsToReview([owner, other], [lookupMatch, second])).toEqual([owner, other]);
+  });
+
+  it("drops requests from customers who are not candidates", () => {
+    expect(pendingIntentsToReview([other], [lookupMatch], lookupMatch)).toEqual([]);
+  });
+
+  it("shows all requests when no customer matched, so staff can still see them", () => {
+    expect(pendingIntentsToReview([owner, other], [])).toEqual([owner, other]);
+  });
+
+  it("keeps a request with no customer id, since it can't be ruled out", () => {
+    const unknown = { ...pendingIntent, customer: undefined } as unknown as typeof pendingIntent;
+    expect(pendingIntentsToReview([unknown], [lookupMatch], lookupMatch)).toEqual([unknown]);
   });
 });
 
