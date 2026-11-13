@@ -7,7 +7,13 @@ import { Label } from "@/components/ui/label";
 import { formatDate } from "@/lib/formatDate";
 import { useFundingLookup, useGetFundingIntents } from "@/lib/services/funding.service";
 import type { FundingIntent, FundingLookupMatch } from "@/lib/types/funding-types";
-import { formatNaira, getMatchBlocker, isAccountNumber } from "@/lib/utils/funding";
+import {
+  formatNaira,
+  getMatchBlocker,
+  isAccountNumber,
+  pendingIntentsToReview,
+  readableErrorMessage,
+} from "@/lib/utils/funding";
 import { LookupMatchCard } from "./lookup-match-card";
 
 const NOTICE = "rounded-lg border px-4 py-3 text-sm";
@@ -41,6 +47,8 @@ export function FindSenderStep({
     accountNumber: account,
     limit: 5,
     enabled: ready,
+    // A refocus refetch would flash the "looking" state over a decision in progress.
+    refetchOnWindowFocus: false,
   });
 
   // The intents list keeps the previous page while a new one loads, so a
@@ -50,7 +58,6 @@ export function FindSenderStep({
   const lookupLoading = lookup.isPending || lookup.isFetching;
   const checking = ready && (lookupLoading || intentsLoading);
 
-  const pendingIntents = ready && !intentsLoading && !intents.isError ? (intents.data?.items ?? []) : [];
   const matches = ready && !lookupLoading && !lookup.isError ? (lookup.data ?? []) : [];
 
   // A lone match is the only candidate, so it is selected for them.
@@ -58,6 +65,11 @@ export function FindSenderStep({
     matches.length === 1
       ? matches[0]
       : matches.find((m) => m.fundingAccountId === selectedId);
+
+  // The check is by account number, which two customers can share, so only
+  // requests belonging to the customer in play stop the credit.
+  const pendingForAccount = ready && !intentsLoading && !intents.isError ? (intents.data?.items ?? []) : [];
+  const pendingIntents = pendingIntentsToReview(pendingForAccount, matches, selected);
   const canContinue =
     ready &&
     !checking &&
@@ -98,7 +110,7 @@ export function FindSenderStep({
 
       {ready && !lookupLoading && lookup.isError && (
         <div className={`${NOTICE} border-error-border bg-error-light text-error-text`} role="alert">
-          <p>{lookup.error?.message || "Couldn't look up that account."}</p>
+          <p>{readableErrorMessage(lookup.error?.message) || "Couldn't look up that account."}</p>
           <button type="button" className="mt-1 underline cursor-pointer" onClick={() => lookup.refetch()}>
             Try again
           </button>

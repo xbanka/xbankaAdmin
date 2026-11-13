@@ -1,6 +1,7 @@
 import type {
   CompleteFundingIntentPayload,
   DirectCreditPayload,
+  FundingIntent,
   FundingIntentStatus,
   FundingIntentsPage,
   FundingLookupMatch,
@@ -223,7 +224,55 @@ export function buildDirectCreditPayload(
   return payload;
 }
 
-export type CreditFailure = "retry" | "reference-conflict" | "not-found" | "rejected";
+/**
+ * The ERP route is a pass-through: on an error it puts the core backend's raw
+ * response text in `detail`, so the message that reaches the UI can be a JSON
+ * string like `{"message":"...","details":"","errorGroup":"..."}`. Pull the
+ * human sentence out of it. `message` may also be a list (validation errors).
+ * Anything that isn't that JSON comes back unchanged.
+ */
+export function readableErrorMessage(message: string | null | undefined): string {
+  const text = (message ?? "").trim();
+  if (!text.startsWith("{")) return text;
+
+  try {
+    const parsed: unknown = JSON.parse(text);
+    const inner = (parsed as { message?: unknown; detail?: unknown } | null) ?? {};
+    const found = inner.message ?? inner.detail;
+    if (typeof found === "string" && found.trim()) return found.trim();
+    if (Array.isArray(found)) {
+      const parts = found.filter((p): p is string => typeof p === "string" && p.trim() !== "");
+      if (parts.length > 0) return parts.join(". ");
+    }
+  } catch {
+    // Not JSON after all: show it as it came.
+  }
+  return text;
+}
+
+/**
+ * Pending requests that should stop a direct credit. The pending-request
+ * lookup is by sender account number, which two customers can share at
+ * different banks, so a request only blocks the customer it belongs to:
+ * - a customer is chosen: only their pending requests
+ * - several candidates and none chosen yet: any of theirs
+ * - no matching customer at all: every request, so staff can still see it
+ * A request with no customer id attached is kept, since it can't be ruled out.
+ */
+export function pendingIntentsToReview(
+  intents: FundingIntent[],
+  matches: FundingLookupMatch[],
+  selected?: FundingLookupMatch,
+): FundingIntent[] {
+  if (matches.length === 0) return intents;
+
+  const candidateIds = new Set(
+    (selected ? [selected] : matches).map((m) => m.customer?.userId),
+  );
+  return intents.filter((i) => !i.customer?.userId || candidateIds.has(i.customer.userId));
+}
+
+export type CreditFailure ="retry" | "reference-conflict" | "not-found" | "rejected";
 
 /**
  * How the credit modal reacts to a failed request. Network trouble and 502

@@ -25,6 +25,7 @@ import {
   customerDisplayName,
   formatNaira,
   hasNoWalletYet,
+  readableErrorMessage,
   storedReference,
   type CreditFailure,
 } from "@/lib/utils/funding";
@@ -60,14 +61,22 @@ const STEP_COPY: Record<Step, { title: string; subtitle: string }> = {
   done: { title: "Wallet Credited", subtitle: "" },
 };
 
-const FAILURE_COPY: Record<CreditFailure, string> = {
-  retry:
-    "That didn't complete. Retrying is safe: the bank reference prevents a double credit.",
+const FAILURE_COPY: Record<Exclude<CreditFailure, "retry">, string> = {
   "reference-conflict":
     "This bank reference was already used with a different amount or account. Re-check the reference. Don't retry.",
   "not-found": "That funding account could not be found. Start over and look it up again.",
   rejected: "The credit was refused.",
 };
+
+/**
+ * A timeout, dropped connection or 5xx leaves it unknown whether the credit
+ * landed. Resending the *same* reference and amount is safe (a repeat comes
+ * back as "already credited"), but changing either would make a second,
+ * separate credit if the first went through. So the only way forward offered
+ * is Retry, and closing comes with a way to check first.
+ */
+const ambiguousCopy = (reference: string) =>
+  `That didn't finish, so the credit may already have gone through. Retry with the same details: the bank reference stops a double credit. Don't change the amount or reference. If you close this instead, check the customer's transactions for ${storedReference(reference)} before crediting again.`;
 
 interface Failure {
   kind: CreditFailure;
@@ -174,16 +183,19 @@ function CreditDirectlyFlow({
         onError: (err) =>
           setFailure({
             kind: classifyCreditError(err),
-            message: (err as { message?: string })?.message,
+            message: readableErrorMessage((err as { message?: string })?.message),
           }),
       },
     );
   };
 
+  // After an uncertain failure, going back to edit could turn a safe retry
+  // into a second credit, so back is withheld until it is resolved.
+  const credited = failure?.kind === "retry";
   const onBack =
     step === "details" && !isPending
       ? () => goTo("find")
-      : step === "review" && !isPending
+      : step === "review" && !isPending && !credited
         ? () => goTo("details")
         : undefined;
 
@@ -310,7 +322,11 @@ function CreditDirectlyFlow({
               role="alert"
               className="mt-4 rounded-lg border border-error-border bg-error-light px-3 py-2 text-sm text-error-text"
             >
-              <p>{FAILURE_COPY[failure.kind]}</p>
+              <p>
+                {failure.kind === "retry"
+                  ? ambiguousCopy(values.bankReference)
+                  : FAILURE_COPY[failure.kind]}
+              </p>
               {failure.message && failure.kind !== "retry" && (
                 <p className="mt-1 text-xs">{failure.message}</p>
               )}
@@ -318,14 +334,16 @@ function CreditDirectlyFlow({
           )}
 
           <div className="mt-6 flex gap-3">
-            <Button
-              variant="outline"
-              className="flex-1 text-[#111827]"
-              onClick={() => goTo("details")}
-              disabled={isPending}
-            >
-              Edit
-            </Button>
+            {!credited && (
+              <Button
+                variant="outline"
+                className="flex-1 text-[#111827]"
+                onClick={() => goTo("details")}
+                disabled={isPending}
+              >
+                Edit
+              </Button>
+            )}
             {failure?.kind === "reference-conflict" ? (
               <Button className="flex-1" onClick={() => goTo("details")}>
                 Edit reference
