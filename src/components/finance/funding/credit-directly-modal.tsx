@@ -20,8 +20,11 @@ import {
   MAX_PROOF_FILES,
   buildDirectCreditPayload,
   classifyCreditError,
+  NO_WALLET_NOTE,
   cleanBankReference,
+  customerDisplayName,
   formatNaira,
+  hasNoWalletYet,
   storedReference,
   type CreditFailure,
 } from "@/lib/utils/funding";
@@ -215,14 +218,17 @@ function CreditDirectlyFlow({
             <p className="text-[13px] text-secondary-text max-w-[340px]">
               {already
                 ? "This bank reference was already credited with these details. No second credit was made."
-                : `${match?.customer.name ?? "The customer"} has been notified in the app.`}
+                : `${match ? customerDisplayName(match.customer) : "The customer"} has been notified in the app.`}
             </p>
           </div>
 
           <div className="divide-y divide-border">
-            <ReviewRow label="Customer" value={match?.customer.name} />
+            <ReviewRow label="Customer" value={match ? customerDisplayName(match.customer) : undefined} />
             <ReviewRow label="Amount credited" value={formatNaira(result.amount)} />
-            <ReviewRow label="New balance" value={formatNaira(result.balance)} />
+            {/* An "Already credited" result carries no balance; don't print NaN. */}
+            {typeof result.balance === "number" && (
+              <ReviewRow label="New balance" value={formatNaira(result.balance)} />
+            )}
             <ReviewRow
               label="Transaction ID"
               value={
@@ -264,7 +270,7 @@ function CreditDirectlyFlow({
               label="Customer"
               value={
                 <>
-                  {match.customer.name}
+                  {customerDisplayName(match.customer)}
                   <span className="block text-xs font-normal text-secondary-text">
                     {[match.customer.xbId, match.customer.email].filter(Boolean).join(" · ")}
                   </span>
@@ -273,7 +279,7 @@ function CreditDirectlyFlow({
             />
             <ReviewRow
               label="Sender account"
-              value={`${match.bank} · ${account} (${match.accountName})`}
+              value={`${match.bankName} · ${account} (${match.accountName})`}
             />
             <ReviewRow label="Amount to credit" value={<span className="text-[#0D9488]">{amount}</span>} />
             <ReviewRow
@@ -295,6 +301,9 @@ function CreditDirectlyFlow({
             <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
             This credits the customer&apos;s wallet immediately and can&apos;t be undone from here.
           </div>
+          {hasNoWalletYet(match) && (
+            <p className="mt-2 text-xs text-secondary-text">{NO_WALLET_NOTE}</p>
+          )}
 
           {failure && (
             <div
@@ -355,12 +364,12 @@ function CreditDirectlyFlow({
           >
             <div className="flex items-start justify-between gap-3 rounded-lg border border-border bg-[#F9FAFB] px-4 py-3">
               <div className="min-w-0">
-                <p className="text-sm font-medium text-text-primary">{match.customer.name}</p>
+                <p className="text-sm font-medium text-text-primary">{customerDisplayName(match.customer)}</p>
                 <p className="text-xs text-secondary-text break-all">
                   {[match.customer.xbId, match.customer.email].filter(Boolean).join(" · ")}
                 </p>
                 <p className="mt-1 text-xs text-secondary-text">
-                  {match.bank} · {account} ·{" "}
+                  {match.bankName} · {account} ·{" "}
                   <span className="uppercase text-text-primary">{match.accountName}</span>
                 </p>
               </div>

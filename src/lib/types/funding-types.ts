@@ -95,17 +95,27 @@ export interface SettleFundingIntentResult {
 export interface FundingLookupMatch {
   /** Goes into the credit request. */
   fundingAccountId: string;
-  bank: string;
+  /**
+   * The real response sends `bankName` (the API doc's sample says `bank`);
+   * extractLookupMatches accepts either and fills this in.
+   */
+  bankName: string;
+  bankCode?: string;
+  accountNumber?: string;
   accountName: string;
   customer: {
     userId: string;
     xbId: string;
     email: string;
     isActive: boolean;
-    name: string;
+    /** null when the customer's profile has no first or last name. */
+    name: string | null;
   };
-  /** null when the customer has no NGN wallet yet. */
-  wallet: { currency: string } | null;
+  /**
+   * null when the customer has no NGN wallet yet. Not an error: the credit
+   * creates the wallet.
+   */
+  wallet: { id?: string; balance?: number; currency: string } | null;
 }
 
 /** Body of POST /funding/credit. Optional fields are omitted, never null. */
@@ -125,6 +135,7 @@ export interface DirectCreditResult {
   transactionId: string;
   reference: string;
   amount: number;
-  balance: number;
+  /** Absent on a `duplicate: true` result: the backend doesn't resend it. */
+  balance?: number;
   creditedAt: string;
 }
