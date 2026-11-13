@@ -50,6 +50,12 @@ const lookupResult = (data: unknown) => ({
 
 const suspended = { ...lookupMatch, customer: { ...lookupMatch.customer, isActive: false } };
 
+// pendingIntent belongs to another customer; this one belongs to lookupMatch's.
+const theirPendingIntent = {
+  ...pendingIntent,
+  customer: { ...pendingIntent.customer, userId: lookupMatch.customer.userId },
+};
+
 function renderModal(props: Partial<React.ComponentProps<typeof CreditDirectlyModal>> = {}) {
   const onClose = vi.fn();
   const onOpenIntent = vi.fn();
@@ -171,11 +177,11 @@ describe("CreditDirectlyModal: finding the customer", () => {
     expect(screen.getByText("Omolade Akinbi")).toBeInTheDocument();
   });
 
-  it("will not continue past a pending request, and hands it to the Confirm flow", async () => {
+  it("will not continue past the customer's pending request, and hands it to the Confirm flow", async () => {
     const user = userEvent.setup();
     useGetFundingIntents.mockReturnValue({
       ...emptyIntents,
-      data: { items: [pendingIntent], meta: {} },
+      data: { items: [theirPendingIntent], meta: {} },
     });
     const { onOpenIntent } = renderModal();
 
@@ -183,7 +189,54 @@ describe("CreditDirectlyModal: finding the customer", () => {
     expect(continueButton()).toBeDisabled();
 
     await user.click(screen.getByRole("button", { name: "Review request" }));
-    expect(onOpenIntent).toHaveBeenCalledWith(pendingIntent);
+    expect(onOpenIntent).toHaveBeenCalledWith(theirPendingIntent);
+  });
+
+  it("is not blocked by a pending request that belongs to a different customer", () => {
+    // Two customers can register the same number at different banks; the
+    // account-number check returns both customers' requests.
+    useGetFundingIntents.mockReturnValue({
+      ...emptyIntents,
+      data: { items: [pendingIntent], meta: {} },
+    });
+    renderModal();
+
+    expect(screen.queryByText(/already has a pending funding request/)).not.toBeInTheDocument();
+    expect(continueButton()).toBeEnabled();
+  });
+
+  it("only blocks the customer whose request it is when several share the number", async () => {
+    const user = userEvent.setup();
+    useFundingLookup.mockReturnValue(lookupResult([lookupMatch, secondLookupMatch]));
+    // Pending request belongs to the SECOND customer.
+    useGetFundingIntents.mockReturnValue({
+      ...emptyIntents,
+      data: {
+        items: [
+          { ...pendingIntent, customer: { ...pendingIntent.customer, userId: secondLookupMatch.customer.userId } },
+        ],
+        meta: {},
+      },
+    });
+    renderModal();
+
+    // Nothing chosen yet: a candidate has a pending request, so it is shown and blocks.
+    expect(screen.getByText(/already has a pending funding request/)).toBeInTheDocument();
+
+    // Choosing the customer with no pending request clears it.
+    await user.click(screen.getByRole("radio", { name: /OMOLADE OLUWASEGUN AKANBI/ }));
+    expect(screen.queryByText(/already has a pending funding request/)).not.toBeInTheDocument();
+    expect(continueButton()).toBeEnabled();
+
+    // Choosing the customer who has one blocks again.
+    await user.click(screen.getByRole("radio", { name: /OMOLADE O AKANBI/ }));
+    expect(screen.getByText(/already has a pending funding request/)).toBeInTheDocument();
+    expect(continueButton()).toBeDisabled();
+  });
+
+  it("does not refetch on window focus, which would blank the customer card mid-decision", () => {
+    renderModal();
+    expect(useGetFundingIntents.mock.calls.at(-1)![0]).toMatchObject({ refetchOnWindowFocus: false });
   });
 
   it("does not trust the previous account's pending-request page while a new one loads", () => {
@@ -206,6 +259,18 @@ describe("CreditDirectlyModal: finding the customer", () => {
 
     expect(screen.getByText(/Couldn.t check for a pending funding request/)).toBeInTheDocument();
     expect(continueButton()).toBeDisabled();
+  });
+
+  it("shows the core's sentence, not its raw JSON, for a lookup failure", () => {
+    useFundingLookup.mockReturnValue({
+      ...lookupResult(undefined),
+      isError: true,
+      error: { message: JSON.stringify({ message: "accountNumber must be exactly 10 digits", errorGroup: "HTTP_ERROR" }) },
+    });
+    renderModal();
+
+    expect(screen.getByText("accountNumber must be exactly 10 digits")).toBeInTheDocument();
+    expect(screen.queryByText(/errorGroup/)).not.toBeInTheDocument();
   });
 
   it("shows a lookup failure with a way to retry", async () => {
@@ -345,11 +410,62 @@ describe("CreditDirectlyModal: review and credit", () => {
 
     mutate.mock.calls[0][1].onError({ status: 503, message: "Network error" });
 
-    expect(await screen.findByText(/Retrying is safe/)).toBeInTheDocument();
+    expect(await screen.findByText(/may already have gone through/)).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Retry credit" }));
 
     expect(mutate).toHaveBeenCalledTimes(2);
     expect(mutate.mock.calls[1][0]).toEqual(mutate.mock.calls[0][0]);
+  });
+
+  it("after an uncertain failure, withholds Edit and Back so the reference can't be changed", async () => {
+    const user = userEvent.setup();
+    renderModal();
+    await toReview(user);
+    expect(screen.getByRole("button", { name: "Edit" })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Credit ₦2,000" }));
+    mutate.mock.calls[0][1].onError({ status: 408, message: "Network timeout" });
+
+    await screen.findByText(/may already have gone through/);
+    expect(screen.queryByRole("button", { name: "Edit" })).not.toBeInTheDocument();
+    // The header's back arrow is the only button rendered before the close X.
+    expect(document.querySelector("button svg.lucide-chevron-left")).toBeNull();
+    // And staff are told how to check before crediting again.
+    expect(screen.getByText(/check the customer's transactions for BANKFUND-100004261006204500123456/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Retry credit" })).toBeEnabled();
+  });
+
+  it("still lets staff edit after a failure that is definitely not a credit", async () => {
+    const user = userEvent.setup();
+    renderModal();
+    await toReview(user);
+    await user.click(screen.getByRole("button", { name: "Credit ₦2,000" }));
+
+    mutate.mock.calls[0][1].onError({ status: 403, message: "Customer account is suspended" });
+
+    await screen.findByText("Customer account is suspended");
+    expect(screen.getByRole("button", { name: "Edit" })).toBeInTheDocument();
+  });
+
+  it("shows the core's sentence, not its raw JSON, for a refused credit", async () => {
+    const user = userEvent.setup();
+    renderModal();
+    await toReview(user);
+    await user.click(screen.getByRole("button", { name: "Credit ₦2,000" }));
+
+    mutate.mock.calls[0][1].onError({
+      status: 409,
+      message: JSON.stringify({
+        message: "Reference 100004 was already used for a different credit (500 NGN)",
+        details: "",
+        errorGroup: "MICROSERVICE_ERROR",
+      }),
+    });
+
+    expect(
+      await screen.findByText("Reference 100004 was already used for a different credit (500 NGN)"),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/errorGroup/)).not.toBeInTheDocument();
   });
 
   it("on a 409, explains and sends staff back to fix the reference instead of retrying", async () => {

@@ -30,8 +30,9 @@ export const FUNDING_INTENTS_QUERY_KEY = ["funding-intents"] as const;
 
 export function useGetFundingIntents({
   enabled = true,
+  refetchOnWindowFocus,
   ...query
-}: FundingIntentQuery & { enabled?: boolean } = {}) {
+}: FundingIntentQuery & { enabled?: boolean; refetchOnWindowFocus?: boolean } = {}) {
   const page = query.page ?? 1;
   const limit = query.limit ?? 10;
   // Key on the params actually sent, so typing digits 1-9 of an account
@@ -41,6 +42,8 @@ export function useGetFundingIntents({
   return useQuery({
     queryKey: [...FUNDING_INTENTS_QUERY_KEY, params],
     enabled,
+    // undefined keeps React Query's default (refetch); callers can opt out.
+    refetchOnWindowFocus,
     placeholderData: keepPreviousData,
     queryFn: async () => {
       const response = await getFundingIntents({ ...query, page, limit });
@@ -117,6 +120,9 @@ export function useFundingLookup(accountNumber: string) {
     enabled: isAccountNumber(account),
     retry: false,
     gcTime: 0,
+    // A refocus refetch would blank the customer card mid-decision, and
+    // nothing here changes while staff look at another window.
+    refetchOnWindowFocus: false,
     queryFn: async () => extractLookupMatches((await lookupFundingCustomer({ accountNumber: account })).data),
   });
 }
