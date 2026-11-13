@@ -142,32 +142,50 @@ export const MAX_PROOF_FILES = 5;
 
 /**
  * GET /funding/lookup answers with an array. Accept it bare or wrapped in
- * `{ data }` like the other routes, and fall back to no matches so a
- * malformed body can't crash the step.
+ * `{ data }` like the other routes (the real response is wrapped), and fall
+ * back to no matches so a malformed body can't crash the step.
+ *
+ * The bank's name arrives as `bankName` (confirmed against a real response);
+ * the API doc's sample calls it `bank`, so either is accepted.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function extractLookupMatches(body: any): FundingLookupMatch[] {
   const list = Array.isArray(body) ? body : body?.data;
-  return Array.isArray(list) ? list : [];
+  if (!Array.isArray(list)) return [];
+  return list.map((raw) => ({ ...raw, bankName: raw.bankName ?? raw.bank ?? "" }));
 }
 
-export type MatchBlocker = "suspended" | "no-wallet";
+export type MatchBlocker = "suspended";
 
 /**
- * Why a matched customer can't be credited, or null when they can. A
- * suspended account is refused by the backend (403); no NGN wallet means
- * there is nothing to credit, so both are blocked up front.
+ * Why a matched customer can't be credited, or null when they can. Only a
+ * suspended account is refused (the backend answers 403).
+ *
+ * A missing NGN wallet is NOT a blocker: the core backend creates the wallet
+ * as part of the credit (it upserts it), and the wallet only ever appears
+ * once a customer first deposits, requests a virtual account, and so on.
+ * See hasNoWalletYet.
  */
 export function getMatchBlocker(match: FundingLookupMatch): MatchBlocker | null {
-  if (!match.customer?.isActive) return "suspended";
-  if (!match.wallet) return "no-wallet";
-  return null;
+  return match.customer?.isActive ? null : "suspended";
 }
 
 export const MATCH_BLOCKER_MESSAGE: Record<MatchBlocker, string> = {
   suspended: "Account suspended. It cannot be credited.",
-  "no-wallet": "No NGN wallet yet. It cannot be credited.",
 };
+
+/** True when the customer has no NGN wallet yet; crediting will create it. */
+export const hasNoWalletYet = (match: FundingLookupMatch) => !match.wallet;
+
+export const NO_WALLET_NOTE = "No NGN wallet yet. One will be created when you credit.";
+
+/**
+ * The core backend sends `customer.name` as null when the profile has no
+ * first or last name, so fall back to something staff can still recognise.
+ */
+export function customerDisplayName(customer: { name?: string | null; email?: string | null }) {
+  return customer.name?.trim() || customer.email || "Unnamed customer";
+}
 
 /** The reference the core backend stores: it trims and uppercases, then prefixes. */
 export const storedReference = (reference: string) =>

@@ -35,10 +35,14 @@ export const pendingIntent: FundingIntent = {
   rejectReason: null,
 };
 
-// Shaped like the sample for GET /funding/lookup (funding-direct-credit-api).
+// Shaped like a real GET /funding/lookup item (checked against staging), which
+// differs from the API doc's sample: `bankName`, not `bank`, and the wallet
+// carries its id and balance.
 export const lookupMatch: FundingLookupMatch = {
   fundingAccountId: "7c0c1d2e-5b4a-4c53-9d57-0f3f0f4a1b11",
-  bank: "Paycom (Opay)",
+  bankName: "Paycom (Opay)",
+  bankCode: "305",
+  accountNumber: "7054178290",
   accountName: "OMOLADE OLUWASEGUN AKANBI",
   customer: {
     userId: "991fbf45-8c5a-4840-9f4f-8af81c586922",
@@ -47,13 +51,14 @@ export const lookupMatch: FundingLookupMatch = {
     isActive: true,
     name: "Omolade Akanbi",
   },
-  wallet: { currency: "NGN" },
+  wallet: { id: "4147cfeb-a6a5-4fc5-a647-79e8744090ca", balance: 1200, currency: "NGN" },
 };
 
 export const secondLookupMatch: FundingLookupMatch = {
   ...lookupMatch,
   fundingAccountId: "2a9f4c6e-7d10-4b7a-8c11-5e3d9a0b6f22",
-  bank: "Access Bank",
+  bankName: "Access Bank",
+  bankCode: "044",
   accountName: "OMOLADE O AKANBI",
   customer: { ...lookupMatch.customer, userId: "u-2", xbId: "XB456", email: "other@example.com", name: "Omolade Akinbi" },
 };

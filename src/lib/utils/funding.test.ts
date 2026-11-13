@@ -6,11 +6,13 @@ import {
   buildIntentParams,
   classifyCreditError,
   cleanBankReference,
+  customerDisplayName,
   extractAttachmentUrl,
   extractIntentsPage,
   extractLookupMatches,
   getMatchBlocker,
   hasAtMostTwoDecimals,
+  hasNoWalletYet,
   isAmountOverridden,
   formatNaira,
   isAccountNumber,
@@ -266,6 +268,51 @@ describe("extractLookupMatches", () => {
     expect(extractLookupMatches({ data: [lookupMatch] })).toEqual([lookupMatch]);
   });
 
+  it("reads a real response: wrapped in { data } with `bankName` and a full wallet", () => {
+    // Copied from a staging response for GET /funding/lookup.
+    const body = {
+      message: "Request successful",
+      details: "",
+      errorGroup: "",
+      data: [
+        {
+          fundingAccountId: "a45400ee-4fcc-40b9-aeae-04aaf6b7c58a",
+          bankName: "Paycom (Opay)",
+          bankCode: "305",
+          accountNumber: "7017796046",
+          accountName: "JOSHUA OSAYANEDE OLOTON",
+          customer: {
+            userId: "cd0baeb0-084d-48b0-9f3b-18b5c827601d",
+            xbId: "XB-KZWJ9",
+            email: "customer@example.com",
+            isActive: true,
+            name: "Joshua Oloton",
+          },
+          wallet: { id: "4147cfeb-a6a5-4fc5-a647-79e8744090ca", balance: 1200, currency: "NGN" },
+        },
+      ],
+    };
+
+    const [match] = extractLookupMatches(body);
+
+    expect(match.bankName).toBe("Paycom (Opay)");
+    expect(match.wallet).toEqual({ id: "4147cfeb-a6a5-4fc5-a647-79e8744090ca", balance: 1200, currency: "NGN" });
+    expect(getMatchBlocker(match)).toBeNull();
+  });
+
+  it("also accepts the doc's `bank` spelling as the bank name", () => {
+    const { bankName, ...rest } = lookupMatch;
+    const [match] = extractLookupMatches([{ ...rest, bank: bankName }]);
+    expect(match.bankName).toBe("Paycom (Opay)");
+  });
+
+  it("falls back to an empty bank name rather than undefined", () => {
+    const { bankName, ...rest } = lookupMatch;
+    void bankName;
+    const [match] = extractLookupMatches([rest]);
+    expect(match.bankName).toBe("");
+  });
+
   it("returns no matches for an empty or malformed body", () => {
     expect(extractLookupMatches([])).toEqual([]);
     expect(extractLookupMatches(undefined)).toEqual([]);
@@ -283,13 +330,35 @@ describe("getMatchBlocker", () => {
     expect(getMatchBlocker(suspended)).toBe("suspended");
   });
 
-  it("blocks a customer with no NGN wallet", () => {
-    expect(getMatchBlocker({ ...lookupMatch, wallet: null })).toBe("no-wallet");
+  it("does not block a customer with no NGN wallet: the credit creates it", () => {
+    expect(getMatchBlocker({ ...lookupMatch, wallet: null })).toBeNull();
   });
 
-  it("reports suspended before a missing wallet", () => {
+  it("still blocks a suspended customer who also has no wallet", () => {
     const both = { ...lookupMatch, wallet: null, customer: { ...lookupMatch.customer, isActive: false } };
     expect(getMatchBlocker(both)).toBe("suspended");
+  });
+});
+
+describe("hasNoWalletYet", () => {
+  it("is true only when the lookup carries no wallet", () => {
+    expect(hasNoWalletYet({ ...lookupMatch, wallet: null })).toBe(true);
+    expect(hasNoWalletYet(lookupMatch)).toBe(false);
+  });
+});
+
+describe("customerDisplayName", () => {
+  it("uses the name when there is one", () => {
+    expect(customerDisplayName({ name: "Ada Tester", email: "a@x.com" })).toBe("Ada Tester");
+  });
+
+  it("falls back to the email when the backend sends a null name", () => {
+    expect(customerDisplayName({ name: null, email: "a@x.com" })).toBe("a@x.com");
+    expect(customerDisplayName({ name: "   ", email: "a@x.com" })).toBe("a@x.com");
+  });
+
+  it("falls back to a placeholder when there is neither", () => {
+    expect(customerDisplayName({ name: null, email: null })).toBe("Unnamed customer");
   });
 });
 
