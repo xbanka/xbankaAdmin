@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { usePageHeaderStore } from "@/store/usePageHeaderStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
-  ArrowLeft,
   MoreVertical,
   Send,
   Paperclip,
@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 import { CustomerLogDetailsForm } from "./customer-log-details-form";
 import type { SupportChat, ChatMessage } from "./types";
-import { DashboardLayout } from "../layout/dashboard-layout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { TicketDetailsPanel } from "./tickets-details-panel";
 
@@ -51,6 +50,14 @@ const mockMessages: ChatMessage[] = [
 ];
 
 export function ChatInterface({ chat, onBack }: ChatInterfaceProps) {
+  // This view has no URL of its own, so it puts its own back button + chat
+  // id in the header, and hands the header back when it closes.
+  const setHeaderOverride = usePageHeaderStore((s) => s.setOverride);
+  useEffect(() => {
+    setHeaderOverride({ title: String(chat.id), onBack });
+    return () => setHeaderOverride(null);
+  }, [chat.id, onBack, setHeaderOverride]);
+
   const [messages, setMessages] = useState<ChatMessage[]>(mockMessages);
   const [newMessage, setNewMessage] = useState("");
   const [showCustomerLog, setShowCustomerLog] = useState(false);
@@ -98,13 +105,8 @@ export function ChatInterface({ chat, onBack }: ChatInterfaceProps) {
   };
 
   return (
-    <DashboardLayout
-      isPending={false}
-      icon={ArrowLeft}
-      id={chat.id}
-      href="customer-support"
-    >
-      <div className="w-full md:max-w-[700px] lg:min-w-[100%] xl:min-w-full">
+    <>
+      <div className="w-full min-w-0">
       <div className="flex min-w-full bg-gray-50 overflow-x-auto">
         {/* Left Sidebar - Conversations */}
         <div className="w-[20%] flex-shrink-0 overflow-y-auto h-screen bg-white border-r border-gray-200 flex flex-col ">
@@ -457,6 +459,6 @@ export function ChatInterface({ chat, onBack }: ChatInterfaceProps) {
         )}
       </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

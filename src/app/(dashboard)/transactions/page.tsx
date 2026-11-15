@@ -8,7 +8,6 @@ import { TransactionsTable } from "@/components/transaction/transactions-table";
 import {
   TransactionRecord,
 } from "@/components/transaction/transaction-data";
-import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { TransactionFormProvider } from "@/components/transaction/transaction-form-provider";
 import { useGetTransactionByCustomer } from "@/lib/services/transaction.service";
 
@@ -50,9 +49,7 @@ export default function Home() {
   };
 
   return (
-    <DashboardLayout
-    breadcrumbs={[{ label: "Transactions" }]}
-    >
+    <>
       <div className="p-4">
         
         <div className="w-full">
@@ -87,6 +84,6 @@ export default function Home() {
         customer={selectedTransactionCustomer}
         transactions={mockTransactions}
       /> */}
-    </DashboardLayout>
+    </>
   );
 }

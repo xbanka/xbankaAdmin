@@ -16,7 +16,6 @@ import { EditSpreadModal } from "./edit-spread-modal";
 import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
-import { DashboardLayout } from "../layout/dashboard-layout";
 import { EmptySpreadSchedule } from "./empty-spread-schedule";
 import {
   useSpreadSchedule,
@@ -437,12 +436,7 @@ export default function RateManagement() {
   ];
 
   return (
-    <DashboardLayout
-      isPending={false}
-      // error={""}
-      breadcrumbs={[{ label: "Rate Management" }]}
-      title="Rate Management"
-    >
+    <>
       <div className="flex min-h-screen bg-card-primary">
         {/* Main */}
         <div className="flex-1 min-w-0 flex flex-col min-h-screen">
@@ -574,6 +568,6 @@ export default function RateManagement() {
 
         {/* Create Wizard */}
       </div>
-    </DashboardLayout>
+    </>
   );
 }

@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import { Search, ChevronDown } from "lucide-react";
-import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { DataTableLayout } from "@/components/DataTableLayout/DataTableLayout";
 import { UnderlineTabs } from "@/components/ui/underline-tabs";
 import { useGetRoleChangeLogs, useGetLoginLogs } from "@/lib/services/audit-log.service";
@@ -170,18 +169,18 @@ export default function AuditLogPage() {
 
   if (!canViewAuditLogs) {
     return (
-      <DashboardLayout>
+      <>
         <div className="p-4">
           <p className="text-sm text-secondary-text">
             You don&apos;t have permission to view audit logs.
           </p>
         </div>
-      </DashboardLayout>
+      </>
     );
   }
 
   return (
-    <DashboardLayout>
+    <>
       <div className="p-4">
         <div className="w-full mx-auto">
           <div className="mb-6">
@@ -246,7 +245,7 @@ export default function AuditLogPage() {
           />
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 }
 

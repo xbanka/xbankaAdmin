@@ -9,7 +9,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { DataTableLayout } from "@/components/DataTableLayout/DataTableLayout";
 import { useState } from "react";
-import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import NewCustomerModal from "@/components/customer-management/NewCustomerModal";
 import Header from "@/components/ui/Header";
 import { Eye, Search, Calendar, SlidersHorizontal, Download } from "lucide-react";
@@ -168,7 +167,7 @@ export default function CustomerManagement() {
   ];
 
   return (
-    <DashboardLayout breadcrumbs={[{ label: "Customer Management" }]}>
+    <>
       <div className="p-4">
         <div className="space-y-4">
           <div className="flex items-center justify-between mb-[24px]">
@@ -395,6 +394,6 @@ export default function CustomerManagement() {
           setSelectedCustomerId(null);
         }}
       />
-    </DashboardLayout>
+    </>
   );
 }

@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { DashboardLayout } from "@/components/layout/dashboard-layout"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -126,7 +125,6 @@ export default function AdminPanel() {
   // }
 
   return (
-    // <DashboardLayout title="Admin Panel" breadcrumbs={[{ label: "Admin Panel" }]}>
     //   <Card className="bg-white">
     //     <CardHeader>
     //       <CardTitle className="flex items-center justify-between">
@@ -308,7 +306,6 @@ export default function AdminPanel() {
     //       )}
     //     </DialogContent>
     //   </Dialog>
-    // </DashboardLayout>
     <div>
       admin
     </div>
