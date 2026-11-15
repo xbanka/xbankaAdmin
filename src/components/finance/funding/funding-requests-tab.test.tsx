@@ -18,6 +18,24 @@ vi.mock("./complete-intent-modal", () => ({
 vi.mock("./reject-intent-modal", () => ({
   RejectIntentModal: () => <div>reject-modal</div>,
 }));
+// The real modal has its own tests; here only what the tab hands it matters.
+vi.mock("./credit-directly-modal", () => ({
+  CreditDirectlyModal: ({
+    initialAccount,
+    onClose,
+    onOpenIntent,
+  }: {
+    initialAccount: string;
+    onClose: () => void;
+    onOpenIntent: (intent: unknown) => void;
+  }) => (
+    <div>
+      <span>credit-modal prefill=[{initialAccount}]</span>
+      <button onClick={onClose}>close-credit</button>
+      <button onClick={() => onOpenIntent({ transactionId: "t-1" })}>handoff-intent</button>
+    </div>
+  ),
+}));
 
 import { FundingRequestsTab } from "./funding-requests-tab";
 import { intentsResponse } from "@/lib/utils/funding.fixtures";
@@ -134,5 +152,112 @@ describe("FundingRequestsTab", () => {
     expect(input).toHaveValue("0000000001");
     expect(screen.queryByText(/Enter all 10 digits/)).not.toBeInTheDocument();
     expect(lastQuery()).toMatchObject({ accountNumber: "0000000001", page: 1 });
+  });
+});
+
+describe("FundingRequestsTab: credit directly", () => {
+  const emptyPage = {
+    data: { items: [], meta: { totalItems: 0 } },
+    isPending: false,
+    isError: false,
+    isFetching: false,
+  };
+  const ACCOUNT = "0000000009";
+  const nudge = () => screen.queryByText(/No pending request from/);
+
+  it("shows the Credit directly button only with finance:adjust_balance", () => {
+    const { unmount } = render(<FundingRequestsTab />);
+    expect(screen.getByRole("button", { name: /Credit directly/ })).toBeInTheDocument();
+    unmount();
+
+    hasPermission.mockImplementation((p: string) => p !== "finance:adjust_balance");
+    render(<FundingRequestsTab />);
+    expect(screen.queryByRole("button", { name: /Credit directly/ })).not.toBeInTheDocument();
+  });
+
+  it("opens the modal empty from the toolbar button", async () => {
+    const user = userEvent.setup();
+    render(<FundingRequestsTab />);
+
+    await user.click(screen.getByRole("button", { name: /Credit directly/ }));
+
+    expect(screen.getByText("credit-modal prefill=[]")).toBeInTheDocument();
+  });
+
+  it("offers to credit directly, pre-filled, when a searched account has no pending request", async () => {
+    const user = userEvent.setup();
+    useGetFundingIntents.mockReturnValue(emptyPage);
+    render(<FundingRequestsTab />);
+    expect(nudge()).not.toBeInTheDocument();
+
+    await user.type(screen.getByLabelText("Sender account number"), ACCOUNT);
+
+    expect(nudge()).toBeInTheDocument();
+    // The banner's button is the second "Credit directly" (toolbar is first).
+    await user.click(screen.getAllByRole("button", { name: "Credit directly" })[1]);
+    expect(screen.getByText(`credit-modal prefill=[${ACCOUNT}]`)).toBeInTheDocument();
+  });
+
+  it("does not nudge for a partial account number", async () => {
+    const user = userEvent.setup();
+    useGetFundingIntents.mockReturnValue(emptyPage);
+    render(<FundingRequestsTab />);
+
+    await user.type(screen.getByLabelText("Sender account number"), "00000");
+
+    expect(nudge()).not.toBeInTheDocument();
+  });
+
+  it("does not nudge when that account does have a pending request", async () => {
+    const user = userEvent.setup();
+    render(<FundingRequestsTab />);
+
+    await user.type(screen.getByLabelText("Sender account number"), ACCOUNT);
+
+    expect(nudge()).not.toBeInTheDocument();
+  });
+
+  it("does not nudge while results are still loading or on a settled-only tab", async () => {
+    const user = userEvent.setup();
+    useGetFundingIntents.mockReturnValue({ ...emptyPage, isFetching: true });
+    render(<FundingRequestsTab />);
+    await user.type(screen.getByLabelText("Sender account number"), ACCOUNT);
+    expect(nudge()).not.toBeInTheDocument();
+
+    useGetFundingIntents.mockReturnValue(emptyPage);
+    await user.click(screen.getByRole("button", { name: "Completed" }));
+    expect(nudge()).not.toBeInTheDocument();
+  });
+
+  it("does not nudge without finance:adjust_balance", async () => {
+    const user = userEvent.setup();
+    hasPermission.mockImplementation((p: string) => p !== "finance:adjust_balance");
+    useGetFundingIntents.mockReturnValue(emptyPage);
+    render(<FundingRequestsTab />);
+
+    await user.type(screen.getByLabelText("Sender account number"), ACCOUNT);
+
+    expect(nudge()).not.toBeInTheDocument();
+  });
+
+  it("hands a pending request to the Confirm modal and closes the credit modal", async () => {
+    const user = userEvent.setup();
+    render(<FundingRequestsTab />);
+    await user.click(screen.getByRole("button", { name: /Credit directly/ }));
+
+    await user.click(screen.getByRole("button", { name: "handoff-intent" }));
+
+    expect(screen.getByText("complete-modal")).toBeInTheDocument();
+    expect(screen.queryByText(/credit-modal/)).not.toBeInTheDocument();
+  });
+
+  it("closes the modal", async () => {
+    const user = userEvent.setup();
+    render(<FundingRequestsTab />);
+    await user.click(screen.getByRole("button", { name: /Credit directly/ }));
+
+    await user.click(screen.getByRole("button", { name: "close-credit" }));
+
+    expect(screen.queryByText(/credit-modal/)).not.toBeInTheDocument();
   });
 });

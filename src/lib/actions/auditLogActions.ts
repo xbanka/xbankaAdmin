@@ -69,7 +69,41 @@ export const getLoginLogs = async ({
   }
 };
 
-export const confirmRoleChange = async ({ id }: { id: string }) => {
+export interface GetFundingIntentAuditParams extends GetAuditLogParams {
+  action?: string;
+}
+
+export const getFundingIntentAuditLogs = async ({
+  action,
+  status,
+  search,
+  page = 1,
+  limit = 10,
+}: GetFundingIntentAuditParams = {}) => {
+  try {
+    const response = await AxiosInstance.get(`/api/audit/funding-intents`, {
+      params: {
+        ...buildAuditLogParams({ status, search, page, limit }),
+        action: action?.trim() || undefined,
+      },
+    });
+
+    return {
+      success: true,
+      data: response.data,
+      status: response.status,
+    };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    throw {
+      success: false,
+      status: error.status,
+      message: error.message,
+    };
+  }
+};
+
+export const confirmRoleChange =async ({ id }: { id: string }) => {
   try {
     const response = await AxiosInstance.post(
       `/api/audit/role-changes/${id}/confirm`,

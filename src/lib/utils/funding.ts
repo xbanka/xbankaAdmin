@@ -1,7 +1,10 @@
 import type {
   CompleteFundingIntentPayload,
+  DirectCreditPayload,
+  FundingIntent,
   FundingIntentStatus,
   FundingIntentsPage,
+  FundingLookupMatch,
 } from "../types/funding-types";
 
 export const FUNDING_INTENT_STATUSES: FundingIntentStatus[] = ["PENDING", "COMPLETED", "FAILED"];
@@ -133,6 +136,157 @@ export function buildCompletePayload(
  */
 export function cleanBankReference(raw: string) {
   return raw.replace(/[\r\n\t]+/g, " ").trim();
+}
+
+/** Most proof files a credit request accepts. */
+export const MAX_PROOF_FILES = 5;
+
+/**
+ * GET /funding/lookup answers with an array. Accept it bare or wrapped in
+ * `{ data }` like the other routes (the real response is wrapped), and fall
+ * back to no matches so a malformed body can't crash the step.
+ *
+ * The bank's name arrives as `bankName` (confirmed against a real response);
+ * the API doc's sample calls it `bank`, so either is accepted.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function extractLookupMatches(body: any): FundingLookupMatch[] {
+  const list = Array.isArray(body) ? body : body?.data;
+  if (!Array.isArray(list)) return [];
+  return list.map((raw) => ({ ...raw, bankName: raw.bankName ?? raw.bank ?? "" }));
+}
+
+export type MatchBlocker = "suspended";
+
+/**
+ * Why a matched customer can't be credited, or null when they can. Only a
+ * suspended account is refused (the backend answers 403).
+ *
+ * A missing NGN wallet is NOT a blocker: the core backend creates the wallet
+ * as part of the credit (it upserts it), and the wallet only ever appears
+ * once a customer first deposits, requests a virtual account, and so on.
+ * See hasNoWalletYet.
+ */
+export function getMatchBlocker(match: FundingLookupMatch): MatchBlocker | null {
+  return match.customer?.isActive ? null : "suspended";
+}
+
+export const MATCH_BLOCKER_MESSAGE: Record<MatchBlocker, string> = {
+  suspended: "Account suspended. It cannot be credited.",
+};
+
+/** True when the customer has no NGN wallet yet; crediting will create it. */
+export const hasNoWalletYet = (match: FundingLookupMatch) => !match.wallet;
+
+export const NO_WALLET_NOTE = "No NGN wallet yet. One will be created when you credit.";
+
+/**
+ * The core backend sends `customer.name` as null when the profile has no
+ * first or last name, so fall back to something staff can still recognise.
+ */
+export function customerDisplayName(customer: { name?: string | null; email?: string | null }) {
+  return customer.name?.trim() || customer.email || "Unnamed customer";
+}
+
+/** The reference the core backend stores: it trims and uppercases, then prefixes. */
+export const storedReference = (reference: string) =>
+  `BANKFUND-${reference.trim().toUpperCase()}`;
+
+/** At most two decimal places, as the credit endpoint requires. */
+export const hasAtMostTwoDecimals = (value: string) => /^\d*(\.\d{0,2})?$/.test(value.trim());
+
+export interface DirectCreditFormValues {
+  bankReference: string;
+  /** Raw numeric string from AmountField, commas already stripped. */
+  amount: string;
+}
+
+/**
+ * Form values to the credit request. The reference is trimmed (it can only
+ * be used once, so stray whitespace must not make a different one), and
+ * `attachmentUrls` is omitted when empty rather than sent as [].
+ */
+export function buildDirectCreditPayload(
+  values: DirectCreditFormValues,
+  {
+    fundingAccountId,
+    creditedBy,
+    attachmentUrls = [],
+  }: { fundingAccountId: string; creditedBy: string; attachmentUrls?: string[] },
+): DirectCreditPayload {
+  const payload: DirectCreditPayload = {
+    fundingAccountId,
+    amount: Number(values.amount),
+    reference: values.bankReference.trim(),
+    creditedBy,
+  };
+  if (attachmentUrls.length > 0) payload.attachmentUrls = attachmentUrls;
+  return payload;
+}
+
+/**
+ * The ERP route is a pass-through: on an error it puts the core backend's raw
+ * response text in `detail`, so the message that reaches the UI can be a JSON
+ * string like `{"message":"...","details":"","errorGroup":"..."}`. Pull the
+ * human sentence out of it. `message` may also be a list (validation errors).
+ * Anything that isn't that JSON comes back unchanged.
+ */
+export function readableErrorMessage(message: string | null | undefined): string {
+  const text = (message ?? "").trim();
+  if (!text.startsWith("{")) return text;
+
+  try {
+    const parsed: unknown = JSON.parse(text);
+    const inner = (parsed as { message?: unknown; detail?: unknown } | null) ?? {};
+    const found = inner.message ?? inner.detail;
+    if (typeof found === "string" && found.trim()) return found.trim();
+    if (Array.isArray(found)) {
+      const parts = found.filter((p): p is string => typeof p === "string" && p.trim() !== "");
+      if (parts.length > 0) return parts.join(". ");
+    }
+  } catch {
+    // Not JSON after all: show it as it came.
+  }
+  return text;
+}
+
+/**
+ * Pending requests that should stop a direct credit. The pending-request
+ * lookup is by sender account number, which two customers can share at
+ * different banks, so a request only blocks the customer it belongs to:
+ * - a customer is chosen: only their pending requests
+ * - several candidates and none chosen yet: any of theirs
+ * - no matching customer at all: every request, so staff can still see it
+ * A request with no customer id attached is kept, since it can't be ruled out.
+ */
+export function pendingIntentsToReview(
+  intents: FundingIntent[],
+  matches: FundingLookupMatch[],
+  selected?: FundingLookupMatch,
+): FundingIntent[] {
+  if (matches.length === 0) return intents;
+
+  const candidateIds = new Set(
+    (selected ? [selected] : matches).map((m) => m.customer?.userId),
+  );
+  return intents.filter((i) => !i.customer?.userId || candidateIds.has(i.customer.userId));
+}
+
+export type CreditFailure ="retry" | "reference-conflict" | "not-found" | "rejected";
+
+/**
+ * How the credit modal reacts to a failed request. Network trouble and 502
+ * are safe to retry (the bank reference prevents a double credit); a 409
+ * must not be retried; a 404 means the lookup is stale.
+ */
+export function classifyCreditError(error: unknown): CreditFailure {
+  const status = (error as { status?: number })?.status;
+  if (status === 409) return "reference-conflict";
+  if (status === 404) return "not-found";
+  // Timeouts, dropped connections and 5xx all leave it unknown whether the
+  // credit landed; resending the same reference is safe either way.
+  if (status === undefined || status === 408 || status >= 500) return "retry";
+  return "rejected";
 }
 
 export function formatNaira(amount: number, currency = "NGN") {

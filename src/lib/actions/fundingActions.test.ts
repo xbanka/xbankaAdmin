@@ -6,7 +6,9 @@ vi.mock("../Axiosinstance/axiosInstance", () => ({ default: { get, post } }));
 
 import {
   completeFundingIntent,
+  creditFundingDirectly,
   getFundingIntents,
+  lookupFundingCustomer,
   rejectFundingIntent,
   uploadFundingAttachment,
 } from "./fundingActions";
@@ -66,6 +68,50 @@ describe("rejectFundingIntent", () => {
     const payload = { rejectedBy: "ops@xbanka.com", reason: "No matching credit" };
     await rejectFundingIntent({ transactionId: ID, payload });
     expect(post).toHaveBeenCalledWith(`/api/transactions/funding/intents/${ID}/reject`, payload);
+  });
+});
+
+describe("lookupFundingCustomer", () => {
+  it("GETs /lookup with just the account number by default", async () => {
+    await lookupFundingCustomer({ accountNumber: "7054178290" });
+
+    expect(get.mock.calls[0][0]).toBe("/api/transactions/funding/lookup");
+    expect(toQuery(get.mock.calls[0][1].params)).toBe("accountNumber=7054178290");
+  });
+
+  it("adds bankCode only when given", async () => {
+    await lookupFundingCustomer({ accountNumber: "7054178290", bankCode: "100004" });
+    expect(toQuery(get.mock.calls[0][1].params)).toBe("accountNumber=7054178290&bankCode=100004");
+  });
+
+  it("rethrows as { success: false, status, message }", async () => {
+    get.mockRejectedValue({ status: 422, message: "accountNumber must be 10 digits" });
+    await expect(lookupFundingCustomer({ accountNumber: "1" })).rejects.toEqual({
+      success: false,
+      status: 422,
+      message: "accountNumber must be 10 digits",
+    });
+  });
+});
+
+describe("creditFundingDirectly", () => {
+  const payload = {
+    fundingAccountId: "7c0c1d2e-5b4a-4c53-9d57-0f3f0f4a1b11",
+    amount: 2000,
+    reference: "100004261006204500123456",
+    creditedBy: "ops@xbanka.com",
+  };
+
+  it("POSTs the payload to /credit", async () => {
+    await creditFundingDirectly(payload);
+    expect(post).toHaveBeenCalledWith("/api/transactions/funding/credit", payload);
+  });
+
+  it("keeps the status so a 409 and a 404 can be told apart", async () => {
+    post.mockRejectedValue({ status: 409, message: "Reference already used" });
+    await expect(creditFundingDirectly(payload)).rejects.toMatchObject({ status: 409 });
+    post.mockRejectedValue({ status: 404, message: "Funding account not found" });
+    await expect(creditFundingDirectly(payload)).rejects.toMatchObject({ status: 404 });
   });
 });
 

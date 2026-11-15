@@ -84,3 +84,58 @@ export interface SettleFundingIntentResult {
   transactionId: string;
   [key: string]: unknown;
 }
+
+/**
+ * "Credit directly": money arrived but the customer never declared it, so
+ * there is no intent. Staff find the customer by the sending account
+ * (GET /funding/lookup), then credit their NGN wallet (POST /funding/credit).
+ */
+
+/** One item of GET /funding/lookup (an array: one number can exist at several banks). */
+export interface FundingLookupMatch {
+  /** Goes into the credit request. */
+  fundingAccountId: string;
+  /**
+   * The real response sends `bankName` (the API doc's sample says `bank`);
+   * extractLookupMatches accepts either and fills this in.
+   */
+  bankName: string;
+  bankCode?: string;
+  accountNumber?: string;
+  accountName: string;
+  customer: {
+    userId: string;
+    xbId: string;
+    email: string;
+    isActive: boolean;
+    /** null when the customer's profile has no first or last name. */
+    name: string | null;
+  };
+  /**
+   * null when the customer has no NGN wallet yet. Not an error: the credit
+   * creates the wallet.
+   */
+  wallet: { id?: string; balance?: number; currency: string } | null;
+}
+
+/** Body of POST /funding/credit. Optional fields are omitted, never null. */
+export interface DirectCreditPayload {
+  fundingAccountId: string;
+  amount: number;
+  /** The bank's reference. The core backend trims it and stores BANKFUND-<REF>. */
+  reference: string;
+  /** The signed-in admin's email; the server does not verify it. */
+  creditedBy: string;
+  attachmentUrls?: string[];
+}
+
+export interface DirectCreditResult {
+  /** true when this reference was already credited with the same details. */
+  duplicate: boolean;
+  transactionId: string;
+  reference: string;
+  amount: number;
+  /** Absent on a `duplicate: true` result: the backend doesn't resend it. */
+  balance?: number;
+  creditedAt: string;
+}
