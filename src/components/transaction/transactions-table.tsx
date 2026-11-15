@@ -501,7 +501,7 @@ export function TransactionsTable({
       <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <Header text="Transaction Management" />
 
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-2 sm:gap-3">
           {hasPermission("transactions:export") && (
             <Button
               size="sm"
@@ -537,8 +537,8 @@ export function TransactionsTable({
       </div>
 
       {/* Filter Buttons */}
-      <div className="md:flex items-end justify-between gap-3 w-full">
-        <div className="space-y-4 w-full md:w-[40%]">
+      <div className="flex w-full flex-col gap-4">
+        <div className="min-w-0 overflow-x-auto">
           <FilterTabs
             filters={[
               "All",
@@ -551,148 +551,151 @@ export function TransactionsTable({
             value={activeFilter}
             onChange={handleTabChange}
           />
-          <div className="flex items-center justify-between w-full">
-            <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Search"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9"
+        </div>
+
+        {/* Toolbar: search on its own row until lg, then filters wrap
+            beside it. On phones the filters form a two-column grid. */}
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-end">
+          <div className="relative w-full lg:max-w-sm lg:flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:items-end lg:ml-auto lg:justify-end">
+            {/* Per-tab filter bar */}
+            {activeFilter === "all" && (
+              <AllTabFilters
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                statusFilter={statusFilter}
+                setStatusFilter={setStatusFilter}
+                sourceFilter={sourceFilter}
+                setSourceFilter={setSourceFilter}
               />
+            )}
+            {activeFilter === "fiat" && (
+              <FiatTabFilters
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                statusFilter={statusFilter}
+                setStatusFilter={setStatusFilter}
+                transactionTypeFilter={transactionTypeFilter}
+                setTransactionTypeFilter={setTransactionTypeFilter}
+              />
+            )}
+            {activeFilter === "crypto" && (
+              <CryptoTabFilters
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                statusFilter={statusFilter}
+                setStatusFilter={setStatusFilter}
+                sourceFilter={sourceFilter}
+                setSourceFilter={setSourceFilter}
+              />
+            )}
+            {activeFilter === "manual" && (
+              <ManualTabFilters
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                statusFilter={statusFilter}
+                setStatusFilter={setStatusFilter}
+                sourceFilter={sourceFilter}
+                setSourceFilter={setSourceFilter}
+              />
+            )}
+            {(activeFilter === "gift cards" ||
+              activeFilter === "bill payments") && (
+              <AllTabFilters
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                statusFilter={statusFilter}
+                setStatusFilter={setStatusFilter}
+                sourceFilter={sourceFilter}
+                setSourceFilter={setSourceFilter}
+              />
+            )}
+  
+            {/* Currency filter — applies across every tab */}
+            <SelectFieldLayout
+              id="currencyFilter"
+              options={["All", ...TRANSACTION_CURRENCIES]}
+              placeholder="Currency: All"
+              value={currencyFilter || "All"}
+              onChange={(v) => setCurrencyFilter(v === "All" ? "" : v)}
+              className="w-full sm:w-36"
+              selectClassName="border border-gray-300"
+            />
+  
+            {/* Date range — applies across every tab */}
+            <div className="relative col-span-2 w-full sm:col-span-1 sm:w-auto">
+              <button
+                type="button"
+                onClick={() => setDateOpen((o) => !o)}
+                className="inline-flex h-10 w-full sm:w-auto items-center gap-2 rounded-lg border border-gray-300 whitespace-nowrap overflow-hidden px-3 text-[14px] text-[#374151] hover:bg-gray-50"
+              >
+                <Calendar className="h-4 w-4 text-gray-400" />
+                {dateLabel}
+              </button>
+              {dateOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-10"
+                    onClick={() => setDateOpen(false)}
+                  />
+                  <div className="absolute right-0 top-12 z-20 w-[260px] max-w-[calc(100vw-32px)] space-y-3 rounded-lg border border-[#E5E7EB] bg-white p-4 shadow-lg">
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-medium text-gray-500">
+                        From
+                      </label>
+                      <input
+                        type="date"
+                        value={dateFrom}
+                        max={dateTo || undefined}
+                        onChange={(e) => setDateFrom(e.target.value)}
+                        className="w-full rounded-md border border-[#E5E7EB] px-2 py-1.5 text-sm outline-none focus:border-[#2DD4BF]"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-medium text-gray-500">
+                        To
+                      </label>
+                      <input
+                        type="date"
+                        value={dateTo}
+                        min={dateFrom || undefined}
+                        onChange={(e) => setDateTo(e.target.value)}
+                        className="w-full rounded-md border border-[#E5E7EB] px-2 py-1.5 text-sm outline-none focus:border-[#2DD4BF]"
+                      />
+                    </div>
+                    <div className="flex items-center justify-between pt-1">
+                      <button
+                        onClick={() => {
+                          setDateFrom("");
+                          setDateTo("");
+                        }}
+                        className="text-[12px] text-gray-500 hover:underline"
+                      >
+                        Clear
+                      </button>
+                      <button
+                        onClick={() => setDateOpen(false)}
+                        className="text-[12px] font-medium text-abstractCyan hover:underline"
+                      >
+                        Apply
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-3 mt-4 md:mt-0 md:flex md:flex-row md:items-end">
-          {/* Per-tab filter bar */}
-          {activeFilter === "all" && (
-            <AllTabFilters
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              statusFilter={statusFilter}
-              setStatusFilter={setStatusFilter}
-              sourceFilter={sourceFilter}
-              setSourceFilter={setSourceFilter}
-            />
-          )}
-          {activeFilter === "fiat" && (
-            <FiatTabFilters
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              statusFilter={statusFilter}
-              setStatusFilter={setStatusFilter}
-              transactionTypeFilter={transactionTypeFilter}
-              setTransactionTypeFilter={setTransactionTypeFilter}
-            />
-          )}
-          {activeFilter === "crypto" && (
-            <CryptoTabFilters
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              statusFilter={statusFilter}
-              setStatusFilter={setStatusFilter}
-              sourceFilter={sourceFilter}
-              setSourceFilter={setSourceFilter}
-            />
-          )}
-          {activeFilter === "manual" && (
-            <ManualTabFilters
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              statusFilter={statusFilter}
-              setStatusFilter={setStatusFilter}
-              sourceFilter={sourceFilter}
-              setSourceFilter={setSourceFilter}
-            />
-          )}
-          {(activeFilter === "gift cards" ||
-            activeFilter === "bill payments") && (
-            <AllTabFilters
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              statusFilter={statusFilter}
-              setStatusFilter={setStatusFilter}
-              sourceFilter={sourceFilter}
-              setSourceFilter={setSourceFilter}
-            />
-          )}
-
-          {/* Currency filter — applies across every tab */}
-          <SelectFieldLayout
-            id="currencyFilter"
-            options={["All", ...TRANSACTION_CURRENCIES]}
-            placeholder="Currency: All"
-            value={currencyFilter || "All"}
-            onChange={(v) => setCurrencyFilter(v === "All" ? "" : v)}
-            className="w-full md:w-36"
-            selectClassName="border border-gray-300"
-          />
-
-          {/* Date range — applies across every tab */}
-          <div className="relative w-full md:w-auto">
-            <button
-              type="button"
-              onClick={() => setDateOpen((o) => !o)}
-              className="inline-flex h-10 w-full md:w-auto items-center gap-2 rounded-lg border border-gray-300 whitespace-nowrap overflow-hidden px-3 text-[14px] text-[#374151] hover:bg-gray-50"
-            >
-              <Calendar className="h-4 w-4 text-gray-400" />
-              {dateLabel}
-            </button>
-            {dateOpen && (
-              <>
-                <div
-                  className="fixed inset-0 z-10"
-                  onClick={() => setDateOpen(false)}
-                />
-                <div className="absolute right-0 top-12 z-20 w-[260px] max-w-[calc(100vw-32px)] space-y-3 rounded-lg border border-[#E5E7EB] bg-white p-4 shadow-lg">
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-medium text-gray-500">
-                      From
-                    </label>
-                    <input
-                      type="date"
-                      value={dateFrom}
-                      max={dateTo || undefined}
-                      onChange={(e) => setDateFrom(e.target.value)}
-                      className="w-full rounded-md border border-[#E5E7EB] px-2 py-1.5 text-sm outline-none focus:border-[#2DD4BF]"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-medium text-gray-500">
-                      To
-                    </label>
-                    <input
-                      type="date"
-                      value={dateTo}
-                      min={dateFrom || undefined}
-                      onChange={(e) => setDateTo(e.target.value)}
-                      className="w-full rounded-md border border-[#E5E7EB] px-2 py-1.5 text-sm outline-none focus:border-[#2DD4BF]"
-                    />
-                  </div>
-                  <div className="flex items-center justify-between pt-1">
-                    <button
-                      onClick={() => {
-                        setDateFrom("");
-                        setDateTo("");
-                      }}
-                      className="text-[12px] text-gray-500 hover:underline"
-                    >
-                      Clear
-                    </button>
-                    <button
-                      onClick={() => setDateOpen(false)}
-                      className="text-[12px] font-medium text-abstractCyan hover:underline"
-                    >
-                      Apply
-                    </button>
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
       </div>
-      <div className="w-full md:max-w-[700px] lg:min-w-[100%] xl:min-w-full min-h-screen">
+      <div className="w-full min-w-0">
         <DataTableLayout
           data={transactions}
           columns={activeColumns}
