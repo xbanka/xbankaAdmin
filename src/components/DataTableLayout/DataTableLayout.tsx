@@ -12,9 +12,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import LoaderSpinner from "../ui/loaderSpinner";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "../ui/skeleton";
+
+const SKELETON_ROWS = 6;
 
 interface Column<T> {
   key: keyof T | string;
@@ -126,18 +128,23 @@ export function DataTableLayout<T>({
                 </TableRow>
               </TableHeader>
 
-              <TableBody>
+              {/* Rows rise in one after another once data replaces the
+                  skeleton (and again whenever a new page of rows arrives). */}
+              <TableBody className={cn(!isLoading && "stagger")}>
                 {/* Loading State */}
-                {isLoading && (
-                  <TableRow>
-                    <TableCell
-                      colSpan={columns.length}
-                      className="text-center py-6 text-gray-500"
-                    >
-                      <LoaderSpinner />
-                    </TableCell>
-                  </TableRow>
-                )}
+                {isLoading &&
+                  Array.from({ length: SKELETON_ROWS }).map((_, i) => (
+                    <TableRow key={`skeleton-${i}`} className="hover:bg-transparent">
+                      {columns.map((col) => (
+                        <TableCell
+                          key={col.key as string}
+                          className="py-[19px] px-[20px]"
+                        >
+                          <Skeleton className="h-4 w-full max-w-[140px]" />
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))}
 
                 {/* Error State */}
                 {!isLoading && isError && (
@@ -194,7 +201,24 @@ export function DataTableLayout<T>({
       {/* MOBILE CARD VIEW */}
       <div className="md:hidden">
         {isLoading && (
-          <div className="p-6 text-center text-gray-500">Loading...</div>
+          <div className="space-y-4 p-4">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div
+                key={i}
+                className="bg-white border border-[#E5E7EB] rounded-[10px] p-4 shadow-sm space-y-3"
+              >
+                <div className="flex justify-between items-center">
+                  <Skeleton className="h-9 w-32" />
+                  <Skeleton className="h-6 w-20 rounded-full" />
+                </div>
+                <div className="space-y-2 pt-2 border-t border-[#E5E7EB]">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-4 w-2/3" />
+                </div>
+              </div>
+            ))}
+          </div>
         )}
 
         {!isLoading && isError && (
@@ -208,7 +232,7 @@ export function DataTableLayout<T>({
         )}
 
         {!isLoading && !isError && (
-          <div className="space-y-4 p-4">
+          <div className="stagger space-y-4 p-4">
             {paginatedData?.map((item) => (
               <div
                 key={rowKey(item)}

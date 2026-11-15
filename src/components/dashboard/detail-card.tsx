@@ -51,7 +51,7 @@ export const DetailCard = ({
             {isLoading ? (
               <Skeleton className="h-7 w-16" />
             ) : (
-              <span className="text-2xl font-semibold text-text-primary-font-color">
+              <span className="text-2xl font-semibold text-text-primary-font-color motion-safe:animate-fade-up">
                 {value}
               </span>
             )}
@@ -74,7 +74,7 @@ export const DetailCard = ({
                   <Skeleton className="mt-1 h-4 w-10" />
                 ) : (
                   <p
-                    className={`text-base font-medium ${item.valueClassName ?? ""}`}
+                    className={`text-base font-medium motion-safe:animate-fade-up ${item.valueClassName ?? ""}`}
                   >
                     {item.value}
                   </p>

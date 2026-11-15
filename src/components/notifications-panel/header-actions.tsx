@@ -51,7 +51,7 @@ export function HeaderActions() {
 
         {/* Notifications Dropdown — the panel anchors itself to this
             relatively-positioned wrapper. */}
-        {isOpen && <NotificationsPanel onClose={toggle} />}
+        <NotificationsPanel isOpen={isOpen} onClose={toggle} />
       </div>
 
       {/* User Profile Dropdown */}

@@ -180,16 +180,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarMenuButton>
           </SidebarMenuItem>
 
-          <SidebarMenuItem className="px-2">
+          <SidebarMenuItem className="pr-2">
             <SidebarMenuButton
               className="py-5 px-5 rounded-tl-none rounded-bl-none rounded-tr-[36px] rounded-br-[36px] cursor-pointer"
-              asChild
+              tooltip="Log out"
               onClick={() => setOpen(true)}
             >
-              <a className="flex items-center">
-                <LogOutIcon className="text-[#4B5563]" />
-                <span className="text-[#4B5563]">Log out</span>
-              </a>
+              <LogOutIcon className="w-4 h-4 text-[#4B5563]" />
+              <span className="text-[#4B5563]">Log out</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

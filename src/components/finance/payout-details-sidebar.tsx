@@ -1,5 +1,6 @@
 "use client";
 
+import { useDrawerClosing, withExitAnimation } from "@/hooks/useExitAnimation";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import CustomDetailsName from "./CustomDetailsName";
@@ -9,7 +10,7 @@ import { PayoutDetailsSidebarProps } from "@/lib/types";
 import { formatDate } from "@/lib/formatDate";
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 
-export function PayoutDetailsSidebar({
+function PayoutDetailsSidebarDrawer({
   isOpen,
   onClose,
   payout,
@@ -21,6 +22,7 @@ export function PayoutDetailsSidebar({
   canReject,
   canFlag,
 }: PayoutDetailsSidebarProps) {
+  const closing = useDrawerClosing();
   useBodyScrollLock(isOpen);
 
   if (!isOpen) return null;
@@ -31,13 +33,13 @@ export function PayoutDetailsSidebar({
     <>
       {/* Overlay */}
       <div
-        className="fixed inset-0 bg-black/50 z-40 overflow-hidden transition-opacity"
+        className={`fixed inset-0 bg-black/50 z-40 overflow-hidden transition-opacity ${closing ? "pointer-events-none motion-safe:animate-fade-out" : "motion-safe:animate-modal-backdrop-in"}`}
         onClick={onClose}
       />
 
       {/* Sidebar - slides from right */}
       <div
-        className={`fixed bg-white right-0 top-0 h-screen overflow-x-hidden w-full md:w-[37%] shadow-lg z-50 transform flex flex-col justify-between items-start transition-transform duration-300 ${
+        className={`fixed bg-white right-0 top-0 h-screen overflow-x-hidden w-full md:w-[37%] shadow-lg z-50 ${closing ? "pointer-events-none motion-safe:animate-drawer-out" : "motion-safe:animate-drawer-in"} transform flex flex-col justify-between items-start transition-transform duration-300 ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -202,3 +204,5 @@ export function PayoutDetailsSidebar({
     </>
   );
 }
+
+export const PayoutDetailsSidebar = withExitAnimation(PayoutDetailsSidebarDrawer, p => p.isOpen);

@@ -1,6 +1,7 @@
 "use client";
 // @ts-nocheck
 
+import { useDrawerClosing, withExitAnimation } from "@/hooks/useExitAnimation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { X } from "lucide-react";
@@ -34,7 +35,8 @@ interface AddStaffSidebarProps {
   onClose: () => void;
 }
 
-export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
+function AddStaffSidebarDrawer({ isOpen, onClose }: AddStaffSidebarProps) {
+  const closing = useDrawerClosing();
   const [step, setStep] = useState(1);
   const [staffData, setStaffData] = useState<InviteStaffDraft>({});
   const { mutate: inviteStaff, isPending } = useInviteStaff();
@@ -135,8 +137,8 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex">
-      <div className="flex-1 bg-black/50" onClick={handleClose} />
-      <div className="bg-white w-full max-w-[550px] h-full flex flex-col shadow-lg">
+      <div className={`flex-1 bg-black/50 ${closing ? "pointer-events-none motion-safe:animate-fade-out" : "motion-safe:animate-modal-backdrop-in"}`} onClick={handleClose} />
+      <div className={`bg-white w-full max-w-[550px] h-full flex flex-col shadow-lg ${closing ? "pointer-events-none motion-safe:animate-drawer-out" : "motion-safe:animate-drawer-in"}`}>
         <div className="p-6 border-b z-50 flex items-center justify-between bg-white flex-shrink-0">
           <div>
             <h2 className="text-lg font-semibold text-gray-900">Assign Role</h2>
@@ -262,3 +264,5 @@ export function AddStaffSidebar({ isOpen, onClose }: AddStaffSidebarProps) {
     </div>
   );
 }
+
+export const AddStaffSidebar = withExitAnimation(AddStaffSidebarDrawer, p => p.isOpen);
