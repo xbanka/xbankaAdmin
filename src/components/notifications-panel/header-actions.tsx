@@ -34,7 +34,7 @@ export function HeaderActions() {
       .toUpperCase() || "?";
 
   return (
-    <div className="flex absolute right-2 items-center gap-4">
+    <div className="flex items-center gap-1 sm:gap-3">
       {/* Notifications Bell */}
       <div className="relative" ref={notificationsRef}>
         <Button
@@ -56,13 +56,13 @@ export function HeaderActions() {
 
       {/* User Profile Dropdown */}
       {isLoading || !data ? (
-        <Skeleton className="h-6 w-24" />
+        <Skeleton className="h-8 w-8 rounded-full sm:w-32 sm:rounded-md" />
       ) : (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
-              className="flex items-center gap-2 px-2 h-auto py-1"
+              className="flex h-auto items-center gap-2 px-1.5 py-1 sm:px-2"
             >
               <Avatar className="w-8 h-8">
                 <AvatarImage
@@ -73,15 +73,16 @@ export function HeaderActions() {
                 />
                 <AvatarFallback>{initials}</AvatarFallback>
               </Avatar>
-              <div className="text-left">
-                <p className="text-sm font-medium leading-none">
+              {/* Name + role only where there's room; avatar alone on phones. */}
+              <div className="hidden max-w-[160px] text-left sm:block">
+                <p className="truncate text-sm font-medium leading-tight">
                   {user?.first_name} {user?.last_name}
                 </p>
-                <p className="text-xs text-gray-500 leading-none">
+                <p className="truncate text-xs leading-tight text-gray-500">
                   {data.data.role?.name}
                 </p>
               </div>
-              <ChevronDown className="w-4 h-4 text-gray-500" />
+              <ChevronDown className="hidden h-4 w-4 text-gray-500 sm:block" />
             </Button>
           </DropdownMenuTrigger>
           {/* <DropdownMenuContent align="end" className="w-56">

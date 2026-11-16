@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Upload } from "lucide-react";
 import Header from "@/components/ui/Header";
 import { UnderlineTabs } from "@/components/ui/underline-tabs";
@@ -20,11 +19,7 @@ export default function FinancePage() {
   const isPayouts = activeTab === "Payout Requests";
 
   return (
-    <DashboardLayout
-      isPending={false}
-      // error={""}
-      breadcrumbs={[{ label: "Finance" }]}
-    >
+    <>
       <div className="w-full p-4 max-w-full overflow-x-hidden">
         <div className="flex items-center justify-between mb-[24px]">
           <Header text="Finance Overview" />
@@ -47,6 +42,6 @@ export default function FinancePage() {
         {activeTab === "Funding Requests" && <FundingRequestsTab />}
         {activeTab === "Xbanka Accounts" && <XbankaAccountsTab />}
       </div>
-    </DashboardLayout>
+    </>
   );
 }

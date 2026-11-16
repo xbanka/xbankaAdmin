@@ -1,5 +1,5 @@
 // Authentication gate only — permission/route-access gating lives in
-// DashboardLayout so it can scope its loading/error state to the page body
+// DashboardShell so it can scope its loading state to the page body
 // instead of hiding the header (breadcrumbs + HeaderActions) too.
 "use client";
 
