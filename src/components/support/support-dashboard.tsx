@@ -16,7 +16,6 @@ import {
 import { SupportChat } from "./types";
 import ChatSummaryCard from "./chat-summary-card";
 import { FilterTabs } from "../ui/FilterTabs";
-import { DashboardLayout } from "../layout/dashboard-layout";
 import { DataTableLayout } from "../DataTableLayout/DataTableLayout";
 import { getPriorityColor } from "@/lib/utils/statusStyles";
 
@@ -249,11 +248,7 @@ export function SupportDashboard({ onSelectChat }: SupportDashboardProps) {
   };
 
   return (
-    <DashboardLayout
-      isPending={false}
-      // error={""}
-      breadcrumbs={[{ label: "Support" }]}
-    >
+    <>
       <div className="p-4">
         <div className="bg-white border-b border-gray-200">
           <div className="">
@@ -342,6 +337,6 @@ export function SupportDashboard({ onSelectChat }: SupportDashboardProps) {
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

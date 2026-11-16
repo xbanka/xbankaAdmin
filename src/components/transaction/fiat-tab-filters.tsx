@@ -18,15 +18,15 @@ export function FiatTabFilters({
   setTransactionTypeFilter: (v: string) => void;
 }) {
   return (
-    <div className="col-span-2 w-full md:w-auto flex flex-col md:flex-row gap-3 md:items-end justify-between">
-      <div className="grid grid-cols-2 gap-3 w-full md:flex md:gap-2">
+    <div className="contents">
+      <div className="contents">
         <SelectFieldLayout
           id="statusFilter"
           options={["All", "Successful", "Pending", "Failed"]}
           placeholder="Status: All"
           value={statusFilter}
           onChange={setStatusFilter}
-          className="w-full md:w-36"
+          className="w-full sm:w-36"
           selectClassName="border border-gray-300"
         />
         <SelectFieldLayout
@@ -35,7 +35,7 @@ export function FiatTabFilters({
           placeholder="Transaction Type"
           value={transactionTypeFilter}
           onChange={setTransactionTypeFilter}
-          className="w-full md:w-44"
+          className="w-full sm:w-44"
           selectClassName="border border-gray-300"
         />
       </div>

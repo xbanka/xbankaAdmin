@@ -313,7 +313,7 @@ export function StepAssignAssets({
         </div>
       </div>
 
-      <div className="w-full md:max-w-[700px] lg:min-w-[100%] xl:min-w-full">
+      <div className="w-full min-w-0">
         <DataTableLayout
           data={visibleAssets}
           columns={columns}

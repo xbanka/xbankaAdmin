@@ -1,9 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { SlidersHorizontal } from "lucide-react";
 
-import { DashboardLayout } from "@/components/layout/dashboard-layout";
 
 import { MyProfileTab } from "./my-profile-tab";
 import { NotificationsTab } from "./notifications-tab";
@@ -35,7 +33,7 @@ export function AccountSettings() {
   const [activeTab, setActiveTab] = useState<SettingsTabId>("profile");
 
   return (
-    <DashboardLayout icon={SlidersHorizontal} id="Settings" href="/settings">
+    <>
       <div className="p-4 sm:p-6 lg:p-8">
         <h1 className="mb-6 text-[28px] font-bold text-text-primary lg:text-[32px]">
           Account Settings
@@ -54,6 +52,6 @@ export function AccountSettings() {
           </section>
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

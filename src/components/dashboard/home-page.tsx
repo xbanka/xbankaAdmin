@@ -1,5 +1,4 @@
 "use client";
-import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -156,7 +155,7 @@ export const DashboardHomePage = () => {
     // },
   ];
   return (
-    <DashboardLayout title="Dashboard">
+    <>
       <div className="p-4 space-y-6">
         {/* Welcome header */}
         <div className="flex items-center justify-between mb-6">
@@ -309,6 +308,6 @@ export const DashboardHomePage = () => {
           </Card>
         </div> */}
       </div>
-    </DashboardLayout>
+    </>
   );
 };

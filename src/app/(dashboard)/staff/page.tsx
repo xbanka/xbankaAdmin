@@ -6,7 +6,6 @@ import { Plus, Mail } from "lucide-react";
 import { DataTableLayout } from "@/components/DataTableLayout/DataTableLayout";
 import { FilterTabs } from "@/components/ui/FilterTabs";
 import { AddStaffSidebar } from "@/components/staff/add-staff-sidebar";
-import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { useGetAllStaff } from "@/lib/services/staff.service";
 import { StaffMember } from "@/lib/types/staffTypes";
 import { formatDate } from "@/lib/formatDate";
@@ -201,7 +200,7 @@ export default function StaffPage() {
   ];
 
   return (
-    <DashboardLayout>
+    <>
       <div className="p-4">
         <div className="w-full mx-auto">
           <div className="mb-8 flex items-center justify-between">
@@ -263,6 +262,6 @@ export default function StaffPage() {
           staff={selectedStaff}
         />
       </div>
-    </DashboardLayout>
+    </>
   );
 }
