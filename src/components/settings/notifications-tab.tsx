@@ -157,7 +157,7 @@ export function NotificationsTab() {
             <PreferencesSkeleton />
           </>
         ) : (
-          <>
+          <div className="motion-safe:animate-fade-up">
             <SettingsSectionLabel>Notification channels</SettingsSectionLabel>
             <SettingsGroup>
               <SettingsRow>
@@ -245,7 +245,7 @@ export function NotificationsTab() {
                 );
               })}
             </SettingsGroup>
-          </>
+          </div>
         )}
       </div>
     </>

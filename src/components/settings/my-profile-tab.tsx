@@ -149,7 +149,7 @@ export function MyProfileTab() {
               {isLoading ? (
                 <Skeleton className="size-12 rounded-full" />
               ) : (
-                <Avatar className="size-12">
+                <Avatar className="size-12 motion-safe:animate-fade-up">
                   <AvatarImage src={user.avatar_signed_url ?? undefined} alt={fullName} />
                   <AvatarFallback className="bg-teal-light text-[14px] font-semibold text-text-teal">
                     {initials}

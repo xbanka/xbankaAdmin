@@ -72,7 +72,7 @@ export function SecurityTab() {
             {isPending ? (
               <Skeleton className="h-9 w-24" />
             ) : (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 motion-safe:animate-fade-up">
                 <StatusBadge enabled={enabled} />
                 {enabled ? (
                   <EditButton

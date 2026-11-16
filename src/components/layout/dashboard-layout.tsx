@@ -10,6 +10,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import LoaderSpinner from "../ui/loaderSpinner";
 import { HeaderActions } from "../notifications-panel/header-actions";
 import { DialogLayout } from "./modalLayout";
 import { Button } from "../ui/button";
@@ -257,8 +258,8 @@ export function DashboardLayout({
         <div className="w-full bg-off-white min-w-0 min-h-screen">
           {/* Handle loading (page data and/or permission check) */}
           {isBodyLoading && (
-            <div className="flex flex-1 items-center justify-center text-gray-500">
-              Loading...
+            <div className="flex flex-1 items-center justify-center py-24">
+              <LoaderSpinner />
             </div>
           )}
 
@@ -273,7 +274,12 @@ export function DashboardLayout({
 
           {/* Render children only once we know it's safe to */}
           {!isBodyLoading && !isBodyError && (
-            <div className="block w-full max-w-full min-w-0">{children}</div>
+            <div
+              key={pathname}
+              className="block w-full max-w-full min-w-0 motion-safe:animate-page-in"
+            >
+              {children}
+            </div>
           )}
 
 

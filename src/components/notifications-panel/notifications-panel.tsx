@@ -17,7 +17,8 @@ import {
   useConfirmRoleChange,
   useGetNotifications,
 } from "@/lib/services/notification.service";
-import LoaderSpinner from "../ui/loaderSpinner";
+import { Skeleton } from "../ui/skeleton";
+import { useDrawerClosing, withExitAnimation } from "@/hooks/useExitAnimation";
 import { usePayoutSidebarStore } from "@/store/usePayoutSidebarStore";
 import { useRateProposalSidebarStore } from "@/store/useRateProposalSidebarStore";
 import { cn } from "@/lib/utils";
@@ -117,7 +118,14 @@ function emptyStateCopy(
     : `No ${noun}`;
 }
 
-export function NotificationsPanel({ onClose }: { onClose: () => void }) {
+type NotificationsPanelProps = {
+  /** Defaults to true so the panel can also be rendered conditionally. */
+  isOpen?: boolean;
+  onClose: () => void;
+};
+
+function NotificationsPanelContent({ onClose }: NotificationsPanelProps) {
+  const closing = useDrawerClosing();
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("ALL");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("ALL");
   const [readFilter, setReadFilter] = useState<ReadFilter>("ALL");
@@ -212,7 +220,12 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
       {/* Click-outside catcher. Radix select menus portal above this, so
           picking a filter option doesn't close the panel. */}
       <div
-        className="fixed inset-0 z-40 bg-black/20 sm:bg-transparent"
+        className={cn(
+          "fixed inset-0 z-40 bg-black/20 sm:bg-transparent",
+          closing
+            ? "pointer-events-none motion-safe:animate-fade-out"
+            : "motion-safe:animate-modal-backdrop-in",
+        )}
         onClick={onClose}
       />
 
@@ -220,6 +233,11 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
         className={cn(
           "fixed inset-x-3 top-16 z-50 flex flex-col overflow-hidden rounded-xl border border-[#E5E3E3] bg-white shadow-2xl",
           "sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mt-2 sm:w-[420px]",
+          // Pops out from under the bell.
+          "origin-top sm:origin-top-right",
+          closing
+            ? "pointer-events-none motion-safe:animate-popover-out"
+            : "motion-safe:animate-popover-in",
           "max-h-[min(540px,calc(100vh-6rem))]",
         )}
       >
@@ -308,9 +326,26 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
         {/* Scrollable list */}
         <div className="min-h-0 flex-1 overflow-y-auto">
           {isPending && (
-            <div className="flex items-center justify-center py-12">
-              <LoaderSpinner />
-            </div>
+            <ul
+              className="divide-y divide-[#F0F0F0]"
+              aria-busy="true"
+              aria-label="Loading notifications"
+            >
+              {Array.from({ length: 4 }).map((_, i) => (
+                <li key={i} className="flex gap-3 px-5 py-3.5">
+                  <Skeleton className="h-9 w-9 flex-shrink-0 rounded-full" />
+                  <div className="flex flex-1 flex-col gap-2">
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-3 w-1/2" />
+                    <Skeleton className="h-3 w-1/3" />
+                    <div className="mt-1 flex items-center justify-between">
+                      <Skeleton className="h-7 w-20 rounded-lg" />
+                      <Skeleton className="h-3 w-14" />
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
           )}
 
           {error && (
@@ -335,7 +370,7 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
 
           {!isPending && !error && notifications.length > 0 && (
             <ul className="divide-y divide-[#F0F0F0]">
-              {notifications.map((notification: PayoutNotification) => {
+              {notifications.map((notification: PayoutNotification, index: number) => {
                 const unread = !notification.is_read;
                 const isResolved = notification.status === "RESOLVED";
                 const isConfirming =
@@ -357,7 +392,9 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
                   <li
                     key={notification.id}
                     onClick={() => handleViewRequest(notification)}
+                    style={{ animationDelay: `${Math.min(index, 8) * 40}ms` }}
                     className={cn(
+                      "motion-safe:animate-fade-up",
                       "relative cursor-pointer px-5 py-3.5 transition-colors hover:bg-[#F9FAFB]",
                       "before:absolute before:left-0 before:top-0 before:h-full before:w-[3px] before:content-['']",
                       unread
@@ -459,3 +496,8 @@ export function NotificationsPanel({ onClose }: { onClose: () => void }) {
     </>
   );
 }
+
+export const NotificationsPanel = withExitAnimation(
+  NotificationsPanelContent,
+  (p) => p.isOpen ?? true,
+);

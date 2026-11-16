@@ -1,6 +1,7 @@
 // components/transaction/transaction-detail-sidebar.tsx
 "use client";
 
+import { useDrawerClosing, withExitAnimation } from "@/hooks/useExitAnimation";
 import { useState } from "react";
 import { X, Copy, Check, ArrowUpRight } from "lucide-react";
 import { useGetTransactionById } from "@/lib/services/transaction.service";
@@ -98,7 +99,8 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-export function TransactionDetailSidebar({ transactionId, onClose }: Props) {
+function TransactionDetailSidebarDrawer({ transactionId, onClose }: Props) {
+  const closing = useDrawerClosing();
   const { data, isPending } = useGetTransactionById(transactionId);
   const [copied, setCopied] = useState(false);
   const { openCustomer } = useCustomerSidebarStore();
@@ -139,8 +141,8 @@ export function TransactionDetailSidebar({ transactionId, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex">
-      <div className="flex-1 bg-black/50" onClick={onClose} />
-      <div className="w-full md:w-[42%] bg-white shadow-lg flex flex-col h-full">
+      <div className={`flex-1 bg-black/50 ${closing ? "pointer-events-none motion-safe:animate-fade-out" : "motion-safe:animate-modal-backdrop-in"}`} onClick={onClose} />
+      <div className={`w-full md:w-[42%] bg-white shadow-lg flex flex-col h-full ${closing ? "pointer-events-none motion-safe:animate-drawer-out" : "motion-safe:animate-drawer-in"}`}>
         {/* Header */}
         <div className="flex items-start justify-between p-6 border-b border-[var(--border-default)] flex-shrink-0">
           <div className="flex-1 min-w-0">
@@ -190,7 +192,7 @@ export function TransactionDetailSidebar({ transactionId, onClose }: Props) {
             ))}
           </div>
         ) : (
-          <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-5">
+          <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-5 motion-safe:animate-fade-up">
             {/* Amount hero */}
             <div className="border border-[var(--border-default)] border-l-4 border-l-[var(--text-teal)] rounded-xl p-5">
               <div className="text-center">
@@ -287,3 +289,5 @@ export function TransactionDetailSidebar({ transactionId, onClose }: Props) {
     </div>
   );
 }
+
+export const TransactionDetailSidebar = withExitAnimation(TransactionDetailSidebarDrawer, p => !!p.transactionId);

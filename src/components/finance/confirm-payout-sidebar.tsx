@@ -1,5 +1,6 @@
 "use client";
 
+import { useDrawerClosing, withExitAnimation } from "@/hooks/useExitAnimation";
 import { Button } from "@/components/ui/button";
 import FinanceDetailsHeader from "./FinanceDetailsHeader";
 import LoaderSpinner from "../ui/loaderSpinner";
@@ -24,7 +25,7 @@ interface ConfirmPayoutSidebarProps {
 
 const filterOptions = ["GTB - Xbanka (0123456789)"];
 
-export function ConfirmPayoutSidebar({
+function ConfirmPayoutSidebarDrawer({
   isOpen,
   onClose,
   payout,
@@ -32,6 +33,7 @@ export function ConfirmPayoutSidebar({
   loading,
   error,
 }: ConfirmPayoutSidebarProps) {
+  const closing = useDrawerClosing();
   const {
     register,
     handleSubmit,
@@ -66,13 +68,13 @@ export function ConfirmPayoutSidebar({
     <>
       {/* Overlay */}
       <div
-        className="fixed inset-0 bg-black/50 z-40 transition-opacity"
+        className={`fixed inset-0 bg-black/50 z-40 transition-opacity ${closing ? "pointer-events-none motion-safe:animate-fade-out" : "motion-safe:animate-modal-backdrop-in"}`}
         onClick={onClose}
       />
 
       {/* Sidebar */}
       <div
-        className={`fixed right-0 top-0 h-screen w-full max-w-[500px] bg-white shadow-lg z-50 transform transition-transform duration-300 ${
+        className={`fixed right-0 top-0 h-screen w-full max-w-[500px] bg-white shadow-lg z-50 ${closing ? "pointer-events-none motion-safe:animate-drawer-out" : "motion-safe:animate-drawer-in"} transform transition-transform duration-300 ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -213,3 +215,5 @@ export function ConfirmPayoutSidebar({
     </>
   );
 }
+
+export const ConfirmPayoutSidebar = withExitAnimation(ConfirmPayoutSidebarDrawer, p => p.isOpen);

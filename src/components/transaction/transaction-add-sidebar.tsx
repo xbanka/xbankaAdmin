@@ -1,5 +1,6 @@
 "use client";
 
+import { useDrawerClosing, withExitAnimation } from "@/hooks/useExitAnimation";
 import { X, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GiftCardTransactionForm } from "./transaction-form-gift-card";
@@ -20,12 +21,13 @@ interface TransactionAddSidebarProps {
   onBack: () => void;
 }
 
-export function TransactionAddSidebar({
+function TransactionAddSidebarDrawer({
   isOpen,
   onClose,
   customer,
   onBack,
 }: TransactionAddSidebarProps) {
+  const closing = useDrawerClosing();
   const { watch, setValue, reset } = useFormContext();
 
   const serviceType = watch("serviceType");
@@ -42,10 +44,10 @@ export function TransactionAddSidebar({
   return (
     <div className="fixed inset-0 z-50 flex">
       {/* Overlay */}
-      <div className="flex-1 bg-black/50" onClick={handleCloseSidebar} />
+      <div className={`flex-1 bg-black/50 ${closing ? "pointer-events-none motion-safe:animate-fade-out" : "motion-safe:animate-modal-backdrop-in"}`} onClick={handleCloseSidebar} />
 
       {/* Sidebar */}
-      <div className="w-full md:w-[40%] bg-white shadow-lg flex flex-col h-full">
+      <div className={`w-full md:w-[40%] bg-white shadow-lg flex flex-col h-full ${closing ? "pointer-events-none motion-safe:animate-drawer-out" : "motion-safe:animate-drawer-in"}`}>
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-[#E5E7EB] flex-shrink-0">
           {serviceType && (
@@ -132,3 +134,5 @@ export function TransactionAddSidebar({
     </div>
   );
 }
+
+export const TransactionAddSidebar = withExitAnimation(TransactionAddSidebarDrawer, p => p.isOpen && !!p.customer);

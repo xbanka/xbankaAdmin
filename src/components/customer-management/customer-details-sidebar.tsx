@@ -1,5 +1,6 @@
 "use client";
 
+import { useDrawerClosing, withExitAnimation } from "@/hooks/useExitAnimation";
 import { X } from "lucide-react";
 import Image from "next/image";
 import {
@@ -27,11 +28,12 @@ interface Props {
   onClose: () => void;
 }
 
-export default function CustomerDetailsSidebar({
+function CustomerDetailsSidebarDrawer({
   isOpen,
   customerId,
   onClose,
 }: Props) {
+  const closing = useDrawerClosing();
   const [activeTab, setActiveTab] = useState<Tab>("profile");
   const { data, isLoading } = useGetCustomerById(customerId || "");
   const { data: verificationData } = useGetCustomerVerification(customerId || "",);
@@ -65,10 +67,10 @@ export default function CustomerDetailsSidebar({
   return (
     <div className="fixed inset-0 z-50 flex">
       {/* Overlay */}
-      <div className="hidden md:block flex-1 bg-black/50" onClick={onClose} />
+      <div className={`hidden md:block flex-1 bg-black/50 ${closing ? "pointer-events-none motion-safe:animate-fade-out" : "motion-safe:animate-modal-backdrop-in"}`} onClick={onClose} />
 
       {/* Sidebar */}
-      <div className="w-full md:w-[600px] md:max-w-[90vw] bg-white h-full overflow-y-auto">
+      <div className={`w-full md:w-[600px] md:max-w-[90vw] bg-white h-full overflow-y-auto ${closing ? "pointer-events-none motion-safe:animate-drawer-out" : "motion-safe:animate-drawer-in"}`}>
         {isLoading ? (
           <CustomerDetailsSkeleton onClose={onClose} />
         ) : (
@@ -141,7 +143,7 @@ export default function CustomerDetailsSidebar({
                   Customer data unavailable.
                 </div>
               ) : (
-                <>
+                <div key={activeTab} className="motion-safe:animate-fade-up">
                   {activeTab === "profile" && (
                     <ProfileTab customer={customer} />
                   )}
@@ -154,7 +156,7 @@ export default function CustomerDetailsSidebar({
                   {activeTab === "verification" && (
                     <VerificationTab customer={verificationData?.data} kyc={kycData?.data} />
                   )}
-                </>
+                </div>
               )}
             </div>
           </>
@@ -163,3 +165,5 @@ export default function CustomerDetailsSidebar({
     </div>
   );
 }
+
+export default withExitAnimation(CustomerDetailsSidebarDrawer, p => p.isOpen);

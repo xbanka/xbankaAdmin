@@ -1,5 +1,6 @@
 "use client";
 
+import { useDrawerClosing, withExitAnimation } from "@/hooks/useExitAnimation";
 import { X } from "lucide-react";
 import { DataTableLayout } from "../DataTableLayout/DataTableLayout";
 import { ScopeBadge, UpdatedStatusBadge } from "./scope-badge";
@@ -60,7 +61,8 @@ function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
-export function SpreadChangeDetailsDrawer({ entry, onClose }: Props) {
+function SpreadChangeDetailsDrawerDrawer({ entry, onClose }: Props) {
+  const closing = useDrawerClosing();
   console.log(entry)
   useBodyScrollLock(!!entry);
 
@@ -115,10 +117,10 @@ export function SpreadChangeDetailsDrawer({ entry, onClose }: Props) {
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
       {/* Overlay */}
-      <div className="flex-1 bg-black/50" onClick={onClose} />
+      <div className={`flex-1 bg-black/50 ${closing ? "pointer-events-none motion-safe:animate-fade-out" : "motion-safe:animate-modal-backdrop-in"}`} onClick={onClose} />
 
       {/* Drawer */}
-      <div className="w-full md:w-[602px] bg-white shadow-lg flex flex-col h-full">
+      <div className={`w-full md:w-[602px] bg-white shadow-lg flex flex-col h-full ${closing ? "pointer-events-none motion-safe:animate-drawer-out" : "motion-safe:animate-drawer-in"}`}>
         {/* Header */}
         <div className="flex items-start justify-between p-6 border-b border-[#E5E7EB] flex-shrink-0">
           <div>
@@ -261,3 +263,5 @@ export function SpreadChangeDetailsDrawer({ entry, onClose }: Props) {
     </div>
   );
 }
+
+export const SpreadChangeDetailsDrawer = withExitAnimation(SpreadChangeDetailsDrawerDrawer, p => !!p.entry);
