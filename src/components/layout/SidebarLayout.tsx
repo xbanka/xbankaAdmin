@@ -12,7 +12,10 @@ export default function SidebarLayout({
   return (
     <SidebarProvider>
       <AppSidebar />
-      <main className="flex-1">{children}</main>
+      {/* min-w-0 lets wide content (tables) overflow inside the content
+          area instead of stretching it past the viewport. Not a <main>:
+          SidebarInset already renders one. */}
+      <div className="flex-1 min-w-0">{children}</div>
     </SidebarProvider>
   );
 }

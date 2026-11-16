@@ -39,7 +39,18 @@ interface DataTableLayoutProps<T> {
   isError?: boolean;
   errorMessage?: string;
   className?: string;
+  /**
+   * Narrowest the desktop table may get before it scrolls sideways inside
+   * its box (px). Defaults to a width derived from the column count; pass
+   * `false` to let it shrink to fit its container instead.
+   */
+  minWidth?: number | false;
 }
+
+// Rough comfortable width per column, and the floor for small tables.
+const COLUMN_MIN_WIDTH = 140;
+const SELECT_COLUMN_WIDTH = 50;
+const TABLE_MIN_WIDTH = 640;
 
 export function DataTableLayout<T>({
   data,
@@ -54,6 +65,7 @@ export function DataTableLayout<T>({
   isError = false,
   errorMessage = "Failed to load data.",
   className,
+  minWidth,
 }: DataTableLayoutProps<T>) {
   const [localPage, setLocalPage] = useState(1);
   const page = currentPage ?? localPage;
@@ -102,6 +114,21 @@ export function DataTableLayout<T>({
   // repeat on every card, so we render only the row checkbox in the card header.
   const selectColumn = columns.find((col) => col.key === "select");
 
+  // Columns keep a readable width; once the container is narrower than
+  // this, the table scrolls horizontally instead of truncating every cell.
+  const tableMinWidth =
+    minWidth === false
+      ? undefined
+      : minWidth ??
+        Math.max(
+          TABLE_MIN_WIDTH,
+          columns.reduce(
+            (sum, col) =>
+              sum + (col.key === "select" ? SELECT_COLUMN_WIDTH : COLUMN_MIN_WIDTH),
+            0
+          )
+        );
+
   return (
     <div
       className={cn(
@@ -109,92 +136,93 @@ export function DataTableLayout<T>({
         className
       )}
     >
-      <div className="hidden md:block w-full rounded-[8px]">
-        <div className="relative w-full overflow-x-auto rounded-[8px]">
-          <div className=" min-w-full">
-            <Table className={cn("w-full table-fixed", isLoading || isError ? "pointer-events-none" : "")}>
-              <TableHeader>
-                <TableRow className="bg-card-secondary">
+      {/* The Table primitive wraps itself in an overflow-x-auto container,
+          so only the table scrolls sideways, never the page. */}
+      <div className="hidden md:block w-full min-w-0 overflow-hidden rounded-[8px]">
+        <Table
+          style={tableMinWidth ? { minWidth: tableMinWidth } : undefined}
+          className={cn("w-full table-fixed", isLoading || isError ? "pointer-events-none" : "")}
+        >
+          <TableHeader>
+            <TableRow className="bg-card-secondary">
+              {columns.map((col) => (
+                <TableHead
+                  key={col.key as string}
+                  className={`truncate font-medium py-[8px] px-[20px] text-[12px] leading-[16px] text-[#606368] ${
+                    col.className ?? ""
+                  }`}
+                >
+                  {col.header}
+                </TableHead>
+              ))}
+            </TableRow>
+          </TableHeader>
+
+          {/* Rows rise in one after another once data replaces the
+              skeleton (and again whenever a new page of rows arrives). */}
+          <TableBody className={cn(!isLoading && "stagger")}>
+            {/* Loading State */}
+            {isLoading &&
+              Array.from({ length: SKELETON_ROWS }).map((_, i) => (
+                <TableRow key={`skeleton-${i}`} className="hover:bg-transparent">
                   {columns.map((col) => (
-                    <TableHead
+                    <TableCell
                       key={col.key as string}
-                      className={`truncate font-medium py-[8px] px-[20px] text-[12px] leading-[16px] text-[#606368] ${
-                        col.className ?? ""
-                      }`}
+                      className="py-[19px] px-[20px]"
                     >
-                      {col.header}
-                    </TableHead>
+                      <Skeleton className="h-4 w-full max-w-[140px]" />
+                    </TableCell>
                   ))}
                 </TableRow>
-              </TableHeader>
+              ))}
 
-              {/* Rows rise in one after another once data replaces the
-                  skeleton (and again whenever a new page of rows arrives). */}
-              <TableBody className={cn(!isLoading && "stagger")}>
-                {/* Loading State */}
-                {isLoading &&
-                  Array.from({ length: SKELETON_ROWS }).map((_, i) => (
-                    <TableRow key={`skeleton-${i}`} className="hover:bg-transparent">
-                      {columns.map((col) => (
-                        <TableCell
-                          key={col.key as string}
-                          className="py-[19px] px-[20px]"
-                        >
-                          <Skeleton className="h-4 w-full max-w-[140px]" />
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  ))}
+            {/* Error State */}
+            {!isLoading && isError && (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="text-center py-6 text-red-500"
+                >
+                  {errorMessage}
+                </TableCell>
+              </TableRow>
+            )}
 
-                {/* Error State */}
-                {!isLoading && isError && (
-                  <TableRow>
+            {!isLoading && !isError && paginatedData?.length === 0 && (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="text-center text-[#111827] text-[14px] font-[500] leading-[18px] py-6"
+                >
+                  {emptyMessage}
+                </TableCell>
+              </TableRow>
+            )}
+
+            {!isLoading &&
+              !isError &&
+              paginatedData?.map((item) => (
+                <TableRow
+                  key={rowKey(item)}
+                  className="hover:bg-gray-50 text-left text-[#111827] text-[14px] font-[500] leading-[18px]"
+                >
+                  {columns.map((col) => (
                     <TableCell
-                      colSpan={columns.length}
-                      className="text-center py-6 text-red-500"
+                      className={cn(
+                        "py-[19px] px-[20px] text-left whitespace-nowrap overflow-hidden text-ellipsis",
+                        col.className
+                      )}
+                      key={col.key as string}
                     >
-                      {errorMessage}
+                      {col.render
+                        ? col.render(item)
+                        : (item as never)[col.key]}
                     </TableCell>
-                  </TableRow>
-                )}
-
-                {!isLoading && !isError && paginatedData?.length === 0 && (
-                  <TableRow>
-                    <TableCell
-                      colSpan={columns.length}
-                      className="text-center text-[#111827] text-[14px] font-[500] leading-[18px] py-6"
-                    >
-                      {emptyMessage}
-                    </TableCell>
-                  </TableRow>
-                )}
-
-                {!isLoading &&
-                  !isError &&
-                  paginatedData?.map((item) => (
-                    <TableRow
-                      key={rowKey(item)}
-                      className="hover:bg-gray-50 text-left text-[#111827] text-[14px] font-[500] leading-[18px]"
-                    >
-                      {columns.map((col) => (
-                        <TableCell
-                          className={cn(
-                            "py-[19px] px-[20px] text-left whitespace-nowrap overflow-hidden text-ellipsis",
-                            col.className
-                          )}
-                          key={col.key as string}
-                        >
-                          {col.render
-                            ? col.render(item)
-                            : (item as never)[col.key]}
-                        </TableCell>
-                      ))}
-                    </TableRow>
                   ))}
-              </TableBody>
-            </Table>
-          </div>
-        </div>
+                </TableRow>
+              ))}
+          </TableBody>
+        </Table>
       </div>
 
       {/* MOBILE CARD VIEW */}
