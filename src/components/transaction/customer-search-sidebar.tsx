@@ -1,5 +1,6 @@
 "use client";
 
+import { useDrawerClosing, withExitAnimation } from "@/hooks/useExitAnimation";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { ArrowLeft, ArrowUpRight, Search, Upload, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -20,12 +21,13 @@ import { SidebarView, UserSummaryItem } from "./transaction-data";
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 import { FilePreview } from "../ui/file-preview";
 
-export function CustomerSearchSidebar({
+function CustomerSearchSidebarDrawer({
   isOpen,
   onClose,
   onCustomerSelect,
   isLoading = false,
 }: CustomerSearchSidebarProps) {
+  const closing = useDrawerClosing();
   const [searchQuery, setSearchQuery] = useState("");
   const [showResults, setShowResults] = useState(false);
   const [kycDocuments, setKycDocuments] = useState<File[]>([]);
@@ -220,8 +222,8 @@ export function CustomerSearchSidebar({
   if (view === "new-user") {
     return (
       <div className="fixed inset-0 z-50 flex">
-        <div className="flex-1 bg-black/50" onClick={handleClose} />
-        <div className="w-full md:w-[37%] bg-white shadow-lg flex flex-col h-full">
+        <div className={`flex-1 bg-black/50 ${closing ? "pointer-events-none motion-safe:animate-fade-out" : "motion-safe:animate-modal-backdrop-in"}`} onClick={handleClose} />
+        <div className={`w-full md:w-[37%] bg-white shadow-lg flex flex-col h-full ${closing ? "pointer-events-none motion-safe:animate-drawer-out" : "motion-safe:animate-drawer-in"}`}>
           <div className="flex items-center gap-3 p-6 border-b border-[#E5E7EB]">
             <button
               onClick={() => setView("search")}
@@ -412,8 +414,8 @@ export function CustomerSearchSidebar({
   // ── Main search view ──
   return (
     <div className="fixed inset-0 z-50 flex">
-      <div className="flex-1 bg-black/50" onClick={handleClose} />
-      <div className="w-full md:w-[37%] bg-white shadow-lg flex flex-col h-full">
+      <div className={`flex-1 bg-black/50 ${closing ? "pointer-events-none motion-safe:animate-fade-out" : "motion-safe:animate-modal-backdrop-in"}`} onClick={handleClose} />
+      <div className={`w-full md:w-[37%] bg-white shadow-lg flex flex-col h-full ${closing ? "pointer-events-none motion-safe:animate-drawer-out" : "motion-safe:animate-drawer-in"}`}>
         <SidebarHeader header="Log Manual Transaction" onClose={handleClose} />
 
         {/* Search */}
@@ -549,10 +551,10 @@ export function CustomerSearchSidebar({
 // return (
 //   <div className="fixed inset-0 z-50 flex">
 //     {/* Overlay */}
-//     <div className="flex-1 bg-black/50" onClick={handleClose} />
+//     <div className="flex-1 bg-black/50 motion-safe:animate-modal-backdrop-in" onClick={handleClose} />
 
 //     {/* Sidebar */}
-//     <div className="w-full md:w-[37%] bg-white shadow-lg flex flex-col h-full">
+//     <div className="w-full md:w-[37%] bg-white shadow-lg flex flex-col h-full motion-safe:animate-drawer-in">
 //       {/* Header */}
 //       <SidebarHeader header="New Transaction" onClose={handleClose} />
 
@@ -706,3 +708,5 @@ export function CustomerSearchSidebar({
 //     </div>
 //   </div>
 // );
+
+export const CustomerSearchSidebar = withExitAnimation(CustomerSearchSidebarDrawer, p => p.isOpen);

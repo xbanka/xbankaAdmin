@@ -1,5 +1,6 @@
 "use client";
 
+import { useDrawerClosing, withExitAnimation } from "@/hooks/useExitAnimation";
 import { X } from "lucide-react";
 import { DataTableLayout } from "../DataTableLayout/DataTableLayout";
 
@@ -100,7 +101,7 @@ function AffectedAssetsSkeleton() {
   );
 }
 
-export function SpreadApprovalDrawer({
+function SpreadApprovalDrawerDrawer({
   isOpen,
   entry,
   isLoading,
@@ -110,6 +111,7 @@ export function SpreadApprovalDrawer({
   isApproving,
   isDeclining,
 }: Props) {
+  const closing = useDrawerClosing();
   useBodyScrollLock(isOpen);
 
   if (!isOpen) return null;
@@ -164,10 +166,10 @@ export function SpreadApprovalDrawer({
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
       {/* Overlay */}
-      <div className="flex-1 bg-black/50" onClick={onClose} />
+      <div className={`flex-1 bg-black/50 ${closing ? "pointer-events-none motion-safe:animate-fade-out" : "motion-safe:animate-modal-backdrop-in"}`} onClick={onClose} />
 
       {/* Drawer */}
-      <div className="w-full md:w-[602px] bg-white shadow-lg flex flex-col h-full">
+      <div className={`w-full md:w-[602px] bg-white shadow-lg flex flex-col h-full ${closing ? "pointer-events-none motion-safe:animate-drawer-out" : "motion-safe:animate-drawer-in"}`}>
         {/* Header */}
         <div className="flex items-start justify-between py-4 px-6 bg-[#FFFFFF] flex-shrink-0">
           <div>
@@ -332,3 +334,5 @@ export function SpreadApprovalDrawer({
     </div>
   );
 }
+
+export const SpreadApprovalDrawer = withExitAnimation(SpreadApprovalDrawerDrawer, p => p.isOpen);

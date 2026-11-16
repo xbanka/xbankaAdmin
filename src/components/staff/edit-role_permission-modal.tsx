@@ -1,6 +1,7 @@
 "use client";
 // @ts-nocheck
 
+import { useDrawerClosing, withExitAnimation } from "@/hooks/useExitAnimation";
 import { useEffect, useMemo, useState } from "react";
 import { X, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -41,11 +42,12 @@ function joinWithAmpersand(labels: string[]) {
   return `${labels.slice(0, -1).join(", ")} & ${labels[labels.length - 1]}`;
 }
 
-export function EditRolesPermissionsModal({
+function EditRolesPermissionsModalDrawer({
   isOpen,
   onClose,
   staff,
 }: EditRolesPermissionsModalProps) {
+  const closing = useDrawerClosing();
   const { mutate: updateStaff, isPending } = useUpdateStaffRolesPermissions();
   console.log("staff:", staff);
 
@@ -188,10 +190,10 @@ export function EditRolesPermissionsModal({
   return (
     <div className="fixed inset-0 z-50 flex">
       {/* Overlay */}
-      <div className="flex-1 bg-black/50" onClick={handleClose} />
+      <div className={`flex-1 bg-black/50 ${closing ? "pointer-events-none motion-safe:animate-fade-out" : "motion-safe:animate-modal-backdrop-in"}`} onClick={handleClose} />
 
       {/* Sidebar */}
-      <div className="relative bg-white w-full max-w-[550px] h-full flex flex-col shadow-lg">
+      <div className={`relative bg-white w-full max-w-[550px] h-full flex flex-col shadow-lg ${closing ? "pointer-events-none motion-safe:animate-drawer-out" : "motion-safe:animate-drawer-in"}`}>
         {/* Header */}
         <div className="px-6 py-4 bg-[#F9F9F9] flex items-center justify-between flex-shrink-0">
           <div>
@@ -449,3 +451,5 @@ export function EditRolesPermissionsModal({
     </div>
   );
 }
+
+export const EditRolesPermissionsModal = withExitAnimation(EditRolesPermissionsModalDrawer, p => p.isOpen && !!p.staff);
