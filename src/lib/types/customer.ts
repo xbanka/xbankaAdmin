@@ -144,6 +144,7 @@ export interface GetCustomersParams {
   limit?: number;
   search?: string;
   status?: string;
+  tier?: string;
   startDate?: string;
   endDate?: string;
 }

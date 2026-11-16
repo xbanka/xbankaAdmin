@@ -64,6 +64,7 @@ export default function CustomerManagement() {
   limit,
   search,
   status: statusFilter === "all" ? undefined : statusFilter,
+  tier: tierFilter === "all" ? undefined : tierFilter,
   startDate: dateFrom || undefined,
   endDate: dateTo || undefined,
 });
@@ -195,7 +196,13 @@ export default function CustomerManagement() {
             </div>
 
             {/* Tier filter */}
-            <Select value={tierFilter} onValueChange={setTierFilter}>
+            <Select
+              value={tierFilter}
+              onValueChange={(value) => {
+                setTierFilter(value);
+                setPage(1);
+              }}
+            >
               <SelectTrigger className="h-10 w-[calc(50%-6px)] sm:w-[130px] border-[#E5E7EB] text-[#374151]">
                 <SelectValue placeholder="All Tiers" />
               </SelectTrigger>
@@ -344,6 +351,7 @@ export default function CustomerManagement() {
                   exportCustomers.mutate({
                     search,
                     status: statusFilter === "all" ? undefined : statusFilter,
+                    tier: tierFilter === "all" ? undefined : tierFilter,
                     startDate: dateFrom || undefined,
                     endDate: dateTo || undefined,
                   })
