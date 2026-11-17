@@ -9,6 +9,7 @@ import {
   getCustomers,
   getCustomerTransactions,
   getCustomerVerification,
+  getKycTiers,
   toggleCustomerStatus,
 } from "@/lib/actions/customerAction";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -23,6 +24,7 @@ export const useGetAllCustomers = ({
   limit = 10,
   search,
   status,
+  tier,
   startDate,
   endDate,
 }: GetCustomersParams) => {
@@ -35,6 +37,7 @@ export const useGetAllCustomers = ({
       limit,
       debouncedSearch,
       status,
+      tier,
       startDate,
       endDate,
     ],
@@ -44,6 +47,7 @@ export const useGetAllCustomers = ({
         limit,
         search: debouncedSearch || undefined,
         status,
+        tier,
         startDate,
         endDate,
       }),
@@ -178,6 +182,15 @@ export const useExportCustomers = () => {
     onError: (error) => {
       handleApiError(error);
     },
+  });
+};
+
+// Tier config is static between deployments, so a few minutes of caching is safe.
+export const useGetKycTiers = () => {
+  return useQuery({
+    queryKey: ["kyc-tiers"],
+    queryFn: getKycTiers,
+    staleTime: 5 * 60 * 1000,
   });
 };
 
