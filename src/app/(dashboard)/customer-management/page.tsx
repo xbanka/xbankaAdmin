@@ -5,6 +5,7 @@ import {
   useExportCustomers,
   useGetAllCustomers,
   useGetCustomer,
+  useGetKycTiers,
 } from "@/lib/services/customer.service";
 import { Input } from "@/components/ui/input";
 import { DataTableLayout } from "@/components/DataTableLayout/DataTableLayout";
@@ -70,6 +71,8 @@ export default function CustomerManagement() {
 });
 
   const exportCustomers = useExportCustomers();
+  const { data: tiersData } = useGetKycTiers();
+  const kycTiers = tiersData?.data?.tiers ?? [];
 
   const customers: CustomerProps[] = data?.data?.data?.items ?? [];
   const meta = data?.data?.data?.meta;
@@ -208,10 +211,11 @@ export default function CustomerManagement() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Tiers</SelectItem>
-                <SelectItem value="0">Tier 0</SelectItem>
-                <SelectItem value="1">Tier 1</SelectItem>
-                <SelectItem value="2">Tier 2</SelectItem>
-                <SelectItem value="3">Tier 3</SelectItem>
+                {kycTiers.map((t) => (
+                  <SelectItem key={t.tier} value={String(t.tier)}>
+                    Tier {t.tier} · {t.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
 

@@ -1,5 +1,5 @@
 import AxiosInstance from "../Axiosinstance/axiosInstance";
-import { GetCustomersParams } from "../types/customer";
+import { GetCustomersParams, KycTiersResponse } from "../types/customer";
 
 const BASE_URL = "/api/customers";
 
@@ -174,6 +174,17 @@ export const toggleCustomerStatus = async (customerId: string) => {
   const response = await AxiosInstance.put(
     `/api/customers/${customerId}/status`,
     {},
+    {
+      withCredentials: true,
+    },
+  );
+
+  return response.data;
+};
+
+export const getKycTiers = async () => {
+  const response = await AxiosInstance.get<KycTiersResponse>(
+    `${BASE_URL}/kyc-tiers`,
     {
       withCredentials: true,
     },

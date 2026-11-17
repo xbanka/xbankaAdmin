@@ -149,6 +149,22 @@ export interface GetCustomersParams {
   endDate?: string;
 }
 
+export interface KycTier {
+  tier: number;
+  name: string;
+  requirements: string[];
+  dailyLimit: number;
+  allowedActions: string[];
+}
+
+export interface KycTiersResponse {
+  message: string;
+  data: {
+    currency: string;
+    tiers: KycTier[];
+  };
+}
+
 export type CustomerKycStatus = "PENDING" | "APPROVED" | "REJECTED" | string; // Add or adjust statuses as needed
 
 export type StepStatus = "completed" | "in_progress" | "pending"; // Add or adjust statuses as needed
