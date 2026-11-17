@@ -5,6 +5,7 @@ import {
   useExportCustomers,
   useGetAllCustomers,
   useGetCustomer,
+  useGetKycTiers,
 } from "@/lib/services/customer.service";
 import { Input } from "@/components/ui/input";
 import { DataTableLayout } from "@/components/DataTableLayout/DataTableLayout";
@@ -64,11 +65,14 @@ export default function CustomerManagement() {
   limit,
   search,
   status: statusFilter === "all" ? undefined : statusFilter,
+  tier: tierFilter === "all" ? undefined : tierFilter,
   startDate: dateFrom || undefined,
   endDate: dateTo || undefined,
 });
 
   const exportCustomers = useExportCustomers();
+  const { data: tiersData } = useGetKycTiers();
+  const kycTiers = tiersData?.data?.tiers ?? [];
 
   const customers: CustomerProps[] = data?.data?.data?.items ?? [];
   const meta = data?.data?.data?.meta;
@@ -195,16 +199,23 @@ export default function CustomerManagement() {
             </div>
 
             {/* Tier filter */}
-            <Select value={tierFilter} onValueChange={setTierFilter}>
+            <Select
+              value={tierFilter}
+              onValueChange={(value) => {
+                setTierFilter(value);
+                setPage(1);
+              }}
+            >
               <SelectTrigger className="h-10 w-[calc(50%-6px)] sm:w-[130px] border-[#E5E7EB] text-[#374151]">
                 <SelectValue placeholder="All Tiers" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Tiers</SelectItem>
-                <SelectItem value="0">Tier 0</SelectItem>
-                <SelectItem value="1">Tier 1</SelectItem>
-                <SelectItem value="2">Tier 2</SelectItem>
-                <SelectItem value="3">Tier 3</SelectItem>
+                {kycTiers.map((t) => (
+                  <SelectItem key={t.tier} value={String(t.tier)}>
+                    Tier {t.tier} · {t.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
 
@@ -344,6 +355,7 @@ export default function CustomerManagement() {
                   exportCustomers.mutate({
                     search,
                     status: statusFilter === "all" ? undefined : statusFilter,
+                    tier: tierFilter === "all" ? undefined : tierFilter,
                     startDate: dateFrom || undefined,
                     endDate: dateTo || undefined,
                   })

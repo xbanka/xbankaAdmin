@@ -1,5 +1,5 @@
 import AxiosInstance from "../Axiosinstance/axiosInstance";
-import { GetCustomersParams } from "../types/customer";
+import { GetCustomersParams, KycTiersResponse } from "../types/customer";
 
 const BASE_URL = "/api/customers";
 
@@ -22,6 +22,7 @@ export const getAllCustomers = async ({
   limit = 10,
   search,
   status,
+  tier,
   startDate,
   endDate,
 }: GetCustomersParams) => {
@@ -32,6 +33,8 @@ export const getAllCustomers = async ({
 
   if (search) params.append("search", search);
   if (status) params.append("status", status);
+  // Tier 0 is a valid value, so check for undefined rather than truthiness.
+  if (tier !== undefined) params.append("tier", tier);
   if (startDate) params.append("startDate", startDate);
   if (endDate) params.append("endDate", endDate);
 
@@ -52,6 +55,7 @@ export const getAllCustomers = async ({
 export const exportCustomers = async ({
   search,
   status,
+  tier,
   startDate,
   endDate,
 }: Omit<GetCustomersParams, "page" | "limit">) => {
@@ -59,6 +63,7 @@ export const exportCustomers = async ({
 
   if (search) params.append("search", search);
   if (status) params.append("status", status);
+  if (tier !== undefined) params.append("tier", tier);
   if (startDate) params.append("startDate", startDate);
   if (endDate) params.append("endDate", endDate);
 
@@ -169,6 +174,17 @@ export const toggleCustomerStatus = async (customerId: string) => {
   const response = await AxiosInstance.put(
     `/api/customers/${customerId}/status`,
     {},
+    {
+      withCredentials: true,
+    },
+  );
+
+  return response.data;
+};
+
+export const getKycTiers = async () => {
+  const response = await AxiosInstance.get<KycTiersResponse>(
+    `${BASE_URL}/kyc-tiers`,
     {
       withCredentials: true,
     },
