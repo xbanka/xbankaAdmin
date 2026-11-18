@@ -1,7 +1,27 @@
 import { CryptoCurrencyTypes } from "@/lib/types/rates-types";
+import { ALL_SEGMENTS_FILTER } from "@/lib/utils/rates";
 import { Segment, SegmentResponse } from "./types";
 
-export const ALL_SEGMENTS = "all";
+export const ALL_SEGMENTS = ALL_SEGMENTS_FILTER;
+
+// Options for the dashboard's segment filter, from GET /api/rates/segments/all.
+// "All segments" comes first and clears the filter; each segment filters by
+// its id (the API's recommended key, no name-matching surprises). Rows with
+// no id are skipped, duplicates are dropped, and the list is sorted by name.
+export function buildSegmentFilterOptions(
+  segments: Pick<SegmentResponse, "id" | "name">[] | null | undefined,
+): { label: string; value: string }[] {
+  const seen = new Set<string>();
+  const options = (Array.isArray(segments) ? segments : [])
+    .filter((s) => {
+      if (!s?.id || s.id === ALL_SEGMENTS_FILTER || seen.has(s.id)) return false;
+      seen.add(s.id);
+      return true;
+    })
+    .map((s) => ({ label: s.name?.trim() || s.id, value: s.id }))
+    .sort((a, b) => a.label.localeCompare(b.label));
+  return [{ label: "All segments", value: ALL_SEGMENTS_FILTER }, ...options];
+}
 
 // Step 3 table filters: the segment dropdown and the name/ticker search.
 export function filterReviewAssets(

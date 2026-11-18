@@ -52,6 +52,55 @@ export function getEffectiveSpreads(
   };
 }
 
+// Query filters GET /api/rates/crypto/all accepts. segmentId/segmentName are
+// a union, currency/name are a union, and those groups plus `search` must
+// all match on the backend. `search` is a partial match on symbol or name.
+export type CryptoRatesFilters = {
+  segmentId?: string | string[];
+  segmentName?: string | string[];
+  currency?: string | string[];
+  name?: string | string[];
+  search?: string;
+};
+
+export type CryptoRatesParams = Partial<Record<keyof CryptoRatesFilters, string>>;
+
+// Sentinel the segment dropdown uses for "no segment filter". Radix Select
+// cannot hold an empty-string value, so "all" stands in for it.
+export const ALL_SEGMENTS_FILTER = "all";
+
+const REPEATABLE_KEYS = ["segmentId", "segmentName", "currency", "name"] as const;
+
+// Turns UI filter state into the query params crypto/all expects. Blank
+// values and the "all" segment sentinel are dropped, repeatable values are
+// trimmed and comma-joined (the backend splits on commas), and `search` is
+// sent as one trimmed value. Returns {} when nothing filters, so the request
+// stays a bare GET.
+export function buildCryptoRatesParams(
+  filters: CryptoRatesFilters | null | undefined,
+): CryptoRatesParams {
+  const params: CryptoRatesParams = {};
+  if (!filters) return params;
+
+  for (const key of REPEATABLE_KEYS) {
+    const raw = filters[key];
+    const values = (Array.isArray(raw) ? raw : [raw])
+      .map((v) => (typeof v === "string" ? v.trim() : ""))
+      .filter((v) => v && !(key === "segmentId" && v === ALL_SEGMENTS_FILTER));
+    const unique = Array.from(new Set(values));
+    if (unique.length) params[key] = unique.join(",");
+  }
+
+  const search = filters.search?.trim();
+  if (search) params.search = search;
+
+  return params;
+}
+
+export function hasCryptoRatesFilters(params: CryptoRatesParams) {
+  return Object.keys(params).length > 0;
+}
+
 type CryptoRatesPayload = {
   initial?: boolean;
   items?: CryptoCurrencyTypes[];
