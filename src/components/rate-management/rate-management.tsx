@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { EmptySpreadSchedule } from "./empty-spread-schedule";
 import {
+  useGetAllSegments,
   useSpreadSchedule,
   UseGetRateLogDetails,
   UseGetRateLogs,
@@ -28,7 +29,6 @@ import { CryptoCurrencyTypes } from "@/lib/types/rates-types";
 import { formatDate } from "@/lib/formatDate";
 import { Input } from "../ui/input";
 import { SelectFieldLayout } from "../forms/SelectFieldLayout";
-import { SEGMENT_TYPES } from "./mock";
 import { Badge } from "./badge";
 import { AuditLogItem, SPREAD_HISTORY_MOCK, SpreadHistoryEntry } from "./types";
 import { AffectedAssetsBadge, ScopeBadge } from "./scope-badge";
@@ -36,10 +36,13 @@ import { SpreadChangeDetailsDrawer } from "./spread-change-details-change-drawer
 import { usePermissions } from "@/hooks/usePermissions";
 import { fmt } from "@/lib/utils/formatNumber";
 import {
+  ALL_SEGMENTS_FILTER,
   formatFeeDisplay,
   getEffectiveSpreads,
   getXBankaRates,
 } from "@/lib/utils/rates";
+import { useDebounce } from "@/hooks/useDebounce";
+import { buildSegmentFilterOptions } from "./segment-selection";
 import { Checkbox } from "../ui/checkbox";
 import { AssetIcon } from "./asset-icon";
 import { BillMarginsTab } from "./bill-margins/bill-margins-tab";
@@ -72,12 +75,23 @@ export default function RateManagement() {
     hasPermission("rates:propose_changes") ||
     hasPermission("rates:approve_changes") ||
     hasPermission("rates:change_override");
+  const [segmentFilter, setSegmentFilter] = useState("");
+  // The search box goes to crypto/all `search` (partial symbol/name match),
+  // the dropdown to `segmentId`. Typing is debounced so each keystroke does
+  // not fire a request.
+  const debouncedSearch = useDebounce(searchQuery, 400);
   const {
     rows: ratesData,
     isLoading: ratesLoading,
     error: ratesError,
     isEmpty: isScheduleEmpty,
-  } = useSpreadSchedule();
+    isFiltered: isScheduleFiltered,
+  } = useSpreadSchedule({
+    search: debouncedSearch,
+    segmentId: segmentFilter,
+  });
+  const { data: segmentsData } = useGetAllSegments();
+  const segmentOptions = buildSegmentFilterOptions(segmentsData?.data);
 
   const {
     data: ratesLogData,
@@ -90,8 +104,6 @@ export default function RateManagement() {
     error: rateProposalError,
   } = UseGetRateProposals();
   const { mutate: updateCryptoRate } = useUpdateBuyAndSpreadRates();
-  const [selectedTransactionType, setSelectedTransactionType] =
-    useState<string>("");
   const [selectedHistoryEntry, setSelectedHistoryEntry] =
     useState<AuditLogItem | null>(null);
   const { data: rateLogDetails, isPending: rateLogDetailsPending } =
@@ -511,11 +523,11 @@ export default function RateManagement() {
                     />
                   </div>
                   <SelectFieldLayout
-                    id="transactionType"
-                    options={SEGMENT_TYPES}
-                    placeholder="All segment"
-                    value={selectedTransactionType}
-                    onChange={setSelectedTransactionType}
+                    id="segmentFilter"
+                    options={segmentOptions}
+                    placeholder="All segments"
+                    value={segmentFilter === ALL_SEGMENTS_FILTER ? "" : segmentFilter}
+                    onChange={setSegmentFilter}
                     className="w-full md:w-[180px]"
                     selectClassName="border border-gray-300"
                   />
@@ -538,12 +550,19 @@ export default function RateManagement() {
 
                 {activeTab === "schedule" ? (
                   <DataTableLayout
+                    // Remount on a filter change so pagination goes back to
+                    // page 1 instead of landing past the end of a shorter list.
+                    key={`${debouncedSearch.trim()}|${segmentFilter}`}
                     data={ratesData}
                     columns={columns}
                     rowKey={(row) => row.id}
                     itemsPerPage={10}
                     totalCount={ratesData?.length}
-                    emptyMessage="No spreads configured yet."
+                    emptyMessage={
+                      isScheduleFiltered
+                        ? "No assets match your search or segment filter."
+                        : "No spreads configured yet."
+                    }
                     isLoading={ratesLoading}
                     isError={!!ratesError}
                     errorMessage={

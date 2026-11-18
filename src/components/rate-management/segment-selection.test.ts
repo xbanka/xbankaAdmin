@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   ALL_SEGMENTS,
+  buildSegmentFilterOptions,
   filterReviewAssets,
   mergeSegments,
 } from "./segment-selection";
@@ -92,5 +93,50 @@ describe("filterReviewAssets", () => {
 
   it("combines segment and search", () => {
     expect(filterReviewAssets(assets, { segmentId: "major", query: "usdt" })).toEqual([]);
+  });
+});
+
+describe("buildSegmentFilterOptions", () => {
+  it("always starts with 'All segments', even with no data", () => {
+    const all = { label: "All segments", value: ALL_SEGMENTS };
+    expect(buildSegmentFilterOptions(undefined)).toEqual([all]);
+    expect(buildSegmentFilterOptions(null)).toEqual([all]);
+    expect(buildSegmentFilterOptions([])).toEqual([all]);
+    expect(
+      buildSegmentFilterOptions("x" as unknown as SegmentResponse[]),
+    ).toEqual([all]);
+  });
+
+  it("filters by segment id, labelled by name, sorted by name", () => {
+    expect(
+      buildSegmentFilterOptions([
+        { id: "s2", name: "Stablecoins" },
+        { id: "s1", name: "Alt coins" },
+      ]),
+    ).toEqual([
+      { label: "All segments", value: ALL_SEGMENTS },
+      { label: "Alt coins", value: "s1" },
+      { label: "Stablecoins", value: "s2" },
+    ]);
+  });
+
+  it("skips rows with no id, duplicate ids, and an id clashing with the sentinel", () => {
+    expect(
+      buildSegmentFilterOptions([
+        { id: "", name: "Ghost" },
+        { id: "s1", name: "Alt coins" },
+        { id: "s1", name: "Alt coins again" },
+        { id: ALL_SEGMENTS, name: "Clash" },
+      ]),
+    ).toEqual([
+      { label: "All segments", value: ALL_SEGMENTS },
+      { label: "Alt coins", value: "s1" },
+    ]);
+  });
+
+  it("falls back to the id when a segment has no name", () => {
+    expect(
+      buildSegmentFilterOptions([{ id: "s9", name: "  " }])[1],
+    ).toEqual({ label: "s9", value: "s9" });
   });
 });

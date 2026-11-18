@@ -5,9 +5,15 @@ import {
   SegmentConfig,
   UpdateSegmentsBulkPayload,
 } from "../types/rates-types";
+import type { CryptoRatesParams } from "../utils/rates";
 
-export const getCryptoRates = async () => {
-  const response = await AxiosInstance.get(`/api/rates/crypto/all`);
+// With no params this is a bare GET (every asset). Filters go through axios
+// `params` so the client encodes spaces in segment names.
+export const getCryptoRates = async (params?: CryptoRatesParams) => {
+  const response =
+    params && Object.keys(params).length
+      ? await AxiosInstance.get(`/api/rates/crypto/all`, { params })
+      : await AxiosInstance.get(`/api/rates/crypto/all`);
   return response.data;
 };
 
