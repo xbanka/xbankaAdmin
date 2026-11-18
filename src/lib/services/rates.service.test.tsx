@@ -12,10 +12,9 @@ import { useGetCryptoRates, useSpreadSchedule } from "./rates.service";
 
 const CRYPTO_URL = "/api/rates/crypto/all";
 
-function wrapper() {
-  const client = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  });
+function wrapper(
+  client = new QueryClient({ defaultOptions: { queries: { retry: false } } }),
+) {
   return function Wrapper({ children }: { children: ReactNode }) {
     return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
   };
@@ -36,6 +35,21 @@ describe("getCryptoRates", () => {
     axios.get.mockResolvedValue({ data: {} });
     await getCryptoRates();
     expect(axios.get).toHaveBeenCalledTimes(1);
+    expect(axios.get.mock.calls[0]).toEqual([CRYPTO_URL]);
+  });
+
+  it("passes filters as axios params so the client encodes them", async () => {
+    axios.get.mockResolvedValue({ data: {} });
+    await getCryptoRates({ segmentName: "Alt coins,Stablecoins", search: "bit" });
+    expect(axios.get.mock.calls[0]).toEqual([
+      CRYPTO_URL,
+      { params: { segmentName: "Alt coins,Stablecoins", search: "bit" } },
+    ]);
+  });
+
+  it("treats empty params as no filter", async () => {
+    axios.get.mockResolvedValue({ data: {} });
+    await getCryptoRates({});
     expect(axios.get.mock.calls[0]).toEqual([CRYPTO_URL]);
   });
 });
@@ -113,5 +127,103 @@ describe("useSpreadSchedule", () => {
 
     await waitFor(() => expect(result.current.error).toBeTruthy());
     expect(result.current.isEmpty).toBe(false);
+  });
+});
+
+describe("useSpreadSchedule with filters", () => {
+  const SEG = "a3d9b2f1-6c44-4e0a-b1d7-90e5c8f2a411";
+
+  it("sends search and segmentId to crypto/all", async () => {
+    respond({ initial: false, items: [coin("sol", SEG)] });
+    const { result } = renderHook(
+      () => useSpreadSchedule({ search: " so ", segmentId: SEG }),
+      { wrapper: wrapper() },
+    );
+    await waitFor(() => expect(result.current.rows).toHaveLength(1));
+    expect(axios.get.mock.calls).toEqual([
+      [CRYPTO_URL, { params: { search: "so", segmentId: SEG } }],
+    ]);
+    expect(result.current.isFiltered).toBe(true);
+  });
+
+  it("does not send the 'all' segment or a blank search", async () => {
+    respond({ initial: false, items: [] });
+    const { result } = renderHook(
+      () => useSpreadSchedule({ search: "  ", segmentId: "all" }),
+      { wrapper: wrapper() },
+    );
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(axios.get.mock.calls).toEqual([[CRYPTO_URL]]);
+    expect(result.current.isFiltered).toBe(false);
+  });
+
+  it("an empty filtered result is 'nothing matched', not the empty schedule", async () => {
+    // initial is computed across all assets, so it stays false under a filter.
+    respond({ initial: false, items: [] });
+    const { result } = renderHook(
+      () => useSpreadSchedule({ search: "zzz" }),
+      { wrapper: wrapper() },
+    );
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.isEmpty).toBe(false);
+    expect(result.current.isFiltered).toBe(true);
+    expect(result.current.rows).toEqual([]);
+  });
+
+  it("keeps the previous rows on screen while a new filter loads", async () => {
+    respond({ initial: false, items: [coin("btc", SEG), coin("eth", SEG)] });
+    const { result, rerender } = renderHook(
+      ({ search }: { search: string }) => useSpreadSchedule({ search }),
+      { wrapper: wrapper(), initialProps: { search: "" } },
+    );
+    await waitFor(() => expect(result.current.rows).toHaveLength(2));
+
+    axios.get.mockReturnValue(new Promise(() => {}));
+    rerender({ search: "bt" });
+    await waitFor(() => expect(axios.get).toHaveBeenCalledTimes(2));
+    expect(result.current.rows).toHaveLength(2);
+    expect(result.current.isLoading).toBe(false);
+  });
+
+  it("a filtered dashboard does not change the wizard's unfiltered list", async () => {
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    axios.get.mockImplementation((_url: string, config?: { params?: object }) =>
+      Promise.resolve({
+        data: {
+          data: {
+            initial: false,
+            items: config?.params
+              ? [coin("sol", SEG)]
+              : [coin("btc", "major"), coin("sol", SEG)],
+          },
+        },
+      }),
+    );
+
+    const dashboard = renderHook(() => useSpreadSchedule({ segmentId: SEG }), {
+      wrapper: wrapper(client),
+    });
+    const wizard = renderHook(() => useGetCryptoRates(), {
+      wrapper: wrapper(client),
+    });
+
+    await waitFor(() => expect(dashboard.result.current.rows).toHaveLength(1));
+    await waitFor(() => expect(wizard.result.current.data?.items).toHaveLength(2));
+  });
+
+  it("invalidating 'get-crypto-rates' refetches the filtered list too", async () => {
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    respond({ initial: false, items: [coin("sol", SEG)] });
+    const { result } = renderHook(() => useSpreadSchedule({ segmentId: SEG }), {
+      wrapper: wrapper(client),
+    });
+    await waitFor(() => expect(result.current.rows).toHaveLength(1));
+
+    await client.invalidateQueries({ queryKey: ["get-crypto-rates"] });
+    await waitFor(() => expect(axios.get).toHaveBeenCalledTimes(2));
   });
 });

@@ -8,6 +8,9 @@ import {
   getSegmentSpreads,
   getXBankaRates,
   isChangePendingApproval,
+  buildCryptoRatesParams,
+  hasCryptoRatesFilters,
+  ALL_SEGMENTS_FILTER,
 } from "./rates";
 import { AssetSegment, CryptoCurrencyTypes } from "@/lib/types/rates-types";
 
@@ -339,5 +342,70 @@ describe("getObiexRates", () => {
     expect(
       getObiexRates(coin({ obiexRate: undefined as unknown as number })),
     ).toEqual({ buy: 0, sell: 0 });
+  });
+});
+
+describe("buildCryptoRatesParams", () => {
+  // Mirrors the crypto/all query contract: repeatable params are
+  // comma-joined, search is one value, blanks are never sent.
+  it("returns {} for no filters, so the request stays a bare GET", () => {
+    expect(buildCryptoRatesParams(undefined)).toEqual({});
+    expect(buildCryptoRatesParams(null)).toEqual({});
+    expect(buildCryptoRatesParams({})).toEqual({});
+    expect(hasCryptoRatesFilters(buildCryptoRatesParams({}))).toBe(false);
+  });
+
+  it("drops blank search and the 'all' segment sentinel", () => {
+    const params = buildCryptoRatesParams({
+      search: "   ",
+      segmentId: ALL_SEGMENTS_FILTER,
+    });
+    expect(params).toEqual({});
+    expect(hasCryptoRatesFilters(params)).toBe(false);
+  });
+
+  it("drops an empty segmentId (dropdown never touched)", () => {
+    expect(buildCryptoRatesParams({ segmentId: "" })).toEqual({});
+  });
+
+  it("trims search and keeps it as one value, commas included", () => {
+    expect(buildCryptoRatesParams({ search: "  bit,coin " })).toEqual({
+      search: "bit,coin",
+    });
+  });
+
+  it("sends a single segmentId as-is", () => {
+    const id = "a3d9b2f1-6c44-4e0a-b1d7-90e5c8f2a411";
+    expect(buildCryptoRatesParams({ segmentId: id })).toEqual({ segmentId: id });
+  });
+
+  it("comma-joins repeatable values, trimmed, blanks and duplicates removed", () => {
+    expect(
+      buildCryptoRatesParams({
+        currency: [" BTC", "ETH ", "", "BTC"],
+        segmentName: ["Alt coins", "Stablecoins"],
+        segmentId: ["a", ALL_SEGMENTS_FILTER, "b"],
+        name: ["Bitcoin"],
+      }),
+    ).toEqual({
+      currency: "BTC,ETH",
+      segmentName: "Alt coins,Stablecoins",
+      segmentId: "a,b",
+      name: "Bitcoin",
+    });
+  });
+
+  it("combines segment and search", () => {
+    const params = buildCryptoRatesParams({ segmentId: "seg-1", search: "us" });
+    expect(params).toEqual({ segmentId: "seg-1", search: "us" });
+    expect(hasCryptoRatesFilters(params)).toBe(true);
+  });
+
+  it("ignores non-string junk in arrays", () => {
+    expect(
+      buildCryptoRatesParams({
+        currency: [null, undefined, 3, "SOL"] as unknown as string[],
+      }),
+    ).toEqual({ currency: "SOL" });
   });
 });
