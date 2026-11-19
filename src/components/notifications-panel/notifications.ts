@@ -10,7 +10,10 @@ export interface Affiliate {
 export type NotificationReferenceType =
   | "PAYOUT"
   | "RATE_PROPOSAL"
-  | "STAFF_ACCOUNT";
+  | "STAFF_ACCOUNT"
+  // A customer tapped "I have sent the money". reference_id is the core
+  // transaction id of the pending funding intent.
+  | "FUNDING_INTENT";
 
 export type NotificationStatus = "ACTIVE" | "RESOLVED";
 
