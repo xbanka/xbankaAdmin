@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
 import Header from "@/components/ui/Header";
@@ -13,8 +14,26 @@ import { usePermissions } from "@/hooks/usePermissions";
 const TABS = ["Payout Requests", "Funding Requests", "Xbanka Accounts"] as const;
 type Tab = (typeof TABS)[number];
 
-export default function FinancePage() {
-  const [activeTab, setActiveTab] = useState<Tab>("Payout Requests");
+// `/finance?tab=<key>` opens a tab directly. Notifications link here, e.g. a
+// customer's "I have sent the money" opens the Funding Requests tab.
+const TAB_PARAM: Record<string, Tab> = {
+  payouts: "Payout Requests",
+  funding: "Funding Requests",
+  accounts: "Xbanka Accounts",
+};
+
+function FinancePageContent() {
+  const requestedTab = TAB_PARAM[useSearchParams().get("tab") ?? ""];
+  const [activeTab, setActiveTab] = useState<Tab>(
+    requestedTab ?? "Payout Requests",
+  );
+
+  // Already on /finance when a notification is clicked: the page stays
+  // mounted and only the query string changes, so follow it.
+  useEffect(() => {
+    if (requestedTab) setActiveTab(requestedTab);
+  }, [requestedTab]);
+
   const { hasPermission } = usePermissions();
   const isPayouts = activeTab === "Payout Requests";
 
@@ -43,5 +62,14 @@ export default function FinancePage() {
         {activeTab === "Xbanka Accounts" && <XbankaAccountsTab />}
       </div>
     </>
+  );
+}
+
+// useSearchParams needs a Suspense boundary or the whole route can't prerender.
+export default function FinancePage() {
+  return (
+    <Suspense>
+      <FinancePageContent />
+    </Suspense>
   );
 }

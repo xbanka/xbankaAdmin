@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { X, Bell, UserPlus, Check, TrendingUp } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { X, Bell, UserPlus, Check, TrendingUp, Landmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -38,7 +39,12 @@ const TYPE_TABS: { value: TypeFilter; label: string }[] = [
   { value: "PAYOUT", label: "Payouts" },
   { value: "RATE_PROPOSAL", label: "Rate Proposals" },
   { value: "STAFF_ACCOUNT", label: "Staff Accounts" },
+  { value: "FUNDING_INTENT", label: "Funding" },
 ];
+
+// Where a funding-intent notification takes staff: the Pending list on the
+// finance page's Funding Requests tab (see finance/page.tsx).
+export const FUNDING_REQUESTS_HREF = "/finance?tab=funding";
 
 const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
   { value: "ALL", label: "Any status" },
@@ -131,6 +137,7 @@ function NotificationsPanelContent({ onClose }: NotificationsPanelProps) {
   const [readFilter, setReadFilter] = useState<ReadFilter>("ALL");
 
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   // Each axis left on "ALL" is simply omitted from the request.
   const filters: NotificationFilters = {
@@ -194,6 +201,18 @@ function NotificationsPanelContent({ onClose }: NotificationsPanelProps) {
       markReadMutation.mutate({
         id: notification.id,
       });
+      return;
+    }
+
+    if (notification.reference_type === "FUNDING_INTENT") {
+      // Not a payout: reference_id is a funding intent's transaction id, which
+      // the payout sidebar can't open. Send staff to the funding list, where
+      // Confirm / Reject live, and get the dropdown out of the way.
+      markReadMutation.mutate({
+        id: notification.id,
+      });
+      router.push(FUNDING_REQUESTS_HREF);
+      onClose();
       return;
     }
 
@@ -387,7 +406,11 @@ function NotificationsPanelContent({ onClose }: NotificationsPanelProps) {
                   notification.reference_type === "STAFF_ACCOUNT"
                     ? !isResolved &&
                       notification.action?.type === "CONFIRM_ROLE_CHANGE"
-                    : !(isResolved && notification.reference_type === "RATE_PROPOSAL");
+                    : !(
+                        isResolved &&
+                        (notification.reference_type === "RATE_PROPOSAL" ||
+                          notification.reference_type === "FUNDING_INTENT")
+                      );
                 return (
                   <li
                     key={notification.id}
@@ -409,6 +432,8 @@ function NotificationsPanelContent({ onClose }: NotificationsPanelProps) {
                           <UserPlus className="h-4.5 w-4.5" />
                         ) : notification.reference_type === "RATE_PROPOSAL" ? (
                           <TrendingUp className="h-4.5 w-4.5" />
+                        ) : notification.reference_type === "FUNDING_INTENT" ? (
+                          <Landmark className="h-4.5 w-4.5" />
                         ) : (
                           <span className="text-[15px] font-bold">₦</span>
                         )}
@@ -425,6 +450,16 @@ function NotificationsPanelContent({ onClose }: NotificationsPanelProps) {
                           <p className="mt-0.5 text-[12px] leading-[18px] text-[#4B5563]">
                             <span className="text-[#6B7280]">Reference:</span>{" "}
                             {formatReferenceType(notification.reference_type)}
+                          </p>
+                        ) : notification.reference_type === "FUNDING_INTENT" ? (
+                          // No affiliate or payout method on a funding intent:
+                          // the message already names the customer, so show
+                          // just the declared amount.
+                          <p className="mt-0.5 text-[12px] leading-[18px] text-[#4B5563]">
+                            <span className="text-[#6B7280]">Declared:</span>{" "}
+                            <span className="font-medium text-[#111827]">
+                              {formatAmount(notification?.amount)}
+                            </span>
                           </p>
                         ) : (
                           <>
@@ -457,7 +492,8 @@ function NotificationsPanelContent({ onClose }: NotificationsPanelProps) {
                                 }}
                               >
                                 {notification.reference_type ===
-                                "RATE_PROPOSAL"
+                                  "RATE_PROPOSAL" ||
+                                notification.reference_type === "FUNDING_INTENT"
                                   ? "Review"
                                   : notification.reference_type ===
                                       "STAFF_ACCOUNT"
