@@ -4,6 +4,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { useNotificationsSocket } from "./useNotificationsSocket";
 import { NOTIFICATIONS_QUERY_KEY } from "@/lib/services/notification.service";
+import { refreshAccessToken } from "@/lib/refresh-token";
+import { useAuthStore } from "@/store/useAuthState";
+
+vi.mock("@/lib/refresh-token", () => ({ refreshAccessToken: vi.fn() }));
 
 class FakeWebSocket {
   static instances: FakeWebSocket[] = [];
@@ -89,6 +93,75 @@ describe("useNotificationsSocket", () => {
 
     expect(invalidateSpy).toHaveBeenCalledWith({
       queryKey: NOTIFICATIONS_QUERY_KEY,
+    });
+  });
+
+  describe("a handshake the server rejects (expired token)", () => {
+    const refresh = vi.mocked(refreshAccessToken);
+
+    beforeEach(() => {
+      refresh.mockReset();
+      vi.spyOn(useAuthStore.getState(), "login").mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+    it("refreshes the token once when the socket closes without ever opening", async () => {
+      refresh.mockResolvedValue("fresh");
+
+      renderHook(() => useNotificationsSocket({ token: "stale" }), { wrapper });
+      FakeWebSocket.instances[0].onclose?.();
+      await flush();
+
+      expect(refresh).toHaveBeenCalledTimes(1);
+      expect(useAuthStore.getState().login).toHaveBeenCalledWith("fresh");
+    });
+
+    it("does not refresh when a socket that had opened drops", async () => {
+      renderHook(() => useNotificationsSocket({ token: "t" }), { wrapper });
+      const socket = FakeWebSocket.instances[0];
+      socket.onopen?.();
+      socket.onclose?.();
+      await flush();
+
+      expect(refresh).not.toHaveBeenCalled();
+    });
+
+    it("refreshes only once per streak, then backs off if the fresh token is rejected too", async () => {
+      vi.useFakeTimers();
+      refresh.mockResolvedValue("fresh");
+
+      const { rerender } = renderHook(
+        ({ token }) => useNotificationsSocket({ token }),
+        { wrapper, initialProps: { token: "stale" } },
+      );
+      FakeWebSocket.instances[0].onclose?.();
+      await vi.advanceTimersByTimeAsync(0);
+      rerender({ token: "fresh" }); // what the store update does
+
+      const retry = FakeWebSocket.instances.at(-1)!;
+      retry.onclose?.();
+      await vi.advanceTimersByTimeAsync(1000);
+
+      expect(refresh).toHaveBeenCalledTimes(1);
+      expect(FakeWebSocket.instances.length).toBeGreaterThan(2);
+      vi.useRealTimers();
+    });
+
+    it("stops reconnecting when the refresh itself is refused (session over)", async () => {
+      vi.useFakeTimers();
+      refresh.mockRejectedValue({ response: { status: 401 } });
+
+      renderHook(() => useNotificationsSocket({ token: "stale" }), { wrapper });
+      FakeWebSocket.instances[0].onclose?.();
+      await vi.advanceTimersByTimeAsync(60_000);
+
+      expect(FakeWebSocket.instances).toHaveLength(1);
+      vi.useRealTimers();
     });
   });
 
