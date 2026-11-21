@@ -7,6 +7,8 @@ import {
   PayoutNotification,
 } from "@/components/notifications-panel/notifications";
 import { NOTIFICATIONS_QUERY_KEY } from "@/lib/services/notification.service";
+import { refreshAccessToken } from "@/lib/refresh-token";
+import { useAuthStore } from "@/store/useAuthState";
 
 type NotificationEvent =
   | { event: "notification:new"; data: PayoutNotification }
@@ -34,6 +36,12 @@ export function useNotificationsSocket({
     null,
   );
   const shouldReconnectRef = useRef(true);
+  // The server rejects an expired token with a 403 handshake, which the
+  // browser reports as a plain close — indistinguishable from a network drop.
+  // So a socket that closes without ever opening gets one token refresh before
+  // the next attempt. Once per streak: if the fresh token is rejected too, the
+  // cause isn't expiry and refreshing again would only spin.
+  const refreshedAfterRejectRef = useRef(false);
 
   const handleMessage = useCallback(
     (raw: MessageEvent) => {
@@ -119,8 +127,21 @@ export function useNotificationsSocket({
         `${WS_URL}?token=${encodeURIComponent(token)}`,
       );
       socketRef.current = socket;
+      let opened = false;
+
+      const scheduleReconnect = () => {
+        const attempt = reconnectAttemptRef.current + 1;
+        reconnectAttemptRef.current = attempt;
+        const delay = Math.min(
+          BASE_RECONNECT_DELAY * 2 ** (attempt - 1),
+          MAX_RECONNECT_DELAY,
+        );
+        reconnectTimeoutRef.current = setTimeout(connect, delay);
+      };
 
       socket.onopen = () => {
+        opened = true;
+        refreshedAfterRejectRef.current = false;
         reconnectAttemptRef.current = 0;
         // If we were offline for a bit, refetch to catch anything the
         // socket missed while disconnected, rather than trusting the
@@ -140,13 +161,26 @@ export function useNotificationsSocket({
         socketRef.current = null;
         if (!shouldReconnectRef.current) return;
 
-        const attempt = reconnectAttemptRef.current + 1;
-        reconnectAttemptRef.current = attempt;
-        const delay = Math.min(
-          BASE_RECONNECT_DELAY * 2 ** (attempt - 1),
-          MAX_RECONNECT_DELAY,
-        );
-        reconnectTimeoutRef.current = setTimeout(connect, delay);
+        if (!opened && !refreshedAfterRejectRef.current) {
+          refreshedAfterRejectRef.current = true;
+          refreshAccessToken()
+            .then((fresh) => {
+              if (!shouldReconnectRef.current) return;
+              // Updating the store changes `token`, which re-runs this effect
+              // and reconnects at once with the fresh token.
+              useAuthStore.getState().login(fresh);
+            })
+            .catch((err) => {
+              if (!shouldReconnectRef.current) return;
+              // A 401 means the refresh cookie is gone too: the session is
+              // over, and the REST layer will send the user to sign in.
+              if (err?.response?.status === 401) return;
+              scheduleReconnect();
+            });
+          return;
+        }
+
+        scheduleReconnect();
       };
     };
 
